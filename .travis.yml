@@ -23,7 +23,7 @@ notifications:
 deploy:
   - provider: openshift
     server: $OPENSHIFT_SERVER
-    project: broadway
+    project: ua
     app: api-dev
     token: $OPENSHIFT_TOKEN
     on:
@@ -31,7 +31,7 @@ deploy:
     edge: true
   - provider: openshift
     server: $OPENSHIFT_SERVER
-    project: broadway
+    project: ua
     app: api-prod
     token: $OPENSHIFT_TOKEN
     on:
