@@ -1,0 +1,5 @@
+# .gitkeep has not been prescribed by Git (https://stackoverflow.com/q/115983/6533383)
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore

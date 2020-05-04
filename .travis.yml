@@ -1,0 +1,39 @@
+language: node_js
+
+node_js:
+  - 'lts/*'
+
+branches:
+  only:
+    - master
+    - dev
+
+cache: yarn
+
+script:
+  - yarn
+  - yarn api-check
+  - yarn lint
+  - yarn build
+
+notifications:
+  slack:
+    secure: H18iyI0sHpyrcG9QrfPPbS3eSVxNCG/fY5/7Q/KtlbzExRPrueJbYFdNEHVLMWBivanvUCVFe7XAls0pj4GOhVm9fegw+u6DzEEw07WZ32tUeG/I/OkT4LdO3bBENG7F34Grt917gA32HRVTTq6iqkX5gPMUEfStmJ1yECdyxYNC/VlpKtK81oKgQnyRttjO+em/8/guVi1tJefet/5e18BEjgYdK37Mi5MAKpdr0t4W0IcQWbC7Dh83JYNC3h1FtvNNPnEyJx9JEpQ0CH9UaEsvBTSDeFTiV22FBM68Cjhf3eJSg/LWAbi7JKnpkrZmzTsmzMjmh2igZUduPMpw7EizxauRv25LkIhHkym801ZP9ZXW/0d1M2gEohjKpr4+RQbAUVx3e+h9MlgQyR67XOeoIaRX1lP+Ed8ZOobtV2NaLqQVb9v8nkS4XLNyYP9yV6JG75Vb4GxhpouJuUMGJd3moRW9ZbQPznBoMiQ+NomaP9NLPgwOp0AzRR+N8iDajwbp296t0irg3H9kD1qmOdOBJRPSmygPGQiiP7YbwNOm+LLD3eyrMxvhfcpI1TB42gDoHaP+2KYJGAUZErmPC/a6fN1rIbql+UL2G5pD2Oq+NjUWx7WUViLIPzF0R8yZuhGBek8nSgMtWLBdWoI/52TUXe1LrwqLp336cAzUlxs=
+
+deploy:
+  - provider: openshift
+    server: $OPENSHIFT_SERVER
+    project: broadway
+    app: api-dev
+    token: $OPENSHIFT_TOKEN
+    on:
+      branch: dev
+    edge: true
+  - provider: openshift
+    server: $OPENSHIFT_SERVER
+    project: broadway
+    app: api-prod
+    token: $OPENSHIFT_TOKEN
+    on:
+      branch: master
+    edge: true
