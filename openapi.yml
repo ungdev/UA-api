@@ -45,6 +45,8 @@ tags:
     description: Routes liées aux tournois
   - name: Users
     description: Routes liées aux utilisateurs
+  - name: '2021'
+    description: Routes à ajouter en 2021
 
 components:
   securitySchemes:
@@ -705,7 +707,7 @@ paths:
         **Permission 'entry' ou 'admin' requise.**<br/>
         *Le billet ne doit pas avoir été déjà scanné.*
       tags:
-        - Admin
+        - '2021'
       security:
         - BearerAuth: []
       parameters:
@@ -981,7 +983,7 @@ paths:
 
   /items:
     get:
-      summary: Renvoie la liste des items
+      summary: Renvoie la liste des items en vente
       description: Renvoie la liste des items en vente dans la billetterie.
       tags:
         - Items
@@ -1417,10 +1419,10 @@ paths:
   /tickets/{cartItemId}:
     get:
       summary: Renvoie le billet associé au cartItem
-      description: Renvoie le billet associé au cartItem.<br/>
+      description: Renvoie le billet associé au cartItem au format PDF.<br/>
         **L'utilisateur doit nécessairement avoir payé ce cartItem.**
       tags:
-        - Tickets
+        - '2021'
       security:
         - BearerAuth: []
       parameters:
