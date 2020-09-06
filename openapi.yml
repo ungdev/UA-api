@@ -621,7 +621,7 @@ paths:
         **Permission 'entry' ou 'admin' requise.**<br/>
         *L'utilisateur cible ne doit pas avoir déjà payé sa place.*
       tags:
-        - Admin
+        - '2021'
       security:
         - BearerAuth: []
       parameters:
