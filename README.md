@@ -16,7 +16,7 @@ git clone https://github.com/ungdev/UA-api.git
 
 cd UA-api
 
-# Installs all the depedencies
+# Install all the depedencies
 yarn
 ```
 
@@ -26,7 +26,7 @@ Then, connect to your database (MySQL/MariaDB) and enter
 CREATE DATABASE arena CHARACTER SET utf8;
 ```
 
-Create the tables with
+Create the tables and populate them with
 
 ```
 yarn seed
@@ -34,22 +34,20 @@ yarn seed
 
 ## Configuration
 
+Create a file .env.local if you want to edit environment variables. It will not be pushed to git.
+
 ```
-# copy env file for all environments
-cp .env.example .env
-# makes your changes in .env, which will not be pushed
-nano .env
+touch .env.local
 ```
 
 ## Commands
 
 ```
-yarn dev       # development server
+yarn dev       # start development server
 yarn build     # builds the typescript to javascript
-yarn start     # production server
+yarn start     # start production server
 yarn lint      # checks if the code is correct
+yarn lint-fix  # try to fix lint errors and warnings
+yarn seed      # populate database with default values
 yarn api-check # checks if openapi.yml is correct
 ```
-
-## Sidenote about package.json
-We don't update winston to the latest version due to this bug https://github.com/winstonjs/winston/issues/1338

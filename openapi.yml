@@ -838,6 +838,8 @@ paths:
                 type:
                   type: string
                   enum: [player, coach]
+                discordId:
+                  type: string
       responses:
         201:
           description: L'utilisateur a bien été créé

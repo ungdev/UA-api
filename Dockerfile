@@ -1,13 +1,13 @@
 FROM node:13-alpine
 
-WORKDIR /srv
+WORKDIR /srv/
 
 COPY package.json yarn.lock ./
 RUN yarn --non-interactive --prod
 
 ENV NODE_ENV=production
 
-COPY . .
+COPY ./ ./
 
 RUN yarn build
 
