@@ -1,11 +1,11 @@
 import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
-import { DynamicEntity } from './dynamicEntity';
+import DynamicEntity from './dynamicEntity';
 import { TransactionState } from '../types';
-import { User } from './user';
-import { CartItem } from './cartItem';
+import UserModel from './user';
+import CartItemModel from './cartItem';
 
 @Entity({ name: 'carts' })
-export default class Cart extends DynamicEntity {
+export default class CartModel extends DynamicEntity {
   @Column({ type: 'enum', enum: TransactionState, default: TransactionState.Pending })
   transactionState: TransactionState;
 
@@ -15,9 +15,9 @@ export default class Cart extends DynamicEntity {
   @Column({ nullable: true })
   paidAt: Date;
 
-  @ManyToOne(() => User, (user) => user.carts, { nullable: false })
-  user: User;
+  @ManyToOne(() => UserModel, (user) => user.carts, { nullable: false })
+  user: UserModel;
 
-  @OneToMany(() => CartItem, (cartitem) => cartitem.cart)
-  cartItems: CartItem[];
+  @OneToMany(() => CartItemModel, (cartitem) => cartitem.cart)
+  cartItems: CartItemModel[];
 }

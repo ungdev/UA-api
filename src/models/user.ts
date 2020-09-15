@@ -1,13 +1,13 @@
 import { Entity, Column, ManyToOne, OneToMany, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { IsEmail } from 'class-validator';
-import { UserType, Gender } from '../types';
-import { DynamicEntity } from './dynamicEntity';
-import { Team } from './team';
-import Cart from './cart';
-import { CartItem } from './cartItem';
+import { UserType } from '../types';
+import DynamicEntity from './dynamicEntity';
+import TeamModel from './team';
+import CartModel from './cart';
+import CartItemModel from './cartItem';
 
 @Entity({ name: 'users' })
-export class User extends DynamicEntity {
+export default class UserModel extends DynamicEntity {
   @Column({ length: 100, nullable: true }) // In case of visitor
   username: string;
 
@@ -39,24 +39,21 @@ export class User extends DynamicEntity {
   @Column({ nullable: true })
   discordId: string;
 
-  @Column({ type: 'enum', enum: Gender, nullable: true })
-  gender: Gender;
+  @ManyToOne(() => TeamModel, (team) => team.users, { onDelete: 'SET NULL' })
+  team: TeamModel;
 
-  @ManyToOne(() => Team, (team) => team.users, { onDelete: 'SET NULL' })
-  team: Team;
+  @ManyToOne(() => TeamModel, (team) => team.users, { onDelete: 'SET NULL' })
+  askingTeam: TeamModel;
 
-  @ManyToOne(() => Team, (team) => team.users, { onDelete: 'SET NULL' })
-  askingTeam: Team;
+  @OneToMany(() => CartModel, (cart) => cart.user)
+  carts: CartModel[];
 
-  @OneToMany(() => Cart, (cart) => cart.user)
-  carts: Cart[];
-
-  @OneToMany(() => CartItem, (cartitem) => cartitem.forUser)
-  cartItems: CartItem[];
+  @OneToMany(() => CartItemModel, (cartItem) => cartItem.forUser)
+  cartItems: CartItemModel[];
 
   @BeforeInsert()
   @BeforeUpdate()
-  checkUsernameConsistency() {
+  checkUsernameConsistency(): void {
     if (this.type !== UserType.Visitor && !this.username) {
       throw new Error("Non visitor doesn't have a username !");
     } else if (this.type === UserType.Visitor && this.username) {

@@ -11,17 +11,16 @@ import cors from 'cors';
 import helmet from 'helmet';
 import swagger from 'swagger-ui-express';
 import yaml from 'yamljs';
-
 import bodyParser from 'body-parser';
+
 import database from './database';
 import { notFound } from './utils/responses';
-// import routes from './controllers';
 import log from './utils/log';
 import { devEnv, nodeEnv, apiPort } from './utils/env';
-
 import { Error } from './types';
 import routes from './controllers';
 import { checkJson } from './middlewares/checkJson';
+import { getIp } from './utils/network';
 
 const app = express();
 const server = http.createServer(app);
@@ -33,7 +32,7 @@ const server = http.createServer(app);
     app.use(morgan(devEnv() ? 'dev' : 'combined'));
 
     morgan.token('username', (req) => (req.permissions ? req.permissions : 'anonymous'));
-    morgan.token('ip', (req) => req.header('x-forwarded-for') || req.connection.remoteAddress);
+    morgan.token('ip', getIp);
 
     if (!devEnv()) {
       app.use(
@@ -47,15 +46,15 @@ const server = http.createServer(app);
     // Security middlewares
     app.use(cors(), helmet());
 
+    // Body json middlewares
+    app.use(bodyParser.json(), checkJson());
+
     // Documentation
     const swaggerDocument = await yaml.load('openapi.yml');
     app.use('/docs', swagger.serve, swagger.setup(swaggerDocument));
 
     // Uploads
     app.use('/uploads', express.static('uploads'));
-
-    // Body json middlewares
-    app.use(bodyParser.json(), checkJson());
 
     // Main routes
     app.use(routes());

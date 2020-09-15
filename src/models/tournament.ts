@@ -1,16 +1,13 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Team } from './team';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import TeamModel from './team';
 
 @Entity({ name: 'tournaments' })
-export class Tournament {
-  @PrimaryGeneratedColumn()
-  id: number;
+export default class Tournament {
+  @PrimaryColumn()
+  id: string;
 
   @Column({ unique: true })
   name: string;
-
-  @Column({ unique: true })
-  shortName: string;
 
   @Column({ type: 'smallint' })
   maxPlayers: number;
@@ -18,6 +15,6 @@ export class Tournament {
   @Column({ type: 'smallint' })
   playersPerTeam: number;
 
-  @OneToMany(() => Team, (team) => team.tournament)
-  teams: Team[];
+  @OneToMany(() => TeamModel, (team) => team.tournament)
+  teams: TeamModel[];
 }

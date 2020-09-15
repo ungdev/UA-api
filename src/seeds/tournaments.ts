@@ -1,51 +1,45 @@
-import { getConnection } from 'typeorm';
-import { Tournament } from '../models/tournament';
+import { getConnection, InsertResult } from 'typeorm';
+import TournamentModel from '../models/tournament';
 
-export default () => {
+export default (): Promise<InsertResult> => {
   const tournaments = [
     {
-      id: 1,
-      name: 'League of Legends (pro)',
-      shortName: 'LoL (pro)',
+      id: 'lol',
+      name: 'League of Legends',
+      maxPlayers: 160,
+      playersPerTeam: 5,
+    },
+    {
+      id: 'csgo',
+      name: 'Counter-Strike : Global Offensive',
       maxPlayers: 80,
       playersPerTeam: 5,
     },
     {
-      id: 2,
-      name: 'League of Legends (amateur)',
-      shortName: 'LoL (amateur)',
+      id: 'valorant',
+      name: 'Valorant',
       maxPlayers: 80,
       playersPerTeam: 5,
     },
     {
-      id: 3,
-      name: 'Counter Strike : Global Offensive',
-      shortName: 'CS:GO',
-      maxPlayers: 80,
-      playersPerTeam: 5,
+      id: 'rl',
+      name: 'Rocket League',
+      maxPlayers: 48,
+      playersPerTeam: 3,
     },
     {
-      id: 4,
+      id: 'ssbu',
       name: 'Super Smash Bros Ultimate',
-      shortName: 'SSBU',
       maxPlayers: 64,
       playersPerTeam: 1,
     },
     {
-      id: 5,
-      name: 'osu!',
-      shortName: 'osu!',
-      maxPlayers: 24,
-      playersPerTeam: 1,
-    },
-    {
-      id: 6,
-      name: 'Libre',
-      shortName: 'Libre',
-      maxPlayers: 24,
+      id: 'tft',
+      name: 'Teamfight Tactics',
+      maxPlayers: 16,
       playersPerTeam: 1,
     },
   ];
 
-  return getConnection().createQueryBuilder().insert().into(Tournament).values(tournaments).execute();
+  return getConnection().createQueryBuilder().insert().into(TournamentModel).values(tournaments).execute();
 };

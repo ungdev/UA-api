@@ -1,11 +1,11 @@
-import { Entity, Column, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, OneToMany, PrimaryColumn } from 'typeorm';
 import { ItemCategory } from '../types';
-import { CartItem } from './cartItem';
+import CartItemModel from './cartItem';
 
 @Entity({ name: 'items' })
-export class Item {
-  @PrimaryGeneratedColumn()
-  id: number;
+export default class ItemModel {
+  @PrimaryColumn()
+  id: string;
 
   @Column()
   name: string;
@@ -31,6 +31,6 @@ export class Item {
   @Column({ nullable: true, default: null })
   stock: number;
 
-  @OneToMany(() => CartItem, (cartitem) => cartitem.item)
-  cartItems: CartItem[];
+  @OneToMany(() => CartItemModel, (cartItem) => cartItem.item)
+  cartItems: CartItemModel[];
 }

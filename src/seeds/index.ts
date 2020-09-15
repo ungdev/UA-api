@@ -1,28 +1,33 @@
-import { getConnection } from 'typeorm';
+/* eslint-disable import/first */
 import dotenv from 'dotenv';
+
+dotenv.config();
+
+import { getConnection } from 'typeorm';
 import database from '../database';
 import log from '../utils/log';
 import { devEnv } from '../utils/env';
-import tournaments from './tournaments';
-import items from './items';
+import seedItems from './items';
+import seedSettings from './settings';
+import seedTournaments from './tournaments';
 
 (async () => {
   try {
-    dotenv.config();
-
     if (!devEnv()) {
-      log.error("Can't seed in production. Please start with NODE_ENV=development yarn seed");
+      log.error("Can't seed in production. Please start with `NODE_ENV=development yarn seed` if you are sure.");
       process.exit(1);
     }
 
     const connection = await database(true);
 
-    await tournaments();
-    await items();
+    await seedItems();
+    await seedSettings();
+    await seedTournaments();
 
     connection.close();
   } catch (err) {
     log.error(err.toString());
+
     if (getConnection()) {
       getConnection().close();
     }

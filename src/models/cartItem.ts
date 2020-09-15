@@ -1,20 +1,20 @@
 import { Entity, Column, ManyToOne } from 'typeorm';
-import { DynamicEntity } from './dynamicEntity';
-import { Item } from './item';
-import Cart from './cart';
-import { User } from './user';
+import DynamicEntity from './dynamicEntity';
+import ItemModel from './item';
+import CartModel from './cart';
+import UserModel from './user';
 
 @Entity({ name: 'cartitems' })
-export class CartItem extends DynamicEntity {
+export default class CartItemModel extends DynamicEntity {
   @Column()
   quantity: number;
 
-  @ManyToOne(() => Item, (item) => item.cartItems, { nullable: false })
-  item: Item;
+  @ManyToOne(() => ItemModel, (item) => item.cartItems, { nullable: false })
+  item: ItemModel;
 
-  @ManyToOne(() => Cart, (cart) => cart.cartItems, { onDelete: 'CASCADE', nullable: false })
-  cart: Cart;
+  @ManyToOne(() => CartModel, (cart) => cart.cartItems, { onDelete: 'CASCADE', nullable: false })
+  cart: CartModel;
 
-  @ManyToOne(() => User, (user) => user.cartItems, { nullable: false })
-  forUser: User;
+  @ManyToOne(() => UserModel, (user) => user.cartItems, { nullable: false })
+  forUser: UserModel;
 }

@@ -2,7 +2,7 @@ import { PrimaryColumn, CreateDateColumn, UpdateDateColumn, BaseEntity, BeforeIn
 import { validate } from 'class-validator';
 import nanoid from '../utils/nanoid';
 
-export abstract class DynamicEntity extends BaseEntity {
+export default abstract class DynamicEntity extends BaseEntity {
   @PrimaryColumn({ type: 'char', length: 6 })
   id: string;
 
@@ -13,13 +13,13 @@ export abstract class DynamicEntity extends BaseEntity {
   updatedAt: Date;
 
   @BeforeInsert()
-  generateNanoid() {
+  generateNanoid(): void {
     this.id = nanoid();
   }
 
   @BeforeInsert()
   @BeforeUpdate()
-  async validate() {
+  async validate(): Promise<void> {
     const errors = await validate(this);
     if (errors.length > 0) {
       throw errors;

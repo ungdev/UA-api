@@ -1,24 +1,24 @@
 import { Column, Entity, OneToOne, JoinColumn, OneToMany, ManyToOne, Unique } from 'typeorm';
-import { DynamicEntity } from './dynamicEntity';
-import { User } from './user';
-import { Tournament } from './tournament';
+import DynamicEntity from './dynamicEntity';
+import UserModel from './user';
+import TournamentModel from './tournament';
 
 @Entity({ name: 'teams' })
 @Unique(['name', 'tournament'])
-export class Team extends DynamicEntity {
+export default class TeamModel extends DynamicEntity {
   @Column()
   name: string;
 
   @Column({ nullable: true })
   lockedAt: Date;
 
-  @OneToOne(() => User, { nullable: false })
+  @OneToOne(() => UserModel, { nullable: false })
   @JoinColumn()
-  captain: User;
+  captain: UserModel;
 
-  @OneToMany(() => User, (user) => user.team)
-  users: User[];
+  @OneToMany(() => UserModel, (user) => user.team)
+  users: UserModel[];
 
-  @ManyToOne(() => Tournament, (tournament) => tournament.teams, { nullable: false })
-  tournament: Tournament;
+  @ManyToOne(() => TournamentModel, (tournament) => tournament.teams, { nullable: false })
+  tournament: TournamentModel;
 }
