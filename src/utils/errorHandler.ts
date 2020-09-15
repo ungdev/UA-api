@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { Error as ErrorType } from '../types';
 import log from './log';
 
-const errorHandler = (res: Response, err: Error) => {
+const errorHandler = (res: Response, err: Error): void => {
   switch (err.name) {
     case 'TokenExpiredError':
       return res.status(401).json({ error: ErrorType.ExpiredToken }).end();

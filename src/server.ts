@@ -44,12 +44,6 @@ const server = http.createServer(app);
       );
     }
 
-    try {
-      throw new TypeError('Bonjour');
-    } catch (err) {
-      log.error(err);
-    }
-
     // Security middlewares
     app.use(cors(), helmet());
 

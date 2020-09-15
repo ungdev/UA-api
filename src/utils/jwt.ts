@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-export const getToken = (req: Request) => {
+export const getToken = (req: Request): string | null => {
   const authorization = req.get('authorization');
 
   if (!authorization) {

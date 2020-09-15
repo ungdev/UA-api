@@ -4,7 +4,7 @@ import { Error } from '../types';
 import log from '../utils/log';
 import { badRequest } from '../utils/responses';
 
-export default () => (req: Request, res: Response, next: NextFunction) => {
+export default () => (req: Request, res: Response, next: NextFunction): void => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {

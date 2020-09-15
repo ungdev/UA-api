@@ -1,7 +1,7 @@
-import etupay from '@ung/node-etupay';
+import etupay, { InitializerReturn } from '@ung/node-etupay';
 import { etupayId, etupayUrl, etupayKey } from './env';
 
-export default () =>
+export default (): InitializerReturn =>
   etupay({
     id: etupayId(),
     url: etupayUrl(),
