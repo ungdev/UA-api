@@ -12,7 +12,7 @@ import helmet from 'helmet';
 import swagger from 'swagger-ui-express';
 import yaml from 'yamljs';
 import bodyParser from 'body-parser';
-import apmNode from 'elastic-apm-node';
+import apm from 'elastic-apm-node/start';
 
 import database from './database';
 import { notFound } from './utils/responses';
@@ -23,7 +23,7 @@ import routes from './controllers';
 import { checkJson } from './middlewares/checkJson';
 import { getIp } from './utils/network';
 
-const apm = apmNode.start({
+apm.start({
   serviceName: dbHost() === 'mariadb-prod' ? 'ua-api-logs' : 'ua-api-logs-dev',
   serverUrl: 'https://apm.dev.uttnetgroup.fr/',
   active: nodeEnv() === 'production',
