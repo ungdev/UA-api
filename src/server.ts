@@ -38,7 +38,7 @@ const server = http.createServer(app);
 
     app.use(morgan(devEnv() ? 'dev' : 'combined'));
 
-    //morgan.token('username', (req) => (req.permissions ? req.permissions : 'anonymous'));
+    // morgan.token('username', (req) => (req.permissions ? req.permissions : 'anonymous'));
     morgan.token('ip', getIp);
 
     if (!devEnv()) {
