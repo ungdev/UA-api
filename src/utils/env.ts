@@ -38,3 +38,6 @@ export const etupayErrorUrl = (): string => process.env.ETUPAY_ERRORURL;
 export const toornamentClientId = (): string => process.env.TOORNAMENT_CLIENT_ID;
 export const toornamentClientSecret = (): string => process.env.TOORNAMENT_CLIENT_SECRET;
 export const toornamentKey = (): string => process.env.TOORNAMENT_KEY;
+
+// DataDog
+export const ddKey = (): string => process.env.DD_KEY;
