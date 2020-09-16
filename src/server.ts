@@ -12,22 +12,15 @@ import helmet from 'helmet';
 import swagger from 'swagger-ui-express';
 import yaml from 'yamljs';
 import bodyParser from 'body-parser';
-import apm from 'elastic-apm-node/start';
 
 import database from './database';
 import { notFound } from './utils/responses';
 import log from './utils/log';
-import { devEnv, nodeEnv, apiPort, dbHost } from './utils/env';
+import { devEnv, nodeEnv, apiPort } from './utils/env';
 import { Error, PermissionsRequest } from './types';
 import routes from './controllers';
 import { checkJson } from './middlewares/checkJson';
 import { getIp } from './utils/network';
-
-apm.start({
-  serviceName: dbHost() === 'mariadb-prod' ? 'ua-api-logs' : 'ua-api-logs-dev',
-  serverUrl: 'https://apm.dev.uttnetgroup.fr/',
-  active: nodeEnv() === 'production',
-});
 
 const app = express();
 const server = http.createServer(app);
