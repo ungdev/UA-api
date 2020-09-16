@@ -5,18 +5,18 @@ dotenv.config();
 
 import express, { Request, Response } from 'express';
 import http from 'http';
-import fs from 'fs';
 import morgan from 'morgan';
 import cors from 'cors';
 import helmet from 'helmet';
 import swagger from 'swagger-ui-express';
 import yaml from 'yamljs';
 import bodyParser from 'body-parser';
+import { createLogger, format, transports } from 'winston';
 
 import database from './database';
 import { notFound } from './utils/responses';
 import log from './utils/log';
-import { devEnv, nodeEnv, apiPort } from './utils/env';
+import { devEnv, nodeEnv, apiPort, ddKey, dbHost } from './utils/env';
 import { Error, PermissionsRequest } from './types';
 import routes from './controllers';
 import { checkJson } from './middlewares/checkJson';
@@ -25,23 +25,37 @@ import { getIp } from './utils/network';
 const app = express();
 const server = http.createServer(app);
 
+const httpTransportOptions = {
+  host: 'http-intake.logs.datadoghq.com',
+  path: `/v1/input/${ddKey()}?ddsource=nodejs&service=${
+    dbHost() === 'mariadb-prod' ? 'logs-api-ua' : 'logs-api-ua-dev'
+  }`,
+  ssl: true,
+};
+
+const logger = createLogger({
+  level: 'info',
+  exitOnError: false,
+  format: format.json(),
+  transports: [
+    new transports.Http(httpTransportOptions),
+    new transports.Console(),
+    new transports.File({ filename: 'logs/access.log' }),
+  ],
+});
+
+const myStream = {
+  write: (text: string) => logger.info(text),
+};
+
 (async () => {
   try {
     await database();
 
-    app.use(morgan(devEnv() ? 'dev' : 'combined'));
-
     morgan.token('username', (req: PermissionsRequest) => (req.permissions ? req.permissions : 'anonymous'));
     morgan.token('ip', getIp);
 
-    if (!devEnv()) {
-      app.use(
-        morgan(':ip - :username - [:date[clf]] :method :status :url - :response-time ms', {
-          stream: fs.createWriteStream(`logs/access.log`, { flags: 'a' }),
-          skip: (req) => req.method === 'OPTIONS' || req.method === 'GET',
-        }),
-      );
-    }
+    app.use(morgan(devEnv() ? 'dev' : 'tiny', !devEnv() && { stream: myStream }));
 
     // Security middlewares
     app.use(cors(), helmet());
