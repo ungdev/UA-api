@@ -18,7 +18,7 @@ import database from './database';
 import { notFound } from './utils/responses';
 import log from './utils/log';
 import { devEnv, nodeEnv, apiPort, dbHost } from './utils/env';
-import { Error } from './types';
+import { Error, PermissionsRequest } from './types';
 import routes from './controllers';
 import { checkJson } from './middlewares/checkJson';
 import { getIp } from './utils/network';
@@ -38,7 +38,7 @@ const server = http.createServer(app);
 
     app.use(morgan(devEnv() ? 'dev' : 'combined'));
 
-    // morgan.token('username', (req) => (req.permissions ? req.permissions : 'anonymous'));
+    morgan.token('username', (req: PermissionsRequest) => (req.permissions ? req.permissions : 'anonymous'));
     morgan.token('ip', getIp);
 
     if (!devEnv()) {
