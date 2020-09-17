@@ -8,6 +8,7 @@ import UserModel from './models/user';
 import CartModel from './models/cart';
 import CartItemModel from './models/cartItem';
 import ItemModel from './models/item';
+import SettingModel from './models/setting';
 
 export default async (seed = false): Promise<Connection> => {
   let connection;
@@ -21,7 +22,16 @@ export default async (seed = false): Promise<Connection> => {
       username: dbUsername(),
       password: dbPassword(),
       database: dbName(),
-      entities: [DynamicEntity, UserModel, TeamModel, TournamentModel, CartModel, ItemModel, CartItemModel],
+      entities: [
+        DynamicEntity,
+        UserModel,
+        TeamModel,
+        TournamentModel,
+        CartModel,
+        ItemModel,
+        CartItemModel,
+        SettingModel,
+      ],
       logging: true,
       synchronize: seed,
       dropSchema: seed,
