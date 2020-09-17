@@ -1,4 +1,4 @@
-import { IRoute, NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import log from '../utils/log';
 import { BodyRequest, User } from '../types';
 
