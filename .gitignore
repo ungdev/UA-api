@@ -1,8 +1,5 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
-# local files
-*.local
-
 # dependencies
 /node_modules
 
@@ -11,6 +8,7 @@
 
 # misc
 .DS_Store
+.env
 
 # IDE Configs
 /.idea

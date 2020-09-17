@@ -34,10 +34,10 @@ yarn seed
 
 ## Configuration
 
-Create a file .env.local if you want to edit environment variables. It will not be pushed to git.
+Copy the file .env.example to .env and then edit it with your values :
 
 ```
-touch .env.local
+cp .env.example .env
 ```
 
 ## Commands
