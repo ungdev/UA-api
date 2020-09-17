@@ -63,20 +63,20 @@ export interface Tournament {
 
 export interface User {
   id: string;
-  username?: string | null;
+  username?: string;
   firstname: string;
   lastname: string;
-  email?: string | null;
-  password?: string | null;
+  email?: string;
+  password?: string;
   type: UserType;
-  permissions?: string | null;
-  place?: string | null;
-  scannedAt?: string | null;
-  registerToken?: string | null;
-  resetToken?: string | null;
-  discordId?: string | null;
-  teamId?: string | null;
-  askingTeamId?: string | null;
+  permissions?: string;
+  place?: string;
+  scannedAt?: string;
+  registerToken?: string;
+  resetToken?: string;
+  discordId?: string;
+  teamId?: string;
+  askingTeamId?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -86,7 +86,7 @@ export interface Team {
   name: string;
   tournamentId: string;
   captainId: string;
-  lockedAt?: string | null;
+  lockedAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -95,20 +95,20 @@ export interface Item {
   id: string;
   name: string;
   category: ItemCategory;
-  attribute?: string | null;
+  attribute?: string;
   price: number;
-  reducedPrice?: number | null;
-  infos?: string | null;
-  image?: string | null;
-  stock?: number | null;
+  reducedPrice?: number;
+  infos?: string;
+  image?: string;
+  stock?: number;
 }
 
 export interface Cart {
   id: string;
   userId: string;
   transactionState: TransactionState;
-  transactionId?: number | null;
-  paidAt?: string | null;
+  transactionId?: number;
+  paidAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -125,7 +125,7 @@ export interface CartItem {
 
 export interface Setting {
   id: string;
-  value?: string | null;
+  value?: string;
 }
 
 /*************/
