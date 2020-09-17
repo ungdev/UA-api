@@ -13,7 +13,6 @@ import yaml from 'yamljs';
 import bodyParser from 'body-parser';
 import { createLogger, format, transports } from 'winston';
 
-import database from './database';
 import { notFound } from './utils/responses';
 import log from './utils/log';
 import { devEnv, nodeEnv, apiPort, ddKey, dbHost } from './utils/env';
@@ -50,8 +49,6 @@ const myStream = {
 
 (async () => {
   try {
-    await database();
-
     morgan.token('username', (req: PermissionsRequest) => (req.permissions ? req.permissions : 'anonymous'));
     morgan.token('ip', getIp);
 

@@ -1,10 +1,13 @@
-import { getRepository } from 'typeorm';
-import UserModel from '../models/user';
+import { PrismaClient } from '@prisma/client';
 
-export const fetchUsers = (): Promise<UserModel[]> => {
-  return getRepository(UserModel).find();
+const prisma = new PrismaClient({
+  log: ['query'],
+});
+
+export const fetchUsers = () => {
+  return prisma.user.findMany();
 };
 
-export const fetchUser = (id: string): Promise<UserModel> => {
-  return getRepository(UserModel).findOne({ where: { id } });
+export const fetchUser = (id: string) => {
+  return prisma.user.findOne({ where: { id } });
 };

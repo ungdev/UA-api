@@ -1,17 +1,11 @@
 import { Request, Response } from 'express';
 import { success } from '../../utils/responses';
 import { fetchUsers } from '../../operations/user';
-import { filterUserRestricted } from '../../utils/filters';
 
-export default [
-  // Middlewares
+export default async (req: Request, res: Response) => {
+  const users = await fetchUsers();
 
-  // Controller
-  async (req: Request, res: Response): Promise<void> => {
-    const users = await fetchUsers();
+  const result = users;
 
-    const result = users.map(filterUserRestricted);
-
-    return success(res, result);
-  },
-];
+  return success(res, result);
+};
