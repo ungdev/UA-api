@@ -51,10 +51,11 @@
     "dev": "ts-node-dev --no-notify src/server.ts",
     "build": "tsc",
     "postbuild": "cpy '**/*' '!**/*.ts' ../build/ --cwd=src/ --no-overwrite --parents",
-    "start": "node build/server.js",
+    "start": "node build/src/server.js",
     "lint": "eslint src/ --ext .ts",
     "lint-fix": "eslint --fix src/ --ext .ts",
     "api-check": "swagger-cli validate openapi.yml",
-    "doc-to-json": "swagger-cli bundle --outfile openapi.json openapi.yml"
+    "doc-to-json": "swagger-cli bundle --outfile openapi.json openapi.yml",
+    "postinstall": "prisma generate"
   }
 }
