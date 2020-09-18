@@ -13,6 +13,7 @@ export const dbPort = (): number => parseInt(process.env.DB_PORT);
 export const dbUsername = (): string => process.env.DB_USERNAME;
 export const dbPassword = (): string => process.env.DB_PASSWORD;
 export const dbName = (): string => process.env.DB_NAME;
+export const dbProd = (): boolean => dbHost() === 'mariadb-prod';
 
 // Mail
 export const arenaWebsite = (): string => process.env.ARENA_WEBSITE;
@@ -41,3 +42,5 @@ export const toornamentKey = (): string => process.env.TOORNAMENT_KEY;
 
 // DataDog
 export const ddKey = (): string => process.env.DD_KEY;
+export const ddServiceProd = (): string => process.env.DD_SERVICE_PROD;
+export const ddServiceDev = (): string => process.env.DD_SERVICE_DEV;

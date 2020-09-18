@@ -8,9 +8,9 @@ export default async (req: Request, res: Response) => {
   const settings = await database.settings.findMany();
   return success(
     res,
-    settings.reduce((prev: ObjectType, current: Setting) => {
-      Object.assign(prev, { [current.id]: current.value });
-      return prev;
+    settings.reduce((previous: ObjectType, current: Setting) => {
+      Object.assign(previous, { [current.id]: current.value });
+      return previous;
     }, {}),
   );
 };

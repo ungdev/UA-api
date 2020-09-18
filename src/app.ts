@@ -12,7 +12,7 @@ import bodyParser from 'body-parser';
 import { createLogger, format, transports } from 'winston';
 
 import { notFound } from './utils/responses';
-import { devEnv, ddKey, dbHost } from './utils/env';
+import { devEnv, ddKey, dbProd, ddServiceDev, ddServiceProd } from './utils/env';
 import { Error, PermissionsRequest } from './types';
 import routes from './controllers';
 import { checkJson } from './middlewares/checkJson';
@@ -24,9 +24,7 @@ const app = express();
 // Http Transport to DataDog
 const httpTransportOptions = {
   host: 'http-intake.logs.datadoghq.com',
-  path: `/v1/input/${ddKey()}?ddsource=nodejs&service=${
-    dbHost() === 'mariadb-prod' ? 'logs-api-ua' : 'logs-api-ua-dev'
-  }`,
+  path: `/v1/input/${ddKey()}?ddsource=nodejs&service=${dbProd() ? ddServiceProd() : ddServiceDev()}`,
   ssl: true,
 };
 
