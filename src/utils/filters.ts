@@ -1,43 +1,24 @@
+import { pick } from '.';
 import { User } from '../types';
 
 export const filterUserRestricted = (user: User): Partial<User> => {
-  const {
-    id,
-    type,
-    // hasPaid
-  } = user;
-  return { id, type };
+  return pick(user, ['id', 'type']);
 };
 
 export const filterUser = (user: User): Partial<User> => {
-  const {
-    id,
-    type,
-    // hasPaid,
-    username,
-    firstname,
-    lastname,
-    email,
-    permissions,
-    place,
-    scannedAt,
-    discordId,
-    teamId,
-    askingTeamId,
-  } = user;
-  return {
-    id,
-    type,
-    // hasPaid,
-    username,
-    firstname,
-    lastname,
-    email,
-    permissions,
-    place,
-    scannedAt,
-    discordId,
-    teamId,
-    askingTeamId,
-  };
+  return pick(user, [
+    'id',
+    'type',
+    'hasPaid',
+    'username',
+    'firstname',
+    'lastname',
+    'email',
+    'permissions',
+    'place',
+    'scanned',
+    'discordId',
+    'teamId',
+    'askingTeamId',
+  ]);
 };
