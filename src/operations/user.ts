@@ -1,10 +1,10 @@
 import { User } from '@prisma/client';
-import db from '../../server';
+import database from '../utils/database';
 
 export const fetchUsers = (): Promise<User[]> => {
-  return db.user.findMany();
+  return database.user.findMany();
 };
 
 export const fetchUser = (id: string) => {
-  return db.user.findOne({ where: { id } });
+  return database.user.findOne({ where: { id } });
 };

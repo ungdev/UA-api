@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
+import { ObjectType, Setting } from '../types';
+import database from '../utils/database';
 
 import { success } from '../utils/responses';
-import db from '../../server';
 
 export default async (req: Request, res: Response) => {
-  const settings = await db.settings.findMany();
+  const settings = await database.settings.findMany();
   return success(
     res,
-    settings.reduce((prev, current) => {
+    settings.reduce((prev: ObjectType, current: Setting) => {
       Object.assign(prev, { [current.id]: current.value });
       return prev;
     }, {}),

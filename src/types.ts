@@ -194,3 +194,6 @@ export enum Error {
   // 500
   Unknown = 'Erreur inconnue',
 }
+
+// Alias type for Object
+export type ObjectType = Record<string, unknown>;

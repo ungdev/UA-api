@@ -4,9 +4,14 @@ import { success } from '../../utils/responses';
 import { fetchUsers } from '../../operations/user';
 import { filterUserRestricted } from '../../utils/filters';
 
-export default async (req: Request, res: Response) => {
-  const users: User[] = await fetchUsers();
-  const result = users.map(filterUserRestricted);
+export default [
+  // Middlewares
 
-  return success(res, result);
-};
+  // Controller
+  async (req: Request, res: Response) => {
+    const users: User[] = await fetchUsers();
+    const result = users.map(filterUserRestricted);
+
+    return success(res, result);
+  },
+];

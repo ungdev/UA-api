@@ -21,6 +21,7 @@ import swaggerDocument from '../openapi.json';
 
 const app = express();
 
+// Http Transport to DataDog
 const httpTransportOptions = {
   host: 'http-intake.logs.datadoghq.com',
   path: `/v1/input/${ddKey()}?ddsource=nodejs&service=${
@@ -29,25 +30,24 @@ const httpTransportOptions = {
   ssl: true,
 };
 
+// Create winston logger
 const logger = createLogger({
   level: 'info',
   exitOnError: false,
   format: format.json(),
-  transports: [
-    new transports.Http(httpTransportOptions),
-    new transports.Console(),
-    new transports.File({ filename: 'logs/access.log' }),
-  ],
+  transports: [new transports.Http(httpTransportOptions), new transports.Console()],
 });
 
-const myStream = {
+// Map morgan with winston
+const streamAccessLog = {
   write: (text: string) => logger.info(text),
 };
 
 morgan.token('username', (req: PermissionsRequest) => (req.permissions ? req.permissions : 'anonymous'));
 morgan.token('ip', getIp);
 
-app.use(morgan(devEnv() ? 'dev' : 'tiny', !devEnv() && { stream: myStream }));
+// Loads logging middleware with more verbosity if in dev environment, and enable datadog production environment
+app.use(morgan(devEnv() ? 'dev' : 'tiny', !devEnv() && { stream: streamAccessLog }));
 
 // Security middlewares
 app.use(cors(), helmet());
