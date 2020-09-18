@@ -1,10 +1,12 @@
-import _ from 'lodash';
-import UserModel from '../models/user';
+import { User } from '@prisma/client';
+import { pick } from '.';
 
-export const filterUserRestricted = (user: UserModel): Partial<UserModel> => _.pick(user, ['id', 'type', 'hasPaid']);
+export const filterUserRestricted = (user: User): Partial<User> => {
+  return pick(user, ['id', 'type']);
+};
 
-export const filterUser = (user: UserModel): Partial<UserModel> =>
-  _.pick(user, [
+export const filterUser = (user: User): Partial<User> => {
+  return pick(user, [
     'id',
     'type',
     'hasPaid',
@@ -19,3 +21,4 @@ export const filterUser = (user: UserModel): Partial<UserModel> =>
     'teamId',
     'askingTeamId',
   ]);
+};

@@ -1,6 +1,6 @@
 import { Response, NextFunction, Request } from 'express';
 import jwt from 'jsonwebtoken';
-import { getToken } from '../utils/jwt';
+import { getToken } from '../utils/user';
 import { unauthorized, unauthenticated } from '../utils/responses';
 import { Token, Permissions, PermissionsRequest } from '../types';
 import { jwtSecret } from '../utils/env';
