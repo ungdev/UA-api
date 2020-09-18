@@ -41,6 +41,7 @@ const streamAccessLog = {
   write: (text: string) => logger.info(text),
 };
 
+// Load morgan variables
 morgan.token('username', (req: PermissionsRequest) => (req.permissions ? req.permissions : 'anonymous'));
 morgan.token('ip', getIp);
 
