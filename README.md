@@ -48,6 +48,9 @@ yarn build     # builds the typescript to javascript
 yarn start     # start production server
 yarn lint      # checks if the code is correct
 yarn lint-fix  # try to fix lint errors and warnings
-yarn seed      # populate database with default values
 yarn api-check # checks if openapi.yml is correct
 ```
+
+## Prisma config
+
+Before use `npx prisma generate` to regenerate your prisma client add `prisma/.env` with `DATABASE_URL`
