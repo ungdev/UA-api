@@ -1,21 +1,43 @@
-import _ from 'lodash';
-import UserModel from '../models/user';
+import { User } from '../types';
 
-export const filterUserRestricted = (user: UserModel): Partial<UserModel> => _.pick(user, ['id', 'type', 'hasPaid']);
+export const filterUserRestricted = (user: User): Partial<User> => {
+  const {
+    id,
+    type,
+    // hasPaid
+  } = user;
+  return { id, type };
+};
 
-export const filterUser = (user: UserModel): Partial<UserModel> =>
-  _.pick(user, [
-    'id',
-    'type',
-    'hasPaid',
-    'username',
-    'firstname',
-    'lastname',
-    'email',
-    'permissions',
-    'place',
-    'scanned',
-    'discordId',
-    'teamId',
-    'askingTeamId',
-  ]);
+export const filterUser = (user: User): Partial<User> => {
+  const {
+    id,
+    type,
+    // hasPaid,
+    username,
+    firstname,
+    lastname,
+    email,
+    permissions,
+    place,
+    scannedAt,
+    discordId,
+    teamId,
+    askingTeamId,
+  } = user;
+  return {
+    id,
+    type,
+    // hasPaid,
+    username,
+    firstname,
+    lastname,
+    email,
+    permissions,
+    place,
+    scannedAt,
+    discordId,
+    teamId,
+    askingTeamId,
+  };
+};

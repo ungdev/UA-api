@@ -1,8 +1,7 @@
 import { Request } from 'express';
 import { fetchUser } from '../operations/user';
-import UserModel from '../models/user';
 
-const getToken = (req: Request): string => {
+export const getToken = (req: Request): string => {
   const authorization = req.get('Authorization');
 
   if (!authorization) {
@@ -15,4 +14,4 @@ const getToken = (req: Request): string => {
   return token;
 };
 
-export const getUser = (req: Request): Promise<UserModel> => fetchUser(getToken(req));
+export const getUser = (req: Request) => fetchUser(getToken(req));
