@@ -1,13 +1,10 @@
-import { PrismaClient } from '@prisma/client';
 import { Request, Response } from 'express';
+
 import { success } from '../utils/responses';
+import db from '../../server';
 
-const prisma = new PrismaClient({
-  log: ['query'],
-});
-
-export default () => async (req: Request, res: Response) => {
-  const settings = await prisma.settings.findMany();
+export default async (req: Request, res: Response) => {
+  const settings = await db.settings.findMany();
   return success(
     res,
     settings.reduce((prev, current) => {

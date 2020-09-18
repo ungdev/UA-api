@@ -1,13 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { User } from '@prisma/client';
+import db from '../../server';
 
-const prisma = new PrismaClient({
-  log: ['query'],
-});
-
-export const fetchUsers = () => {
-  return prisma.user.findMany();
+export const fetchUsers = (): Promise<User[]> => {
+  return db.user.findMany();
 };
 
 export const fetchUser = (id: string) => {
-  return prisma.user.findOne({ where: { id } });
+  return db.user.findOne({ where: { id } });
 };

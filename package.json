@@ -33,8 +33,7 @@
     "swagger-ui-express": "^4.1.4",
     "typescript": "^4.0.2",
     "winston": "^3.3.3",
-    "winston-daily-rotate-file": "^4.5.0",
-    "yamljs": "^0.3.0"
+    "winston-daily-rotate-file": "^4.5.0"
   },
   "devDependencies": {
     "@prisma/cli": "2.7.1",
@@ -49,13 +48,14 @@
     "ts-node-dev": "^1.0.0-pre.62"
   },
   "scripts": {
-    "dev": "ts-node-dev --no-notify src/index.ts",
+    "dev": "ts-node-dev --no-notify server.ts",
     "build": "tsc",
     "postbuild": "cpy '**/*' '!**/*.ts' ../build/ --cwd=src/ --no-overwrite --parents",
     "start": "node build/index.js",
     "lint": "eslint src/ --ext .ts",
     "lint-fix": "eslint --fix src/ --ext .ts",
     "seed": "ts-node src/seeds/index.ts",
-    "api-check": "swagger-cli validate openapi.yml"
+    "api-check": "swagger-cli validate openapi.yml",
+    "doc-to-json": "swagger-cli bundle --outfile openapi.json openapi.yml"
   }
 }
