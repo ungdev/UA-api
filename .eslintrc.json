@@ -9,9 +9,10 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
-    "prettier"
+    "prettier",
+    "plugin:unicorn/recommended"
   ],
-  "plugins": ["@typescript-eslint", "prettier"],
+  "plugins": ["@typescript-eslint", "prettier", "unicorn"],
   "parserOptions": {
     "ecmaVersion": 2018,
     "sourceType": "module"
@@ -34,6 +35,20 @@
     "import/prefer-default-export": "off",
     "no-shadow": "off",
     "no-useless-constructor": "off",
-    "spaced-comment": ["error", "always", { "exceptions": ["*"] }]
+    "spaced-comment": ["error", "always", { "exceptions": ["*"] }],
+    "unicorn/no-reduce": "off",
+    "unicorn/filename-case": ["error", { "case": "camelCase" }],
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-fn-reference-in-iterator": "off",
+    "unicorn/prevent-abbreviations": [
+      "error",
+      {
+        "replacements": {
+          "req": false,
+          "res": false,
+          "env": false
+        }
+      }
+    ]
   }
 }

@@ -4,7 +4,7 @@ import database from '../utils/database';
 
 import { success } from '../utils/responses';
 
-export default async (req: Request, res: Response) => {
+export default async (request: Request, res: Response) => {
   const settings = await database.settings.findMany();
   return success(
     res,

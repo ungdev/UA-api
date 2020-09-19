@@ -1,11 +1,11 @@
 import { Request } from 'express';
 import { fetchUser } from '../operations/user';
 
-export const getToken = (req: Request): string => {
-  const authorization = req.get('Authorization');
+export const getToken = (request: Request): string => {
+  const authorization = request.get('Authorization');
 
   if (!authorization) {
-    return null;
+    return '';
   }
 
   // Authorization header is of the form "Bearer {token}"
@@ -14,4 +14,4 @@ export const getToken = (req: Request): string => {
   return token;
 };
 
-export const getUser = (req: Request) => fetchUser(getToken(req));
+export const getUser = (request: Request) => fetchUser(getToken(request));
