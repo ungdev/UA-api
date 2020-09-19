@@ -12,7 +12,13 @@ import bodyParser from 'body-parser';
 import { createLogger, format, transports } from 'winston';
 
 import { notFound } from './utils/responses';
-import { devEnv, ddKey, dbProd, ddServiceDev, ddServiceProd } from './utils/env';
+import {
+  datadogKey,
+  isProductionDatabase,
+  datadogDevelopment,
+  datadogProduction,
+  isProduction,
+} from './utils/environment';
 import { Error, PermissionsRequest } from './types';
 import routes from './controllers';
 import { checkJson } from './middlewares/checkJson';
@@ -24,7 +30,9 @@ const app = express();
 // Http Transport to DataDog
 const httpTransportOptions = {
   host: 'http-intake.logs.datadoghq.com',
-  path: `/v1/input/${ddKey()}?ddsource=nodejs&service=${dbProd() ? ddServiceProd() : ddServiceDev()}`,
+  path: `/v1/input/${datadogKey()}?ddsource=nodejs&service=${
+    isProductionDatabase() ? datadogProduction() : datadogDevelopment()
+  }`,
   ssl: true,
 };
 
@@ -42,11 +50,11 @@ const streamAccessLog = {
 };
 
 // Load morgan variables
-morgan.token('username', (req: PermissionsRequest) => (req.permissions ? req.permissions : 'anonymous'));
+morgan.token('username', (request: PermissionsRequest) => (request.permissions ? request.permissions : 'anonymous'));
 morgan.token('ip', getIp);
 
 // Loads logging middleware with more verbosity if in dev environment, and enable datadog production environment
-app.use(morgan(devEnv() ? 'dev' : 'tiny', !devEnv() && { stream: streamAccessLog }));
+app.use(morgan(isProduction() ? 'tiny' : 'dev', isProduction() && { stream: streamAccessLog }));
 
 // Security middlewares
 app.use(cors(), helmet());
@@ -64,6 +72,6 @@ app.use('/uploads', express.static('uploads'));
 app.use(routes());
 
 // Not found
-app.use((req: Request, res: Response) => notFound(res, Error.RouteNotFound));
+app.use((request: Request, response: Response) => notFound(response, Error.RouteNotFound));
 
 export default app;

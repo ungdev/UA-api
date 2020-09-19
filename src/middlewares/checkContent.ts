@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { notAcceptable } from '../utils/responses';
 
-export default () => (req: Request, res: Response, next: NextFunction): void => {
-  if (req.method === 'OPTIONS' || req.get('Content-Type') === 'application/json') {
+export default () => (request: Request, response: Response, next: NextFunction): void => {
+  if (request.method === 'OPTIONS' || request.get('Content-Type') === 'application/json') {
     return next();
   }
 
   // If etupay callback
-  if (req.method === 'GET' && req.path === '/etupay/return') {
+  if (request.method === 'GET' && request.path === '/etupay/return') {
     return next();
   }
 
-  return notAcceptable(res);
+  return notAcceptable(response);
 };
