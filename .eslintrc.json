@@ -10,9 +10,10 @@
     "plugin:import/warnings",
     "plugin:import/typescript",
     "prettier",
-    "plugin:unicorn/recommended"
+    "plugin:unicorn/recommended",
+    "plugin:security/recommended"
   ],
-  "plugins": ["@typescript-eslint", "prettier", "unicorn"],
+  "plugins": ["@typescript-eslint", "prettier", "unicorn", "security"],
   "parserOptions": {
     "ecmaVersion": 2018,
     "sourceType": "module"
@@ -40,6 +41,7 @@
     "unicorn/filename-case": ["error", { "case": "camelCase" }],
     "unicorn/consistent-function-scoping": "off",
     "unicorn/no-fn-reference-in-iterator": "off",
+    "security/detect-object-injection": "off",
     "unicorn/prevent-abbreviations": [
       "error",
       {
