@@ -1,5 +1,5 @@
 import http from 'http';
 import { Request } from 'express';
 
-export const getIp = (req: Request | http.IncomingMessage): string =>
-  (req.headers['x-forwarded-for'] as string) || req.connection.remoteAddress || req.socket.remoteAddress;
+export const getIp = (request: Request | http.IncomingMessage): string =>
+  (request.headers['x-forwarded-for'] as string) || request.connection.remoteAddress || request.socket.remoteAddress;
