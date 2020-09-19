@@ -1,10 +1,10 @@
 import { ObjectType } from '../types';
 
 export function pick(object: ObjectType, keys: Array<string>) {
-  return keys.reduce((object_, key: string) => {
+  return keys.reduce((objectReduced, key: string) => {
     if (object && Object.prototype.hasOwnProperty.call(object, key)) {
-      Object.assign(object_, { key: object[key] });
+      Object.assign(objectReduced, { key: object[key] });
     }
-    return object_;
+    return objectReduced;
   }, {});
 }
