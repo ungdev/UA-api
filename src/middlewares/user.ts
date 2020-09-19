@@ -4,7 +4,7 @@ import { UserRequest, Error } from '../types';
 import { badRequest } from '../utils/responses';
 
 // Check the user's team. If he's in one, it will return an error.
-export const isNotInATeam = () => async (req: UserRequest, res: Response, next: NextFunction) => {
+export const isNotInATeam = async (req: UserRequest, res: Response, next: NextFunction) => {
   if (req.user.teamId) {
     log.debug(`${req.path} failed : already in team`);
 
