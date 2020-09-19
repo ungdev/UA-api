@@ -1,7 +1,7 @@
 import { createLogger, format, transports } from 'winston';
 import 'winston-daily-rotate-file';
 import moment from 'moment';
-import { developmentEnv as developmentEnvironment } from './environment';
+import { isProduction } from './environment';
 import { LoggingLevel } from '../types';
 
 const createEnvironmentLogger = (name: string, level: LoggingLevel = LoggingLevel.Info) => {
@@ -16,7 +16,7 @@ const createEnvironmentLogger = (name: string, level: LoggingLevel = LoggingLeve
   });
 
   // There is a conditional operator to prevent creating files in a development environment
-  const rotateTransport = !developmentEnvironment()
+  const rotateTransport = isProduction()
     ? new transports.DailyRotateFile({
         filename: `logs/${name}/%DATE%.log`,
         frequency: '1d',
@@ -39,7 +39,7 @@ const createEnvironmentLogger = (name: string, level: LoggingLevel = LoggingLeve
   // }
 
   const logger = createLogger({
-    transports: developmentEnvironment() ? developmentTransports : productionTransports,
+    transports: isProduction() ? productionTransports : developmentTransports,
   });
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -13,11 +13,11 @@ import { createLogger, format, transports } from 'winston';
 
 import { notFound } from './utils/responses';
 import {
-  developmentEnv as developmentEnvironment,
   datadogKey,
-  isProductionDatabase as databaseProduction,
-  datadogDevelopment as ddServiceDevelopment,
-  datadogProduction as ddServiceProduction,
+  isProductionDatabase,
+  datadogDevelopment,
+  datadogProduction,
+  isProduction,
 } from './utils/environment';
 import { Error, PermissionsRequest } from './types';
 import routes from './controllers';
@@ -31,7 +31,7 @@ const app = express();
 const httpTransportOptions = {
   host: 'http-intake.logs.datadoghq.com',
   path: `/v1/input/${datadogKey()}?ddsource=nodejs&service=${
-    databaseProduction() ? ddServiceProduction() : ddServiceDevelopment()
+    isProductionDatabase() ? datadogProduction() : datadogDevelopment()
   }`,
   ssl: true,
 };
@@ -54,7 +54,7 @@ morgan.token('username', (request: PermissionsRequest) => (request.permissions ?
 morgan.token('ip', getIp);
 
 // Loads logging middleware with more verbosity if in dev environment, and enable datadog production environment
-app.use(morgan(developmentEnvironment() ? 'dev' : 'tiny', !developmentEnvironment() && { stream: streamAccessLog }));
+app.use(morgan(isProduction() ? 'tiny' : 'dev', isProduction() && { stream: streamAccessLog }));
 
 // Security middlewares
 app.use(cors(), helmet());
@@ -72,6 +72,6 @@ app.use('/uploads', express.static('uploads'));
 app.use(routes());
 
 // Not found
-app.use((request: Request, res: Response) => notFound(res, Error.RouteNotFound));
+app.use((req: Request, res: Response) => notFound(res, Error.RouteNotFound));
 
 export default app;
