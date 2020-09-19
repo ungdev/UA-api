@@ -29,7 +29,7 @@ CREATE DATABASE arena CHARACTER SET utf8;
 Create the tables and populate them with
 
 ```
-yarn seed
+mysql -u USERNAME -p arena < seed.sql
 ```
 
 ## Configuration
