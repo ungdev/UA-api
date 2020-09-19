@@ -166,7 +166,7 @@ export interface BodyRequest<T> extends Request {
   body: T;
 }
 
-export interface BodyUserRequest<T> extends UserRequest{
+export interface BodyUserRequest<T> extends UserRequest {
   body: T;
 }
 
