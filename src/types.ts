@@ -158,7 +158,15 @@ export interface EtupayResponse {
 /** Misc **/
 /**********/
 
+export interface UserRequest extends Request {
+  user: User;
+}
+
 export interface BodyRequest<T> extends Request {
+  body: T;
+}
+
+export interface BodyUserRequest<T> extends UserRequest {
   body: T;
 }
 
@@ -169,6 +177,7 @@ export interface PermissionsRequest extends Request {
 export enum Error {
   // 400
   BadRequest = 'Requête invalide',
+  AlreadyInTeam = 'Vous êtes déjà dans une équipe',
 
   // 401
   Unauthenticated = "Vous n'êtes pas authentifié",
