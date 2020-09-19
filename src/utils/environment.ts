@@ -10,6 +10,10 @@ export const slackAlertWebhook = (): string => process.env.SLACK_ALERT_WEBHOOK;
 
 // Database
 export const databaseHost = (): string => process.env.DATABASE_HOST;
+export const databasePort = (): number => Number.parseInt(process.env.DATABASE_PORT);
+export const databaseUsername = (): string => process.env.DATABASE_USERNAME;
+export const databasePassword = (): string => process.env.DATABASE_PASSWORD;
+export const databaseName = (): string => process.env.DATABASE_NAME;
 export const isProductionDatabase = (): boolean => databaseHost() === 'mariadb-prod';
 
 // Mail
