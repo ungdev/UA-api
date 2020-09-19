@@ -8,10 +8,10 @@ export default [
   // Middlewares
 
   // Controller
-  async (request: Request, res: Response) => {
+  async (request: Request, response: Response) => {
     const users: User[] = await fetchUsers();
     const result = users.map(filterUserRestricted);
 
-    return success(res, result);
+    return success(response, result);
   },
 ];

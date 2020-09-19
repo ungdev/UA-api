@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { notAcceptable } from '../utils/responses';
 
-export default () => (request: Request, res: Response, next: NextFunction): void => {
+export default () => (request: Request, response: Response, next: NextFunction): void => {
   if (request.method === 'OPTIONS' || request.get('Content-Type') === 'application/json') {
     return next();
   }
@@ -11,5 +11,5 @@ export default () => (request: Request, res: Response, next: NextFunction): void
     return next();
   }
 
-  return notAcceptable(res);
+  return notAcceptable(response);
 };

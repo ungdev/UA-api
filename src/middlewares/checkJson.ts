@@ -4,11 +4,11 @@ import { badRequest } from '../utils/responses';
 export const checkJson = () => (
   error: ErrorRequestHandler,
   request: Request,
-  res: Response,
+  response: Response,
   next: NextFunction,
 ): void => {
   if (error instanceof SyntaxError) {
-    return badRequest(res);
+    return badRequest(response);
   }
 
   return next();

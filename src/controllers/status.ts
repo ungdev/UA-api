@@ -4,10 +4,10 @@ import database from '../utils/database';
 
 import { success } from '../utils/responses';
 
-export default async (request: Request, res: Response) => {
+export default async (request: Request, response: Response) => {
   const settings = await database.settings.findMany();
   return success(
-    res,
+    response,
     settings.reduce((previous: ObjectType, current: Setting) => {
       Object.assign(previous, { [current.id]: current.value });
       return previous;

@@ -46,8 +46,6 @@
       "error",
       {
         "replacements": {
-          "req": false,
-          "res": false,
           "env": false
         }
       }

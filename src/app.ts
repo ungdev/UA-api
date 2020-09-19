@@ -72,6 +72,6 @@ app.use('/uploads', express.static('uploads'));
 app.use(routes());
 
 // Not found
-app.use((req: Request, res: Response) => notFound(res, Error.RouteNotFound));
+app.use((request: Request, response: Response) => notFound(response, Error.RouteNotFound));
 
 export default app;
