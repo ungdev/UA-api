@@ -3,28 +3,28 @@ import { PrismaClient } from '@prisma/client';
 import { databaseHost, databaseName, databasePassword, databasePort, databaseUsername, isTest } from './environment';
 import log from './log';
 
-const database = new PrismaClient(
-  !isTest() && {
-    log: [
-      {
-        emit: 'event',
-        level: 'query',
-      },
-      {
-        emit: 'event',
-        level: 'info',
-      },
-      {
-        emit: 'event',
-        level: 'warn',
-      },
-    ],
-  },
-);
+const database = new PrismaClient({
+  log: [
+    {
+      emit: 'event',
+      level: 'query',
+    },
+    {
+      emit: 'event',
+      level: 'info',
+    },
+    {
+      emit: 'event',
+      level: 'warn',
+    },
+  ],
+});
 
-database.$on('query', (event) => log.debug(event.query));
-database.$on('info', (event) => log.info(event.message));
-database.$on('warn', (event) => log.warn(event.message));
+if (!isTest()) {
+  database.$on('query', (event) => log.debug(event.query));
+  database.$on('info', (event) => log.info(event.message));
+  database.$on('warn', (event) => log.warn(event.message));
+}
 
 // Dump query to initiate the connection
 const setup = async () => {

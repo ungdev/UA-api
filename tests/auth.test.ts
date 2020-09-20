@@ -28,7 +28,7 @@ describe.skip('Auth API', () => {
     it('should not create a duplicate user', async () => {
       await request(app).post('/auth/register').send(validBody).expect(400);
     });
-    it('should not create a user with imcomplete body', async () => {
+    it('should not create a user with incomplete body', async () => {
       await request(app)
         .post('/auth/register')
         .send({ firstname: validBody.firstname, email: validBody.email })

@@ -21,8 +21,8 @@ script:
   - yarn
   - yarn api-check
   - yarn lint
-  - yarn test
   - yarn build
+  - yarn test
 
 notifications:
   slack:
