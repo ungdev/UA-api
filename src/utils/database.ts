@@ -4,8 +4,25 @@ import { databaseHost, databaseName, databasePassword, databasePort, databaseUse
 import log from './log';
 
 const database = new PrismaClient({
-  log: ['query', 'info', 'warn'],
+  log: [
+    {
+      emit: 'event',
+      level: 'query',
+    },
+    {
+      emit: 'event',
+      level: 'info',
+    },
+    {
+      emit: 'event',
+      level: 'warn',
+    },
+  ],
 });
+
+database.$on('query', (event) => log.debug(event.query));
+database.$on('info', (event) => log.info(event.message));
+database.$on('warn', (event) => log.warn(event.message));
 
 // Dump query to initiate the connection
 const setup = async () => {
