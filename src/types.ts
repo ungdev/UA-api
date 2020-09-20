@@ -192,6 +192,7 @@ export enum Error {
   RouteNotFound = 'La route est introuvable',
   UserNotFound = "L'utilisateur est introuvable",
   OrderNotFound = 'La commande est introuvable',
+  WrongRegisterToken = "Token d'enregistrement invalide",
 
   // 406
   NotAcceptable = 'Contenu envoyé inacceptable',

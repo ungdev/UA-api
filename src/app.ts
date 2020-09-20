@@ -10,11 +10,14 @@ import routes from './controllers';
 import { checkJson } from './middlewares/checkJson';
 import swaggerDocument from '../openapi.json';
 import { morgan } from './utils/log';
+import { isTest } from './utils/environment';
 
 const app = express();
 
 // Loads logging middleware with more verbosity if in dev environment, and enable datadog production environment
-app.use(morgan());
+if (!isTest()) {
+  app.use(morgan());
+}
 
 // Security middlewares
 app.use(cors(), helmet());

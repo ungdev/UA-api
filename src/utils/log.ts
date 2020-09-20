@@ -67,9 +67,7 @@ export const morgan = () => {
   const logStream = split().on('data', (message: string) => logger.http(message));
 
   // Load morgan variables
-  morganMiddleware.token('username', (request: UserRequest) =>
-    request.user.username ? request.user.username : 'anonymous',
-  );
+  morganMiddleware.token('username', (request: UserRequest) => (request.user && request.user.username) || 'anonymous');
   morganMiddleware.token('ip', getIp);
 
   const productionFormat = ':ip :username :method :url :status :res[content-length] - :response-time ms';
