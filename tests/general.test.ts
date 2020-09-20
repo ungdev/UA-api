@@ -25,4 +25,34 @@ describe('General API', () => {
       await request(app).post('/').expect(404);
     });
   });
+  describe('POST /contact', () => {
+    it('should send the message with a 204', async () => {
+      const body = {
+        firstname: 'John',
+        lastname: 'Doe',
+        email: 'john.doe@test.com',
+        subject: 'Test',
+        message: 'Test test',
+      };
+      await request(app).post('/contact').send(body).expect(204);
+    });
+    it('should not accept wrong email', async () => {
+      const body = {
+        firstname: 'John',
+        lastname: 'Doe',
+        email: 'wrong email',
+        subject: 'Test',
+        message: 'Test test',
+      };
+      await request(app).post('/contact').send(body).expect(400);
+    });
+    it('should not accept missing parameters in body', async () => {
+      const body = {
+        firstname: 'John',
+        subject: 'Test',
+        message: 'Test test',
+      };
+      await request(app).post('/contact').send(body).expect(400);
+    });
+  });
 });
