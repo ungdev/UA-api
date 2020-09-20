@@ -72,8 +72,7 @@ export const morgan = () => {
   );
   morganMiddleware.token('ip', getIp);
 
-  const productionFormat =
-    ':ip :username :method :url HTTP/:http-version :status :res[content-length] - :response-time ms';
+  const productionFormat = ':ip :username :method :url :status :res[content-length] - :response-time ms';
   const developmentFormat = ':method :url :status :response-time ms - :res[content-length] - :username';
 
   return morganMiddleware(isProduction() ? productionFormat : developmentFormat, { stream: logStream });
