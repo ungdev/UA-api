@@ -1,24 +1,26 @@
 /* eslint-disable unicorn/no-process-exit */
 import { PrismaClient } from '@prisma/client';
-import { databaseHost, databaseName, databasePassword, databasePort, databaseUsername } from './environment';
+import { databaseHost, databaseName, databasePassword, databasePort, databaseUsername, isTest } from './environment';
 import log from './log';
 
-const database = new PrismaClient({
-  log: [
-    {
-      emit: 'event',
-      level: 'query',
-    },
-    {
-      emit: 'event',
-      level: 'info',
-    },
-    {
-      emit: 'event',
-      level: 'warn',
-    },
-  ],
-});
+const database = new PrismaClient(
+  !isTest() && {
+    log: [
+      {
+        emit: 'event',
+        level: 'query',
+      },
+      {
+        emit: 'event',
+        level: 'info',
+      },
+      {
+        emit: 'event',
+        level: 'warn',
+      },
+    ],
+  },
+);
 
 database.$on('query', (event) => log.debug(event.query));
 database.$on('info', (event) => log.info(event.message));
