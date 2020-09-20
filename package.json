@@ -33,8 +33,7 @@
     "nanoid": "^3.1.12",
     "swagger-ui-express": "^4.1.4",
     "typescript": "^4.0.2",
-    "winston": "^3.3.3",
-    "winston-daily-rotate-file": "^4.5.0"
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@prisma/cli": "2.7.1",

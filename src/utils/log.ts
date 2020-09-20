@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
-import 'winston-daily-rotate-file';
 import moment from 'moment';
 import { datadogDevelopment, datadogKey, datadogProduction, isProduction, isProductionDatabase } from './environment';
 import { PermissionsRequest } from '../types';
