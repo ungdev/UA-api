@@ -1,59 +1,63 @@
-import { createLogger, format, transports } from 'winston';
+import morganMiddleware from 'morgan';
+import { createLogger, format, silly, transports } from 'winston';
 import 'winston-daily-rotate-file';
 import moment from 'moment';
-import { isProduction } from './environment';
-import { LoggingLevel } from '../types';
+import { datadogDevelopment, datadogKey, datadogProduction, isProduction, isProductionDatabase } from './environment';
+import { PermissionsRequest } from '../types';
+import { getIp } from './network';
 
-const createEnvironmentLogger = (name: string, level: LoggingLevel = LoggingLevel.Info) => {
-  const { combine, colorize, printf } = format;
+// Create console Transport
+const { combine, colorize, printf, json } = format;
+const timestamp = moment().format('HH:mm:ss');
+const consoleTransport = new transports.Console({
+  format: combine(
+    colorize(),
+    printf(({ level, message }) => `${timestamp} ${level}: ${message}`),
+  ),
+  level: 'silly',
+});
 
-  const timestamp = moment().format('HH:mm:ss');
+// Create datadog transport
+const datadogTransport = new transports.Http({
+  host: 'http-intake.logs.datadoghq.com',
+  path: `/v1/input/${datadogKey()}?ddsource=nodejs&service=${
+    isProductionDatabase() ? datadogProduction() : datadogDevelopment()
+  }`,
+  ssl: true,
+  format: json(),
+  level: 'http',
+});
 
-  const printFormat = printf(({ level, message }) => `${timestamp} ${level}: ${message}`);
+const developmentTransports = [consoleTransport];
+const productionTransports = [consoleTransport, datadogTransport];
 
-  const consoleTransport = new transports.Console({
-    format: combine(colorize(), printFormat),
-  });
+const logger = createLogger({
+  transports: isProduction() ? productionTransports : developmentTransports,
+});
 
-  // There is a conditional operator to prevent creating files in a development environment
-  const rotateTransport = isProduction()
-    ? new transports.DailyRotateFile({
-        filename: `logs/${name}/%DATE%.log`,
-        frequency: '1d',
-        datePattern: 'YYYY-MM-DD',
-        level,
-        format: printFormat,
-      })
-    : undefined;
-
-  const developmentTransports = [consoleTransport];
-  const productionTransports = [
-    consoleTransport,
-    rotateTransport,
-    new transports.File({ filename: 'logs/error.log', level: 'error', format: printFormat }),
-  ];
-
-  // if (slackAlertWebhook()) {
-  //   // @ts-ignore
-  //   prodTransports.push(new SlackTransport({ webhookUrl: slackAlertWebhook(), level: 'error' }));
-  // }
-
-  const logger = createLogger({
-    transports: isProduction() ? productionTransports : developmentTransports,
-  });
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  logger.error = (error) => {
-    if (error instanceof Error) {
-      logger.log({ level: 'error', message: `${error.stack || error}` });
-    } else {
-      logger.log({ level: 'error', message: error });
-    }
-  };
-
-  return logger;
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+logger.error = (error) => {
+  if (error instanceof Error) {
+    logger.log({ level: 'error', message: `${error.stack || error}` });
+  } else {
+    logger.log({ level: 'error', message: error });
+  }
 };
 
-export default createEnvironmentLogger('errors', LoggingLevel.Error);
-export const teamJoin = createEnvironmentLogger('teamJoin');
+export default logger;
+
+export const morgan = () => {
+  // Map morgan with winston
+  const logStream = {
+    write: (text: string) => logger.http(text),
+  };
+
+  // Load morgan variables
+  morganMiddleware.token('username', (request: PermissionsRequest) =>
+    request.permissions ? request.permissions : 'anonymous',
+  );
+  morganMiddleware.token('ip', getIp);
+
+  return morganMiddleware(isProduction() ? 'tiny' : 'dev', { stream: logStream });
+};
