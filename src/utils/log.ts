@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { ConsoleTransportInstance, HttpTransportInstance } from 'winston/lib/winston/transports';
 import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
@@ -17,28 +18,30 @@ const consoleTransport = new transports.Console({
   level: 'silly',
 });
 
+const loggingTransports: Array<ConsoleTransportInstance | HttpTransportInstance> = [consoleTransport];
+
 // Create datadog transport
-const datadogPath = `/v1/input/${datadogKey()}?ddsource=nodejs&service=${
-  isProductionDatabase() ? datadogProduction() : datadogDevelopment()
-}`;
-console.info(`Datadog URL: ${datadogPath}`);
-const datadogTransport = new transports.Http({
-  host: 'http-intake.logs.datadoghq.com',
-  path: datadogPath,
-  ssl: true,
-  format: json(),
-  level: 'http',
-});
+if (isProduction()) {
+  const datadogPath = `/v1/input/${datadogKey()}?ddsource=nodejs&service=${
+    isProductionDatabase() ? datadogProduction() : datadogDevelopment()
+  }`;
+  console.info(`Datadog URL: ${datadogPath}`);
+  const datadogTransport = new transports.Http({
+    host: 'http-intake.logs.datadoghq.com',
+    path: datadogPath,
+    ssl: true,
+    format: json(),
+    level: 'http',
+  });
+  // Log if datadog is unreachable/forbidden
+  datadogTransport.on('warn', (warning) => console.warn(`Datadog ${warning}`));
 
-// Log if datadog is unreachable/forbidden
-datadogTransport.on('warn', (warning) => console.warn(`Datadog ${warning}`));
-
-const developmentTransports = [consoleTransport];
-const productionTransports = [consoleTransport, datadogTransport];
+  loggingTransports.push(datadogTransport);
+}
 
 // Create the production/developpment logger
 const logger = createLogger({
-  transports: isProduction() ? productionTransports : developmentTransports,
+  transports: loggingTransports,
 });
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
