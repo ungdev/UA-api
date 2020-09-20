@@ -2,6 +2,7 @@ import chai from 'chai';
 import request from 'supertest';
 import app from '../src/app';
 import database from '../src/utils/database';
+import { Error } from '../src/types';
 
 chai.should();
 
@@ -48,7 +49,7 @@ describe('Auth API', () => {
   });
   describe('POST /auth/validate/{token}', () => {
     it('should not accept wrong token', async () => {
-      await request(app).post('/auth/validate/wrongtoken').expect(404);
+      await request(app).post('/auth/validate/wrongtoken').expect(404, { error: Error.WrongRegisterToken });
     });
     it('should validate the user', async () => {
       const newUser = await database.user.findOne({
