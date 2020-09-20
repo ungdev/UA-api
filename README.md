@@ -54,3 +54,11 @@ yarn api-check # checks if openapi.yml is correct
 ## Prisma config
 
 Before use `npx prisma generate` to regenerate your prisma client add `prisma/.env` with `DATABASE_URL`
+
+## How to test
+
+- Change `DATABASE_NAME` in `.env` with your testing database name
+
+- Seed the database before testing
+
+- Run `yarn test`

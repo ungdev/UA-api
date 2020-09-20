@@ -133,6 +133,8 @@ CREATE TABLE `users` (
   `discordId` varchar(255) DEFAULT NULL,
   `teamId` char(6) DEFAULT NULL,
   `askingTeamId` char(6) DEFAULT NULL,
+  `registerToken` char(6) DEFAULT NULL,
+  `resetToken` char(6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `askingTeamId` (`askingTeamId`),
   KEY `teamId` (`teamId`),

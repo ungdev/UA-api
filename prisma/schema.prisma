@@ -15,18 +15,18 @@ model CartItem {
   itemId    String
   cartId    String
   forUserId String
-  cart     Cart    @relation(fields: [cartId], references: [id])
-  user     User    @relation(fields: [forUserId], references: [id])
-  item     Item    @relation(fields: [itemId], references: [id])
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  user      User     @relation(fields: [forUserId], references: [id])
+  item      Item     @relation(fields: [itemId], references: [id])
 
   @@map("cartitems")
 }
 
 model Cart {
-  id               String                 @id
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-  transactionState cart_transactionState  @default(pending)
+  id               String                @id
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  transactionState cart_transactionState @default(pending)
   transactionId    Int?
   paidAt           DateTime?
   userId           String
@@ -37,7 +37,7 @@ model Cart {
 }
 
 model Item {
-  id           String         @id
+  id           String        @id
   name         String
   category     item_category
   attribute    String?
@@ -52,24 +52,24 @@ model Item {
 }
 
 model Team {
-  id                              String      @id
-  createdAt                       DateTime    @default(now())
-  updatedAt                       DateTime    @updatedAt
-  name                            String
-  lockedAt                        DateTime?
-  captainId                       String      @unique
-  tournamentId                    String
-  captain                         User        @relation(fields: [captainId], references: [id])
-  tournament                      Tournament  @relation(fields: [tournamentId], references: [id])
-  askingUsers                     User[]     @relation("teamAskingUsers")
-  users                           User[]      @relation("teamUsers")
+  id           String     @id
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  name         String
+  lockedAt     DateTime?
+  captainId    String     @unique
+  tournamentId String
+  captain      User       @relation(fields: [captainId], references: [id])
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  askingUsers  User[]     @relation("teamAskingUsers")
+  users        User[]     @relation("teamUsers")
 
   @@map("teams")
 }
 
 model Tournament {
-  id             String  @id
-  name           String  @unique
+  id             String @id
+  name           String @unique
   maxPlayers     Int
   playersPerTeam Int
   teams          Team[]
@@ -78,27 +78,30 @@ model Tournament {
 }
 
 model User {
-  id                              String      @id
-  createdAt                       DateTime    @default(now())
-  updatedAt                       DateTime    @updatedAt
-  username                        String?
-  firstname                       String
-  lastname                        String
-  email                           String      @unique
-  password                        String
-  type                            user_type
-  permissions                     String?
-  place                           String?
-  scannedAt                       DateTime?
-  discordId                       String?
-  teamId                          String?
-  askingTeamId                    String?
-  askingTeam                      Team?       @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
-  team                            Team?       @relation("teamUsers", fields: [teamId], references: [id])
-  cartitems                       CartItem[]
-  carts                           Cart[]
+  id            String     @id
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  username      String?
+  firstname     String
+  lastname      String
+  email         String     @unique
+  password      String
+  type          user_type
+  permissions   String?
+  place         String?
+  scannedAt     DateTime?
+  discordId     String?
+  teamId        String?
+  askingTeamId  String?
+  registerToken String?
+  resetToken    String?
+  askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
+  team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
+  cartitems     CartItem[]
+  carts         Cart[]
 
   @@map("users")
+  Team Team[]
 }
 
 model Settings {

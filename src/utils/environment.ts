@@ -6,6 +6,7 @@ dotenv.config();
 export const nodeEnv = (): string => process.env.NODE_ENV;
 export const isDevelopment = (): boolean => nodeEnv() === 'development';
 export const isProduction = (): boolean => nodeEnv() === 'production';
+export const isTest = (): boolean => nodeEnv() === 'test';
 export const apiPort = (): number => Number.parseInt(process.env.API_PORT);
 export const bcryptLevel = (): number => Number.parseInt(process.env.API_BCRYPT_LEVEL);
 export const jwtSecret = (): string => process.env.JWT_SECRET;
