@@ -5,7 +5,7 @@ import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { datadogDevelopment, datadogKey, datadogProduction, isProduction, isProductionDatabase } from './environment';
-import { PermissionsRequest } from '../types';
+import { PermissionsRequest, UserRequest } from '../types';
 import { getIp } from './network';
 
 // Create console Transport
@@ -67,8 +67,8 @@ export const morgan = () => {
   const logStream = split().on('data', (message: string) => logger.http(message));
 
   // Load morgan variables
-  morganMiddleware.token('username', (request: PermissionsRequest) =>
-    request.permissions ? request.permissions : 'anonymous',
+  morganMiddleware.token('username', (request: UserRequest) =>
+    request.user.username ? request.user.username : 'anonymous',
   );
   morganMiddleware.token('ip', getIp);
 
