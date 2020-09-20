@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import status from './status';
+import getTournaments from './tournaments/getTournaments';
 import users from './users';
 
 const routes = (): Router => {
@@ -10,6 +11,9 @@ const routes = (): Router => {
 
   // Users routes
   router.use('/users', users());
+
+  // Tournaments route
+  router.get('/tournaments', getTournaments);
 
   return router;
 };
