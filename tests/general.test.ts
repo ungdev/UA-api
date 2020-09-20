@@ -21,5 +21,8 @@ describe('General API', () => {
       });
       await request(app).get('/').expect(200, { shop: false, login: true });
     });
+    it('should not accept POST request', async () => {
+      await request(app).post('/').expect(404);
+    });
   });
 });

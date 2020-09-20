@@ -60,11 +60,11 @@
     "build": "tsc",
     "postbuild": "cpy '**/*' '!**/*.ts' ../build/ --cwd=src/ --no-overwrite --parents",
     "start": "node build/src/server.js",
-    "lint": "eslint src/ test/ --ext .ts",
-    "lint-fix": "eslint --fix src/ test/ --ext .ts",
+    "lint": "eslint src/ tests/ --ext .ts",
+    "lint-fix": "eslint --fix src/ tests/ --ext .ts",
     "api-check": "swagger-cli validate openapi.yml",
     "doc-to-json": "swagger-cli bundle --outfile openapi.json openapi.yml",
     "postinstall": "prisma generate",
-    "test": "NODE_ENV=test mocha -r ts-node/register test/**/*.test.ts"
+    "test": "NODE_ENV=test mocha -r ts-node/register tests/**/*.test.ts"
   }
 }
