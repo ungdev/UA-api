@@ -65,6 +65,6 @@
     "api-check": "swagger-cli validate openapi.yml",
     "doc-to-json": "swagger-cli bundle --outfile openapi.json openapi.yml",
     "postinstall": "prisma generate",
-    "test": "NODE_ENV=test mocha -r ts-node/register tests/**/*.test.ts"
+    "test": "NODE_ENV=test mocha -r ts-node/register tests/**/*.test.ts --exit"
   }
 }
