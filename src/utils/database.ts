@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-process-exit */
 import { PrismaClient } from '@prisma/client';
 import { databaseHost, databaseName, databasePassword, databasePort, databaseUsername } from './environment';
 import log from './log';
@@ -14,7 +15,7 @@ const setup = async () => {
 
 setup().catch((error) => {
   log.error(error);
-  throw error;
+  process.exit(1);
 });
 
 export default database;
