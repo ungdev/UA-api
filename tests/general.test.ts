@@ -22,7 +22,7 @@ describe('General API', () => {
       await request(app).post('/').expect(404);
     });
   });
-  describe('POST /contact', () => {
+  describe.skip('POST /contact', () => {
     it('should send the message with a 204', async () => {
       const body = {
         firstname: 'John',
