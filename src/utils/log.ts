@@ -5,7 +5,7 @@ import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { datadogDevelopment, datadogKey, datadogProduction, isProduction, isProductionDatabase } from './environment';
-import { PermissionsRequest, UserRequest } from '../types';
+import { UserRequest } from '../types';
 import { getIp } from './network';
 
 // Create console Transport
