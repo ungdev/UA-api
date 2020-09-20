@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import morganMiddleware from 'morgan';
-import { createLogger, format, silly, transports } from 'winston';
+import { createLogger, format, transports } from 'winston';
 import 'winston-daily-rotate-file';
 import moment from 'moment';
 import { datadogDevelopment, datadogKey, datadogProduction, isProduction, isProductionDatabase } from './environment';
@@ -18,19 +19,25 @@ const consoleTransport = new transports.Console({
 });
 
 // Create datadog transport
+const datadogPath = `/v1/input/${datadogKey()}?ddsource=nodejs&service=${
+  isProductionDatabase() ? datadogProduction() : datadogDevelopment()
+}`;
+console.info(`Datadog URL: ${datadogPath}`);
 const datadogTransport = new transports.Http({
   host: 'http-intake.logs.datadoghq.com',
-  path: `/v1/input/${datadogKey()}?ddsource=nodejs&service=${
-    isProductionDatabase() ? datadogProduction() : datadogDevelopment()
-  }`,
+  path: datadogPath,
   ssl: true,
   format: json(),
   level: 'http',
 });
 
+// Log if datadog is unreachable/forbidden
+datadogTransport.on('warn', (warning) => console.warn(`Datadog ${warning}`));
+
 const developmentTransports = [consoleTransport];
 const productionTransports = [consoleTransport, datadogTransport];
 
+// Create the production/developpment logger
 const logger = createLogger({
   transports: isProduction() ? productionTransports : developmentTransports,
 });
@@ -47,6 +54,10 @@ logger.error = (error) => {
 
 export default logger;
 
+/**
+ * Creates a morgan middleware with ip and username varibles
+ * The logging is more verbose when in production
+ */
 export const morgan = () => {
   // Map morgan with winston
   const logStream = {
@@ -59,5 +70,5 @@ export const morgan = () => {
   );
   morganMiddleware.token('ip', getIp);
 
-  return morganMiddleware(isProduction() ? 'tiny' : 'dev', { stream: logStream });
+  return morganMiddleware(isProduction() ? 'short' : 'dev', { stream: logStream });
 };
