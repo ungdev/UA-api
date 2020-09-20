@@ -1,3 +1,7 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 // General
 export const nodeEnv = (): string => process.env.NODE_ENV;
 export const isDevelopment = (): boolean => nodeEnv() === 'development';

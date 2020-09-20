@@ -8,7 +8,7 @@ export default () => (request: Request, response: Response, next: NextFunction):
   const errors = validationResult(request);
 
   if (!errors.isEmpty()) {
-    log.info(`Invalid form: ${JSON.stringify(errors)}`);
+    log.debug(`Invalid form: ${JSON.stringify(errors)}`);
     return badRequest(response, Error.InvalidForm);
   }
 
