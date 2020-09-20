@@ -170,10 +170,6 @@ export interface BodyUserRequest<T> extends UserRequest {
   body: T;
 }
 
-export interface PermissionsRequest extends Request {
-  permissions: Permissions;
-}
-
 export enum Error {
   // 400
   BadRequest = 'Requête invalide',

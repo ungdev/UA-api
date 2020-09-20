@@ -1,10 +1,28 @@
+/* eslint-disable unicorn/no-process-exit */
 import { PrismaClient } from '@prisma/client';
 import { databaseHost, databaseName, databasePassword, databasePort, databaseUsername } from './environment';
 import log from './log';
 
 const database = new PrismaClient({
-  log: ['query', 'info', 'warn'],
+  log: [
+    {
+      emit: 'event',
+      level: 'query',
+    },
+    {
+      emit: 'event',
+      level: 'info',
+    },
+    {
+      emit: 'event',
+      level: 'warn',
+    },
+  ],
 });
+
+database.$on('query', (event) => log.debug(event.query));
+database.$on('info', (event) => log.info(event.message));
+database.$on('warn', (event) => log.warn(event.message));
 
 // Dump query to initiate the connection
 const setup = async () => {
@@ -14,7 +32,7 @@ const setup = async () => {
 
 setup().catch((error) => {
   log.error(error);
-  throw error;
+  process.exit(1);
 });
 
 export default database;
