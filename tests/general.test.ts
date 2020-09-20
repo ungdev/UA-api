@@ -1,9 +1,6 @@
-import chai from 'chai';
 import request from 'supertest';
 import app from '../src/app';
 import database from '../src/utils/database';
-
-chai.should();
 
 describe('General API', () => {
   describe('GET /', () => {

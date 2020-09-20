@@ -78,25 +78,27 @@ model Tournament {
 }
 
 model User {
-  id           String     @id
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  username     String?
-  firstname    String
-  lastname     String
-  email        String     @unique
-  password     String
-  type         user_type
-  permissions  String?
-  place        String?
-  scannedAt    DateTime?
-  discordId    String?
-  teamId       String?
-  askingTeamId String?
-  askingTeam   Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
-  team         Team?      @relation("teamUsers", fields: [teamId], references: [id])
-  cartitems    CartItem[]
-  carts        Cart[]
+  id            String     @id
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  username      String?
+  firstname     String
+  lastname      String
+  email         String     @unique
+  password      String
+  type          user_type
+  permissions   String?
+  place         String?
+  scannedAt     DateTime?
+  discordId     String?
+  teamId        String?
+  askingTeamId  String?
+  registerToken String?
+  resetToken    String?
+  askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
+  team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
+  cartitems     CartItem[]
+  carts         Cart[]
 
   @@map("users")
   Team Team[]
