@@ -1,5 +1,6 @@
 # UA-api
 
+[![Build Status](https://travis-ci.com/ungdev/UA-api.svg?branch=master)](https://travis-ci.com/ungdev/UA-api)
 [![codecov](https://codecov.io/gh/ungdev/UA-API/branch/master/graph/badge.svg)](https://codecov.io/gh/ungdev/UA-API)
 
 API web à destination des services de l'UTT Arena
