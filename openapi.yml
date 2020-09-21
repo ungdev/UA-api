@@ -25,6 +25,8 @@ info:
 servers:
   - url: http://127.0.0.1:3000
     description: Serveur local
+  - url: https://ua-api.dev.uttnetgroup.fr/
+    description: Serveur de pré-production
   - url: https://ua-api.uttnetgroup.fr
     description: Serveur de production
 
@@ -355,7 +357,7 @@ paths:
       description: Marque le panier comme étant remboursé.<br/>
         **Permission 'admin' requise.**
       tags:
-        - Admin
+        - '2021'
       security:
         - BearerAuth: []
       parameters:
@@ -587,7 +589,7 @@ paths:
       description: Renvoie les paniers de l'utilisateur.<br/>
         **Permission 'admin' requise.**
       tags:
-        - Admin
+        - '2021'
       security:
         - BearerAuth: []
       parameters:
@@ -988,7 +990,7 @@ paths:
       summary: Renvoie la liste des items en vente
       description: Renvoie la liste des items en vente dans la billetterie.
       tags:
-        - Items
+        - '2021'
       responses:
         200:
           description: Renvoie la liste des items
@@ -1474,31 +1476,6 @@ paths:
                 items:
                   $ref: '#/components/schemas/Tournament'
 
-  /uploads/{filename}:
-    get:
-      summary: Renvoie un fichier statique
-      description: Renvoie un fichier statique présent sur le stockage persistent de l'API.
-      tags:
-        - Général
-      parameters:
-        - in: path
-          name: filename
-          description: Nom du fichier à servir
-          schema:
-            type: string
-          required: true
-      responses:
-        200:
-          description: Le fichier demandé est renvoyé
-        404:
-          description: Le fichier demandé est introuvable
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: Le fichier demandé est introuvable
-
   /users:
     get:
       summary: Renvoie les informations minimales d'un utilisateur
@@ -1577,7 +1554,7 @@ paths:
       description: Renvoie la liste des achats de l'utilisateur.<br/>
         **L'utilisateur doit être l'utilisateur cible.**
       tags:
-        - Users
+        - '2021'
       security:
         - BearerAuth: []
       parameters:
@@ -1613,7 +1590,7 @@ paths:
         *La billetterie doit être ouverte.*
         *Le stock d'items restant doit être suffisant pour satisfaire la demande.*
       tags:
-        - Users
+        - '2021'
       security:
         - BearerAuth: []
       parameters:

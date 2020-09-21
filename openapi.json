@@ -1,0 +1,2475 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0",
+    "title": "UTT Arena - API",
+    "description": "API web à destination des services de l'UTT Arena.<br/><br/>\n**Définitions :**<br/>\n- Le terme \"paramètre\" désigne un champ qui peut se trouver dans les champs `param`, `query` ou `body` de la requête<br/>\n- Le terme \"utilisateur\" désigne l''utilisateur originaire de la requête<br/>\n- Les termes \"utilisateur cible\" ou \"équipe cible\" désignent respectivement l''utilisateur ou l''équipe identifiée par le paramètre `userId` ou `teamId`<br/>\n- Une erreur 403 sera renvoyée si une condition en **gras** n''est pas respectée<br/>\n- Une erreur 400 sera renvoyée si une condition en *italique* n''est pas respectée ou si un paramètre n''est pas dans un format valide<br/>\n<br/>\n**Remarques :**<br/>\n- Pour toutes les routes nécessitant un token d''authentification, la connexion doit être autorisée (sauf pour les utilisateurs organisateurs)",
+    "contact": {
+      "name": "UTT Arena",
+      "url": "https://arena.utt.fr",
+      "email": "arena@utt.fr"
+    },
+    "license": {
+      "name": "Licence MIT",
+      "url": "https://github.com/ungdev/UA-api/blob/master/LICENSE"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:3000",
+      "description": "Serveur local"
+    },
+    {
+      "url": "https://ua-api.dev.uttnetgroup.fr/",
+      "description": "Serveur de pré-production"
+    },
+    {
+      "url": "https://ua-api.uttnetgroup.fr",
+      "description": "Serveur de production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Général",
+      "description": "Routes générales"
+    },
+    {
+      "name": "Admin",
+      "description": "Routes d'administration"
+    },
+    {
+      "name": "Auth",
+      "description": "Routes d'authentification"
+    },
+    {
+      "name": "Items",
+      "description": "Routes liées aux items"
+    },
+    {
+      "name": "Teams",
+      "description": "Routes liées aux équipes"
+    },
+    {
+      "name": "Tickets",
+      "description": "Routes liées aux billets"
+    },
+    {
+      "name": "Tournaments",
+      "description": "Routes liées aux tournois"
+    },
+    {
+      "name": "Users",
+      "description": "Routes liées aux utilisateurs"
+    },
+    {
+      "name": "2021",
+      "description": "Routes à ajouter en 2021"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "Type": {
+        "type": "string",
+        "enum": [
+          "player",
+          "coach",
+          "visitor",
+          "orga"
+        ]
+      },
+      "Permission": {
+        "type": "string",
+        "enum": [
+          "stream",
+          "entry",
+          "anim",
+          "admin"
+        ]
+      },
+      "Tournament": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "maxPlayers": {
+            "type": "integer",
+            "example": 80
+          },
+          "playersPerTeam": {
+            "type": "integer",
+            "example": 5
+          },
+          "lockedTeamsCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "UserRestricted": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "V1StGX"
+          },
+          "type": {
+            "$ref": "#/components/schemas/Type"
+          },
+          "hasPaid": {
+            "type": "boolean"
+          }
+        }
+      },
+      "User": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UserRestricted"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "username": {
+                "type": "string",
+                "nullable": true
+              },
+              "firstname": {
+                "type": "string"
+              },
+              "lastname": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "nullable": true
+              },
+              "permissions": {
+                "type": "string",
+                "nullable": true
+              },
+              "place": {
+                "type": "string",
+                "nullable": true,
+                "example": "X000"
+              },
+              "scanned": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "discordId": {
+                "type": "string",
+                "nullable": true
+              },
+              "teamId": {
+                "type": "string",
+                "example": "Z5jdHi",
+                "nullable": true
+              },
+              "askingTeamId": {
+                "type": "string",
+                "example": "i8yNHk",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "Team": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "Z5jdHi"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tournamentId": {
+            "type": "integer"
+          },
+          "captainId": {
+            "type": "string",
+            "example": "XiHGta"
+          },
+          "lockedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "TeamWithUsers": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Team"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "users": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/User"
+                }
+              },
+              "askingUsers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "UserWithTeam": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "team": {
+                "$ref": "#/components/schemas/Team"
+              }
+            }
+          }
+        ]
+      },
+      "Cart": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "8MF1b0"
+          },
+          "userId": {
+            "type": "string",
+            "example": "V1StGX"
+          },
+          "transactionState": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "paid",
+              "canceled",
+              "refused",
+              "refunded"
+            ]
+          },
+          "transactionId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "paidAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "CartItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "wS6p0t"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "cartId": {
+            "type": "string",
+            "example": "8MF1b0"
+          },
+          "itemId": {
+            "type": "integer"
+          },
+          "forUserId": {
+            "type": "string",
+            "example": "V1StGX"
+          }
+        }
+      },
+      "CartWithCartItems": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Cart"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cartItems": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CartItem"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "ticket",
+              "item"
+            ]
+          },
+          "attribute": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "integer"
+          },
+          "infos": {
+            "type": "string",
+            "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    },
+    "responses": {
+      "400Errored": {
+        "description": "Requête erronée",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "401Unauthenticated": {
+        "description": "Vous n'êtes pas authentifié",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Vous n'êtes pas authentifié"
+            }
+          }
+        }
+      },
+      "403Unauthorized": {
+        "description": "Vous n'avez pas la permission",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Vous n'avez pas la permission"
+            }
+          }
+        }
+      },
+      "404UserNotFound": {
+        "description": "L'utilisateur est introuvable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "L'utilisateur est introuvable"
+            }
+          }
+        }
+      },
+      "404TeamNotFound": {
+        "description": "L'équipe est introuvable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "L'équipe est introuvable"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Renvoie l'état du serveur",
+        "description": "Indique si le serveur accepte la connexion \"tout public\" et si la billetterie est ouverte ou non.",
+        "tags": [
+          "Général"
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie l'état du serveur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "login": {
+                      "type": "boolean"
+                    },
+                    "shop": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/auth/login/{userId}": {
+      "post": {
+        "summary": "Authentifie en tant qu'un autre utilisateur",
+        "description": "Permet de s'authentifier en tant que n'importe quel utilisateur.<br/> **Permission 'admin' requise.**",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant de l'utilisateur cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'authentification a réussi. Les informations de l'utilisateur et le token d'authentification sont renvoyés.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    },
+    "/admin/carts/{cartId}/refund": {
+      "post": {
+        "summary": "Marque le panier comme étant remboursé",
+        "description": "Marque le panier comme étant remboursé.<br/> **Permission 'admin' requise.**",
+        "tags": [
+          "2021"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cartId",
+            "description": "Identifiant du panier à marquer comme étant remboursé",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le panier a bien été marqué comme étant remboursé. Les informations du panier sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cart"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "description": "Aucun panier n'est associé à cet identifiant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Aucun panier n'est associé à cet identifiant"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/emails": {
+      "post": {
+        "summary": "Envoie un mail d'information",
+        "description": "Envoie un mail d'information à tous les joueurs, coachs et accompagnateurs en fonction des filtres sélectionnés.\nEnvoie également une copie à arena@utt.fr.<br/>\n**Permission 'admin' requise.**",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "locked": {
+                    "type": "boolean",
+                    "description": "Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non"
+                  },
+                  "tournamentId": {
+                    "type": "integer",
+                    "description": "Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.\nLe champ 'locked' doit être non nul.",
+                    "nullable": true
+                  },
+                  "subject": {
+                    "type": "string",
+                    "description": "Sujet du mail"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Contenu du mail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Le mail a été envoyé avec succès"
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "summary": "Renvoie la liste des utilisateurs et leur équipe",
+        "description": "Les champs de recherche renvoient l'utilisateur s'il contient la chaîne de caractères recherchée. Les filtres et les champs de recherche sont appliqués entre eux avec un opérateur ET.<br/> **Permission 'anim', 'entry' ou 'admin' requise.**",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "description": "Recherche par nom d'utilisateur",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "firstname",
+            "description": "Recherche par prénom",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lastname",
+            "description": "Recherche par nom",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "email",
+            "description": "Recherche par adresse email",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "team",
+            "description": "Recherche par nom d'équipe",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "place",
+            "description": "Recherche par place",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "discordId",
+            "description": "Recherche par identifiant Discord",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "description": "Filtre les utilisateurs par leur type",
+            "schema": {
+              "$ref": "#/components/schemas/Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tournament",
+            "description": "Filtre les utilisateurs en fonction de l'identifiant de leur tournoi",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "locked",
+            "description": "Filtre les utilisateurs en fonction de s'ils sont dans une équipe verrouillée ou non",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "permission",
+            "description": "Filtre les utilisateurs en fonction de leurs permissions",
+            "schema": {
+              "$ref": "#/components/schemas/Permission"
+            }
+          },
+          {
+            "in": "query",
+            "name": "paid",
+            "description": "Filtre les utilisateurs en fonction de s'ils ont payé ou non",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scanned",
+            "description": "Filtre les utilisateurs en fonction de s'ils ont été scannés ou non",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "description": "(Pagination) Longueur de la page. Doit être utilisé avec 'pageIndex'",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageIndex",
+            "description": "(Pagination) Indice de la page. Doit être utilisé avec 'pageSize'",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La liste de tous les utilisateurs filtrés est renvoyée",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserWithTeam"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          }
+        }
+      }
+    },
+    "/admin/users/{userId}": {
+      "put": {
+        "summary": "Modifie les informations d'un utilisateur",
+        "description": "Modifie les informations d'un utilisateur.<br/> **Permission 'admin' requise.**",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant de l'utilisateur à modifier",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "permissions": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "place": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "L'utilisateur a bien été modifié. Ses informations sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    },
+    "/admin/users/{userId}/carts": {
+      "get": {
+        "summary": "Renvoie les paniers de l'utilisateur",
+        "description": "Renvoie les paniers de l'utilisateur.<br/> **Permission 'admin' requise.**",
+        "tags": [
+          "2021"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie les paniers de l'utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CartWithCartItems"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    },
+    "/admin/users/{userId}/forcePay": {
+      "post": {
+        "summary": "Valide le paiement d'un utilisateur",
+        "description": "Valide le paiement d'un utilisateur.<br/> **Permission 'entry' ou 'admin' requise.**<br/> *L'utilisateur cible ne doit pas avoir déjà payé sa place.*",
+        "tags": [
+          "2021"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant de l'utilisateur cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'utilisateur est bien marqué comme ayant payé sa place. Les informations de l'utilisateur sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    },
+    "/admin/users/{userId}/replace": {
+      "post": {
+        "summary": "Remplace un utilisateur par un autre dans une équipe",
+        "description": "Remplace un utilisateur (utilisateur remplacé) par un autre (utilisateur remplaçant).<br/> **Permission 'admin' requise.**<br/> *L'utilisateur remplacé doit être dans une équipe.* *Les deux utilisateurs doivent avoir le même type.* *L'équipe doit être verrouillée.* *Le nouvel utilisateur doit avoir payé sa place.*",
+        "tags": [
+          "Admin"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant de l'utilisateur remplacé",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "replacementUserId": {
+                    "type": "string",
+                    "description": "Identifiant de l'utilisateur remplaçant"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "L'utilisateur remplaçant a bien pris la place de l'utilisateur remplaçé. Les informations des deux utilisateurs et de leur équipe sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "replacedUser": {
+                      "$ref": "#/components/schemas/UserWithTeam"
+                    },
+                    "replacementUser": {
+                      "$ref": "#/components/schemas/UserWithTeam"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    },
+    "/admin/scan/{qrcode}": {
+      "post": {
+        "summary": "Scanne le billet d'un utilisateur",
+        "description": "Renvoie les informations de l'utilisateur.<br/> **Permission 'entry' ou 'admin' requise.**<br/> *Le billet ne doit pas avoir été déjà scanné.*",
+        "tags": [
+          "2021"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "qrcode",
+            "description": "Contenu du QR code présent sur le billet",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie les informations de l'utilisateur et son équipe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithTeam"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "description": "Aucun utilisateur n'est associé à ce QR code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Aucun utilisateur n'est associé à ce QR code"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Authentifie l'utilisateur",
+        "description": "Permet d'obtenir un token d'authentification.<br/> *La connexion doit être autorisée (seuls les organisateurs sont toujours autorisés à accéder à cette route).* *Le compte doit être activé.*",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "Nom d'utilisateur ou adresse mail de l'utilisateur cible"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Mot de passe de l'utilisateur cible"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Renvoie le token d'authentification et les informations de l'utilisateur. Le champ 'captivePortalSuccess' indique si l'utilisateur a été ajouté au portail captif ou non.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "captivePortalSuccess": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          }
+        }
+      }
+    },
+    "/auth/refreshToken": {
+      "post": {
+        "summary": "Génère un nouveau token d'authentification",
+        "description": "Génère un nouveau token d'authentification si le token actuel arrive bientôt à expiration.",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Un nouveau token a été généré",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Le token actuel est valide encore suffisamment longtemps, aucun nouveau token n'a été généré"
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Crée un nouvel utilisateur",
+        "description": "Crée un nouvel utilisateur.<br/> *La connexion doit être autorisée.*",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 100
+                  },
+                  "firstname": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100
+                  },
+                  "lastname": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "player",
+                      "coach"
+                    ]
+                  },
+                  "discordId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "L'utilisateur a bien été créé"
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          }
+        }
+      }
+    },
+    "/auth/resetPassword": {
+      "post": {
+        "summary": "Envoie un mail permettant de changer son mot de passe",
+        "description": "Envoie un mail contenant un token permettant de réinitialiser son mot de passe.<br/> *La connexion doit être autorisée.*",
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Si un utilisateur est associé à cette adresse mail, alors le mail a bien été envoyé"
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          }
+        }
+      }
+    },
+    "/auth/resetPassword/{token}": {
+      "post": {
+        "summary": "Modifie le mot de passe de l'utilisateur associé au token",
+        "description": "Modifie le mot de passe de l'utilisateur associé au token de réinitialisation de mot de passe.<br/> *La connexion doit être autorisée.*",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "description": "Token de réinitialisation de mot de passe",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "type": "string",
+                    "description": "Nouveau mot de passe de l'utilisateur"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Le mot de passe a bien été modifié. Les informations nécessaires à l'authentification sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "404": {
+            "description": "Aucun utilisateur n'est associé à ce token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Le token est invalide"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/validate/{token}": {
+      "post": {
+        "summary": "Valide le compte de l'utilisateur",
+        "description": "Valide le compte de l'utilisateur associé au token d'inscription.<br/> *La connexion doit être autorisée.*",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "token",
+            "description": "Token d'inscription",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le compte a été validé. Les informations nécessaires à l'authentification sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "404": {
+            "description": "Aucun utilisateur n'est associé à ce token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Le token est invalide"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contact": {
+      "post": {
+        "summary": "Envoie un message à l'équipe de l'UTT Arena",
+        "description": "Envoie un message sur le slack UNG dans #ua-contact-bot.",
+        "tags": [
+          "Général"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstname": {
+                    "type": "string"
+                  },
+                  "lastname": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "subject": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Le message a bien été envoyé"
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          }
+        }
+      }
+    },
+    "/items": {
+      "get": {
+        "summary": "Renvoie la liste des items en vente",
+        "description": "Renvoie la liste des items en vente dans la billetterie.",
+        "tags": [
+          "2021"
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie la liste des items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Item"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/teams": {
+      "get": {
+        "summary": "Renvoie la liste des équipes d'un tournoi",
+        "description": "Renvoie les informations publiques des équipes d'un tournoi.",
+        "tags": [
+          "Teams"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tournamentId",
+            "description": "Identifiant du tournoi cible",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "locked",
+            "description": "Filtre les équipes en fonction de si elles sont verrouillées ou non",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie les informations publiques des équipes du tournoi",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Team"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "players": {
+                            "type": "array",
+                            "description": "Liste des noms d'utilisateurs des joueurs de l'équipe",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "coachs": {
+                            "type": "array",
+                            "description": "Liste des noms d'utilisateurs des coachs de l'équipe",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "404": {
+            "description": "Aucun tournoi n'est associé à cet identifiant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Aucun tournoi n'est associé à cet identifiant"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crée une équipe",
+        "description": "Crée une équipe.<br/> *L'utilisateur ne doit pas avoir d'équipe.*",
+        "tags": [
+          "Teams"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "Nom de l'équipe. Ne sera pas pris en compte pour les tournois solo.",
+                    "type": "string"
+                  },
+                  "tournamentId": {
+                    "description": "Identifiant du tournoi",
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "L'équipe a bien été créée. Ses informations sont retournées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamWithUsers"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          }
+        }
+      }
+    },
+    "/teams/{teamId}": {
+      "delete": {
+        "summary": "Détruit l'équipe",
+        "description": "Détruit l'équipe cible.<br/> **L'utilisateur doit être le chef de l'équipe cible.**<br/> *L'équipe cible ne doit pas être verrouillée.*",
+        "tags": [
+          "Teams"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamId",
+            "description": "Identifiant de l'équipe cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "L'équipe a bien été détruite"
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404TeamNotFound"
+          }
+        }
+      },
+      "get": {
+        "summary": "Renvoie les informations de l'équipe",
+        "description": "Renvoie les informations de l'équipe cible.<br/> **L'utilisateur doit être dans l'équipe cible.**",
+        "tags": [
+          "Teams"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamId",
+            "description": "Identifiant de l'équipe cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie les informations de l'équipe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamWithUsers"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404TeamNotFound"
+          }
+        }
+      },
+      "put": {
+        "summary": "Modifie les informations de l'équipe",
+        "description": "Modifie les informations de l'équipe cible.<br/> **L'utilisateur doit être le chef de l'équipe cible.**",
+        "tags": [
+          "Teams"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamId",
+            "description": "Identifiant de l'équipe cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nouveau nom de l'équipe"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "L'équipe a bien été modifiée. Ses informations sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamWithUsers"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404TeamNotFound"
+          }
+        }
+      }
+    },
+    "/teams/{teamId}/captain/{userId}": {
+      "put": {
+        "summary": "Définit le nouveau chef d'équipe",
+        "description": "Transfère son rôle de chef d'équipe.<br/> **L'utilisateur doit être le chef de l'équipe cible.**<br/> *L'équipe cible ne doit pas être verrouillée.* *L'utilisateur cible doit être dans l'équipe cible.*",
+        "tags": [
+          "Teams"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamId",
+            "description": "Identifiant de l'équipe cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant du nouveau chef d'équipe",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Le rôle de chef d'équipe a bien été transféré. Les informations de l'équipe sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamWithUsers"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    },
+    "/teams/{teamId}/joinRequests": {
+      "post": {
+        "summary": "Crée une demande pour rejoindre une équipe",
+        "description": "Crée une demande pour rejoindre une équipe.<br/> *L'utilisateur ne doit pas avoir d'équipe.*",
+        "tags": [
+          "Teams"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamId",
+            "description": "Identifiant de l'équipe cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La demande a bien été envoyée. Les informations de l'utilisateur sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "404": {
+            "$ref": "#/components/responses/404TeamNotFound"
+          }
+        }
+      }
+    },
+    "/teams/{teamId}/joinRequests/{userId}": {
+      "delete": {
+        "summary": "Annule la demande d'équipe",
+        "description": "Annule la demande d'équipe de l'utilisateur cible.<br/> **L'utilisateur doit être l'utilisateur cible ou être le chef de l'équipe cible.**<br/> *L'équipe ne doit pas être verrouillée.* *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*",
+        "tags": [
+          "Teams"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamId",
+            "description": "Identifiant de l'équipe cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant de l'utilisateur cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "La demande a bien été annulée. Les informations de l'équipe et de l'utilisateur sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "team": {
+                      "$ref": "#/components/schemas/TeamWithUsers"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      },
+      "post": {
+        "summary": "Accepte la demande d'équipe",
+        "description": "Accepte la demande d'équipe de l'utilisateur cible.<br/> **L'utilisateur doit être le chef de l'équipe cible.**<br/> *L'équipe ne doit pas être verrouillée.* *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*",
+        "tags": [
+          "Teams"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamId",
+            "description": "Identifiant de l'équipe cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant de l'utilisateur cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'utilisateur a été ajouté à l'équipe. Les informations de l'équipe sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamWithUsers"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    },
+    "/teams/{teamId}/lock": {
+      "post": {
+        "summary": "Verrouille l'équipe",
+        "description": "Verrouille l'équipe cible.<br/> **L'utilisateur doit être le chef de l'équipe cible.**<br/> *L'équipe doit être verrouillable (équipe complète et tous les membres ont payé).* *Le tournoi ne doit pas être complet.*",
+        "tags": [
+          "Teams"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamId",
+            "description": "Identifiant de l'équipe cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'équipe a bien été verrouillée. Ses informations sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamWithUsers"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404TeamNotFound"
+          }
+        }
+      }
+    },
+    "/teams/{teamId}/users/{userId}": {
+      "delete": {
+        "summary": "Retire l'utilisateur de l'équipe",
+        "description": "Retire l'utilisateur de l'équipe.<br/> **L'utilisateur doit être l'utilisateur cible ou être le chef de l'équipe cible.**<br/> *L'utilisateur cible doit être dans l'équipe cible.* *L'équipe ne doit pas être verrouillée.* *Le chef d'équipe ne peut pas quitter l'équipe.*",
+        "tags": [
+          "Teams"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamId",
+            "description": "Identifiant de l'équipe cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant de l'utilisateur cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "L'utilisateur a bien été retiré de l'équipe. Les informations de l'équipe et de l'utilisateur sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "team": {
+                      "$ref": "#/components/schemas/TeamWithUsers"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    },
+    "/tickets/{cartItemId}": {
+      "get": {
+        "summary": "Renvoie le billet associé au cartItem",
+        "description": "Renvoie le billet associé au cartItem au format PDF.<br/> **L'utilisateur doit nécessairement avoir payé ce cartItem.**",
+        "tags": [
+          "2021"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "cartItemId",
+            "description": "Identifiant du cartItem",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie le billet au format PDF"
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "description": "Vous n'avez pas la permission de télécharger ce billet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Vous n'avez pas la permission de télécharger ce billet"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Aucun billet n'est associé à cet identifiant",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Aucun billet n'est associé à cet identifiant"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tournaments": {
+      "get": {
+        "summary": "Renvoie les informations des tournois",
+        "description": "Renvoie les informations des tournois.",
+        "tags": [
+          "Tournaments"
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie les informations sur les tournois",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Tournament"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "Renvoie les informations minimales d'un utilisateur",
+        "description": "Renvoie les informations minimales d'un utilisateur.",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "description": "Identifiant ou adresse mail de l'utilisateur cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie les informations minimales de l'utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRestricted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    },
+    "/users/{userId}": {
+      "put": {
+        "summary": "Modifie les informations d'un utilisateur",
+        "description": "Modifie les informations d'un utilisateur.<br/> **L'utilisateur doit être l'utilisateur cible.**",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant de l'utilisateur cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "L'utilisateur a bien été modifié. Ses informations sont renvoyées.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    },
+    "/users/{userId}/carts": {
+      "get": {
+        "summary": "Renvoie la liste des achats de l'utilisateur",
+        "description": "Renvoie la liste des achats de l'utilisateur.<br/> **L'utilisateur doit être l'utilisateur cible.**",
+        "tags": [
+          "2021"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant de l'utilisateur cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie la liste des achats de l'utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CartWithCartItems"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      },
+      "post": {
+        "summary": "Crée un panier",
+        "description": "Crée un panier et renvoie une URL afin de procéder au paiement. Pour chaque accompagnateur, un compte inaccessible est créé et sera lié à l'équipe actuelle de l'utilisateur.<br/> **L'utilisateur doit être l'utilisateur cible.**<br/> *La billetterie doit être ouverte.* *Le stock d'items restant doit être suffisant pour satisfaire la demande.*",
+        "tags": [
+          "2021"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "Identifiant de l'utilisateur cible",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tickets": {
+                    "type": "object",
+                    "properties": {
+                      "userIds": {
+                        "type": "array",
+                        "description": "Liste des identifiants des utilisateurs pour qui acheter les billets",
+                        "items": {
+                          "type": "string"
+                        },
+                        "example": [
+                          "V1StGX"
+                        ]
+                      },
+                      "visitors": {
+                        "type": "array",
+                        "description": "Liste des billets accompagnateurs à acheter",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "firstname": {
+                              "type": "string",
+                              "description": "Prénom de l'accompagnateur"
+                            },
+                            "lastname": {
+                              "type": "string",
+                              "description": "Nom de l'accompagnateur"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "items": {
+                    "type": "array",
+                    "description": "Liste des items (goodies) à acheter",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "itemId": {
+                          "type": "integer",
+                          "description": "Identifiant de l'item à acheter"
+                        },
+                        "quantity": {
+                          "type": "integer",
+                          "description": "Quantité à acheter"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Le panier a bien été créé. L'URL permettant de procéder au paiement est renvoyée.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400Errored"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/404UserNotFound"
+          }
+        }
+      }
+    }
+  }
+}
