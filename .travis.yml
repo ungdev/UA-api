@@ -22,7 +22,11 @@ script:
   - yarn api-check
   - yarn lint
   - yarn build
-  - yarn test
+  - yarn test:coverage
+
+after_success:
+  - yarn nyc report --reporter=text-lcov > coverage.lcov
+  - yarn codecov
 
 notifications:
   slack:

@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../src/app';
 import database from '../src/utils/database';
+import { mock } from './utils';
 
 describe('General API', () => {
   describe('GET /', () => {
@@ -22,11 +23,14 @@ describe('General API', () => {
       await request(app).post('/').expect(404);
     });
   });
-  describe.skip('POST /contact', () => {
+  describe('POST /contact', () => {
+    beforeEach(() => {
+      mock.onPost(/https:\/\/hooks\.slack\.com\/services\/\w+\/\w+\/\w+/).reply(200, 'ok');
+    });
+
     it('should send the message with a 204', async () => {
       const body = {
-        firstname: 'John',
-        lastname: 'Doe',
+        name: 'John Doe',
         email: 'john.doe@test.com',
         subject: 'Test',
         message: 'Test test',
@@ -35,8 +39,7 @@ describe('General API', () => {
     });
     it('should not accept wrong email', async () => {
       const body = {
-        firstname: 'John',
-        lastname: 'Doe',
+        name: 'John Doe',
         email: 'wrong email',
         subject: 'Test',
         message: 'Test test',
@@ -45,7 +48,6 @@ describe('General API', () => {
     });
     it('should not accept missing parameters in body', async () => {
       const body = {
-        firstname: 'John',
         subject: 'Test',
         message: 'Test test',
       };

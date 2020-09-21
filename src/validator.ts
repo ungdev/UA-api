@@ -44,3 +44,10 @@ export const userValidator = dynamicEntity.append({
   captainId: Joi.string().length(6).required(),
   tournamentId: Joi.string().required(),
 });
+
+export const contactValidator = Joi.object({
+  name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  subject: Joi.string().required(),
+  message: Joi.string().required(),
+});

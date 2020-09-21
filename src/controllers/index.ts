@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import status from './status';
 import tournaments from './tournaments';
+import { status, contact } from './general';
 import users from './users';
 
 const routes = (): Router => {
@@ -14,6 +14,9 @@ const routes = (): Router => {
 
   // Tournaments route
   router.use('/tournaments', tournaments());
+
+  // Route contact
+  router.post('/contact', contact);
 
   return router;
 };

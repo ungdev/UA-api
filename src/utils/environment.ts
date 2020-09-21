@@ -11,7 +11,9 @@ export const apiPort = (): number => Number.parseInt(process.env.API_PORT);
 export const bcryptLevel = (): number => Number.parseInt(process.env.API_BCRYPT_LEVEL);
 export const jwtSecret = (): string => process.env.JWT_SECRET;
 export const jwtExpires = (): string => process.env.JWT_EXPIRES;
-export const slackAlertWebhook = (): string => process.env.SLACK_ALERT_WEBHOOK;
+
+// Slack
+export const slackContactWebhook = (): string => process.env.SLACK_CONTACT_WEBHOOK;
 
 // Database
 export const databaseHost = (): string => process.env.DATABASE_HOST;
