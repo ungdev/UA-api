@@ -13,6 +13,7 @@
     "plugin:unicorn/recommended",
     "plugin:security/recommended"
   ],
+  "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint", "prettier", "unicorn", "security"],
   "parserOptions": {
     "ecmaVersion": 2018,
