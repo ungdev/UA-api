@@ -63,20 +63,20 @@ export interface Tournament {
 
 export interface User {
   id: string;
-  username?: string | null;
+  username?: string;
   firstname: string;
   lastname: string;
-  email?: string | null;
-  password?: string | null;
+  email?: string;
+  password?: string;
   type: UserType;
-  permissions?: string | null;
-  place?: string | null;
-  scannedAt?: string | null;
-  registerToken?: string | null;
-  resetToken?: string | null;
-  discordId?: string | null;
-  teamId?: string | null;
-  askingTeamId?: string | null;
+  permissions?: string;
+  place?: string;
+  scannedAt?: string;
+  registerToken?: string;
+  resetToken?: string;
+  discordId?: string;
+  teamId?: string;
+  askingTeamId?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -86,7 +86,7 @@ export interface Team {
   name: string;
   tournamentId: string;
   captainId: string;
-  lockedAt?: string | null;
+  lockedAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -95,20 +95,20 @@ export interface Item {
   id: string;
   name: string;
   category: ItemCategory;
-  attribute?: string | null;
+  attribute?: string;
   price: number;
-  reducedPrice?: number | null;
-  infos?: string | null;
-  image?: string | null;
-  stock?: number | null;
+  reducedPrice?: number;
+  infos?: string;
+  image?: string;
+  stock?: number;
 }
 
 export interface Cart {
   id: string;
   userId: string;
   transactionState: TransactionState;
-  transactionId?: number | null;
-  paidAt?: string | null;
+  transactionId?: number;
+  paidAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -125,7 +125,17 @@ export interface CartItem {
 
 export interface Setting {
   id: string;
-  value?: string | null;
+  value?: string;
+}
+
+export interface TournamentWithLockedTeams extends Tournament {
+  lockedTeamsCount: number;
+}
+export interface Contact {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
 }
 
 /*************/
@@ -158,13 +168,22 @@ export interface EtupayResponse {
 /** Misc **/
 /**********/
 
+export interface UserRequest extends Request {
+  user: User;
+}
+
 export interface BodyRequest<T> extends Request {
+  body: T;
+}
+
+export interface BodyUserRequest<T> extends UserRequest {
   body: T;
 }
 
 export enum Error {
   // 400
   BadRequest = 'Requête invalide',
+  AlreadyInTeam = 'Vous êtes déjà dans une équipe',
 
   // 401
   Unauthenticated = "Vous n'êtes pas authentifié",
@@ -183,6 +202,7 @@ export enum Error {
   RouteNotFound = 'La route est introuvable',
   UserNotFound = "L'utilisateur est introuvable",
   OrderNotFound = 'La commande est introuvable',
+  WrongRegisterToken = "Token d'enregistrement invalide",
 
   // 406
   NotAcceptable = 'Contenu envoyé inacceptable',
@@ -190,3 +210,6 @@ export enum Error {
   // 500
   Unknown = 'Erreur inconnue',
 }
+
+// Alias type for Object
+export type ObjectType = Record<string, unknown>;

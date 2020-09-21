@@ -9,9 +9,12 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
-    "prettier"
+    "prettier",
+    "plugin:unicorn/recommended",
+    "plugin:security/recommended"
   ],
-  "plugins": ["@typescript-eslint", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "prettier", "unicorn", "security"],
   "parserOptions": {
     "ecmaVersion": 2018,
     "sourceType": "module"
@@ -20,6 +23,7 @@
     "prettier/prettier": "error",
     "no-async-promise-executor": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/ban-ts-ignore": "off",
     "eol-last": "off",
@@ -33,6 +37,19 @@
     "import/prefer-default-export": "off",
     "no-shadow": "off",
     "no-useless-constructor": "off",
-    "spaced-comment": ["error", "always", { "exceptions": ["*"] }]
+    "spaced-comment": ["error", "always", { "exceptions": ["*"] }],
+    "unicorn/no-reduce": "off",
+    "unicorn/filename-case": ["error", { "case": "camelCase" }],
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-fn-reference-in-iterator": "off",
+    "security/detect-object-injection": "off",
+    "unicorn/prevent-abbreviations": [
+      "error",
+      {
+        "replacements": {
+          "env": false
+        }
+      }
+    ]
   }
 }
