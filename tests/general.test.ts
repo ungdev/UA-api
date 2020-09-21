@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../src/app';
 import database from '../src/utils/database';
+import { mock } from './utils';
 
 describe('General API', () => {
   describe('GET /', () => {
@@ -23,6 +24,10 @@ describe('General API', () => {
     });
   });
   describe('POST /contact', () => {
+    beforeEach(() => {
+      mock.onPost(/https:\/\/hooks\.slack\.com\/services\/\w+\/\w+\/\w+/).reply(200, 'ok');
+    });
+
     it('should send the message with a 204', async () => {
       const body = {
         name: 'John Doe',

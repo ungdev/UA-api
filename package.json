@@ -38,6 +38,7 @@
     "@types/supertest": "^2.0.10",
     "@typescript-eslint/eslint-plugin": "^4.1.0",
     "@typescript-eslint/parser": "^4.1.0",
+    "axios-mock-adapter": "^1.18.2",
     "chai": "^4.2.0",
     "codecov": "^3.7.2",
     "eslint": "^7.8.1",
@@ -65,6 +66,7 @@
     "api-check": "swagger-cli validate openapi.yml",
     "doc-to-json": "swagger-cli bundle --outfile openapi.json openapi.yml",
     "postinstall": "prisma generate",
-    "test": "NODE_ENV=test nyc mocha -r ts-node/register tests/**/*.test.ts --exit"
+    "test": "NODE_ENV=test mocha -r ts-node/register tests/**/*.test.ts --exit",
+    "test:coverage": "yarn nyc test"
   }
 }
