@@ -46,8 +46,7 @@ export const userValidator = dynamicEntity.append({
 });
 
 export const contactValidator = Joi.object({
-  firstname: Joi.string().required(),
-  lastname: Joi.string().required(),
+  name: Joi.string().required(),
   email: Joi.string().email().required(),
   subject: Joi.string().required(),
   message: Joi.string().required(),

@@ -1,17 +1,17 @@
 import axios from 'axios';
 import { Contact } from '../types';
-import { slackContactWeebhook } from './environment';
+import { slackContactWebhook } from './environment';
 
-export default ({ firstname, lastname, email, subject, message }: Contact) => {
+export default ({ name, email, subject, message }: Contact) => {
   return axios.post(
-    slackContactWeebhook(),
+    slackContactWebhook(),
     {
       blocks: [
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `• De *${firstname} ${lastname}*\n• Email : ${email}\n• Sujet : ${subject}`,
+            text: `• De *${name}*\n• Email : ${email}\n• Sujet : ${subject}`,
           },
         },
         {

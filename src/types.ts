@@ -132,8 +132,7 @@ export interface TournamentWithLockedTeams extends Tournament {
   lockedTeamsCount: number;
 }
 export interface Contact {
-  firstname: string;
-  lastname: string;
+  name: string;
   email: string;
   subject: string;
   message: string;

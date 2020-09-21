@@ -19,7 +19,7 @@ export const status = async (request: Request, response: Response) => {
   );
 };
 
-export const postContact = [
+export const contact = [
   // Middleware
   validateBody(contactValidator),
   // Controller

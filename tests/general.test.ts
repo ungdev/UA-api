@@ -25,8 +25,7 @@ describe('General API', () => {
   describe('POST /contact', () => {
     it('should send the message with a 204', async () => {
       const body = {
-        firstname: 'John',
-        lastname: 'Doe',
+        name: 'John Doe',
         email: 'john.doe@test.com',
         subject: 'Test',
         message: 'Test test',
@@ -35,8 +34,7 @@ describe('General API', () => {
     });
     it('should not accept wrong email', async () => {
       const body = {
-        firstname: 'John',
-        lastname: 'Doe',
+        name: 'John Doe',
         email: 'wrong email',
         subject: 'Test',
         message: 'Test test',
@@ -45,7 +43,6 @@ describe('General API', () => {
     });
     it('should not accept missing parameters in body', async () => {
       const body = {
-        firstname: 'John',
         subject: 'Test',
         message: 'Test test',
       };
