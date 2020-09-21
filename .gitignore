@@ -5,6 +5,7 @@
 
 # production
 /build
+.nyc_output
 
 # misc
 .DS_Store
