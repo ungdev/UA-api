@@ -128,6 +128,10 @@ export interface Setting {
   value?: string;
 }
 
+export interface TournamentWithLockedTeams extends Tournament {
+  lockedTeamsCount: number;
+}
+
 /*************/
 /** Winston **/
 /*************/
