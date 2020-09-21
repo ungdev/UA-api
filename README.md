@@ -1,5 +1,7 @@
 # UA-api
 
+[![codecov](https://codecov.io/gh/ungdev/UA-API/branch/master/graph/badge.svg)](https://codecov.io/gh/ungdev/UA-API)
+
 API web à destination des services de l'UTT Arena
 
 ## Requirements
