@@ -67,6 +67,6 @@
     "doc-to-json": "swagger-cli bundle --outfile openapi.json openapi.yml",
     "postinstall": "prisma generate",
     "test": "NODE_ENV=test mocha -r ts-node/register tests/**/*.test.ts --exit",
-    "test:coverage": "yarn nyc test"
+    "test:coverage": "nyc yarn test"
   }
 }
