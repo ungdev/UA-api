@@ -1,7 +1,9 @@
 import { apiPort, nodeEnv as nodeEnvironment } from './utils/environment';
 import log from './utils/log';
 import app from './app';
+import { toornamentInit } from './utils/toornament';
 
+toornamentInit();
 // Listen the API on port 3000 (default)
 app.listen(apiPort(), () => {
   log.debug(`Node environment: ${nodeEnvironment()}`);

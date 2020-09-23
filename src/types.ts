@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { Request } from 'express';
 
 /**
@@ -215,3 +216,24 @@ export enum Error {
 
 // Alias type for Object
 export type ObjectType = Record<string, unknown>;
+
+// Toornament Credentials
+export interface ToornamentCredentials {
+  participantToken: string;
+  registrationToken: string;
+  expirationDate: Date;
+  apiKey: string;
+}
+
+export interface PlayerToornament {
+  custom_fields: ObjectType;
+}
+
+export interface WebhookToornament {
+  name: string;
+  object_id: string;
+  object_type: string;
+  scope: string;
+  scope_id: string;
+  triggered_at: string;
+}
