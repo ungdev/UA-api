@@ -5,6 +5,7 @@ import { getToken } from '../utils/user';
 import { jwtSecret } from '../utils/environment';
 import { Token, UserRequest } from '../types';
 import { fetchTeam } from '../operations/team';
+import { fetchUser } from '../operations/user';
 
 // Checks the user is the captain of the team. If not, it will return an error
 export const isCaptainOfTeamId = async (
@@ -14,6 +15,11 @@ export const isCaptainOfTeamId = async (
 ): Promise<void> => {
   const token = getToken(request);
   if (token) {
+    // Question : Où prendre userId ?
+    // Soit dans le jeton : redondant
+    // Soit dans la request.user.id mais alors la vérification doit être faite :
+    //  Soit dans chaque route qui utilise isCaptainOfTeamId
+    //  Soit il faut exporter un tableau contenant [isUserId, cette fonction] à la place de isCaptainOfTeamId
     const decoded = jwt.verify(token, jwtSecret()) as Token;
     const { userId } = decoded;
 
@@ -21,6 +27,8 @@ export const isCaptainOfTeamId = async (
     const team = await fetchTeam(teamId);
     const { captainId } = team;
 
+    // Question : y'a pas moyen d'homogénéiser le type de userId, entre la db, les requêtes, etc... ?
+    // Parce que ça fait utiliser toString() dans tous les sens... Ou alors je fais mal les choses
     if (userId.toString() === captainId) {
       return next();
     }
@@ -37,11 +45,25 @@ export const isUserId = (request: UserRequest, response: Response, next: NextFun
     if (decoded.userId.toString() === request.user.id) {
       return next();
     }
+    // Question : Je retourne les bonnes erreurs, là ?
     return unauthorized(response);
   }
   return unauthenticated(response);
 };
 
-// export const isInTeamId = (request: Request, response: Response, next: NextFunction): void => {
-//   return next();
-// };
+// Checks the user is the captain of the team. If not, it will return an error
+export const isInTeamId = async (request: UserRequest, response: Response, next: NextFunction): Promise<void> => {
+  const token = getToken(request);
+  if (token) {
+    const decoded = jwt.verify(token, jwtSecret()) as Token;
+    const { userId } = decoded;
+    const user = await fetchUser(userId.toString());
+    const { teamId } = user;
+
+    if (request.user.teamId === user.teamId) {
+      return next();
+    }
+    return unauthorized(response);
+  }
+  return unauthenticated(response);
+};
