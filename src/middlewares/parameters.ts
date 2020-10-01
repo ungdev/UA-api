@@ -15,11 +15,6 @@ export const isCaptainOfTeamId = async (
 ): Promise<void> => {
   const token = getToken(request);
   if (token) {
-    // Question : Où prendre userId ?
-    // Soit dans le jeton : redondant
-    // Soit dans la request.user.id mais alors la vérification doit être faite :
-    //  Soit dans chaque route qui utilise isCaptainOfTeamId
-    //  Soit il faut exporter un tableau contenant [isUserId, cette fonction] à la place de isCaptainOfTeamId
     const decoded = jwt.verify(token, jwtSecret()) as Token;
     const { userId } = decoded;
 
@@ -27,9 +22,7 @@ export const isCaptainOfTeamId = async (
     const team = await fetchTeam(teamId);
     const { captainId } = team;
 
-    // Question : y'a pas moyen d'homogénéiser le type de userId, entre la db, les requêtes, etc... ?
-    // Parce que ça fait utiliser toString() dans tous les sens... Ou alors je fais mal les choses
-    if (userId.toString() === captainId) {
+    if (userId === captainId) {
       return next();
     }
     return unauthorized(response);
@@ -42,10 +35,9 @@ export const isUserId = (request: UserRequest, response: Response, next: NextFun
   const token = getToken(request);
   if (token) {
     const decoded = jwt.verify(token, jwtSecret()) as Token;
-    if (decoded.userId.toString() === request.user.id) {
+    if (decoded.userId === request.user.id) {
       return next();
     }
-    // Question : Je retourne les bonnes erreurs, là ?
     return unauthorized(response);
   }
   return unauthenticated(response);
@@ -54,20 +46,13 @@ export const isUserId = (request: UserRequest, response: Response, next: NextFun
 // Checks the user is the captain of the team. If not, it will return an error
 export const isInTeamId = async (request: UserRequest, response: Response, next: NextFunction): Promise<void> => {
   const token = getToken(request);
+
   if (token) {
     const decoded = jwt.verify(token, jwtSecret()) as Token;
     const { userId } = decoded;
     const user = await fetchUser(userId);
-    if (typeof user === User) {
-        const { teamId } = user;
-        if (request.user.teamId === user.teamId) {
-          return next();
-        }
-    }
-    return unauthorized(response);
-    const { teamId } = user;
-
-    if (request.user.teamId === user.teamId) {
+    // Compare user's teamId and teamId of the request
+    if (user && request.params.teamId === user.teamId) {
       return next();
     }
     return unauthorized(response);
