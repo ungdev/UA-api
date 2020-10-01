@@ -184,7 +184,7 @@ export enum Error {
   // 400
   BadRequest = 'Requête invalide',
   AlreadyInTeam = 'Vous êtes déjà dans une équipe',
-  LoginNotAllowed = "Le login n'est pas autorisé actuellement",
+  LoginNotAllowed = "Vous ne pouvez pas vous connecter actuellement",
   ShopNotAllowed = 'Le shop est fermé',
 
   // 401
