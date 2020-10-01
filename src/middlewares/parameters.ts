@@ -57,7 +57,14 @@ export const isInTeamId = async (request: UserRequest, response: Response, next:
   if (token) {
     const decoded = jwt.verify(token, jwtSecret()) as Token;
     const { userId } = decoded;
-    const user = await fetchUser(userId.toString());
+    const user = await fetchUser(userId);
+    if (typeof user === User) {
+        const { teamId } = user;
+        if (request.user.teamId === user.teamId) {
+          return next();
+        }
+    }
+    return unauthorized(response);
     const { teamId } = user;
 
     if (request.user.teamId === user.teamId) {
