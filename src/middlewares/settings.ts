@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import { fetchLogin, fetchShop } from '../operations/settings';
+import { fetchSetting } from '../operations/settings';
 import { Error } from '../types';
 import { badRequest } from '../utils/responses';
 
 export const loginAllowed = async (request: Request, response: Response, next: NextFunction) => {
-  const login = (await fetchLogin()).value;
+  const login = (await fetchSetting('shop')).value;
   if (login === 'true') {
     return next();
   }
@@ -12,7 +12,7 @@ export const loginAllowed = async (request: Request, response: Response, next: N
 };
 
 export const shopAllowed = async (request: Request, response: Response, next: NextFunction) => {
-  const shop = (await fetchShop()).value;
+  const shop = (await fetchSetting('shop')).value;
   if (shop === 'true') {
     return next();
   }
