@@ -18,8 +18,6 @@ const routes = (): Router => {
   // Route contact
   router.post('/contact', contact);
 
-  router.use('/debug', debug());
-
   return router;
 };
 
