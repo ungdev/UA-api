@@ -17,7 +17,7 @@ export enum Permissions {
 }
 
 export interface Token {
-  userId: number;
+  userId: string;
   permissions: Permissions;
 }
 
