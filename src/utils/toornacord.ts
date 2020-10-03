@@ -57,9 +57,14 @@ if (discordToken()) {
   logger.warn('Discord token not entered, you can still continue to dev !');
 }
 
-const getMember = (id: string) => {
-  return server.members.cache.find((member) => id === `${member.user.username}#${member.user.discriminator}`);
-};
+const getMemberByName = (id: string) =>
+  server.members.cache.find((member) => id === `${member.user.username}#${member.user.discriminator}`);
+
+const getChannelsByName = (name: string) => server.channels.cache.filter((channel) => channel.name === name);
+
+const getRolesByName = (name: string) => server.roles.cache.filter((role) => role.name === name);
+
+export const getDiscordTeamName = (team: string, tournamentId: string) => `${tournamentId}_${team}`;
 
 /**
  * Create a discord team with 2 channels and assign roles
@@ -67,21 +72,28 @@ const getMember = (id: string) => {
 export const createTeam = async (team: string, discordIds: Array<string>, tournamentId: string) => {
   const tournament = await fetchTournament(tournamentId);
 
-  const discordName = `${tournamentId}_${team}`;
+  const discordTeamName = getDiscordTeamName(team, tournamentId);
 
   const tournamentRole = server.roles.cache.get(tournament.discordRoleId);
 
   // Create role
   const teamRole = await server.roles.create({
     data: {
-      name: discordName,
+      name: discordTeamName,
     },
+  });
+
+  // Check if all members are in discord
+  discordIds.forEach((discordId) => {
+    if (!getMemberByName(discordId)) {
+      throw new Error('A person from the team you are trying to add is not in the server');
+    }
   });
 
   // Assign role to all the users
   await Promise.all(
     discordIds.map((discordId) => {
-      const member = getMember(discordId);
+      const member = getMemberByName(discordId);
       return member.roles.add([teamRole, tournamentRole]);
     }),
   );
@@ -91,7 +103,7 @@ export const createTeam = async (team: string, discordIds: Array<string>, tourna
 
   await Promise.all(
     channelTypes.map((channelType) =>
-      server.channels.create(discordName, {
+      server.channels.create(discordTeamName, {
         type: channelType,
         parent: tournament.discordCategoryId,
         permissionOverwrites: [
@@ -107,4 +119,16 @@ export const createTeam = async (team: string, discordIds: Array<string>, tourna
       }),
     ),
   );
+};
+
+export const deleteTeam = async (team: string, tournamentId: string) => {
+  const discordTeamName = getDiscordTeamName(team, tournamentId);
+
+  // Delete all channels
+  const channels = getChannelsByName(discordTeamName);
+  await Promise.all(channels.map((channel) => channel.delete()));
+
+  // Delete role (should always be 1)
+  const roles = getRolesByName(discordTeamName);
+  await Promise.all(roles.map((role) => role.delete()));
 };

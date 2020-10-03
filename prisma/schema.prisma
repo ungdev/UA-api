@@ -68,14 +68,15 @@ model Team {
 }
 
 model Tournament {
-  id                String @id
-  name              String @unique
-  maxPlayers        Int
-  playersPerTeam    Int
-  teams             Team[]
-  toornamentId      String
-  discordRoleId     String
-  discordCategoryId String
+  id                 String @id
+  name               String @unique
+  maxPlayers         Int
+  playersPerTeam     Int
+  teams              Team[]
+  toornamentId       String
+  discordRoleId      String
+  discordStaffRoleId String
+  discordCategoryId  String
 
   @@map("tournaments")
 }
