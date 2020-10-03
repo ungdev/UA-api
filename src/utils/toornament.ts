@@ -2,6 +2,7 @@ import axios from 'axios';
 import qs from 'querystring';
 import { ToornamentCredentials } from '../types';
 import { toornamentClientId, toornamentClientSecret, toornamentKey } from './environment';
+import logger from './log';
 
 const clientCredentials = {
   grant_type: 'client_credentials',
@@ -19,21 +20,25 @@ export const toornamentCredentials: ToornamentCredentials = {
 };
 
 export const toornamentInit = async () => {
-  const responseParticipantToken = await axios.post(
-    toornamentTokenURL,
-    qs.stringify({ ...clientCredentials, scope: 'organizer:participant' }),
-    { headers: { 'content-type': 'application/x-www-form-urlencoded' } },
-  );
-  const responseRegistrationToken = await axios.post(
-    toornamentTokenURL,
-    qs.stringify({ ...clientCredentials, scope: 'organizer:registration' }),
-    { headers: { 'content-type': 'application/x-www-form-urlencoded' } },
-  );
-  const participantToken = responseParticipantToken.data.access_token;
-  const registrationToken = responseRegistrationToken.data.access_token;
-  const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  try {
+    const responseParticipantToken = await axios.post(
+      toornamentTokenURL,
+      qs.stringify({ ...clientCredentials, scope: 'organizer:participant' }),
+      { headers: { 'content-type': 'application/x-www-form-urlencoded' } },
+    );
+    const responseRegistrationToken = await axios.post(
+      toornamentTokenURL,
+      qs.stringify({ ...clientCredentials, scope: 'organizer:registration' }),
+      { headers: { 'content-type': 'application/x-www-form-urlencoded' } },
+    );
+    const participantToken = responseParticipantToken.data.access_token;
+    const registrationToken = responseRegistrationToken.data.access_token;
+    const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-  toornamentCredentials.participantToken = participantToken;
-  toornamentCredentials.registrationToken = registrationToken;
-  toornamentCredentials.expirationDate = expirationDate;
+    toornamentCredentials.participantToken = participantToken;
+    toornamentCredentials.registrationToken = registrationToken;
+    toornamentCredentials.expirationDate = expirationDate;
+  } catch {
+    logger.warn('Could not init toornament');
+  }
 };
