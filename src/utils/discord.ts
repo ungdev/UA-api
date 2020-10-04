@@ -1,6 +1,6 @@
+import { Tournament } from '@prisma/client';
 import Discord, { GuildMember } from 'discord.js';
 import logger from './log';
-import { fetchTournament } from '../operations/tournament';
 import { discordServer, discordToken } from './environment';
 
 // Discord permission scope needed: 268436496 (manage roles, manage channels and view channels)
@@ -73,9 +73,7 @@ export const fetchDiscordParticipants = (tournamentId: string) => {
 /**
  * Create a discord team with 2 channels and assign roles
  */
-export const createTeam = async (discordTeamName: string, discordIds: Array<string>, tournamentId: string) => {
-  const tournament = await fetchTournament(tournamentId);
-
+export const createTeam = async (discordTeamName: string, discordIds: Array<string>, tournament: Tournament) => {
   const tournamentRole = server.roles.cache.get(tournament.discordRoleId);
 
   // Create role

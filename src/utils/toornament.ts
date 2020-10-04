@@ -44,10 +44,11 @@ export const toornamentInit = async () => {
 };
 
 /**
- * Fetch tournaments from
+ * Fetch tournaments from toornament
+ * Works only with team tournemants and not solo tournaments
  * @param toornamentId
  */
-export const fetchParticipants = async (toornamentId: string) => {
+export const fetchParticipantsDiscordIds = async (toornamentId: string) => {
   const toornamentParticipants: ToornamentParticipant[] = [];
   let cursor = 0;
   let totalTournaments = 0;

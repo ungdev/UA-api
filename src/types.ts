@@ -226,7 +226,7 @@ export interface ToornamentCredentials {
 }
 
 export interface ToornamentPlayerCustomFields {
-  discord_id: string;
+  discord_id?: string;
 }
 
 export interface ToornamentPlayer {
@@ -236,13 +236,4 @@ export interface ToornamentPlayer {
 export interface ToornamentParticipant {
   name: string;
   lineup: Array<ToornamentPlayer>;
-}
-
-export interface WebhookToornament {
-  name: string;
-  object_id: string;
-  object_type: string;
-  scope: string;
-  scope_id: string;
-  triggered_at: string;
 }

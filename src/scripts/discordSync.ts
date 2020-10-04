@@ -11,7 +11,7 @@ import {
   addRolesToUsers,
   deleteRolesFromUsers,
 } from '../utils/discord';
-import { toornamentInit, fetchParticipants } from '../utils/toornament';
+import { toornamentInit, fetchParticipantsDiscordIds } from '../utils/toornament';
 import logger from '../utils/log';
 
 (async () => {
@@ -20,22 +20,24 @@ import logger from '../utils/log';
 
   const tournaments = await fetchTournaments();
 
-  // Check if the toornament has a toornamentid and a discordroleid (therefore all discord ids)
+  // Check if the toornament has a toornamentid and a discordCategory (therefore its a team tournament)
   await Promise.all(
     tournaments
-      .filter((tournament) => tournament.toornamentId && tournament.discordRoleId)
+      .filter((tournament) => tournament.toornamentId && tournament.discordCategoryId)
       .map(async (tournament) => {
-        const toornamentParticipants = (await fetchParticipants(tournament.toornamentId)).map((participant) => ({
+        let toornamentParticipants = await fetchParticipantsDiscordIds(tournament.toornamentId);
+
+        toornamentParticipants = toornamentParticipants.map((participant) => ({
           ...participant,
           name: getDiscordTeamName(participant.name, tournament.id),
         }));
 
-        const discordParticipants = await fetchDiscordParticipants(tournament.id);
+        const discordParticipants = fetchDiscordParticipants(tournament.id);
 
         const teamsToAdd = differenceBy(toornamentParticipants, discordParticipants, 'name');
         const teamsToDelete = differenceBy(discordParticipants, toornamentParticipants, 'name');
 
-        await Promise.all(teamsToAdd.map((team) => createTeam(team.name, team.discordIds, tournament.id)));
+        await Promise.all(teamsToAdd.map((team) => createTeam(team.name, team.discordIds, tournament)));
         await Promise.all(teamsToDelete.map((team) => deleteTeam(team.name)));
 
         await Promise.all(
