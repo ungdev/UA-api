@@ -85,7 +85,7 @@ export const fetchParticipantsDiscordIds = async (toornamentId: string) => {
     return {
       name: participant.name,
       discordIds: participant.lineup.map((player) => {
-        if (!player.custom_fields.discord_id) {
+        if (!player.custom_fields || !player.custom_fields.discord_id) {
           throw new Error(`${participant.name} team has has a member without a discord id`);
         }
         return player.custom_fields.discord_id;
