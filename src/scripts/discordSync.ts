@@ -1,6 +1,6 @@
 import differenceBy from 'lodash.differenceby';
 import difference from 'lodash.difference';
-import { fetchTournaments } from './operations/tournament';
+import { fetchTournaments } from '../operations/tournament';
 
 import {
   createTeam,
@@ -10,9 +10,9 @@ import {
   getDiscordTeamName,
   addRolesToUsers,
   deleteRolesFromUsers,
-} from './utils/discord';
-import { toornamentInit, fetchParticipants } from './utils/toornament';
-import logger from './utils/log';
+} from '../utils/discord';
+import { toornamentInit, fetchParticipants } from '../utils/toornament';
+import logger from '../utils/log';
 
 (async () => {
   await discordLogin();

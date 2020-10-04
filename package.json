@@ -14,6 +14,7 @@
     "@types/morgan": "^1.9.1",
     "@types/split": "^1.0.0",
     "@types/swagger-ui-express": "^4.1.2",
+    "@types/ws": "^7.2.7",
     "@types/yamljs": "^0.2.31",
     "@ung/node-etupay": "^2.0.1",
     "axios": "^0.20.0",
@@ -75,6 +76,8 @@
     "doc-to-json": "swagger-cli bundle --outfile openapi.json openapi.yml",
     "postinstall": "prisma generate",
     "test": "NODE_ENV=test mocha -r ts-node/register tests/**/*.test.ts --exit",
-    "test:coverage": "nyc yarn test"
+    "test:coverage": "nyc yarn test",
+    "discord:sync:dev": "ts-node-dev --no-notify src/scripts/discordSync.ts",
+    "discord:sync:start": "node build/src/scripts/discordSync.js"
   }
 }
