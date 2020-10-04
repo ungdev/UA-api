@@ -105,19 +105,20 @@ CREATE TABLE `tournaments` (
   `name` varchar(255) NOT NULL,
   `maxPlayers` smallint(6) NOT NULL,
   `playersPerTeam` smallint(6) NOT NULL,
+  `toornamentId` varchar(25) NOT NULL,
   `discordRoleId` varchar(25) NOT NULL,
   `discordStaffRoleId` varchar(25) NOT NULL,
   `discordCategoryId` varchar(25) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`, `discordRoleId`, `discordStaffRoleId`, `discordCategoryId`) VALUES
-('csgo',	'Counter-Strike : Global Offensive',	80,	5,	'',	'',	''),
-('lol',	'League of Legends',	160,	5,	'',	'',	''),
-('rl',	'Rocket League',	48,	3,	'',	'',	''),
-('ssbu',	'Super Smash Bros Ultimate',	64,	1,	'',	'',	''),
-('tft',	'Teamfight Tactics',	16,	1,	'',	'',	''),
-('valorant',	'Valorant',	80,	5,	'',	'',	'');
+INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`, `toornamentId`, `discordRoleId`, `discordStaffRoleId`, `discordCategoryId`) VALUES
+('csgo',	'Counter-Strike : Global Offensive',	80,	5,	'',	'',	'',	''),
+('lol',	'League of Legends',	160,	5,	'',	'',	'',	''),
+('rl',	'Rocket League',	48,	3,	'',	'',	'',	''),
+('ssbu',	'Super Smash Bros Ultimate',	64,	1,	'',	'',	'',	''),
+('tft',	'Teamfight Tactics',	16,	1,	'',	'',	'',	''),
+('valorant',	'Valorant',	80,	5,	'',	'',	'',	'');
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
@@ -146,4 +147,4 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
--- 2020-10-03 18:27:49
+-- 2020-10-04 13:07:17

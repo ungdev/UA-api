@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import runToornacord from '../../utils/toornacord';
+import runToornacord from '../../utils/discord';
 import { noContent } from '../../utils/responses';
 
 export default [

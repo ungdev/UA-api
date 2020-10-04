@@ -72,6 +72,7 @@ model Tournament {
   name               String @unique
   maxPlayers         Int
   playersPerTeam     Int
+  toornamentId       String
   discordRoleId      String
   discordStaffRoleId String
   discordCategoryId  String

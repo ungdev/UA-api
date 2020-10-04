@@ -225,8 +225,17 @@ export interface ToornamentCredentials {
   apiKey: string;
 }
 
-export interface PlayerToornament {
-  custom_fields: ObjectType;
+export interface ToornamentPlayerCustomFields {
+  discord_id: string;
+}
+
+export interface ToornamentPlayer {
+  custom_fields: ToornamentPlayerCustomFields;
+}
+
+export interface ToornamentParticipant {
+  name: string;
+  lineup: Array<ToornamentPlayer>;
 }
 
 export interface WebhookToornament {

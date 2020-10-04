@@ -1,51 +1,9 @@
-import Discord from 'discord.js';
-import { Request } from 'express';
-import axios from 'axios';
-import { toornamentCredentials } from './toornament';
-import { PlayerToornament, WebhookToornament } from '../types';
+import Discord, { GuildMember } from 'discord.js';
 import logger from './log';
 import { fetchTournament } from '../operations/tournament';
 import { discordServer, discordToken } from './environment';
 
 // Discord permission scope needed: 268436496 (manage roles, manage channels and view channels)
-
-const baseURL = 'https://api.toornament.com/organizer/v2/tournaments';
-
-const fetchParticipants = async (webhookToornament: WebhookToornament) => {
-  const token = webhookToornament.object_type.startsWith('registration')
-    ? toornamentCredentials.registrationToken
-    : toornamentCredentials.participantToken;
-  const toornamentParticipants = await axios.get(
-    `${baseURL}/${webhookToornament.scope_id}/${webhookToornament.object_type}s/${webhookToornament.object_id}`,
-    {
-      headers: {
-        'X-Api-Key': toornamentCredentials.apiKey,
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
-  const discordIds = toornamentParticipants.data.lineup
-    ? toornamentParticipants.data.lineup.map((player: PlayerToornament) => player.custom_fields.discord_id)
-    : [toornamentParticipants.data.custom_fields.discord_id];
-  return { team: toornamentParticipants.data.name, discordIds };
-};
-
-export default async (request: Request) => {
-  const participants = await fetchParticipants(request.body);
-  switch (request.body.name) {
-    case 'participant.created':
-      logger.debug(`ADD ${JSON.stringify(participants)}`);
-      break;
-    case 'registration.info_updated':
-      logger.debug(`DELETE ${JSON.stringify(participants)}`);
-      break;
-    case 'participant.info_updated':
-      logger.debug(`UPDATE ${JSON.stringify(participants)}`);
-      break;
-    default:
-      break;
-  }
-};
 
 const bot = new Discord.Client();
 let server: Discord.Guild;
@@ -68,6 +26,8 @@ export const discordLogin = () =>
 
 const getMemberByName = (id: string) =>
   server.members.cache.find((member) => id === `${member.user.username}#${member.user.discriminator}`);
+
+const getMemberUsername = (member: GuildMember) => `${member.user.username}#${member.user.discriminator}`;
 
 const getChannelsByName = (name: string) => server.channels.cache.filter((channel) => channel.name === name);
 
@@ -97,13 +57,24 @@ export const getDiscordTeamName = (team: string, tournamentId: string) => {
   return name;
 };
 
+export const fetchDiscordParticipants = (tournamentId: string) => {
+  const roles = server.roles.cache.array();
+
+  // Filter the role by tournamentId_
+  // Warning the staff role mustn't be tournamentId_staff but tournamentId staff
+  return roles
+    .filter((role) => role.name.startsWith(`${tournamentId}_`))
+    .map((role) => ({
+      name: role.name,
+      discordIds: role.members.map((member) => getMemberUsername(member)),
+    }));
+};
+
 /**
  * Create a discord team with 2 channels and assign roles
  */
-export const createTeam = async (team: string, discordIds: Array<string>, tournamentId: string) => {
+export const createTeam = async (discordTeamName: string, discordIds: Array<string>, tournamentId: string) => {
   const tournament = await fetchTournament(tournamentId);
-
-  const discordTeamName = getDiscordTeamName(team, tournamentId);
 
   const tournamentRole = server.roles.cache.get(tournament.discordRoleId);
 
@@ -118,7 +89,7 @@ export const createTeam = async (team: string, discordIds: Array<string>, tourna
   // Check if all members are in discord
   discordIds.forEach((discordId) => {
     if (!getMemberByName(discordId)) {
-      throw new Error('A person from the team you are trying to add is not in the server');
+      logger.warn(`${discordId} isn't on the discord`);
     }
   });
 
@@ -128,7 +99,7 @@ export const createTeam = async (team: string, discordIds: Array<string>, tourna
       .filter((discordId) => getMemberByName(discordId))
       .map((discordId) => {
         const member = getMemberByName(discordId);
-        logger.debug(`Asign ${teamRole.name} role to ${discordId}`);
+        logger.debug(`Assign ${teamRole.name} role to ${discordId}`);
 
         return member.roles.add([teamRole, tournamentRole]);
       }),
@@ -168,9 +139,7 @@ export const createTeam = async (team: string, discordIds: Array<string>, tourna
   );
 };
 
-export const deleteTeam = async (team: string, tournamentId: string) => {
-  const discordTeamName = getDiscordTeamName(team, tournamentId);
-
+export const deleteTeam = async (discordTeamName: string) => {
   // Delete all channels
   const channels = getChannelsByName(discordTeamName);
   await Promise.all(
@@ -187,5 +156,55 @@ export const deleteTeam = async (team: string, tournamentId: string) => {
       logger.debug(`Delete role ${role.name}`);
       return role.delete();
     }),
+  );
+};
+
+/**
+ *
+ * @param discordTeamName discord team such as lol_awesome-team
+ * @param discordIds array of discord username such as Wow#1584
+ */
+export const addRolesToUsers = (discordTeamName: string, discordIds: Array<string>) => {
+  const roles = getRolesByName(discordTeamName);
+
+  // Check if all members are in discord
+  discordIds.forEach((discordId) => {
+    if (!getMemberByName(discordId)) {
+      logger.warn(`${discordId} isn't on the discord`);
+    }
+  });
+
+  return Promise.all(
+    roles.map((role) =>
+      Promise.all(
+        discordIds
+          .filter((discordId) => getMemberByName(discordId))
+          .map((discordId) => {
+            const member = getMemberByName(discordId);
+            logger.debug(`Assign ${role.name} role to ${discordId}`);
+
+            return member.roles.add(role);
+          }),
+      ),
+    ),
+  );
+};
+
+export const deleteRolesFromUsers = (discordTeamName: string, discordIds: Array<string>) => {
+  const roles = getRolesByName(discordTeamName);
+
+  return Promise.all(
+    roles.map((role) =>
+      Promise.all(
+        discordIds
+          .filter((discordId) => getMemberByName(discordId))
+          .map((discordId) => {
+            const member = getMemberByName(discordId);
+            logger.debug(`Remove ${role.name} role to ${discordId}`);
+
+            return member.roles.remove(role);
+          }),
+      ),
+    ),
   );
 };

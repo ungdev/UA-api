@@ -1,6 +1,6 @@
 import axios from 'axios';
 import qs from 'querystring';
-import { ToornamentCredentials } from '../types';
+import { ToornamentCredentials, ToornamentParticipant } from '../types';
 import { toornamentClientId, toornamentClientSecret, toornamentKey } from './environment';
 import logger from './log';
 
@@ -41,4 +41,26 @@ export const toornamentInit = async () => {
   } catch {
     logger.warn('Could not init toornament');
   }
+};
+
+/**
+ * Fetch tournaments from
+ * @param toornamentId
+ */
+export const fetchParticipants = async (toornamentId: string) => {
+  const response = await axios.get<ToornamentParticipant[]>(
+    `https://api.toornament.com/organizer/v2/tournaments/${toornamentId}/participants`,
+    {
+      headers: {
+        'X-Api-Key': toornamentCredentials.apiKey,
+        Range: 'participants=0-49',
+        Authorization: `Bearer ${toornamentCredentials.participantToken}`,
+      },
+    },
+  );
+
+  return response.data.map((participant: ToornamentParticipant) => ({
+    name: participant.name,
+    discordIds: participant.lineup.map((player) => player.custom_fields.discord_id),
+  }));
 };
