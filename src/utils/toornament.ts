@@ -77,8 +77,19 @@ export const fetchParticipantsDiscordIds = async (toornamentId: string) => {
     cursor += 50;
   } while (cursor < totalTournaments);
 
-  return toornamentParticipants.map((participant: ToornamentParticipant) => ({
-    name: participant.name,
-    discordIds: participant.lineup.map((player) => player.custom_fields.discord_id),
-  }));
+  return toornamentParticipants.map((participant: ToornamentParticipant) => {
+    if (!participant.lineup) {
+      throw new Error(`${toornamentId} is a solo tournament and s incompatible with team discord ids`);
+    }
+
+    return {
+      name: participant.name,
+      discordIds: participant.lineup.map((player) => {
+        if (!player.custom_fields.discord_id) {
+          throw new Error(`${participant.name} team has has a member without a discord id`);
+        }
+        return player.custom_fields.discord_id;
+      }),
+    };
+  });
 };
