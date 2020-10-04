@@ -48,18 +48,35 @@ export const toornamentInit = async () => {
  * @param toornamentId
  */
 export const fetchParticipants = async (toornamentId: string) => {
-  const response = await axios.get<ToornamentParticipant[]>(
-    `https://api.toornament.com/organizer/v2/tournaments/${toornamentId}/participants`,
-    {
-      headers: {
-        'X-Api-Key': toornamentCredentials.apiKey,
-        Range: 'participants=0-49',
-        Authorization: `Bearer ${toornamentCredentials.participantToken}`,
-      },
-    },
-  );
+  const toornamentParticipants: ToornamentParticipant[] = [];
+  let cursor = 0;
+  let totalTournaments = 0;
 
-  return response.data.map((participant: ToornamentParticipant) => ({
+  do {
+    logger.silly(`Fetch toornaments participants. Page: ${cursor / 50 + 1}`);
+    const response = await axios.get<ToornamentParticipant[]>(
+      `https://api.toornament.com/organizer/v2/tournaments/${toornamentId}/participants`,
+      {
+        headers: {
+          'X-Api-Key': toornamentCredentials.apiKey,
+          Range: `participants=${cursor}-${cursor + 49}`,
+          Authorization: `Bearer ${toornamentCredentials.participantToken}`,
+        },
+      },
+    );
+
+    toornamentParticipants.push(...response.data);
+
+    // Example of this header: participants 0-1/2
+    // Capture the last number to get the total number of tournaments
+    const contentRange: string = response.headers['content-range'];
+    totalTournaments = Number(contentRange.match(/\d+$/)[0]);
+
+    // You can only fetch tournaments 50 by 50
+    cursor += 50;
+  } while (cursor < totalTournaments);
+
+  return toornamentParticipants.map((participant: ToornamentParticipant) => ({
     name: participant.name,
     discordIds: participant.lineup.map((player) => player.custom_fields.discord_id),
   }));

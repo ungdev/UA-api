@@ -36,6 +36,7 @@
     "radix": "off",
     "import/prefer-default-export": "off",
     "no-shadow": "off",
+    "no-await-in-loop": "off",
     "no-useless-constructor": "off",
     "spaced-comment": ["error", "always", { "exceptions": ["*"] }],
     "unicorn/no-reduce": "off",
