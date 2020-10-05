@@ -226,7 +226,7 @@ export interface ToornamentCredentials {
 }
 
 export interface ToornamentPlayerCustomFields {
-  discord_id?: string;
+  discord?: string;
 }
 
 export interface ToornamentPlayer {
