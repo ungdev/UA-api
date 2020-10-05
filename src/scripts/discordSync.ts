@@ -57,4 +57,9 @@ import logger from '../utils/log';
         );
       }),
   );
-})().catch(logger.error);
+
+  process.exit(0);
+})().catch((error) => {
+  logger.error(error);
+  process.exit(1);
+});
