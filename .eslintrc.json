@@ -44,6 +44,7 @@
     "unicorn/consistent-function-scoping": "off",
     "unicorn/no-fn-reference-in-iterator": "off",
     "security/detect-object-injection": "off",
+    "unicorn/no-process-exit": "off",
     "unicorn/prevent-abbreviations": [
       "error",
       {
