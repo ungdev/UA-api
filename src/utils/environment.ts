@@ -52,3 +52,7 @@ export const toornamentKey = (): string => process.env.TOORNAMENT_KEY;
 export const datadogKey = (): string => process.env.DATADOG_KEY;
 export const datadogProduction = (): string => process.env.DATADOG_PRODUCTION;
 export const datadogDevelopment = (): string => process.env.DATADOG_DEVELOPMENT;
+
+// Discord
+export const discordToken = (): string => process.env.DISCORD_TOKEN;
+export const discordServer = (): string => process.env.DISCORD_SERVER;

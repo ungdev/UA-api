@@ -36,6 +36,7 @@
     "radix": "off",
     "import/prefer-default-export": "off",
     "no-shadow": "off",
+    "no-await-in-loop": "off",
     "no-useless-constructor": "off",
     "spaced-comment": ["error", "always", { "exceptions": ["*"] }],
     "unicorn/no-reduce": "off",
@@ -43,6 +44,7 @@
     "unicorn/consistent-function-scoping": "off",
     "unicorn/no-fn-reference-in-iterator": "off",
     "security/detect-object-injection": "off",
+    "unicorn/no-process-exit": "off",
     "unicorn/prevent-abbreviations": [
       "error",
       {
