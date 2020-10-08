@@ -3,8 +3,8 @@ import validateBody from '../../middlewares/validateBody';
 import { ObjectType, Setting } from '../../types';
 import database from '../../utils/database';
 
-import { noContent, success, badRequest } from '../../utils/responses';
-import { sendContactMessage } from '../../utils/slack';
+import { noContent, success, badRequest, unknown } from '../../utils/responses';
+import { sendSlackContact } from '../../utils/slack';
 import { contactValidator } from '../../validator';
 
 export const status = async (request: Request, response: Response) => {
@@ -24,9 +24,9 @@ export const contact = [
   validateBody(contactValidator),
   // Controller
   async (request: Request, response: Response) => {
-    const slackResponse = await sendContactMessage(request.body);
-    if (slackResponse.status !== 200) {
-      return badRequest(response);
+    const slackResponse = await sendSlackContact(request.body);
+    if (slackResponse.status !== 200 || slackResponse.data.ok === false) {
+      return unknown(response);
     }
     return noContent(response);
   },
