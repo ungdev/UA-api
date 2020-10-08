@@ -3,7 +3,7 @@ import validateBody from '../../middlewares/validateBody';
 import { ObjectType, Setting } from '../../types';
 import database from '../../utils/database';
 
-import { noContent, success, badRequest, unknown } from '../../utils/responses';
+import { noContent, success, unknown } from '../../utils/responses';
 import { sendSlackContact } from '../../utils/slack';
 import { contactValidator } from '../../validator';
 
