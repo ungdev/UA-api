@@ -10,8 +10,6 @@ import {
   getDiscordTeamName,
   addRolesToUsers,
   deleteRolesFromUsers,
-  addTournamentRoleToUsers,
-  deleteTournamentRoleToUsers,
   fetchDiscordSoloParticipants,
 } from '../utils/discord';
 import { toornamentInit, fetchParticipantsDiscordIds } from '../utils/toornament';
@@ -72,14 +70,8 @@ import { DiscordParticipants } from '../types';
             if (discordParticipant) {
               const usersToAdd = difference(toornamentParticipant.discordIds, discordParticipant.discordIds);
               const usersToDelete = difference(discordParticipant.discordIds, toornamentParticipant.discordIds);
-
-              if (!isSoloTournament) {
-                await addRolesToUsers(discordParticipant.name, usersToAdd);
-                await deleteRolesFromUsers(discordParticipant.name, usersToDelete);
-              } else {
-                await addTournamentRoleToUsers(tournament.discordRoleId, usersToAdd);
-                await deleteTournamentRoleToUsers(tournament.discordRoleId, usersToDelete);
-              }
+              await addRolesToUsers(discordParticipant.name, tournament.discordRoleId, usersToAdd);
+              await deleteRolesFromUsers(discordParticipant.name, tournament.discordRoleId, usersToDelete);
             }
           }),
         );
