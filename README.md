@@ -7,7 +7,7 @@ API web à destination des services de l'UTT Arena
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/) (_LTS Version prefered_)
+- [Node.js](https://nodejs.org/)
 - [yarn](https://yarnpkg.com/)
 
 ## Installation
