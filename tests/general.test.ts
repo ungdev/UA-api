@@ -25,7 +25,9 @@ describe('General API', () => {
   });
   describe('POST /contact', () => {
     beforeEach(() => {
-      mock.onPost(/https:\/\/hooks\.slack\.com\/services\/\w+\/\w+\/\w+/).reply(200, 'ok');
+      mock.onPost('https://slack.com/api/chat.postMessage').reply(200, {
+        ok: true,
+      });
     });
 
     it('should send the message with a 204', async () => {
