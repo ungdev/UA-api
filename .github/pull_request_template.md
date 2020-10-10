@@ -3,3 +3,11 @@
 -
 -
 -
+
+### Variables d'environnements changées
+
+Exemple: DB_HOST -> DATABASE_HOST
+
+-
+-
+-
