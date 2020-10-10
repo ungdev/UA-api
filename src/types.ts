@@ -235,5 +235,11 @@ export interface ToornamentPlayer {
 
 export interface ToornamentParticipant {
   name: string;
+  custom_fields?: ToornamentPlayerCustomFields;
   lineup: Array<ToornamentPlayer>;
+}
+
+export interface DiscordParticipants {
+  name: string;
+  discordIds: string[];
 }

@@ -31,7 +31,7 @@ const getMemberUsername = (member: GuildMember) => `${member.user.username}#${me
 
 const getChannelsByName = (name: string) => server.channels.cache.filter((channel) => channel.name === name);
 
-const getRolesByName = (name: string) => server.roles.cache.filter((role) => role.name === name);
+const getRolesByName = (name: string) => server.roles.cache.filter((role) => role.name === name).array();
 
 /**
  * Get the self bot role id it is equal at the bot name and never changes
@@ -71,11 +71,18 @@ export const fetchDiscordParticipants = (tournamentId: string) => {
 };
 
 /**
+ * Fetch all users with the tournament's participant role
+ * @param tournamentRoleId Tournament discord role id
+ */
+export const fetchDiscordSoloParticipants = (tournamentRoleId: string) => {
+  const tournamentRole = server.roles.cache.get(tournamentRoleId);
+  return tournamentRole.members.map((member) => getMemberUsername(member));
+};
+
+/**
  * Create a discord team with 2 channels and assign roles
  */
 export const createTeam = async (discordTeamName: string, discordIds: Array<string>, tournament: Tournament) => {
-  const tournamentRole = server.roles.cache.get(tournament.discordRoleId);
-
   // Create role
   logger.debug(`Create role ${discordTeamName}`);
   const teamRole = await server.roles.create({
@@ -83,25 +90,6 @@ export const createTeam = async (discordTeamName: string, discordIds: Array<stri
       name: discordTeamName,
     },
   });
-
-  // Check if all members are in discord
-  discordIds.forEach((discordId) => {
-    if (!getMemberByName(discordId)) {
-      logger.warn(`${discordId} isn't on the discord`);
-    }
-  });
-
-  // Assign role to all the users who has joined the server
-  await Promise.all(
-    discordIds
-      .filter((discordId) => getMemberByName(discordId))
-      .map((discordId) => {
-        const member = getMemberByName(discordId);
-        logger.debug(`Assign ${teamRole.name} role to ${discordId}`);
-
-        return member.roles.add([teamRole, tournamentRole]);
-      }),
-  );
 
   // Create channels
   const channelTypes: Array<'text' | 'voice'> = ['text', 'voice'];
@@ -158,13 +146,14 @@ export const deleteTeam = async (discordTeamName: string) => {
 };
 
 /**
- *
+ * Add the tournmament role to each register user
  * @param discordTeamName discord team such as lol_awesome-team
- * @param discordIds array of discord username such as Wow#1584
+ * @param roleId Tournament discord role id
+ * @param discordIds Array of discord ID (i.e. johndoe#123)
  */
-export const addRolesToUsers = (discordTeamName: string, discordIds: Array<string>) => {
+export const addRolesToUsers = (discordTeamName: string, roleId: string, discordIds: Array<string>) => {
   const roles = getRolesByName(discordTeamName);
-
+  const tournamentRole = server.roles.cache.get(roleId);
   // Check if all members are in discord
   discordIds.forEach((discordId) => {
     if (!getMemberByName(discordId)) {
@@ -173,36 +162,35 @@ export const addRolesToUsers = (discordTeamName: string, discordIds: Array<strin
   });
 
   return Promise.all(
-    roles.map((role) =>
-      Promise.all(
-        discordIds
-          .filter((discordId) => getMemberByName(discordId))
-          .map((discordId) => {
-            const member = getMemberByName(discordId);
-            logger.debug(`Assign ${role.name} role to ${discordId}`);
+    discordIds
+      .filter((discordId) => getMemberByName(discordId))
+      .map((discordId) => {
+        const member = getMemberByName(discordId);
+        logger.debug(`Assign roles to ${discordId}`);
 
-            return member.roles.add(role);
-          }),
-      ),
-    ),
+        return member.roles.add([...roles, tournamentRole]);
+      }),
   );
 };
 
-export const deleteRolesFromUsers = (discordTeamName: string, discordIds: Array<string>) => {
+/**
+ * Remove the tournmament role to each unregister user
+ * @param discordTeamName discord team such as lol_awesome-team
+ * @param roleId Tournament discord role id
+ * @param discordIds Array of discord ID (i.e. johndoe#123)
+ */
+export const deleteRolesFromUsers = (discordTeamName: string, roleId: string, discordIds: Array<string>) => {
   const roles = getRolesByName(discordTeamName);
+  const tournamentRole = server.roles.cache.get(roleId);
 
   return Promise.all(
-    roles.map((role) =>
-      Promise.all(
-        discordIds
-          .filter((discordId) => getMemberByName(discordId))
-          .map((discordId) => {
-            const member = getMemberByName(discordId);
-            logger.debug(`Remove ${role.name} role to ${discordId}`);
+    discordIds
+      .filter((discordId) => getMemberByName(discordId))
+      .map((discordId) => {
+        const member = getMemberByName(discordId);
+        logger.debug(`Remove roles to ${discordId}`);
 
-            return member.roles.remove(role);
-          }),
-      ),
-    ),
+        return member.roles.remove([...roles, tournamentRole]);
+      }),
   );
 };
