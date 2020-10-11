@@ -16,7 +16,7 @@ import { initSentryExpress } from './utils/sentry';
 
 const app = express();
 
-// Loads logging middleware with more verbosity if in dev environment, and enable datadog production environment, and erro reporting
+// Loads logging middleware with more verbosity if in dev environment, and enable datadog production environment, and error reporting
 if (!isTest()) {
   app.use(morgan());
   initSentryExpress(app);
