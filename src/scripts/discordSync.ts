@@ -1,3 +1,4 @@
+import Sentry from '@sentry/node';
 import differenceBy from 'lodash.differenceby';
 import difference from 'lodash.difference';
 import { fetchTournaments } from '../operations/tournament';
@@ -15,8 +16,10 @@ import {
 import { toornamentInit, fetchParticipantsDiscordIds } from '../utils/toornament';
 import logger from '../utils/log';
 import { DiscordParticipants } from '../types';
+import { initSentryNode } from '../utils/sentry';
 
 (async () => {
+  initSentryNode();
   await discordLogin();
   await toornamentInit();
 
@@ -80,5 +83,6 @@ import { DiscordParticipants } from '../types';
   process.exit(0);
 })().catch((error) => {
   logger.error(error);
+  Sentry.captureException(error);
   process.exit(1);
 });

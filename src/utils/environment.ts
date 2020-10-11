@@ -16,6 +16,9 @@ export const jwtExpires = (): string => process.env.JWT_EXPIRES;
 export const slackToken = (): string => process.env.SLACK_TOKEN;
 export const slackContactChannel = (): string => process.env.SLACK_CONTACT_CHANNEL;
 
+// Environment
+export const sentryUrl = (): string => process.env.SENTRY_URL;
+
 // Database
 export const databaseHost = (): string => process.env.DATABASE_HOST;
 export const databasePort = (): number => Number.parseInt(process.env.DATABASE_PORT);

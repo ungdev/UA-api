@@ -1,8 +1,9 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, ErrorRequestHandler, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import swagger from 'swagger-ui-express';
 import bodyParser from 'body-parser';
+import * as Sentry from '@sentry/node';
 
 import { notFound } from './utils/responses';
 import { Error } from './types';
@@ -11,12 +12,14 @@ import { checkJson } from './middlewares/checkJson';
 import swaggerDocument from '../openapi.json';
 import { morgan } from './utils/log';
 import { isTest } from './utils/environment';
+import { initSentryExpress } from './utils/sentry';
 
 const app = express();
 
-// Loads logging middleware with more verbosity if in dev environment, and enable datadog production environment
+// Loads logging middleware with more verbosity if in dev environment, and enable datadog production environment, and erro reporting
 if (!isTest()) {
   app.use(morgan());
+  initSentryExpress(app);
 }
 
 // Security middlewares
@@ -36,5 +39,17 @@ app.use(routes());
 
 // Not found
 app.use((request: Request, response: Response) => notFound(response, Error.RouteNotFound));
+
+app.use(Sentry.Handlers.errorHandler());
+
+// Optional fallthrough error handler
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((error: ErrorRequestHandler, request: Request, response: Response, next: NextFunction) => {
+  // The error id is attached to `res.sentry` to be returned
+  // and optionally displayed to the user for support.
+  response.statusCode = 500;
+  // @ts-ignore
+  response.end(`${response.sentry}\n`);
+});
 
 export default app;
