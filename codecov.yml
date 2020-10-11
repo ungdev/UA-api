@@ -1,0 +1,9 @@
+coverage:
+  notify:
+    slack:
+      default:
+        url: 'secret:Xm7ZVs2S8Ha+S0T8TRzykW4YXRxL9m6yLA6F610kGcZW+Nya2+459sIfBNZvqdLpNaCWuVDTpbBCFSBWgnDSpMnhtQyewgYvw+HRN5INiS0e/xIgbvifxEU4n16hjYsnPfq8ZvQ7B+mLdNrwvIN7WBGRu5BuWAdhFpXbXXtKsc4='
+        only_pulls: false
+        branches:
+          - 'master'
+          - 'staging'
