@@ -1,7 +1,7 @@
 language: node_js
 
 node_js:
-  - 'lts/*'
+  - 'node'
 
 services:
   - mysql
@@ -9,7 +9,7 @@ services:
 branches:
   only:
     - master
-    - dev
+    - staging
 
 cache: yarn
 
@@ -39,7 +39,7 @@ deploy:
     app: api-dev
     token: $OPENSHIFT_TOKEN
     on:
-      branch: dev
+      branch: staging
     edge: true
   - provider: openshift
     server: $OPENSHIFT_SERVER

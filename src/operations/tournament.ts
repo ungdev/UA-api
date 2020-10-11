@@ -7,6 +7,10 @@ export const fetchTournaments = (): Promise<Tournament[]> => {
   return database.tournament.findMany();
 };
 
+export const fetchTournament = (id: string) => {
+  return database.tournament.findOne({ where: { id } });
+};
+
 export const fetchTournamentsWithLockedTeams = async (): Promise<TournamentWithLockedTeams[]> => {
   // fetch all tournaments
   const tournaments: Tournament[] = await fetchTournaments();

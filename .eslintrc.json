@@ -26,6 +26,7 @@
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
     "eol-last": "off",
     "no-console": "error",
     "no-alert": "error",
@@ -36,6 +37,7 @@
     "radix": "off",
     "import/prefer-default-export": "off",
     "no-shadow": "off",
+    "no-await-in-loop": "off",
     "no-useless-constructor": "off",
     "spaced-comment": ["error", "always", { "exceptions": ["*"] }],
     "unicorn/no-reduce": "off",
@@ -43,6 +45,7 @@
     "unicorn/consistent-function-scoping": "off",
     "unicorn/no-fn-reference-in-iterator": "off",
     "security/detect-object-injection": "off",
+    "unicorn/no-process-exit": "off",
     "unicorn/prevent-abbreviations": [
       "error",
       {

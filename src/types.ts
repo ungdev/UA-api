@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { Request } from 'express';
 
 /**
@@ -17,7 +18,7 @@ export enum Permissions {
 }
 
 export interface Token {
-  userId: number;
+  userId: string;
   permissions: Permissions;
 }
 
@@ -184,6 +185,8 @@ export enum Error {
   // 400
   BadRequest = 'Requête invalide',
   AlreadyInTeam = 'Vous êtes déjà dans une équipe',
+  LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
+  ShopNotAllowed = 'La billetterie est fermée',
 
   // 401
   Unauthenticated = "Vous n'êtes pas authentifié",
@@ -213,3 +216,30 @@ export enum Error {
 
 // Alias type for Object
 export type ObjectType = Record<string, unknown>;
+
+// Toornament Credentials
+export interface ToornamentCredentials {
+  participantToken: string;
+  registrationToken: string;
+  expirationDate: Date;
+  apiKey: string;
+}
+
+export interface ToornamentPlayerCustomFields {
+  discord?: string;
+}
+
+export interface ToornamentPlayer {
+  custom_fields: ToornamentPlayerCustomFields;
+}
+
+export interface ToornamentParticipant {
+  name: string;
+  custom_fields?: ToornamentPlayerCustomFields;
+  lineup: Array<ToornamentPlayer>;
+}
+
+export interface DiscordParticipants {
+  name: string;
+  discordIds: string[];
+}

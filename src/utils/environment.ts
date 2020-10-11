@@ -13,7 +13,11 @@ export const jwtSecret = (): string => process.env.JWT_SECRET;
 export const jwtExpires = (): string => process.env.JWT_EXPIRES;
 
 // Slack
-export const slackContactWebhook = (): string => process.env.SLACK_CONTACT_WEBHOOK;
+export const slackToken = (): string => process.env.SLACK_TOKEN;
+export const slackContactChannel = (): string => process.env.SLACK_CONTACT_CHANNEL;
+
+// Environment
+export const sentryUrl = (): string => process.env.SENTRY_URL;
 
 // Database
 export const databaseHost = (): string => process.env.DATABASE_HOST;
@@ -52,3 +56,7 @@ export const toornamentKey = (): string => process.env.TOORNAMENT_KEY;
 export const datadogKey = (): string => process.env.DATADOG_KEY;
 export const datadogProduction = (): string => process.env.DATADOG_PRODUCTION;
 export const datadogDevelopment = (): string => process.env.DATADOG_DEVELOPMENT;
+
+// Discord
+export const discordToken = (): string => process.env.DISCORD_TOKEN;
+export const discordServer = (): string => process.env.DISCORD_SERVER;

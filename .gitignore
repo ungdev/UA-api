@@ -6,6 +6,7 @@
 # production
 /build
 .nyc_output
+yarn-error.log
 
 # misc
 .DS_Store
