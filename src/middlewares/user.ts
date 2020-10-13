@@ -1,7 +1,11 @@
 import { NextFunction, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import log from '../utils/log';
-import { UserRequest, Error } from '../types';
+import { UserRequest, Error, DecodedToken } from '../types';
 import { badRequest } from '../utils/responses';
+import { getToken } from '../utils/user';
+import { jwtSecret } from '../utils/environment';
+import { fetchUser } from '../operations/user';
 
 // Check the user's team. If he's in one, it will return an error.
 export const isNotInATeam = async (request: UserRequest, response: Response, next: NextFunction) => {
@@ -12,4 +16,15 @@ export const isNotInATeam = async (request: UserRequest, response: Response, nex
   }
 
   return next;
+};
+
+export const initUserRequest = async (request: UserRequest, responce: Response, next: NextFunction): Promise<void> => {
+  const token = getToken(request);
+
+  if (token) {
+    const decoded = jwt.verify(token, jwtSecret()) as DecodedToken;
+    const databaseUser = await fetchUser(decoded.userId);
+    request.user = databaseUser;
+  }
+  return next();
 };

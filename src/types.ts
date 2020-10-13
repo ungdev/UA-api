@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import { Request } from 'express';
+import { User } from '@prisma/client';
 
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
@@ -17,7 +18,7 @@ export enum Permissions {
   Admin = 'admin',
 }
 
-export interface Token {
+export interface DecodedToken {
   userId: string;
   permissions: Permissions;
 }
@@ -60,26 +61,6 @@ export interface Tournament {
   name: string;
   maxPlayers: number;
   playersPerTeam: number;
-}
-
-export interface User {
-  id: string;
-  username?: string;
-  firstname: string;
-  lastname: string;
-  email?: string;
-  password?: string;
-  type: UserType;
-  permissions?: string;
-  place?: string;
-  scannedAt?: string;
-  registerToken?: string;
-  resetToken?: string;
-  discordId?: string;
-  teamId?: string;
-  askingTeamId?: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export interface Team {
