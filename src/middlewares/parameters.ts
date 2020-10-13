@@ -5,7 +5,6 @@ import { getToken } from '../utils/user';
 import { jwtSecret } from '../utils/environment';
 import { Token, UserRequest } from '../types';
 import { fetchTeam } from '../operations/team';
-import { fetchUser } from '../operations/user';
 
 // Checks the user is the captain of the team. If not, it will return an error
 export const isCaptainOfTeamId = async (
@@ -42,14 +41,10 @@ export const isUserId = (request: UserRequest, response: Response, next: NextFun
 
 // Checks the user is the captain of the team. If not, it will return an error
 export const isInTeamId = async (request: UserRequest, response: Response, next: NextFunction): Promise<void> => {
-  const token = getToken(request);
-
-  if (token) {
-    const decoded = jwt.verify(token, jwtSecret()) as Token;
-    const { userId } = decoded;
-    const user = await fetchUser(userId);
+  const { user } = request;
+  if (user) {
     // Compare user's teamId and teamId of the request
-    if (user && request.params.teamId === user.teamId) {
+    if (request.params.teamId === user.teamId) {
       return next();
     }
     return unauthorized(response);
