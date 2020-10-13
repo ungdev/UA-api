@@ -20,7 +20,6 @@ export enum Permissions {
 
 export interface DecodedToken {
   userId: string;
-  permissions: Permissions;
 }
 
 export interface EmailAttachment {

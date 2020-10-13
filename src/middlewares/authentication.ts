@@ -1,9 +1,7 @@
 import { Response, NextFunction, Request } from 'express';
-import jwt from 'jsonwebtoken';
 import { getToken } from '../utils/user';
 import { unauthorized, unauthenticated } from '../utils/responses';
-import { Token, Permissions, UserRequest } from '../types';
-import { jwtSecret } from '../utils/environment';
+import { Permissions, UserRequest } from '../types';
 
 // Checks the user is authenticated. If not, it will return an error
 export const isAuthenticated = () => async (
@@ -25,14 +23,10 @@ export const hasPermission = (permissions: Permissions) => async (
   response: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const token = getToken(request);
+  const { user } = request;
 
-  if (token) {
-    const decoded = jwt.verify(token, jwtSecret()) as Token;
-
-    request.user.permissions = decoded.permissions;
-
-    if (decoded.permissions === permissions || decoded.permissions === Permissions.Admin) {
+  if (user) {
+    if (user.permissions === permissions || user.permissions === Permissions.Admin) {
       return next();
     }
     return unauthorized(response);
