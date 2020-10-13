@@ -13,16 +13,13 @@ export const isCaptainOfTeamId = async (
   response: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const token = getToken(request);
-  if (token) {
-    const decoded = jwt.verify(token, jwtSecret()) as Token;
-    const { userId } = decoded;
-
+  const { user } = request;
+  if (user) {
     const { teamId } = request.user;
     const team = await fetchTeam(teamId);
     const { captainId } = team;
 
-    if (userId === captainId) {
+    if (user.id === captainId) {
       return next();
     }
     return unauthorized(response);
