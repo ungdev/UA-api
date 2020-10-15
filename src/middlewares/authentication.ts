@@ -6,11 +6,7 @@ import { Token, Permissions, UserRequest } from '../types';
 import { jwtSecret } from '../utils/environment';
 
 // Checks the user is authenticated. If not, it will return an error
-export const isAuthenticated = () => async (
-  request: Request,
-  response: Response,
-  next: NextFunction,
-): Promise<void> => {
+export const isAuthenticated = () => (request: Request, response: Response, next: NextFunction) => {
   const token = getToken(request);
   if (token) {
     return next();
@@ -20,11 +16,11 @@ export const isAuthenticated = () => async (
 };
 
 // Checks the user has the given permission. If not, it will return an error
-export const hasPermission = (permissions: Permissions) => async (
+export const hasPermission = (permissions: Permissions) => (
   request: UserRequest,
   response: Response,
   next: NextFunction,
-): Promise<void> => {
+) => {
   const token = getToken(request);
 
   if (token) {

@@ -12,7 +12,7 @@ export const discordLogin = () =>
   new Promise((resolve) => {
     if (discordToken()) {
       bot.login(discordToken());
-      bot.on('ready', async () => {
+      bot.on('ready', () => {
         logger.info('Bot ready');
         server = bot.guilds.cache.get(discordServer());
 
