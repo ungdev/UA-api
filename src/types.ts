@@ -167,6 +167,8 @@ export enum Error {
   AlreadyInTeam = 'Vous êtes déjà dans une équipe',
   LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
   ShopNotAllowed = 'La billetterie est fermée',
+  EmailAlreadyTaken = 'Cet email est déjà utilisé',
+  UsernameAlreadyTaken = 'Ce pseudo est déjà utilisé',
 
   // 401
   Unauthenticated = "Vous n'êtes pas authentifié",

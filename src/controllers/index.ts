@@ -2,6 +2,7 @@ import { Router } from 'express';
 import tournaments from './tournaments';
 import { status, contact } from './general';
 import users from './users';
+import auth from './auth';
 
 const routes = (): Router => {
   const router = Router();
@@ -17,6 +18,9 @@ const routes = (): Router => {
 
   // Route contact
   router.post('/contact', contact);
+
+  // Authentication routes
+  router.use('/auth', auth());
 
   return router;
 };

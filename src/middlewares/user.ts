@@ -18,6 +18,7 @@ export const isNotInATeam = async (request: UserRequest, response: Response, nex
   return next;
 };
 
+// Initialize the UserRequest with user informations fetched from database.
 export const initUserRequest = async (request: UserRequest, responce: Response, next: NextFunction): Promise<void> => {
   const token = getToken(request);
 
