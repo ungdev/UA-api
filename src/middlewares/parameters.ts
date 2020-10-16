@@ -3,7 +3,7 @@ import { unauthenticated, unauthorized } from '../utils/responses';
 import { UserRequest } from '../types';
 import { fetchTeam } from '../operations/team';
 
-// Checks the user is the captain of the team. If not, it will return an error
+// Checks if the user is the captain of the team specified in the URL. If not, it will return an error
 export const isCaptainOfTeamId = async (
   request: UserRequest,
   response: Response,
@@ -40,7 +40,7 @@ export const isInTeamId = (request: UserRequest, response: Response, next: NextF
   const { user } = request;
   if (user) {
     // Compare user's teamId and teamId of the request
-    if (request.params.teamId === user.teamId) {
+    if (user.teamId === request.params.teamId) {
       return next();
     }
     return unauthorized(response);

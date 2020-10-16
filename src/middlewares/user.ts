@@ -15,7 +15,7 @@ export const isNotInATeam = (request: UserRequest, response: Response, next: Nex
     return badRequest(response, Error.AlreadyInTeam);
   }
 
-  return next;
+  return next();
 };
 
 export const initUserRequest = async (request: UserRequest, responce: Response, next: NextFunction): Promise<void> => {
