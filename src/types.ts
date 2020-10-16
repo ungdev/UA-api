@@ -169,6 +169,13 @@ export enum Error {
   ShopNotAllowed = 'La billetterie est fermée',
   EmailAlreadyTaken = 'Cet email est déjà utilisé',
   UsernameAlreadyTaken = 'Ce pseudo est déjà utilisé',
+  MissingFirstname = 'Le prénom est manquant',
+  MissingLastname = 'Le nom de famille est manquant',
+  MissingEmail = "L'email est manquant",
+  MissingPassword = 'Le mot de passe est manquant',
+  MissingUserType = "Le type d'utilisateur est manquant",
+  InvalidEmail = 'Le format de l adresse mail n est pas valide',
+  InvalidUserType = 'Le type d utilisateur n est pas valide',
 
   // 401
   Unauthenticated = "Vous n'êtes pas authentifié",

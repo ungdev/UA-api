@@ -1,9 +1,8 @@
 import { Response, NextFunction, Request } from 'express';
 import { getToken } from '../utils/user';
-import { unauthorized, unauthenticated, badRequest, success } from '../utils/responses';
-import { Permissions, UserRequest, Error } from '../types';
+import { unauthorized, unauthenticated, badRequest } from '../utils/responses';
+import { Permissions, UserRequest, Error, UserType } from '../types';
 import { fetchUsers } from '../operations/user';
-import log from '../utils/log';
 
 // Checks the user is authenticated. If not, it will return an error
 export const isAuthenticated = () => async (
@@ -37,6 +36,40 @@ export const hasPermission = (permissions: Permissions) => async (
   return unauthenticated(response);
 };
 
+export const isRegisterBodyValid = () => (request: Request, response: Response, next: NextFunction): void => {
+  let error = 'no error';
+
+  // Test if some fields are missing.
+  error = request.body.firstname ? error : Error.MissingFirstname;
+  error = request.body.lastname ? error : Error.MissingLastname;
+  error = request.body.email ? error : Error.MissingEmail;
+  error = request.body.password ? error : Error.MissingPassword;
+  error = request.body.type ? error : Error.MissingUserType;
+  if (error !== 'no error') {
+    return badRequest(response, error as Error);
+  }
+
+  // Test the format of the email adress.
+  // eslint-disable-next-line security/detect-unsafe-regex
+  const re = /^(([^\s"(),.:;<>@[\\\]]+(\.[^\s"(),.:;<>@[\\\]]+)*)|(".+"))@((\[(?:\d{1,3}\.){3}\d{1,3}])|(([\dA-Za-z-]+\.)+[A-Za-z]{2,}))$/;
+  if (!re.test(request.body.email.toLowerCase())) {
+    return badRequest(response, Error.InvalidEmail);
+  }
+
+  // Test if type is a UserType
+  if (
+    request.body.type !== UserType.Coach &&
+    request.body.type !== UserType.Orga &&
+    request.body.type !== UserType.Player &&
+    request.body.type !== UserType.Visitor
+  ) {
+    return badRequest(response, Error.InvalidUserType);
+  }
+
+  return next();
+};
+
+// Test if the email and username are already used by an other user.
 export const isUserUnique = () => async (request: Request, response: Response, next: NextFunction): Promise<void> => {
   const sameEmail = await fetchUsers({
     where: {
