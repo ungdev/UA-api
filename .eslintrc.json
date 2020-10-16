@@ -39,6 +39,7 @@
     "no-shadow": "off",
     "no-await-in-loop": "off",
     "no-useless-constructor": "off",
+    "require-await": "warn",
     "spaced-comment": ["error", "always", { "exceptions": ["*"] }],
     "unicorn/no-reduce": "off",
     "unicorn/filename-case": ["error", { "case": "camelCase" }],

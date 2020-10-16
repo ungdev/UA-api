@@ -31,9 +31,6 @@ app.use(bodyParser.json(), checkJson());
 // Documentation
 app.use('/docs', swagger.serve, swagger.setup(swaggerDocument));
 
-// Uploads
-app.use('/uploads', express.static('uploads'));
-
 // Main routes
 app.use(routes());
 
