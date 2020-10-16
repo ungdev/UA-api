@@ -40,7 +40,7 @@ export const isInTeamId = async (request: UserRequest, response: Response, next:
   const { user } = request;
   if (user) {
     // Compare user's teamId and teamId of the request
-    if (request.params.teamId === user.teamId) {
+    if (user.teamId === request.params.teamId) {
       return next();
     }
     return unauthorized(response);
