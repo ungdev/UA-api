@@ -11,7 +11,7 @@ export const isCaptainOfTeamId = async (
 ): Promise<void> => {
   const { user } = request;
   if (user) {
-    const { teamId } = request.user;
+    const { teamId } = request.params;
     const team = await fetchTeam(teamId);
     const { captainId } = team;
 
@@ -36,7 +36,7 @@ export const isUserId = (request: UserRequest, response: Response, next: NextFun
 };
 
 // Checks the user is the captain of the team. If not, it will return an error
-export const isInTeamId = async (request: UserRequest, response: Response, next: NextFunction): Promise<void> => {
+export const isInTeamId = (request: UserRequest, response: Response, next: NextFunction): void => {
   const { user } = request;
   if (user) {
     // Compare user's teamId and teamId of the request

@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { Request } from 'express';
-import { User } from '@prisma/client';
+import { User as PrismaUser } from '@prisma/client';
 
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
@@ -36,6 +36,10 @@ export enum UserType {
   Coach = 'coach',
   Visitor = 'visitor',
   Orga = 'orga',
+}
+
+export interface User extends PrismaUser {
+  hasPaid: boolean;
 }
 
 export enum ItemCategory {
