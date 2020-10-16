@@ -3,7 +3,7 @@ import { unauthenticated, unauthorized } from '../utils/responses';
 import { UserRequest } from '../types';
 import { fetchTeam } from '../operations/team';
 
-// Checks the user is the captain of the team. If not, it will return an error
+// Checks if the user is the captain of the team specified in the URL. If not, it will return an error
 export const isCaptainOfTeamId = async (
   request: UserRequest,
   response: Response,
