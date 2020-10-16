@@ -51,6 +51,15 @@ model Item {
   @@map("items")
 }
 
+model Partner {
+  name        String @id
+  description String
+  image       String
+  link        String
+
+  @@map("partners")
+}
+
 model Team {
   id           String     @id
   createdAt    DateTime   @default(now())
@@ -104,8 +113,8 @@ model User {
   cartitems     CartItem[]
   carts         Cart[]
 
-  @@map("users")
   Team Team[]
+  @@map("users")
 }
 
 model Settings {
