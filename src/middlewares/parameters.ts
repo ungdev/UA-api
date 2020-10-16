@@ -11,7 +11,7 @@ export const isCaptainOfTeamId = async (
 ): Promise<void> => {
   const { user } = request;
   if (user) {
-    const { teamId } = request.user;
+    const { teamId } = request.params;
     const team = await fetchTeam(teamId);
     const { captainId } = team;
 
