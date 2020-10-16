@@ -13,6 +13,7 @@ import swaggerDocument from '../openapi.json';
 import { morgan } from './utils/log';
 import { isTest } from './utils/environment';
 import { initSentryExpress } from './utils/sentry';
+import { initUserRequest } from './middlewares/user';
 
 const app = express();
 
@@ -27,6 +28,9 @@ app.use(cors(), helmet());
 
 // Body json middlewares
 app.use(bodyParser.json(), checkJson());
+
+// UserRequest middleware
+app.use(initUserRequest);
 
 // Documentation
 app.use('/docs', swagger.serve, swagger.setup(swaggerDocument));

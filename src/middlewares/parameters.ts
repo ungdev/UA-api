@@ -11,11 +11,8 @@ export const isCaptainOfTeamId = async (
 ): Promise<void> => {
   const { user } = request;
   if (user) {
-    const { teamId } = request.params;
-    const team = await fetchTeam(teamId);
-    const { captainId } = team;
-
-    if (user.id === captainId) {
+    const team = await fetchTeam(request.params.teamId);
+    if (user.id === team.captainId) {
       return next();
     }
     return unauthorized(response);
@@ -23,7 +20,7 @@ export const isCaptainOfTeamId = async (
   return unauthenticated(response);
 };
 
-// Checks the user is who he pretends to be. If not, it will return an error
+// Checks if the user is who he pretends to be. If not, it will return an error
 export const isUserId = (request: UserRequest, response: Response, next: NextFunction): void => {
   const { user } = request;
   if (user) {

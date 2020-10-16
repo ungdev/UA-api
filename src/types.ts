@@ -39,7 +39,7 @@ export enum UserType {
 }
 
 export interface User extends PrismaUser {
-  hasPaid: boolean;
+  hasPaid?: boolean;
 }
 
 export enum ItemCategory {

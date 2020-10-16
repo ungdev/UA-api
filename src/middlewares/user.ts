@@ -18,7 +18,7 @@ export const isNotInATeam = (request: UserRequest, response: Response, next: Nex
   return next();
 };
 
-export const initUserRequest = async (request: UserRequest, responce: Response, next: NextFunction): Promise<void> => {
+export const initUserRequest = () => async (request: UserRequest, responce: Response, next: NextFunction) => {
   const token = getToken(request);
 
   if (token) {
