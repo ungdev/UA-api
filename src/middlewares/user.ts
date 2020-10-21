@@ -1,4 +1,4 @@
-import { NextFunction, Response, Request } from 'express';
+import { NextFunction, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import log from '../utils/log';
 import { UserRequest, Error, DecodedToken } from '../types';
@@ -18,15 +18,13 @@ export const isNotInATeam = (request: UserRequest, response: Response, next: Nex
   return next();
 };
 
-// Initialize UserRequest with user from the database.
-export const initUserRequest = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+export const initUserRequest = () => async (request: UserRequest, responce: Response, next: NextFunction) => {
   const token = getToken(request);
+
   if (token) {
     const decoded = jwt.verify(token, jwtSecret()) as DecodedToken;
     const databaseUser = await fetchUser(decoded.userId);
     request.user = databaseUser;
-  } else {
-    request.user = undefined;
   }
   return next();
 };
