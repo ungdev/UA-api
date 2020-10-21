@@ -51,3 +51,18 @@ export const contactValidator = Joi.object({
   subject: Joi.string().required(),
   message: Joi.string().required(),
 });
+
+export const userRegisterValidator = Joi.object({
+  username: Joi.string().required(),
+  firstname: Joi.string().required(),
+  lastname: Joi.string().required(),
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).required(),
+  type: Joi.alternatives().try(
+    Joi.string().valid(UserType.Coach),
+    Joi.string().valid(UserType.Orga),
+    Joi.string().valid(UserType.Player),
+    Joi.string().valid(UserType.Visitor),
+  ),
+  discordId: Joi.string().required(),
+});
