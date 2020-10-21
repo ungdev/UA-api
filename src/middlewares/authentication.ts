@@ -1,7 +1,7 @@
 import { Response, NextFunction, Request } from 'express';
 import { getToken } from '../utils/user';
 import { unauthorized, unauthenticated } from '../utils/responses';
-import { Permissions } from '../types';
+import { Permissions, UserRequest } from '../types';
 
 // Checks the user is authenticated. If not, it will return an error
 export const isAuthenticated = () => (request: Request, response: Response, next: NextFunction) => {
@@ -15,7 +15,7 @@ export const isAuthenticated = () => (request: Request, response: Response, next
 
 // Checks the user has the given permission. If not, it will return an error
 export const hasPermission = (permissions: Permissions) => (
-  request: Request,
+  request: UserRequest,
   response: Response,
   next: NextFunction,
 ) => {

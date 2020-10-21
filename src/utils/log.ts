@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
-import { Request } from 'express';
 import { ConsoleTransportInstance, HttpTransportInstance } from 'winston/lib/winston/transports';
 import split from 'split';
 import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { datadogDevelopment, datadogKey, datadogProduction, isProduction, isProductionDatabase } from './environment';
+import { UserRequest } from '../types';
 import { getIp } from './network';
 
 // Create console Transport
@@ -67,7 +67,7 @@ export const morgan = () => {
   const logStream = split().on('data', (message: string) => logger.http(message));
 
   // Load morgan variables
-  morganMiddleware.token('username', (request: Request) => (request.user && request.user.username) || 'anonymous');
+  morganMiddleware.token('username', (request: UserRequest) => (request.user && request.user.username) || 'anonymous');
   morganMiddleware.token('ip', getIp);
 
   const productionFormat = ':ip :username :method :url :status :res[content-length] - :response-time ms';
