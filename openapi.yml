@@ -39,8 +39,6 @@ tags:
     description: Routes d'authentification
   - name: Items
     description: Routes liées aux items
-  - name: Partners
-    description: Routes liées aux partenaires
   - name: Teams
     description: Routes liées aux équipes
   - name: Tickets
@@ -248,18 +246,6 @@ components:
         image:
           type: string
           nullable: true
-
-    Partner:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        image:
-          type: string
-        link:
-          type: string
 
   responses:
     400Errored:
@@ -1012,21 +998,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Item'
-
-  /partners:
-    get:
-      summary: Renvoie la liste des partenaires
-      tags:
-        - Partners
-      responses:
-        200:
-          description: Renvoie la liste des partenaires
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Partner'
 
   /teams:
     get:
