@@ -51,15 +51,6 @@ model Item {
   @@map("items")
 }
 
-model Partner {
-  name        String @id
-  description String
-  image       String
-  link        String
-
-  @@map("partners")
-}
-
 model Team {
   id           String     @id
   createdAt    DateTime   @default(now())
