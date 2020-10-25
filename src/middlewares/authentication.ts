@@ -22,7 +22,7 @@ export const hasPermission = (permissions: Permissions) => (
   const { user } = request;
 
   if (user) {
-    if (user.permissions === permissions || user.permissions === Permissions.Admin) {
+    if (Number(user.permissions) === permissions || Number(user.permissions) === Permissions.admin) {
       return next();
     }
     return unauthorized(response);
