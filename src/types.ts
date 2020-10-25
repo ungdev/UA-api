@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { Request } from 'express';
-import { User as PrismaUser, Tournament } from '@prisma/client';
+import { User as PrismaUser } from '@prisma/client';
 
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
@@ -12,10 +12,10 @@ import { User as PrismaUser, Tournament } from '@prisma/client';
 /*************/
 
 export enum Permissions {
-  'stream',
-  'entry',
-  'anim',
-  'admin',
+  Stream = 'stream',
+  Entry = 'entry',
+  Anim = 'anim',
+  Admin = 'admin',
 }
 
 export interface DecodedToken {
@@ -36,6 +36,10 @@ export enum UserType {
   Coach = 'coach',
   Visitor = 'visitor',
   Orga = 'orga',
+}
+
+export interface User extends PrismaUser {
+  hasPaid?: boolean;
 }
 
 export enum ItemCategory {
@@ -59,6 +63,34 @@ export interface User extends PrismaUser {
   hasPaid?: boolean;
 }
 
+  updatedAt?: string;
+}
+  createdAt?: string;
+  forUserId: string;
+  itemId: string;
+  cartId: string;
+  quantity: number;
+  id: string;
+export interface CartItem {
+
+export interface Setting {
+  id: string;
+  value?: string;
+}
+
+export interface TournamentWithLockedTeams extends Tournament {
+  lockedTeamsCount: number;
+}
+export interface Cart {
+  id: string;
+  userId: string;
+  transactionState: TransactionState;
+  transactionId?: number;
+  createdAt?: string;
+  paidAt?: string;
+  updatedAt?: string;
+}
+
 export interface Contact {
   name: string;
   email: string;
@@ -66,12 +98,19 @@ export interface Contact {
   message: string;
 }
 
-/************************/
-/** Databse extensions **/
-/************************/
+/*************/
+/** Winston **/
+/*************/
 
-export interface TournamentWithLockedTeams extends Tournament {
-  lockedTeamsCount: number;
+export enum LoggingLevel {
+  Emerg = 'emerg',
+  ALert = 'alert',
+  Crit = 'crit',
+  Error = 'error',
+  Warning = 'warning',
+  Notice = 'notice',
+  Info = 'info',
+  Debug = 'debug',
 }
 
 /************/
