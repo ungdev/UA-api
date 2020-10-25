@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { Request } from 'express';
-import { User as PrismaUser } from '@prisma/client';
+import { User as PrismaUser, Tournament } from '@prisma/client';
 
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
@@ -12,10 +12,10 @@ import { User as PrismaUser } from '@prisma/client';
 /*************/
 
 export enum Permissions {
-  Stream = 'stream',
-  Entry = 'entry',
-  Anim = 'anim',
-  Admin = 'admin',
+  'stream',
+  'entry',
+  'anim',
+  'admin',
 }
 
 export interface DecodedToken {
@@ -38,10 +38,6 @@ export enum UserType {
   Orga = 'orga',
 }
 
-export interface User extends PrismaUser {
-  hasPaid?: boolean;
-}
-
 export enum ItemCategory {
   Ticket = 'ticket',
   Item = 'item',
@@ -59,6 +55,10 @@ export enum TransactionState {
 /** Database models **/
 /*********************/
 
+export interface User extends PrismaUser {
+  hasPaid?: boolean;
+}
+
 export interface Tournament {
   id: string;
   name: string;
@@ -66,56 +66,6 @@ export interface Tournament {
   playersPerTeam: number;
 }
 
-export interface Team {
-  id: string;
-  name: string;
-  tournamentId: string;
-  captainId: string;
-  lockedAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface Item {
-  id: string;
-  name: string;
-  category: ItemCategory;
-  attribute?: string;
-  price: number;
-  reducedPrice?: number;
-  infos?: string;
-  image?: string;
-  stock?: number;
-}
-
-export interface Cart {
-  id: string;
-  userId: string;
-  transactionState: TransactionState;
-  transactionId?: number;
-  paidAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CartItem {
-  id: string;
-  quantity: number;
-  cartId: string;
-  itemId: string;
-  forUserId: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface Setting {
-  id: string;
-  value?: string;
-}
-
-export interface TournamentWithLockedTeams extends Tournament {
-  lockedTeamsCount: number;
-}
 export interface Contact {
   name: string;
   email: string;
@@ -123,19 +73,12 @@ export interface Contact {
   message: string;
 }
 
-/*************/
-/** Winston **/
-/*************/
+/************************/
+/** Databse extensions **/
+/************************/
 
-export enum LoggingLevel {
-  Emerg = 'emerg',
-  ALert = 'alert',
-  Crit = 'crit',
-  Error = 'error',
-  Warning = 'warning',
-  Notice = 'notice',
-  Info = 'info',
-  Debug = 'debug',
+export interface TournamentWithLockedTeams extends Tournament {
+  lockedTeamsCount: number;
 }
 
 /************/
