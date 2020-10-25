@@ -74,13 +74,13 @@ INSERT INTO `items` (`id`, `name`, `category`, `attribute`, `price`, `reducedPri
 DROP TABLE IF EXISTS `settings`;
 CREATE TABLE `settings` (
   `id` varchar(255) NOT NULL,
-  `value` varchar(255) NOT NULL,
+  `value` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `settings` (`id`, `value`) VALUES
-('login',	'false'),
-('shop',	'false');
+('login',	0),
+('shop',  0);
 
 DROP TABLE IF EXISTS `teams`;
 CREATE TABLE `teams` (
