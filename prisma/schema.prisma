@@ -110,7 +110,7 @@ model User {
 
 model Settings {
   id    String @id
-  value String
+  value Boolean
 
   @@map("settings")
 }

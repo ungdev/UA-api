@@ -45,7 +45,6 @@ const logger = createLogger({
   transports: loggingTransports,
 });
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 logger.error = (error) => {
   if (error instanceof Error) {

@@ -62,8 +62,9 @@ export interface User extends PrismaUser {
 export interface Tournament {
   id: string;
   name: string;
-  maxPlayers: number;
-  playersPerTeam: number;
+  email: string;
+  subject: string;
+  message: string;
 }
 
 export interface Contact {

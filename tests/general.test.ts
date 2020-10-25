@@ -4,9 +4,9 @@ import database from '../src/utils/database';
 import { mock } from './utils';
 
 describe('General API', () => {
-  describe('GET /', () => {
+  describe('GET /settings', () => {
     it('should return 200 with an object', async () => {
-      await request(app).get('/').expect(200, { shop: false, login: false });
+      await request(app).get('/settings').expect(200, { shop: false, login: false });
     });
     it('should return the updated value', async () => {
       await database.settings.update({
@@ -14,13 +14,13 @@ describe('General API', () => {
           id: 'login',
         },
         data: {
-          value: 'true',
+          value: true,
         },
       });
-      await request(app).get('/').expect(200, { shop: false, login: true });
+      await request(app).get('/settings').expect(200, { shop: false, login: true });
     });
     it('should not accept POST request', async () => {
-      await request(app).post('/').expect(404);
+      await request(app).post('/settings').expect(404);
     });
   });
   describe('POST /contact', () => {
