@@ -11,7 +11,7 @@ import routes from './controllers';
 import { checkJson } from './middlewares/checkJson';
 import swaggerDocument from '../openapi.json';
 import { morgan } from './utils/log';
-import { isTest } from './utils/environment';
+import { apiPrefix, isTest } from './utils/environment';
 import { initSentryExpress } from './utils/sentry';
 
 const app = express();
@@ -32,7 +32,7 @@ app.use(bodyParser.json(), checkJson());
 app.use('/docs', swagger.serve, swagger.setup(swaggerDocument));
 
 // Main routes
-app.use(routes());
+app.use(apiPrefix(), routes());
 
 // Not found
 app.use((request: Request, response: Response) => notFound(response, Error.RouteNotFound));
