@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { Request } from 'express';
-import { Tournament, User } from '@prisma/client';
+import { Tournament, User as PrismaUser } from '@prisma/client';
 
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
@@ -11,16 +11,15 @@ import { Tournament, User } from '@prisma/client';
 /** General **/
 /*************/
 
-export enum Permissions {
+export enum Permission {
   stream = 'stream',
   entry = 'entry',
   anim = 'anim',
   admin = 'admin',
 }
 
-export interface Token {
+export interface DecodedToken {
   userId: string;
-  permissions: Permissions;
 }
 
 export interface EmailAttachment {
@@ -82,15 +81,11 @@ export interface EtupayResponse {
 /** Misc **/
 /**********/
 
-export interface UserRequest extends Request {
-  user: User;
+export interface User extends PrismaUser {
+  hasPaid?: boolean;
 }
 
 export interface BodyRequest<T> extends Request {
-  body: T;
-}
-
-export interface BodyUserRequest<T> extends UserRequest {
   body: T;
 }
 

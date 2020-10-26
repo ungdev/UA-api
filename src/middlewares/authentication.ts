@@ -1,9 +1,7 @@
 import { Response, NextFunction, Request } from 'express';
-import jwt from 'jsonwebtoken';
-import { getToken } from '../utils/user';
+import { getToken, getRequestUser } from '../utils/user';
 import { unauthorized, unauthenticated } from '../utils/responses';
-import { Token, Permissions, UserRequest } from '../types';
-import { jwtSecret } from '../utils/environment';
+import { Permission } from '../types';
 
 // Checks the user is authenticated. If not, it will return an error
 export const isAuthenticated = () => (request: Request, response: Response, next: NextFunction) => {
@@ -16,19 +14,23 @@ export const isAuthenticated = () => (request: Request, response: Response, next
 };
 
 // Checks the user has the given permission. If not, it will return an error
-export const hasPermission = (permissions: Permissions) => (
-  request: UserRequest,
-  response: Response,
-  next: NextFunction,
-) => {
-  const token = getToken(request);
+export const hasPermission = (permission: Permission) => (request: Request, response: Response, next: NextFunction) => {
+  const user = getRequestUser(response);
 
-  if (token) {
-    const decoded = jwt.verify(token, jwtSecret()) as Token;
+  const containsPermission = (userPermissions: string, permission: Permission) => {
+    return (
+      // User has only this permission
+      userPermissions === permission ||
+      // Contains this permission (but it is not the last of the list)
+      userPermissions.includes(`${permission},`) ||
+      // Contains this permission (and it is the last of the list)
+      userPermissions.endsWith(`,${permission}`)
+    );
+  };
 
-    request.user.permissions = decoded.permissions;
-
-    if (decoded.permissions === permissions || decoded.permissions === Permissions.admin) {
+  if (user) {
+    // If user has required permission or has "admin" permission
+    if (containsPermission(user.permissions, permission) || containsPermission(user.permissions, Permission.admin)) {
       return next();
     }
     return unauthorized(response);

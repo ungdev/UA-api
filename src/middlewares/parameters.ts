@@ -1,28 +1,14 @@
-import { Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from 'express';
 import { unauthenticated, unauthorized } from '../utils/responses';
-import { getToken } from '../utils/user';
-import { jwtSecret } from '../utils/environment';
-import { Token, UserRequest } from '../types';
 import { fetchTeam } from '../operations/team';
-import { fetchUser } from '../operations/user';
+import { getRequestUser } from '../utils/user';
 
-// Checks the user is the captain of the team. If not, it will return an error
-export const isCaptainOfTeamId = async (
-  request: UserRequest,
-  response: Response,
-  next: NextFunction,
-): Promise<void> => {
-  const token = getToken(request);
-  if (token) {
-    const decoded = jwt.verify(token, jwtSecret()) as Token;
-    const { userId } = decoded;
-
-    const { teamId } = request.user;
-    const team = await fetchTeam(teamId);
-    const { captainId } = team;
-
-    if (userId === captainId) {
+// Checks if the user is the captain of the team specified in the URL. If not, it will return an error
+export const isCaptainOfTeamId = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+  const user = getRequestUser(response);
+  if (user) {
+    const team = await fetchTeam(request.params.teamId);
+    if (user.id === team.captainId) {
       return next();
     }
     return unauthorized(response);
@@ -30,12 +16,11 @@ export const isCaptainOfTeamId = async (
   return unauthenticated(response);
 };
 
-// Checks the user is who he pretends to be. If not, it will return an error
-export const isUserId = (request: UserRequest, response: Response, next: NextFunction): void => {
-  const token = getToken(request);
-  if (token) {
-    const decoded = jwt.verify(token, jwtSecret()) as Token;
-    if (decoded.userId === request.user.id) {
+// Checks if the user is who he pretends to be. If not, it will return an error
+export const isUserId = (request: Request, response: Response, next: NextFunction): void => {
+  const user = getRequestUser(response);
+  if (user) {
+    if (user.id === request.params.userId) {
       return next();
     }
     return unauthorized(response);
@@ -44,15 +29,11 @@ export const isUserId = (request: UserRequest, response: Response, next: NextFun
 };
 
 // Checks the user is the captain of the team. If not, it will return an error
-export const isInTeamId = async (request: UserRequest, response: Response, next: NextFunction): Promise<void> => {
-  const token = getToken(request);
-
-  if (token) {
-    const decoded = jwt.verify(token, jwtSecret()) as Token;
-    const { userId } = decoded;
-    const user = await fetchUser(userId);
+export const isInTeamId = (request: Request, response: Response, next: NextFunction): void => {
+  const user = getRequestUser(response);
+  if (user) {
     // Compare user's teamId and teamId of the request
-    if (user && request.params.teamId === user.teamId) {
+    if (user.teamId === request.params.teamId) {
       return next();
     }
     return unauthorized(response);
