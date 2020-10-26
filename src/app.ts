@@ -30,9 +30,6 @@ app.use(bodyParser.json(), checkJson());
 // UserRequest middleware
 app.use(initUserRequest);
 
-// Documentation
-app.use('/docs', swagger.serve, swagger.setup(swaggerDocument));
-
 // Main routes
 app.use(apiPrefix(), routes());
 

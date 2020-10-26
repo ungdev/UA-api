@@ -1,15 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import log from '../utils/log';
-import { UserRequest, Error, DecodedToken } from '../types';
+import { Error, DecodedToken } from '../types';
 import { badRequest } from '../utils/responses';
-import { getToken } from '../utils/user';
+import { getToken, getUser } from '../utils/user';
 import { jwtSecret } from '../utils/environment';
 import { fetchUser } from '../operations/user';
 
 // Check the user's team. If he's in one, it will return an error.
-export const isNotInATeam = (request: UserRequest, response: Response, next: NextFunction) => {
-  if (request.user.teamId) {
+export const isNotInATeam = (request: Request, response: Response, next: NextFunction) => {
+  const user = getUser(response);
+  if (user.teamId) {
     log.debug(`${request.path} failed : already in team`);
 
     return badRequest(response, Error.AlreadyInTeam);

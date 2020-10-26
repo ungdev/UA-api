@@ -85,15 +85,7 @@ export interface User extends PrismaUser {
   hasPaid?: boolean;
 }
 
-export interface UserRequest extends Request {
-  user: User;
-}
-
 export interface BodyRequest<T> extends Request {
-  body: T;
-}
-
-export interface BodyUserRequest<T> extends UserRequest {
   body: T;
 }
 

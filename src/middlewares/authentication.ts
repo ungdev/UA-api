@@ -22,7 +22,7 @@ export const hasPermission = (permissions: Permissions) => (
   const user = getUser(response);
 
   if (user) {
-    if (user.permissions.search(permissions) || user.permissions.search(Permissions.admin)) {
+    if (user.permissions.search(permissions) > -1 || user.permissions.search(Permissions.admin) > -1) {
       return next();
     }
     return unauthorized(response);
