@@ -24,9 +24,7 @@ export const initUserRequest = async (request: Request, response: Response, next
   if (token) {
     const decoded = jwt.verify(token, jwtSecret()) as DecodedToken;
     const databaseUser = await fetchUser(decoded.userId);
-    Object.assign(request, {
-      user: databaseUser,
-    });
+    response.locals.user = databaseUser;
   }
   return next();
 };

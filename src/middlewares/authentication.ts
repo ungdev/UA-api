@@ -1,7 +1,7 @@
 import { Response, NextFunction, Request } from 'express';
-import { getToken } from '../utils/user';
+import { getToken, getUser } from '../utils/user';
 import { unauthorized, unauthenticated } from '../utils/responses';
-import { Permissions, UserRequest } from '../types';
+import { Permissions } from '../types';
 
 // Checks the user is authenticated. If not, it will return an error
 export const isAuthenticated = () => (request: Request, response: Response, next: NextFunction) => {
@@ -15,14 +15,14 @@ export const isAuthenticated = () => (request: Request, response: Response, next
 
 // Checks the user has the given permission. If not, it will return an error
 export const hasPermission = (permissions: Permissions) => (
-  request: UserRequest,
+  request: Request,
   response: Response,
   next: NextFunction,
 ) => {
-  const { user } = request;
+  const user = getUser(response);
 
   if (user) {
-    if (Number(user.permissions) === permissions || Number(user.permissions) === Permissions.admin) {
+    if (user.permissions.search(permissions) || user.permissions.search(Permissions.admin)) {
       return next();
     }
     return unauthorized(response);

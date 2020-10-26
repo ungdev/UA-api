@@ -1,5 +1,5 @@
-import { Request } from 'express';
-import { fetchUser } from '../operations/user';
+import { Request, Response } from 'express';
+import { User } from '../types';
 
 export const getToken = (request: Request): string => {
   const authorization = request.get('Authorization');
@@ -14,4 +14,6 @@ export const getToken = (request: Request): string => {
   return token;
 };
 
-export const getUser = (request: Request) => fetchUser(getToken(request));
+export const getUser = (response: Response): User | null => {
+  return response.locals.user;
+};
