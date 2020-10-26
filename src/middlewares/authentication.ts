@@ -1,7 +1,7 @@
 import { Response, NextFunction, Request } from 'express';
-import { getToken, getUser } from '../utils/user';
+import { getToken, getRequestUser } from '../utils/user';
 import { unauthorized, unauthenticated } from '../utils/responses';
-import { Permissions } from '../types';
+import { Permission } from '../types';
 
 // Checks the user is authenticated. If not, it will return an error
 export const isAuthenticated = () => (request: Request, response: Response, next: NextFunction) => {
@@ -14,15 +14,23 @@ export const isAuthenticated = () => (request: Request, response: Response, next
 };
 
 // Checks the user has the given permission. If not, it will return an error
-export const hasPermission = (permissions: Permissions) => (
-  request: Request,
-  response: Response,
-  next: NextFunction,
-) => {
-  const user = getUser(response);
+export const hasPermission = (permission: Permission) => (request: Request, response: Response, next: NextFunction) => {
+  const user = getRequestUser(response);
+
+  const containsPermission = (userPermissions: string, permission: Permission) => {
+    return (
+      // User has only this permission
+      userPermissions === permission ||
+      // Contains this permission (but it is not the last of the list)
+      userPermissions.includes(`${permission},`) ||
+      // Contains this permission (and it is the last of the list)
+      userPermissions.endsWith(`,${permission}`)
+    );
+  };
 
   if (user) {
-    if (user.permissions.search(permissions) > -1 || user.permissions.search(Permissions.admin) > -1) {
+    // If user has required permission or has "admin" permission
+    if (containsPermission(user.permissions, permission) || containsPermission(user.permissions, Permission.admin)) {
       return next();
     }
     return unauthorized(response);

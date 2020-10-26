@@ -14,6 +14,6 @@ export const getToken = (request: Request): string => {
   return token;
 };
 
-export const getUser = (response: Response): User | null => {
+export const getRequestUser = (response: Response): User | null => {
   return response.locals.user;
 };

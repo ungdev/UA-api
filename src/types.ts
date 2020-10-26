@@ -11,7 +11,7 @@ import { Tournament, User as PrismaUser } from '@prisma/client';
 /** General **/
 /*************/
 
-export enum Permissions {
+export enum Permission {
   stream = 'stream',
   entry = 'entry',
   anim = 'anim',

@@ -7,7 +7,7 @@ import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { datadogDevelopment, datadogKey, datadogProduction, isProduction, isProductionDatabase } from './environment';
 import { getIp } from './network';
-import { getUser } from './user';
+import { getRequestUser } from './user';
 
 // Create console Transport
 const { combine, colorize, printf, json } = format;
@@ -68,7 +68,7 @@ export const morgan = () => {
 
   // Load morgan variables
   morganMiddleware.token('username', (request: Request, response: Response) => {
-    const user = getUser(response);
+    const user = getRequestUser(response);
     return (user && user.username) || 'anonymous';
   });
   morganMiddleware.token('ip', getIp);
