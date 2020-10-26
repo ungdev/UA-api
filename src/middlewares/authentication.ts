@@ -26,7 +26,7 @@ export const hasPermission = (permissions: Permissions) => (
   if (token) {
     const decoded = jwt.verify(token, jwtSecret()) as Token;
 
-    request.user.permissions = decoded.permissions.toString();
+    request.user.permissions = decoded.permissions;
 
     if (decoded.permissions === permissions || decoded.permissions === Permissions.admin) {
       return next();
