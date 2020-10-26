@@ -1,4 +1,7 @@
 import { Router } from 'express';
+import swagger from 'swagger-ui-express';
+
+import swaggerDocument from '../../openapi.json';
 import status from './status';
 import contact from './contact';
 import settings from './settings';
@@ -16,6 +19,9 @@ const routes = (): Router => {
 
   // Contact route
   router.post('/contact', contact);
+
+  // Documentation
+  router.use('/docs', swagger.serve, swagger.setup(swaggerDocument));
 
   // Users routes
   router.use('/users', users());
