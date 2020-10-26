@@ -12,10 +12,10 @@ import { Tournament, User } from '@prisma/client';
 /*************/
 
 export enum Permissions {
-  'stream',
-  'entry',
-  'anim',
-  'admin',
+  stream = 'stream',
+  entry = 'entry',
+  anim = 'anim',
+  admin = 'admin',
 }
 
 export interface Token {
@@ -48,23 +48,23 @@ export interface TournamentWithLockedTeams extends Tournament {
 /********************/
 
 export enum ItemCategory {
-  'ticket',
-  'item',
+  ticket = 'ticket',
+  item = 'item',
 }
 
 export enum UserType {
-  'player',
-  'coach',
-  'visitor',
-  'orga',
+  player = 'player',
+  coach = 'coach',
+  visitor = 'visitor',
+  orga = 'orga',
 }
 
 export enum TransactionState {
-  'pending',
-  'paid',
-  'canceled',
-  'refused',
-  'refunded',
+  pending = 'pending',
+  paid = 'paid',
+  canceled = 'canceled',
+  refused = 'refused',
+  refunded = 'refunded',
 }
 
 /************/
