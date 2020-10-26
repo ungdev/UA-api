@@ -8,6 +8,7 @@ export const isDevelopment = (): boolean => nodeEnv() === 'development';
 export const isProduction = (): boolean => nodeEnv() === 'production';
 export const isTest = (): boolean => nodeEnv() === 'test';
 export const apiPort = (): number => Number.parseInt(process.env.API_PORT);
+export const apiPrefix = (): string => process.env.API_PREFIX || '/';
 export const bcryptLevel = (): number => Number.parseInt(process.env.API_BCRYPT_LEVEL);
 export const jwtSecret = (): string => process.env.JWT_SECRET;
 export const jwtExpires = (): string => process.env.JWT_EXPIRES;

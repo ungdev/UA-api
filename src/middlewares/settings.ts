@@ -5,7 +5,7 @@ import { badRequest } from '../utils/responses';
 
 export const loginAllowed = async (request: Request, response: Response, next: NextFunction) => {
   const login = (await fetchSetting('shop')).value;
-  if (login === 'true') {
+  if (login) {
     return next();
   }
   return badRequest(response, Error.LoginNotAllowed);
@@ -13,7 +13,7 @@ export const loginAllowed = async (request: Request, response: Response, next: N
 
 export const shopAllowed = async (request: Request, response: Response, next: NextFunction) => {
   const shop = (await fetchSetting('shop')).value;
-  if (shop === 'true') {
+  if (shop) {
     return next();
   }
   return badRequest(response, Error.ShopNotAllowed);

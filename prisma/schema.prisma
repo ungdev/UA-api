@@ -104,13 +104,13 @@ model User {
   cartitems     CartItem[]
   carts         Cart[]
 
-  @@map("users")
   Team Team[]
+  @@map("users")
 }
 
 model Settings {
   id    String @id
-  value String
+  value Boolean
 
   @@map("settings")
 }

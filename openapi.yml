@@ -9,8 +9,8 @@ info:
     - Le terme "paramètre" désigne un champ qui peut se trouver dans les champs `param`, `query` ou `body` de la requête<br/>
     - Le terme "utilisateur" désigne l''utilisateur originaire de la requête<br/>
     - Les termes "utilisateur cible" ou "équipe cible" désignent respectivement l''utilisateur ou l''équipe identifiée par le paramètre `userId` ou `teamId`<br/>
-    - Une erreur 403 sera renvoyée si une condition en **gras** n''est pas respectée<br/>
-    - Une erreur 400 sera renvoyée si une condition en *italique* n''est pas respectée ou si un paramètre n''est pas dans un format valide<br/>
+    - Une erreur 403 sera renvoyée si une condition en **gras** n'est pas respectée<br/>
+    - Une erreur 400 sera renvoyée si une condition en *italique* n'est pas respectée ou si un paramètre n''est pas dans un format valide<br/>
     <br/>
     **Remarques :**<br/>
     - Pour toutes les routes nécessitant un token d''authentification, la connexion doit être autorisée (sauf pour les utilisateurs organisateurs)
@@ -47,8 +47,6 @@ tags:
     description: Routes liées aux tournois
   - name: Users
     description: Routes liées aux utilisateurs
-  - name: '2021'
-    description: Routes à ajouter en 2021
 
 components:
   securitySchemes:
@@ -357,7 +355,7 @@ paths:
       description: Marque le panier comme étant remboursé.<br/>
         **Permission 'admin' requise.**
       tags:
-        - '2021'
+        - Admin
       security:
         - BearerAuth: []
       parameters:
@@ -589,7 +587,7 @@ paths:
       description: Renvoie les paniers de l'utilisateur.<br/>
         **Permission 'admin' requise.**
       tags:
-        - '2021'
+        - Admin
       security:
         - BearerAuth: []
       parameters:
@@ -623,7 +621,7 @@ paths:
         **Permission 'entry' ou 'admin' requise.**<br/>
         *L'utilisateur cible ne doit pas avoir déjà payé sa place.*
       tags:
-        - '2021'
+        - Admin
       security:
         - BearerAuth: []
       parameters:
@@ -709,7 +707,7 @@ paths:
         **Permission 'entry' ou 'admin' requise.**<br/>
         *Le billet ne doit pas avoir été déjà scanné.*
       tags:
-        - '2021'
+        - Admin
       security:
         - BearerAuth: []
       parameters:
@@ -990,7 +988,7 @@ paths:
       summary: Renvoie la liste des items en vente
       description: Renvoie la liste des items en vente dans la billetterie.
       tags:
-        - '2021'
+        - Items
       responses:
         200:
           description: Renvoie la liste des items
@@ -1426,7 +1424,7 @@ paths:
       description: Renvoie le billet associé au cartItem au format PDF.<br/>
         **L'utilisateur doit nécessairement avoir payé ce cartItem.**
       tags:
-        - '2021'
+        - Tickets
       security:
         - BearerAuth: []
       parameters:
@@ -1554,7 +1552,7 @@ paths:
       description: Renvoie la liste des achats de l'utilisateur.<br/>
         **L'utilisateur doit être l'utilisateur cible.**
       tags:
-        - '2021'
+        - Users
       security:
         - BearerAuth: []
       parameters:
@@ -1590,7 +1588,7 @@ paths:
         *La billetterie doit être ouverte.*
         *Le stock d'items restant doit être suffisant pour satisfaire la demande.*
       tags:
-        - '2021'
+        - Users
       security:
         - BearerAuth: []
       parameters:

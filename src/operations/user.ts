@@ -5,8 +5,8 @@ export const fetchUsers = (argument: FindManyUserArgs = {}): Promise<User[]> => 
   return database.user.findMany(argument);
 };
 
-export const fetchUser = (id: string) => {
-  return database.user.findOne({ where: { id } });
+export const fetchUser = (parameterId: string) => {
+  return database.user.findOne({ where: { id: parameterId } });
 };
 
 export const createUser = (user: User) => {

@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
+import { Request, Response } from 'express';
 import { ConsoleTransportInstance, HttpTransportInstance } from 'winston/lib/winston/transports';
 import split from 'split';
 import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { datadogDevelopment, datadogKey, datadogProduction, isProduction, isProductionDatabase } from './environment';
-import { UserRequest } from '../types';
 import { getIp } from './network';
+import { getRequestUser } from './user';
 
 // Create console Transport
 const { combine, colorize, printf, json } = format;
@@ -45,7 +46,6 @@ const logger = createLogger({
   transports: loggingTransports,
 });
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 logger.error = (error) => {
   if (error instanceof Error) {
@@ -67,7 +67,10 @@ export const morgan = () => {
   const logStream = split().on('data', (message: string) => logger.http(message));
 
   // Load morgan variables
-  morganMiddleware.token('username', (request: UserRequest) => (request.user && request.user.username) || 'anonymous');
+  morganMiddleware.token('username', (request: Request, response: Response) => {
+    const user = getRequestUser(response);
+    return (user && user.username) || 'anonymous';
+  });
   morganMiddleware.token('ip', getIp);
 
   const productionFormat = ':ip :username :method :url :status :res[content-length] - :response-time ms';
