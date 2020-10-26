@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import { Request } from 'express';
+import { Tournament, User } from '@prisma/client';
 
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
@@ -11,10 +12,10 @@ import { Request } from 'express';
 /*************/
 
 export enum Permissions {
-  Stream = 'stream',
-  Entry = 'entry',
-  Anim = 'anim',
-  Admin = 'admin',
+  stream = 'stream',
+  entry = 'entry',
+  anim = 'anim',
+  admin = 'admin',
 }
 
 export interface Token {
@@ -27,111 +28,6 @@ export interface EmailAttachment {
   content: Buffer;
 }
 
-/********************/
-/** Database enums **/
-/********************/
-
-export enum UserType {
-  Player = 'player',
-  Coach = 'coach',
-  Visitor = 'visitor',
-  Orga = 'orga',
-}
-
-export enum ItemCategory {
-  Ticket = 'ticket',
-  Item = 'item',
-}
-
-export enum TransactionState {
-  Pending = 'pending',
-  Paid = 'paid',
-  Canceled = 'canceled',
-  Refused = 'refused',
-  Refunded = 'refunded',
-}
-
-/*********************/
-/** Database models **/
-/*********************/
-
-export interface Tournament {
-  id: string;
-  name: string;
-  maxPlayers: number;
-  playersPerTeam: number;
-}
-
-export interface User {
-  id: string;
-  username?: string;
-  firstname: string;
-  lastname: string;
-  email?: string;
-  password?: string;
-  type: UserType;
-  permissions?: string;
-  place?: string;
-  scannedAt?: string;
-  registerToken?: string;
-  resetToken?: string;
-  discordId?: string;
-  teamId?: string;
-  askingTeamId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface Team {
-  id: string;
-  name: string;
-  tournamentId: string;
-  captainId: string;
-  lockedAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface Item {
-  id: string;
-  name: string;
-  category: ItemCategory;
-  attribute?: string;
-  price: number;
-  reducedPrice?: number;
-  infos?: string;
-  image?: string;
-  stock?: number;
-}
-
-export interface Cart {
-  id: string;
-  userId: string;
-  transactionState: TransactionState;
-  transactionId?: number;
-  paidAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CartItem {
-  id: string;
-  quantity: number;
-  cartId: string;
-  itemId: string;
-  forUserId: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface Setting {
-  id: string;
-  value?: string;
-}
-
-export interface TournamentWithLockedTeams extends Tournament {
-  lockedTeamsCount: number;
-}
 export interface Contact {
   name: string;
   email: string;
@@ -139,19 +35,36 @@ export interface Contact {
   message: string;
 }
 
-/*************/
-/** Winston **/
-/*************/
+/************************/
+/** Databse extensions **/
+/************************/
 
-export enum LoggingLevel {
-  Emerg = 'emerg',
-  ALert = 'alert',
-  Crit = 'crit',
-  Error = 'error',
-  Warning = 'warning',
-  Notice = 'notice',
-  Info = 'info',
-  Debug = 'debug',
+export interface TournamentWithLockedTeams extends Tournament {
+  lockedTeamsCount: number;
+}
+
+/********************/
+/** Database enums **/
+/********************/
+
+export enum ItemCategory {
+  ticket = 'ticket',
+  item = 'item',
+}
+
+export enum UserType {
+  player = 'player',
+  coach = 'coach',
+  visitor = 'visitor',
+  orga = 'orga',
+}
+
+export enum TransactionState {
+  pending = 'pending',
+  paid = 'paid',
+  canceled = 'canceled',
+  refused = 'refused',
+  refunded = 'refunded',
 }
 
 /************/

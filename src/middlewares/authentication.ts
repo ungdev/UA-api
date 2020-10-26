@@ -28,7 +28,7 @@ export const hasPermission = (permissions: Permissions) => (
 
     request.user.permissions = decoded.permissions;
 
-    if (decoded.permissions === permissions || decoded.permissions === Permissions.Admin) {
+    if (decoded.permissions === permissions || decoded.permissions === Permissions.admin) {
       return next();
     }
     return unauthorized(response);

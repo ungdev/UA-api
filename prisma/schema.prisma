@@ -51,15 +51,6 @@ model Item {
   @@map("items")
 }
 
-model Partner {
-  name        String @id
-  description String
-  image       String
-  link        String
-
-  @@map("partners")
-}
-
 model Team {
   id           String     @id
   createdAt    DateTime   @default(now())
@@ -119,7 +110,7 @@ model User {
 
 model Settings {
   id    String @id
-  value String
+  value Boolean
 
   @@map("settings")
 }

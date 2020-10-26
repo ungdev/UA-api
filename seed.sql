@@ -71,25 +71,16 @@ INSERT INTO `items` (`id`, `name`, `category`, `attribute`, `price`, `reducedPri
 ('tshirt-h-s',	'T-shirt UA 2020 (Homme)',	'item',	's',	1299,	NULL,	'Un t-shirt souvenir de cette LAN de folie',	'tshirt.png',	0),
 ('tshirt-h-xl',	'T-shirt UA 2020 (Homme)',	'item',	'xl',	1299,	NULL,	'Un t-shirt souvenir de cette LAN de folie',	'tshirt.png',	0);
 
-DROP TABLE IF EXISTS `partners`;
-CREATE TABLE `partners` (
-  `name` varchar(255) NOT NULL,
-  `description` text NOT NULL,
-  `image` varchar(255) NOT NULL,
-  `link` varchar(255) NOT NULL,
-  PRIMARY KEY (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 DROP TABLE IF EXISTS `settings`;
 CREATE TABLE `settings` (
   `id` varchar(255) NOT NULL,
-  `value` varchar(255) NOT NULL,
+  `value` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `settings` (`id`, `value`) VALUES
-('login',	'false'),
-('shop',	'false');
+('login',	0),
+('shop',  0);
 
 DROP TABLE IF EXISTS `teams`;
 CREATE TABLE `teams` (
