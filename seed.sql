@@ -132,7 +132,7 @@ CREATE TABLE `users` (
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `type` enum('player','coach','visitor','orga') NOT NULL,
-  `permissions` varchar(255) DEFAULT NULL,
+  `permissions` varchar(255) NOT NULL,
   `place` char(4) DEFAULT NULL,
   `scannedAt` datetime DEFAULT NULL,
   `discordId` varchar(255) DEFAULT NULL,

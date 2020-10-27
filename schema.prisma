@@ -92,7 +92,7 @@ model User {
   email         String     @unique
   password      String
   type          user_type
-  permissions   String?
+  permissions   String
   place         String?
   scannedAt     DateTime?
   discordId     String?
