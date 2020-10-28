@@ -13,7 +13,7 @@ export const created = (response: Response, body?: unknown): void => {
 
 export const noContent = (response: Response): void => response.status(204).end();
 
-export const badRequest = (response: Response, type?: Error): void =>
+export const badRequest = (response: Response, type?: Error | string): void =>
   response
     .status(400)
     .json({ error: type || Error.BadRequest })

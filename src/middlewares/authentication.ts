@@ -44,7 +44,6 @@ export const hasPermission = (permission: Permission) => (request: Request, resp
 export const isRegisterBodyValid = () => (request: Request, response: Response, next: NextFunction): void => {
   const { error } = userRegisterValidator.validate(request.body);
   if (error) {
-    // @ts-ignore
     return badRequest(response, error.message);
   }
   return next();

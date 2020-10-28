@@ -59,10 +59,10 @@ export const userRegisterValidator = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(8).required(),
   type: Joi.alternatives().try(
-    Joi.string().valid(UserType.Coach),
-    Joi.string().valid(UserType.Orga),
-    Joi.string().valid(UserType.Player),
-    Joi.string().valid(UserType.Visitor),
+    Joi.string().valid(UserType.coach),
+    Joi.string().valid(UserType.orga),
+    Joi.string().valid(UserType.player),
+    Joi.string().valid(UserType.visitor),
   ),
   discordId: Joi.string().required(),
 });
