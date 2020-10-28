@@ -3,8 +3,6 @@ import Discord, { GuildMember } from 'discord.js';
 import logger from './log';
 import { discordServer, discordToken } from './environment';
 
-// Discord permission scope needed: 268436496 (manage roles, manage channels and view channels)
-
 const bot = new Discord.Client();
 let server: Discord.Guild;
 
@@ -109,14 +107,6 @@ export const createTeam = async (discordTeamName: string, discordIds: Array<stri
           },
           {
             id: teamRole.id,
-            allow: ['VIEW_CHANNEL'],
-          },
-          {
-            id: tournament.discordStaffRoleId,
-            allow: ['VIEW_CHANNEL'],
-          },
-          {
-            id: getSelfRoleId(),
             allow: ['VIEW_CHANNEL'],
           },
         ],
