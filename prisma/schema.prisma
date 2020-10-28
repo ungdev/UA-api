@@ -74,7 +74,6 @@ model Tournament {
   playersPerTeam     Int
   toornamentId       String
   discordRoleId      String
-  discordStaffRoleId String
   discordCategoryId  String
   teams              Team[]
 

@@ -18,6 +18,9 @@ import logger from '../utils/log';
 import { DiscordParticipants } from '../types';
 import { initSentryNode } from '../utils/sentry';
 
+// Create categories on the server with the permissions to the staff and bot to view the channels in the category
+// Discord permission scope needed (manage roles, manage channels)
+
 (async () => {
   initSentryNode();
   await discordLogin();
