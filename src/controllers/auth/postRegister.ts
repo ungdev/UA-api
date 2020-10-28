@@ -6,6 +6,7 @@ import { created } from '../../utils/responses';
 import { isRegisterBodyValid, isUserUnique } from '../../middlewares/authentication';
 import nanoid from '../../utils/nanoid';
 import { arenaWebsite, bcryptLevel } from '../../utils/environment';
+import { registerMail, sendMail } from '../../utils/mail/mail';
 
 export default [
   // Middlewares
@@ -26,6 +27,11 @@ export default [
     } as User;
 
     await createUser(user);
+    // Send registerToken by email to the user
+    sendMail(registerMail, user.email, {
+      username: user.username,
+      buttonLink: `${arenaWebsite()}/valid/${user.registerToken}`,
+    });
     return created(response);
   },
 ];

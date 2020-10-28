@@ -27,6 +27,16 @@ export interface EmailAttachment {
   content: Buffer;
 }
 
+export interface RegisterMailData {
+  username: string;
+  buttonLink: string;
+}
+
+export interface EmailContent {
+  title: string;
+  html: string;
+}
+
 export interface Contact {
   name: string;
   email: string;
