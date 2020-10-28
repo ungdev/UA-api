@@ -5,9 +5,7 @@ import swaggerDocument from '../../openapi.json';
 import status from './status';
 import contact from './contact';
 import settings from './settings';
-import users from './users';
 import tournaments from './tournaments';
-import { status, contact } from './general';
 import users from './users';
 import auth from './auth';
 

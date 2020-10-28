@@ -1,5 +1,5 @@
 import { Response, NextFunction, Request } from 'express';
-import { Permissions, UserRequest, Error } from '../types';
+import { Permission, Error } from '../types';
 import { fetchUsers } from '../operations/user';
 import { userRegisterValidator } from '../validator';
 import { unauthorized, unauthenticated, badRequest } from '../utils/responses';
