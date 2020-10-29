@@ -13,11 +13,14 @@ export const createUser = (user: User) => {
   return database.user.create({
     data: {
       id: user.id,
+      username: user.username,
       firstname: user.firstname,
       lastname: user.lastname,
       email: user.email,
       password: user.password,
       type: user.type,
+      discordId: user.discordId,
+      registerToken: user.registerToken,
     },
   });
 };
