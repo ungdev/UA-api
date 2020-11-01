@@ -29,7 +29,7 @@ if (!isTest()) {
 // Dump query to initiate the connection
 const setup = async () => {
   process.env.DATABASE_URL = `mysql://${databaseUsername()}:${databasePassword()}@${databaseHost()}:${databasePort()}/${databaseName()}`;
-  await database.settings.findMany();
+  await database.setting.findMany();
 };
 
 setup().catch((error) => {
