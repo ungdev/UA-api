@@ -162,3 +162,22 @@ export const fetchTeamsInfosForTickets = async (
     }) as PlayerInformations[];
   }) as PlayerInformations[][];
 };
+
+export const fetchParticipantsSummonersName = async (toornamentId: string) => {
+  logger.silly('Fetch toornaments participants.');
+  const response = await toornamentAPI.get<ToornamentParticipant[]>(`/tournaments/${toornamentId}/participants`, {
+    headers: {
+      Range: 'participants=0-49',
+    },
+  });
+  const toornamentParticipants: ToornamentParticipant[] = response.data;
+  return toornamentParticipants.map((participant: ToornamentParticipant) => ({
+    name: participant.name,
+    summonersName: participant.lineup.map((player) => {
+      if (!player.custom_fields || !player.custom_fields.summoner_player_id) {
+        return '';
+      }
+      return player.custom_fields.summoner_player_id;
+    }),
+  }));
+};

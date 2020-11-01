@@ -114,6 +114,7 @@ export interface ToornamentPlayerCustomFields {
     last_name: string;
     first_name: string;
   };
+  summoner_player_id?: string;
 }
 
 export interface ToornamentPlayer {
@@ -143,4 +144,8 @@ export interface PlayerInformations {
   email: string;
   firstname: string;
   lastname: string;
+}
+export interface SummonersParticipants {
+  name: string;
+  summonersName: string[];
 }
