@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/no-process-exit */
 import { PrismaClient } from '@prisma/client';
-import { databaseHost, databaseName, databasePassword, databasePort, databaseUsername, isTest } from './environment';
+import { isTest } from './environment';
 import log from './log';
 
 const database = new PrismaClient({
@@ -28,7 +28,6 @@ if (!isTest()) {
 
 // Dump query to initiate the connection
 const setup = async () => {
-  process.env.DATABASE_URL = `mysql://${databaseUsername()}:${databasePassword()}@${databaseHost()}:${databasePort()}/${databaseName()}`;
   await database.setting.findMany();
 };
 
