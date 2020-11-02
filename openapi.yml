@@ -25,9 +25,9 @@ info:
 servers:
   - url: http://127.0.0.1:3000
     description: Serveur local
-  - url: https://ua-api.dev.uttnetgroup.fr/
+  - url: https://arena.dev.uttnetgroup.fr/api
     description: Serveur de pré-production
-  - url: https://ua-api.uttnetgroup.fr
+  - url: https://arena.utt.fr/api
     description: Serveur de production
 
 tags:
@@ -35,7 +35,7 @@ tags:
     description: Routes générales
   - name: Admin
     description: Routes d'administration
-  - name: Auth
+  - name: Authentication
     description: Routes d'authentification
   - name: Items
     description: Routes liées aux items
@@ -295,20 +295,20 @@ paths:
   /:
     get:
       summary: Renvoie l'état du serveur
-      description: Indique si le serveur accepte la connexion "tout public" et si la billetterie est ouverte ou non.
+      description: Indique si le serveur fonctionne correctement (connexion HTTP et à la base de données).
       tags:
         - Général
       responses:
         200:
-          description: Renvoie l'état du serveur
+          description: Indique si le serveur fonctionne correctement
           content:
             application/json:
               schema:
-                type: object
+                type: Object
                 properties:
-                  login:
+                  http:
                     type: boolean
-                  shop:
+                  database:
                     type: boolean
 
   /admin/auth/login/{userId}:
@@ -746,7 +746,7 @@ paths:
         *La connexion doit être autorisée (seuls les organisateurs sont toujours autorisés à accéder à cette route).*
         *Le compte doit être activé.*
       tags:
-        - Auth
+        - Authentication
       requestBody:
         required: true
         content:
@@ -783,7 +783,7 @@ paths:
       summary: Génère un nouveau token d'authentification
       description: Génère un nouveau token d'authentification si le token actuel arrive bientôt à expiration.
       tags:
-        - Auth
+        - Authentication
       security:
         - BearerAuth: []
       responses:
@@ -806,10 +806,10 @@ paths:
   /auth/register:
     post:
       summary: Crée un nouvel utilisateur
-      description: Crée un nouvel utilisateur.<br/>
+      description: Crée un nouvel utilisateur et lui envoie un mail pour confirmer son adresse mail.<br/>
         *La connexion doit être autorisée.*
       tags:
-        - Auth
+        - Authentication
       requestBody:
         required: true
         content:
@@ -852,7 +852,7 @@ paths:
       description: Envoie un mail contenant un token permettant de réinitialiser son mot de passe.<br/>
         *La connexion doit être autorisée.*
       tags:
-        - Auth
+        - Authentication
       requestBody:
         required: true
         content:
@@ -875,7 +875,7 @@ paths:
       description: Modifie le mot de passe de l'utilisateur associé au token de réinitialisation de mot de passe.<br/>
         *La connexion doit être autorisée.*
       tags:
-        - Auth
+        - Authentication
       parameters:
         - in: path
           name: token
@@ -922,7 +922,7 @@ paths:
       description: Valide le compte de l'utilisateur associé au token d'inscription.<br/>
         *La connexion doit être autorisée.*
       tags:
-        - Auth
+        - Authentication
       parameters:
         - in: path
           name: token
@@ -998,6 +998,25 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Item'
+
+  /settings:
+    get:
+      summary: Renvoie les paramètres du serveur
+      description: Indique si le serveur accepte la connexion "tout public" et si la billetterie est ouverte ou non.
+      tags:
+        - Général
+      responses:
+        200:
+          description: Renvoie les paramètres du serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  login:
+                    type: boolean
+                  shop:
+                    type: boolean
 
   /teams:
     get:
