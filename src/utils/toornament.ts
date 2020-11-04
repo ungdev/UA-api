@@ -82,11 +82,12 @@ export const fetchParticipantsDiscordIds = async (toornamentId: string) => {
 
     if (!participant.lineup) {
       if (!participant.custom_fields || !participant.custom_fields.discord) {
-        throw new Error(`${participant.name} don't have a discord id`);
+        logger.warn(`${participant.name} don't have a discord id`);
+        return { name: participant.name };
       }
       return {
         name: participant.name,
-        discordIds: [participant.custom_fields.discord],
+        discordIds: [participant.custom_fields.discord.replace(' #', '#')],
       };
     }
 
@@ -96,9 +97,10 @@ export const fetchParticipantsDiscordIds = async (toornamentId: string) => {
       name: participant.name,
       discordIds: participant.lineup.map((player) => {
         if (!player.custom_fields || !player.custom_fields.discord) {
-          throw new Error(`${participant.name} team has a member without a discord id`);
+          logger.warn(`${participant.name} team has a member without a discord id`);
+          return '';
         }
-        return player.custom_fields.discord;
+        return player.custom_fields.discord.replace(' #', '#');
       }),
     };
   });

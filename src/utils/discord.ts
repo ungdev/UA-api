@@ -2,6 +2,7 @@ import { Tournament } from '@prisma/client';
 import Discord, { GuildMember } from 'discord.js';
 import logger from './log';
 import { discordServer, discordToken } from './environment';
+import removeAccents from './removeAccents';
 
 const bot = new Discord.Client();
 let server: Discord.Guild;
@@ -12,7 +13,7 @@ export const discordLogin = () =>
       bot.login(discordToken());
       bot.on('ready', () => {
         logger.info('Bot ready');
-        server = bot.guilds.cache.get(discordServer());
+        server = await bot.guilds.fetch(discordServer(), true, true);
 
         resolve();
       });
@@ -32,11 +33,6 @@ const getChannelsByName = (name: string) => server.channels.cache.filter((channe
 const getRolesByName = (name: string) => server.roles.cache.filter((role) => role.name === name).array();
 
 /**
- * Get the self bot role id it is equal at the bot name and never changes
- */
-const getSelfRoleId = () => server.me.roles.cache.find((role) => role.name === server.me.displayName);
-
-/**
  * Convert the name to match the discord text channels restrictions
  * No majuscules, no special characters, replace spaces by tiret
  */
@@ -49,8 +45,8 @@ export const getDiscordTeamName = (team: string, tournamentId: string) => {
   // Replace multiple spaces or spaces by one tiret
   name = name.replace(/[\s-]+/g, '-');
 
-  // Remove special characters except french accents
-  name = name.replace(/[^\s\w]àâäéèêëîïôöùûüÿçæœ_-/g, '');
+  // Remove special characters
+  name = removeAccents(name).replace(/[^\s\w-_]/g, '');
 
   return name;
 };
@@ -99,7 +95,7 @@ export const createTeam = async (discordTeamName: string, discordIds: Array<stri
 
       return server.channels.create(discordTeamName, {
         type: channelType,
-        parent: tournament.discordCategoryId,
+        parent: tournament[channelType === 'text' ? 'discordTextCategoryId' : 'discordVocalCategoryId'],
         permissionOverwrites: [
           {
             id: server.roles.everyone.id,
@@ -107,6 +103,10 @@ export const createTeam = async (discordTeamName: string, discordIds: Array<stri
           },
           {
             id: teamRole.id,
+            allow: ['VIEW_CHANNEL'],
+          },
+          {
+            id: tournament.discordStaffRoleId,
             allow: ['VIEW_CHANNEL'],
           },
         ],
@@ -147,7 +147,7 @@ export const addRolesToUsers = (discordTeamName: string, roleId: string, discord
   // Check if all members are in discord
   discordIds.forEach((discordId) => {
     if (!getMemberByName(discordId)) {
-      logger.warn(`${discordId} isn't on the discord`);
+      logger.warn(`${discordId} isn't on the discord (team ${discordTeamName})`);
     }
   });
 
