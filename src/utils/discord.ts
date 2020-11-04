@@ -136,6 +136,21 @@ export const deleteTeam = async (discordTeamName: string) => {
 };
 
 /**
+ * Delete all channels for each teams and their roles
+ */
+export const deleteAllTeams = async () => {
+  // Filter roles beginning with lowercase letters followed by an underscore
+  await Promise.all(
+    server.roles.cache
+      .filter((role) => /[a-z]{2,}_/.test(role.name))
+      .array()
+      .map(async (role) => {
+        await deleteTeam(role.name);
+      }),
+  );
+};
+
+/**
  * Add the tournmament role to each register user
  * @param discordTeamName discord team such as lol_awesome-team
  * @param roleId Tournament discord role id
