@@ -11,7 +11,7 @@ export const discordLogin = () =>
   new Promise((resolve) => {
     if (discordToken()) {
       bot.login(discordToken());
-      bot.on('ready', () => {
+      bot.on('ready', async () => {
         logger.info('Bot ready');
         server = await bot.guilds.fetch(discordServer(), true, true);
 

@@ -7,25 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Cart {
-  id               String               @id
-  transactionState TransactionState     @default(pending)
-  transactionId    Int?
-  paidAt           DateTime?
-  userId           String
-  user             User                 @relation(fields: [userId], references: [id])
-  cartItems        CartItem[]
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @default(now()) @updatedAt
-
-  @@index([userId], name: "carts_ibfk_1")
-  @@map("carts")
-}
-
 model CartItem {
   id        String   @id
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  updatedAt DateTime @updatedAt
   quantity  Int
   itemId    String
   cartId    String
@@ -34,23 +19,34 @@ model CartItem {
   user      User     @relation(fields: [forUserId], references: [id])
   item      Item     @relation(fields: [itemId], references: [id])
 
-  @@index([itemId], name: "cartitems_ibfk_1")
-  @@index([cartId], name: "cartitems_ibfk_2")
-  @@index([forUserId], name: "cartitems_ibfk_3")
   @@map("cartitems")
 }
 
+model Cart {
+  id               String                @id
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  transactionState cart_transactionState @default(pending)
+  transactionId    Int?
+  paidAt           DateTime?
+  userId           String
+  user             User                  @relation(fields: [userId], references: [id])
+  cartitems        CartItem[]
+
+  @@map("carts")
+}
+
 model Item {
-  id           String       @id
+  id           String        @id
   name         String
-  category     ItemCategory
+  category     item_category
   attribute    String?
   price        Int
   reducedPrice Int?
   infos        String?
   image        String?
   stock        Int?
-  cartItems    CartItem[]
+  cartitems    CartItem[]
 
   @@map("items")
 }
@@ -58,18 +54,16 @@ model Item {
 model Team {
   id           String     @id
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now()) @updatedAt
+  updatedAt    DateTime   @updatedAt
   name         String
   lockedAt     DateTime?
-  captainId    String
+  captainId    String     @unique
   tournamentId String
   captain      User       @relation(fields: [captainId], references: [id])
   tournament   Tournament @relation(fields: [tournamentId], references: [id])
   askingUsers  User[]     @relation("teamAskingUsers")
   users        User[]     @relation("teamUsers")
 
-  @@index([captainId], name: "teams_ibfk_1")
-  @@index([tournamentId], name: "teams_ibfk_2")
   @@map("teams")
 }
 
@@ -91,13 +85,13 @@ model Tournament {
 model User {
   id            String     @id
   createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
+  updatedAt     DateTime   @updatedAt
   username      String?
   firstname     String
   lastname      String
-  email         String
+  email         String     @unique
   password      String
-  type          UserType
+  type          user_type
   permissions   String?
   place         String?
   scannedAt     DateTime?
@@ -108,23 +102,21 @@ model User {
   resetToken    String?
   askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
   team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
-  cartItems     CartItem[]
+  cartitems     CartItem[]
   carts         Cart[]
-  Team          Team[]
 
-  @@index([askingTeamId], name: "users_ibfk_1")
-  @@index([teamId], name: "users_ibfk_2")
+  Team Team[]
   @@map("users")
 }
 
-model Setting {
-  id    String  @id
+model Settings {
+  id    String @id
   value Boolean
 
   @@map("settings")
 }
 
-enum TransactionState {
+enum cart_transactionState {
   pending
   paid
   canceled
@@ -132,12 +124,12 @@ enum TransactionState {
   refunded
 }
 
-enum ItemCategory {
+enum item_category {
   ticket
   item
 }
 
-enum UserType {
+enum user_type {
   player
   coach
   visitor
