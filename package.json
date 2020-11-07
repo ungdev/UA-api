@@ -82,7 +82,7 @@
     "test:coverage": "nyc yarn test",
     "discord:sync:dev": "ts-node-dev --no-notify src/scripts/discordSync.ts",
     "discord:sync:start": "node build/src/scripts/discordSync.js",
-    "discord:reset:dev": "ts-node-dev --no-notify build/src/scripts/discordReset.js",
+    "discord:reset:dev": "ts-node-dev --no-notify src/scripts/discordReset.ts",
     "discord:reset:start": "node build/src/scripts/discordReset.js"
   }
 }

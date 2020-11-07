@@ -1,15 +1,27 @@
 import Sentry from '@sentry/node';
+import { fetchTournaments } from '../operations/tournament';
 
-import { discordLogin, deleteAllTeams } from '../utils/discord';
+import * as discord from '../utils/discord';
 import logger from '../utils/log';
 import { initSentryNode } from '../utils/sentry';
 
 (async () => {
   initSentryNode();
-  await discordLogin();
+  await discord.init();
+
+  const tournaments = await fetchTournaments();
 
   // Delete all teams
-  await deleteAllTeams();
+  logger.info('Delete all teams...');
+  await discord.deleteAllTeams();
+
+  const roleIds = tournaments.map((tournament) => tournament.discordRoleId);
+
+  // Unassign tournament roles
+  logger.info('Unassign tournaments roles...');
+  await discord.unassignRoles(roleIds);
+
+  process.exit(0);
 })().catch((error) => {
   logger.error(error);
   Sentry.captureException(error);

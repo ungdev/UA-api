@@ -125,14 +125,7 @@ export enum Error {
 // Alias type for Object
 export type ObjectType = Record<string, unknown>;
 
-// Toornament Credentials
-export interface ToornamentCredentials {
-  participantToken: string;
-  registrationToken: string;
-  expirationDate: Date;
-  apiKey: string;
-}
-
+// Toornament
 export interface ToornamentPlayerCustomFields {
   discord?: string;
 }

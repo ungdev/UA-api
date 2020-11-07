@@ -7,13 +7,16 @@ import removeAccents from './removeAccents';
 const bot = new Discord.Client();
 let server: Discord.Guild;
 
-export const discordLogin = () =>
+export const init = () =>
   new Promise((resolve) => {
     if (discordToken()) {
       bot.login(discordToken());
       bot.on('ready', async () => {
         logger.info('Bot ready');
-        server = await bot.guilds.fetch(discordServer(), true, true);
+        server = await bot.guilds.fetch(discordServer());
+
+        // Mandatory to see others members than ourself
+        await server.members.fetch();
 
         resolve();
       });
@@ -32,51 +35,57 @@ const getChannelsByName = (name: string) => server.channels.cache.filter((channe
 
 const getRolesByName = (name: string) => server.roles.cache.filter((role) => role.name === name).array();
 
+const getRolesByIds = (roleIds: string[]) => server.roles.cache.filter((role) => roleIds.includes(role.id));
+
 /**
  * Convert the name to match the discord text channels restrictions
- * No majuscules, no special characters, replace spaces by tiret
+ * No majuscules, no accent, no special characters, replace spaces by tiret
+ * @param teamName name of the team
+ * @param tournamentId short name of the tournament
  */
-export const getDiscordTeamName = (team: string, tournamentId: string) => {
-  let name = `${tournamentId}_${team}`;
+export const getDiscordTeamName = (teamName: string, tournamentId: string) => {
+  let name = `${tournamentId}_${teamName}`;
 
-  name = name.toLowerCase();
-  name = name.trim();
-
-  // Replace multiple spaces or spaces by one tiret
-  name = name.replace(/[\s-]+/g, '-');
+  // Lowercase and remove trailing spaces
+  name = name.toLowerCase().trim();
 
   // Remove special characters
   name = removeAccents(name).replace(/[^\s\w-_]/g, '');
 
+  // Replace multiple spaces or tirets by one tiret
+  name = name.replace(/[\s-]+/g, '-');
+
   return name;
 };
 
-export const fetchDiscordParticipants = (tournamentId: string) => {
-  const roles = server.roles.cache.array();
-
-  // Filter the role by tournamentId_
-  // Warning the staff role mustn't be tournamentId_staff but tournamentId staff
-  return roles
+/**
+ * Fetch participants who have the role of the given tournament
+ * @param tournamentId short name of the tournament
+ */
+export const fetchParticipantsInTeamTournament = (tournamentId: string) =>
+  server.roles.cache
+    .array()
     .filter((role) => role.name.startsWith(`${tournamentId}_`))
     .map((role) => ({
       name: role.name,
       discordIds: role.members.map((member) => getMemberUsername(member)),
     }));
-};
 
 /**
  * Fetch all users with the tournament's participant role
- * @param tournamentRoleId Tournament discord role id
+ * @param tournamentRoleId tournament discord role id
  */
-export const fetchDiscordSoloParticipants = (tournamentRoleId: string) => {
+export const fetchParticipantsInSoloTournament = (tournamentRoleId: string) => {
   const tournamentRole = server.roles.cache.get(tournamentRoleId);
   return tournamentRole.members.map((member) => getMemberUsername(member));
 };
 
 /**
  * Create a discord team with 2 channels and assign roles
+ * @param discordTeamName team name in the format "{tournament}_{team}"
+ * @param tournament tournament row from the database
  */
-export const createTeam = async (discordTeamName: string, discordIds: Array<string>, tournament: Tournament) => {
+export const createTeam = async (discordTeamName: string, tournament: Tournament) => {
   // Create role
   logger.debug(`Create role ${discordTeamName}`);
   const teamRole = await server.roles.create({
@@ -88,7 +97,6 @@ export const createTeam = async (discordTeamName: string, discordIds: Array<stri
   // Create channels
   const channelTypes: Array<'text' | 'voice'> = ['text', 'voice'];
 
-  // Allow the channel to be viewed only by the tournament staff and the team and the bot (to delete the channel)
   await Promise.all(
     channelTypes.map((channelType) => {
       logger.debug(`Create channel ${channelType}:${discordTeamName}`);
@@ -97,6 +105,7 @@ export const createTeam = async (discordTeamName: string, discordIds: Array<stri
         type: channelType,
         parent: tournament[channelType === 'text' ? 'discordTextCategoryId' : 'discordVocalCategoryId'],
         permissionOverwrites: [
+          // Allow the channel to be viewed only by the team and the tournament staff
           {
             id: server.roles.everyone.id,
             deny: ['VIEW_CHANNEL'],
@@ -147,6 +156,21 @@ export const deleteAllTeams = async () => {
       .map(async (role) => {
         await deleteTeam(role.name);
       }),
+  );
+};
+
+/**
+ * Unassign roles to all members
+ * @param roleIds Array of role ids
+ */
+export const unassignRoles = async (roleIds: string[]) => {
+  await Promise.all(
+    server.members.cache.map((member) => {
+      if (member.roles.cache.find((role) => roleIds.includes(role.id))) {
+        logger.debug(`Unassign roles to ${getMemberUsername(member)}`);
+      }
+      return member.roles.remove(getRolesByIds(roleIds));
+    }),
   );
 };
 
