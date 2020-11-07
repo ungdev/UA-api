@@ -103,21 +103,23 @@ DROP TABLE IF EXISTS `tournaments`;
 CREATE TABLE `tournaments` (
   `id` varchar(255) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `maxPlayers` smallint(6) NOT NULL,
-  `playersPerTeam` smallint(6) NOT NULL,
-  `toornamentId` varchar(25) NOT NULL,
-  `discordRoleId` varchar(25) NOT NULL,
-  `discordCategoryId` varchar(25) NOT NULL,
+  `maxPlayers` int(6) NOT NULL,
+  `playersPerTeam` int(6) NOT NULL,
+  `toornamentId` varchar(255) DEFAULT NULL,
+  `discordRoleId` varchar(255) DEFAULT NULL,
+  `discordVocalCategoryId` varchar(255) DEFAULT NULL,
+  `discordTextCategoryId` varchar(255) DEFAULT NULL,
+  `discordStaffRoleId` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`, `toornamentId`, `discordRoleId`, `discordCategoryId`) VALUES
-('csgo',	'Counter-Strike : Global Offensive',	80,	5,	'',	'',	''),
-('lol',	'League of Legends',	160,	5,	'',	'',	''),
-('rl',	'Rocket League',	48,	3,	'',	'',	''),
-('ssbu',	'Super Smash Bros Ultimate',	64,	1,	'',	'',	''),
-('tft',	'Teamfight Tactics',	16,	1,	'',	'',	''),
-('valorant',	'Valorant',	80,	5,	'',	'',	'');
+INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`) VALUES
+('csgo',	'Counter-Strike : Global Offensive',	80,	5),
+('lol',	'League of Legends',	160,	5),
+('rl',	'Rocket League',	48,	3),
+('ssbu',	'Super Smash Bros Ultimate',	64,	1),
+('tft',	'Teamfight Tactics',	16,	1),
+('valorant',	'Valorant',	80,	5);
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
