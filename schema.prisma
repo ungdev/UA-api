@@ -8,15 +8,15 @@ datasource db {
 }
 
 model Cart {
-  id               String               @id
-  transactionState TransactionState     @default(pending)
+  id               String           @id
+  userId           String
+  transactionState TransactionState @default(pending)
   transactionId    Int?
   paidAt           DateTime?
-  userId           String
-  user             User                 @relation(fields: [userId], references: [id])
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  user             User             @relation(fields: [userId], references: [id])
   cartItems        CartItem[]
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @default(now()) @updatedAt
 
   @@index([userId], name: "carts_ibfk_1")
   @@map("carts")
@@ -24,12 +24,12 @@ model Cart {
 
 model CartItem {
   id        String   @id
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  quantity  Int
   itemId    String
+  quantity  Int
   cartId    String
   forUserId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
   cart      Cart     @relation(fields: [cartId], references: [id])
   user      User     @relation(fields: [forUserId], references: [id])
   item      Item     @relation(fields: [itemId], references: [id])
@@ -55,73 +55,72 @@ model Item {
   @@map("items")
 }
 
+model Setting {
+  id    String  @id
+  value Boolean
+
+  @@map("settings")
+}
+
 model Team {
   id           String     @id
+  name         String
+  tournamentId String
+  captainId    String     @unique
+  lockedAt     DateTime?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now()) @updatedAt
-  name         String
-  lockedAt     DateTime?
-  captainId    String
-  tournamentId String
   captain      User       @relation(fields: [captainId], references: [id])
   tournament   Tournament @relation(fields: [tournamentId], references: [id])
   askingUsers  User[]     @relation("teamAskingUsers")
   users        User[]     @relation("teamUsers")
 
-  @@index([captainId], name: "teams_ibfk_1")
   @@index([tournamentId], name: "teams_ibfk_2")
   @@map("teams")
 }
 
 model Tournament {
-  id                      String @id
-  name                    String
-  maxPlayers              Int
-  playersPerTeam          Int
-  toornamentId            String?
-  discordRoleId           String?
-  discordVocalCategoryId  String?
-  discordTextCategoryId   String?
-  discordStaffRoleId      String?
-  teams                   Team[]
+  id                     String  @id
+  name                   String  @unique
+  maxPlayers             Int
+  playersPerTeam         Int
+  toornamentId           String?
+  discordRoleId          String?
+  discordStaffRoleId     String?
+  discordVocalCategoryId String?
+  discordTextCategoryId  String?
+  teams                  Team[]
 
   @@map("tournaments")
 }
 
 model User {
   id            String     @id
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
   username      String?
   firstname     String
   lastname      String
-  email         String
-  password      String
+  email         String?    @unique
+  password      String?
   type          UserType
   permissions   String?
-  place         String?
-  scannedAt     DateTime?
-  discordId     String?
-  teamId        String?
-  askingTeamId  String?
   registerToken String?
   resetToken    String?
+  place         String?    @unique
+  scannedAt     DateTime?
+  discordId     String?    @unique
+  teamId        String?
+  askingTeamId  String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @default(now()) @updatedAt
   askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
   team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
   cartItems     CartItem[]
   carts         Cart[]
-  Team          Team[]
+  Team          Team?
 
   @@index([askingTeamId], name: "users_ibfk_1")
   @@index([teamId], name: "users_ibfk_2")
   @@map("users")
-}
-
-model Setting {
-  id    String  @id
-  value Boolean
-
-  @@map("settings")
 }
 
 enum TransactionState {
