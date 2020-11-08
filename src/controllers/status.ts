@@ -8,7 +8,7 @@ export default [
 
     // Try to reach the database
     try {
-      await database.settings.findMany();
+      await database.setting.findMany();
     } catch {
       databaseStatus = false;
     }

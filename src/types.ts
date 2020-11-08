@@ -1,6 +1,4 @@
-/* eslint-disable camelcase */
-import { Request } from 'express';
-import { Tournament, User as PrismaUser } from '@prisma/client';
+import { Tournament, User, TransactionState } from '@prisma/client';
 
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
@@ -38,32 +36,12 @@ export interface Contact {
 /** Databse extensions **/
 /************************/
 
+export interface UserWithHasPaid extends User {
+  hasPaid: boolean;
+}
+
 export interface TournamentWithLockedTeams extends Tournament {
   lockedTeamsCount: number;
-}
-
-/********************/
-/** Database enums **/
-/********************/
-
-export enum ItemCategory {
-  ticket = 'ticket',
-  item = 'item',
-}
-
-export enum UserType {
-  player = 'player',
-  coach = 'coach',
-  visitor = 'visitor',
-  orga = 'orga',
-}
-
-export enum TransactionState {
-  pending = 'pending',
-  paid = 'paid',
-  canceled = 'canceled',
-  refused = 'refused',
-  refunded = 'refunded',
 }
 
 /************/
@@ -80,14 +58,6 @@ export interface EtupayResponse {
 /**********/
 /** Misc **/
 /**********/
-
-export interface User extends PrismaUser {
-  hasPaid?: boolean;
-}
-
-export interface BodyRequest<T> extends Request {
-  body: T;
-}
 
 export enum Error {
   // 400
@@ -126,6 +96,7 @@ export enum Error {
 export type ObjectType = Record<string, unknown>;
 
 // Toornament
+/* eslint-disable camelcase */
 export interface ToornamentPlayerCustomFields {
   discord?: string;
 }
@@ -139,6 +110,7 @@ export interface ToornamentParticipant {
   custom_fields?: ToornamentPlayerCustomFields;
   lineup: Array<ToornamentPlayer>;
 }
+/* eslint-enable camelcase */
 
 export interface DiscordParticipants {
   name: string;

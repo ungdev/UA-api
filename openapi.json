@@ -20,11 +20,11 @@
       "description": "Serveur local"
     },
     {
-      "url": "https://ua-api.dev.uttnetgroup.fr/",
+      "url": "https://arena.dev.uttnetgroup.fr/api",
       "description": "Serveur de pré-production"
     },
     {
-      "url": "https://ua-api.uttnetgroup.fr",
+      "url": "https://arena.utt.fr/api",
       "description": "Serveur de production"
     }
   ],
@@ -38,7 +38,7 @@
       "description": "Routes d'administration"
     },
     {
-      "name": "Auth",
+      "name": "Authentication",
       "description": "Routes d'authentification"
     },
     {
@@ -431,22 +431,22 @@
     "/": {
       "get": {
         "summary": "Renvoie l'état du serveur",
-        "description": "Indique si le serveur accepte la connexion \"tout public\" et si la billetterie est ouverte ou non.",
+        "description": "Indique si le serveur fonctionne correctement (connexion HTTP et à la base de données).",
         "tags": [
           "Général"
         ],
         "responses": {
           "200": {
-            "description": "Renvoie l'état du serveur",
+            "description": "Indique si le serveur fonctionne correctement",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "login": {
+                    "http": {
                       "type": "boolean"
                     },
-                    "shop": {
+                    "database": {
                       "type": "boolean"
                     }
                   }
@@ -1099,7 +1099,7 @@
         "summary": "Authentifie l'utilisateur",
         "description": "Permet d'obtenir un token d'authentification.<br/> *La connexion doit être autorisée (seuls les organisateurs sont toujours autorisés à accéder à cette route).* *Le compte doit être activé.*",
         "tags": [
-          "Auth"
+          "Authentication"
         ],
         "requestBody": {
           "required": true,
@@ -1154,7 +1154,7 @@
         "summary": "Génère un nouveau token d'authentification",
         "description": "Génère un nouveau token d'authentification si le token actuel arrive bientôt à expiration.",
         "tags": [
-          "Auth"
+          "Authentication"
         ],
         "security": [
           {
@@ -1192,9 +1192,9 @@
     "/auth/register": {
       "post": {
         "summary": "Crée un nouvel utilisateur",
-        "description": "Crée un nouvel utilisateur.<br/> *La connexion doit être autorisée.*",
+        "description": "Crée un nouvel utilisateur et lui envoie un mail pour confirmer son adresse mail.<br/> *La connexion doit être autorisée.*",
         "tags": [
-          "Auth"
+          "Authentication"
         ],
         "requestBody": {
           "required": true,
@@ -1256,7 +1256,7 @@
         "summary": "Envoie un mail permettant de changer son mot de passe",
         "description": "Envoie un mail contenant un token permettant de réinitialiser son mot de passe.<br/> *La connexion doit être autorisée.*",
         "tags": [
-          "Auth"
+          "Authentication"
         ],
         "requestBody": {
           "required": true,
@@ -1289,7 +1289,7 @@
         "summary": "Modifie le mot de passe de l'utilisateur associé au token",
         "description": "Modifie le mot de passe de l'utilisateur associé au token de réinitialisation de mot de passe.<br/> *La connexion doit être autorisée.*",
         "tags": [
-          "Auth"
+          "Authentication"
         ],
         "parameters": [
           {
@@ -1361,7 +1361,7 @@
         "summary": "Valide le compte de l'utilisateur",
         "description": "Valide le compte de l'utilisateur associé au token d'inscription.<br/> *La connexion doit être autorisée.*",
         "tags": [
-          "Auth"
+          "Authentication"
         ],
         "parameters": [
           {
@@ -1473,6 +1473,35 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/Item"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settings": {
+      "get": {
+        "summary": "Renvoie les paramètres du serveur",
+        "description": "Indique si le serveur accepte la connexion \"tout public\" et si la billetterie est ouverte ou non.",
+        "tags": [
+          "Général"
+        ],
+        "responses": {
+          "200": {
+            "description": "Renvoie les paramètres du serveur",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "login": {
+                      "type": "boolean"
+                    },
+                    "shop": {
+                      "type": "boolean"
+                    }
                   }
                 }
               }
