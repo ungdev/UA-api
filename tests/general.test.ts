@@ -9,7 +9,7 @@ describe('General API', () => {
       await request(app).get('/settings').expect(200, { shop: false, login: false });
     });
     it('should return the updated value', async () => {
-      await database.settings.update({
+      await database.setting.update({
         where: {
           id: 'login',
         },

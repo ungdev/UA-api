@@ -441,7 +441,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "Object",
+                  "type": "object",
                   "properties": {
                     "http": {
                       "type": "boolean"

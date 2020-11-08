@@ -96,6 +96,7 @@ export enum Error {
 export type ObjectType = Record<string, unknown>;
 
 // Toornament
+/* eslint-disable camelcase */
 export interface ToornamentPlayerCustomFields {
   discord?: string;
 }
@@ -109,6 +110,7 @@ export interface ToornamentParticipant {
   custom_fields?: ToornamentPlayerCustomFields;
   lineup: Array<ToornamentPlayer>;
 }
+/* eslint-enable camelcase */
 
 export interface DiscordParticipants {
   name: string;
