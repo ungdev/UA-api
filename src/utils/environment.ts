@@ -17,7 +17,7 @@ export const jwtExpires = (): string => process.env.JWT_EXPIRES;
 export const slackToken = (): string => process.env.SLACK_TOKEN;
 export const slackContactChannel = (): string => process.env.SLACK_CONTACT_CHANNEL;
 
-// Environment
+// Sentry
 export const sentryUrl = (): string => process.env.SENTRY_URL;
 
 // Database
