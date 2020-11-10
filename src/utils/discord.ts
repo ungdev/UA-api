@@ -151,7 +151,7 @@ export const deleteAllTeams = async () => {
   // Filter roles beginning with lowercase letters followed by an underscore
   await Promise.all(
     server.roles.cache
-      .filter((role) => /^[a-z]{2,}_/.test(role.name))
+      .filter((role) => /^[a-z-]{2,}_/.test(role.name))
       .array()
       .map(async (role) => {
         await deleteTeam(role.name);
