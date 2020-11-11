@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Cart {
+  id               String           @id
+  userId           String
+  transactionState TransactionState @default(pending)
+  transactionId    Int?
+  paidAt           DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  user             User             @relation(fields: [userId], references: [id])
+  cartItems        CartItem[]
+
+  @@index([userId], name: "carts_ibfk_1")
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id
+  itemId    String
+  quantity  Int
+  cartId    String
+  forUserId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  user      User     @relation(fields: [forUserId], references: [id])
+  item      Item     @relation(fields: [itemId], references: [id])
+
+  @@index([itemId], name: "cartitems_ibfk_1")
+  @@index([cartId], name: "cartitems_ibfk_2")
+  @@index([forUserId], name: "cartitems_ibfk_3")
+  @@map("cartitems")
+}
+
+model Item {
+  id           String       @id
+  name         String
+  category     ItemCategory
+  attribute    String?
+  price        Int
+  reducedPrice Int?
+  infos        String?
+  image        String?
+  stock        Int?
+  cartItems    CartItem[]
+
+  @@map("items")
+}
+
+model Setting {
+  id    String  @id
+  value Boolean
+
+  @@map("settings")
+}
+
+model Team {
+  id           String     @id
+  name         String
+  tournamentId String
+  captainId    String     @unique
+  lockedAt     DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
+  captain      User       @relation(fields: [captainId], references: [id])
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  askingUsers  User[]     @relation("teamAskingUsers")
+  users        User[]     @relation("teamUsers")
+
+  @@index([tournamentId], name: "teams_ibfk_2")
+  @@map("teams")
+}
+
+model Tournament {
+  id                     String  @id
+  name                   String  @unique
+  maxPlayers             Int
+  playersPerTeam         Int
+  toornamentId           String?
+  discordRoleId          String?
+  discordStaffRoleId     String?
+  discordVocalCategoryId String?
+  discordTextCategoryId  String?
+  teams                  Team[]
+
+  @@map("tournaments")
+}
+
+model User {
+  id            String     @id
+  username      String?
+  firstname     String
+  lastname      String
+  email         String?    @unique
+  password      String?
+  type          UserType
+  permissions   String?
+  registerToken String?
+  resetToken    String?
+  place         String?    @unique
+  scannedAt     DateTime?
+  discordId     String?    @unique
+  teamId        String?
+  askingTeamId  String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @default(now()) @updatedAt
+  askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
+  team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
+  cartItems     CartItem[]
+  carts         Cart[]
+  Team          Team?
+
+  @@index([askingTeamId], name: "users_ibfk_1")
+  @@index([teamId], name: "users_ibfk_2")
+  @@map("users")
+}
+
+enum TransactionState {
+  pending
+  paid
+  canceled
+  refused
+  refunded
+}
+
+enum ItemCategory {
+  ticket
+  item
+}
+
+enum UserType {
+  player
+  coach
+  visitor
+  orga
+}

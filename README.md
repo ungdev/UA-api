@@ -19,7 +19,7 @@ git clone https://github.com/ungdev/UA-api.git
 
 cd UA-api
 
-# Install all the depedencies
+# Install all the dependencies
 yarn
 ```
 
@@ -32,7 +32,7 @@ CREATE DATABASE arena CHARACTER SET utf8;
 Create the tables and populate them with
 
 ```
-mysql -u USERNAME -p arena < seed.sql
+mysql -u DATABASE_USER -p arena < seed.sql
 ```
 
 ## Configuration
@@ -56,12 +56,12 @@ yarn api-check # checks if openapi.yml is correct
 
 ## Prisma config
 
-Before use `npx prisma generate` to regenerate your prisma client add `prisma/.env` with `DATABASE_URL`
+Use `npx prisma generate` to generate your prisma client
 
 ## How to test
 
 - Change `DATABASE_NAME` in `.env` with your testing database name
 
-- Seed the database before testing
+- Seed the database before testing with `mysql -u DATABASE_USER -p DATABASE_NAME < seed.sql` by replacing `DATABASE_USER` and `DATABASE_NAME` with their values
 
 - Run `yarn test`

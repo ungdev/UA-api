@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { TransactionState, UserType } from './types';
+import { TransactionState, UserType } from '@prisma/client';
 
 const dynamicEntity = Joi.object({
   id: Joi.string().length(6).required(),

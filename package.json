@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": false,
   "dependencies": {
-    "@prisma/client": "2.7.1",
+    "@prisma/client": "^2.10.2",
     "@sentry/integrations": "^5.25.0",
     "@sentry/node": "^5.25.0",
     "@sentry/tracing": "^5.25.0",
@@ -44,7 +44,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "@prisma/cli": "^2.9.0",
+    "@prisma/cli": "^2.10.2",
     "@types/chai": "^4.2.12",
     "@types/mocha": "^8.0.3",
     "@types/supertest": "^2.0.10",
@@ -81,6 +81,8 @@
     "test": "NODE_ENV=test mocha -r ts-node/register tests/**/*.test.ts --exit",
     "test:coverage": "nyc yarn test",
     "discord:sync:dev": "ts-node-dev --no-notify src/scripts/discordSync.ts",
-    "discord:sync:start": "node build/src/scripts/discordSync.js"
+    "discord:sync:start": "node build/src/scripts/discordSync.js",
+    "discord:reset:dev": "ts-node-dev --no-notify src/scripts/discordReset.ts",
+    "discord:reset:start": "node build/src/scripts/discordReset.js"
   }
 }

@@ -11,6 +11,7 @@ import { checkJson } from './middlewares/checkJson';
 import { morgan } from './utils/log';
 import { apiPrefix, isTest } from './utils/environment';
 import { initSentryExpress } from './utils/sentry';
+import { initUserRequest } from './middlewares/user';
 
 const app = express();
 
@@ -26,6 +27,9 @@ app.use(cors(), helmet());
 // Body json middlewares
 app.use(bodyParser.json(), checkJson());
 
+// Fetch user from database
+app.use(initUserRequest);
+
 // Main routes
 app.use(apiPrefix(), routes());
 
@@ -37,7 +41,7 @@ app.use(Sentry.Handlers.errorHandler());
 // Optional fallthrough error handler
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((error: ErrorRequestHandler, request: Request, response: Response, next: NextFunction) => {
-  // The error id is attached to `res.sentry` to be returned
+  // The error id is attached to `response.sentry` to be returned
   // and optionally displayed to the user for support.
   response.statusCode = 500;
   // @ts-ignore

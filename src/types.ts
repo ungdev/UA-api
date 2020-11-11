@@ -1,6 +1,4 @@
-/* eslint-disable camelcase */
-import { Request } from 'express';
-import { Tournament, User } from '@prisma/client';
+import { Tournament, User, TransactionState } from '@prisma/client';
 
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
@@ -11,16 +9,15 @@ import { Tournament, User } from '@prisma/client';
 /** General **/
 /*************/
 
-export enum Permissions {
+export enum Permission {
   stream = 'stream',
   entry = 'entry',
   anim = 'anim',
   admin = 'admin',
 }
 
-export interface Token {
+export interface DecodedToken {
   userId: string;
-  permissions: Permissions;
 }
 
 export interface EmailAttachment {
@@ -39,32 +36,12 @@ export interface Contact {
 /** Databse extensions **/
 /************************/
 
+export interface UserWithHasPaid extends User {
+  hasPaid: boolean;
+}
+
 export interface TournamentWithLockedTeams extends Tournament {
   lockedTeamsCount: number;
-}
-
-/********************/
-/** Database enums **/
-/********************/
-
-export enum ItemCategory {
-  ticket = 'ticket',
-  item = 'item',
-}
-
-export enum UserType {
-  player = 'player',
-  coach = 'coach',
-  visitor = 'visitor',
-  orga = 'orga',
-}
-
-export enum TransactionState {
-  pending = 'pending',
-  paid = 'paid',
-  canceled = 'canceled',
-  refused = 'refused',
-  refunded = 'refunded',
 }
 
 /************/
@@ -81,18 +58,6 @@ export interface EtupayResponse {
 /**********/
 /** Misc **/
 /**********/
-
-export interface UserRequest extends Request {
-  user: User;
-}
-
-export interface BodyRequest<T> extends Request {
-  body: T;
-}
-
-export interface BodyUserRequest<T> extends UserRequest {
-  body: T;
-}
 
 export enum Error {
   // 400
@@ -130,14 +95,8 @@ export enum Error {
 // Alias type for Object
 export type ObjectType = Record<string, unknown>;
 
-// Toornament Credentials
-export interface ToornamentCredentials {
-  participantToken: string;
-  registrationToken: string;
-  expirationDate: Date;
-  apiKey: string;
-}
-
+// Toornament
+/* eslint-disable camelcase */
 export interface ToornamentPlayerCustomFields {
   discord?: string;
 }
@@ -151,6 +110,7 @@ export interface ToornamentParticipant {
   custom_fields?: ToornamentPlayerCustomFields;
   lineup: Array<ToornamentPlayer>;
 }
+/* eslint-enable camelcase */
 
 export interface DiscordParticipants {
   name: string;
