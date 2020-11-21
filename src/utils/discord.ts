@@ -8,7 +8,7 @@ const bot = new Discord.Client();
 let server: Discord.Guild;
 
 export const init = () =>
-  new Promise((resolve) => {
+  new Promise((resolve, reject) => {
     if (discordToken()) {
       bot.login(discordToken());
       bot.on('ready', async () => {
@@ -20,6 +20,10 @@ export const init = () =>
 
         resolve();
       });
+
+      // On error or network error, reject the promise and passes the error
+      bot.on('error', reject);
+      bot.on('shardError', reject);
     } else {
       logger.warn('Discord token not entered, you can still continue to dev !');
       resolve();
