@@ -15,6 +15,9 @@
     "@types/lodash.differenceby": "^4.8.6",
     "@types/lodash.intersectionby": "^4.7.6",
     "@types/morgan": "^1.9.1",
+    "@types/mustache": "^4.0.1",
+    "@types/nodemailer": "^6.4.0",
+    "@types/pdfkit": "^0.10.6",
     "@types/split": "^1.0.0",
     "@types/swagger-ui-express": "^4.1.2",
     "@types/ws": "^7.2.7",
@@ -36,7 +39,10 @@
     "lodash.intersectionby": "^4.7.0",
     "moment": "^2.27.0",
     "morgan": "^1.10.0",
+    "mustache": "^4.0.1",
     "nanoid": "^3.1.12",
+    "nodemailer": "^6.4.16",
+    "pdfkit": "^0.11.0",
     "querystring": "^0.2.0",
     "split": "^1.0.1",
     "swagger-ui-express": "^4.1.4",
@@ -83,6 +89,8 @@
     "discord:sync:dev": "ts-node-dev --no-notify src/scripts/discordSync.ts",
     "discord:sync:start": "node build/src/scripts/discordSync.js",
     "discord:reset:dev": "ts-node-dev --no-notify src/scripts/discordReset.ts",
-    "discord:reset:start": "node build/src/scripts/discordReset.js"
+    "discord:reset:start": "node build/src/scripts/discordReset.js",
+    "send-email:dev": "ts-node-dev --no-notify src/scripts/sendTickets/sendTickets.ts",
+    "send-email:start": "node build/src/scripts/sendTickets/sendTickets.ts"
   }
 }

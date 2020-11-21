@@ -1,6 +1,7 @@
 import axios from 'axios';
 import qs from 'querystring';
-import { ToornamentParticipant } from '../types';
+import { PlayerInformations, ToornamentParticipant } from '../types';
+import { playerValidator } from '../validator';
 import { toornamentClientId, toornamentClientSecret, toornamentKey } from './environment';
 import logger from './log';
 
@@ -44,13 +45,14 @@ export const init = async () => {
 const normalizeDiscordId = (discordId: string) => discordId.trim().replace(/ +#/, '#');
 
 /**
- * Fetch tournament participants from toornament id
- * @param toornamentId
+ * Fetch participants from toornament
+ * @param toornamentId The toornament identifier
+ * @param tournamentId The tournament id
  */
-export const fetchParticipants = async (toornamentId: string, tournamentId: string) => {
+const fetchParticipants = async (toornamentId: string, tournamentId: string) => {
   const toornamentParticipants: ToornamentParticipant[] = [];
-  let cursor = 0;
   let totalParticipants;
+  let cursor = 0;
 
   // You can only fetch participants 50 by 50
   do {
@@ -70,6 +72,16 @@ export const fetchParticipants = async (toornamentId: string, tournamentId: stri
 
     cursor += 50;
   } while (cursor < totalParticipants);
+
+  return toornamentParticipants;
+}
+
+/**
+ * Fetch tournament participants from toornament id
+ * @param toornamentId
+ */
+export const fetchParticipantsWithDiscordIds = async (toornamentId: string, tournamentId: string) => {
+  const toornamentParticipants: ToornamentParticipant[] = await fetchParticipants(toornamentId, tournamentId);
 
   // Return result with discord ids
   return toornamentParticipants.map((participant: ToornamentParticipant) => {
@@ -100,4 +112,47 @@ export const fetchParticipants = async (toornamentId: string, tournamentId: stri
         .map((player) => normalizeDiscordId(player.custom_fields.discord)),
     };
   });
+};
+
+export const fetchPlayerInfosForTickets = async (toornamentId: string, tournamentId: string): Promise<PlayerInformations[]> => {
+  const toornamentParticipants: ToornamentParticipant[] = await fetchParticipants(toornamentId, tournamentId);
+
+  return toornamentParticipants.map((participant: ToornamentParticipant) => {
+    // Solo tournament case
+
+    const { error } = playerValidator.validate(participant);
+    if (error) {
+      logger.error(error.message);
+    }
+
+    return {
+      username: participant.name,
+      email: participant.email,
+      firstname: participant.custom_fields.nom_complet.first_name,
+      lastname: participant.custom_fields.nom_complet.last_name,
+    } as PlayerInformations;
+  });
+};
+
+export const fetchTeamsInfosForTickets = async (toornamentId: string, tournamentId: string): Promise<PlayerInformations[][]> => {
+  const toornamentParticipants: ToornamentParticipant[] = await fetchParticipants(toornamentId, tournamentId);
+
+  return toornamentParticipants.map((participant: ToornamentParticipant) => {
+    // Team tournament case (with lineup)
+    return participant.lineup.map((player) => {
+      // Checks if any field is missing
+
+      const { error } = playerValidator.validate(player);
+      if (error) {
+        logger.error(error.message);
+      }
+
+      return {
+        username: player.name,
+        email: player.email,
+        firstname: player.custom_fields.nom_complet.first_name,
+        lastname: player.custom_fields.nom_complet.last_name,
+      } as PlayerInformations;
+    }) as PlayerInformations[];
+  }) as PlayerInformations[][];
 };
