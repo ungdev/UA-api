@@ -3,7 +3,7 @@ import PDFkit from 'pdfkit';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { fetchTournaments } from '../../operations/tournament';
-import { toornamentInit, fetchPlayerInfosForTickets, fetchTeamsInfosForTickets } from '../../utils/toornament';
+import * as toornament from '../../utils/toornament';
 import logger from '../../utils/log';
 import { initSentryNode } from '../../utils/sentry';
 import { sendMail, sendTicketsMail } from '../../utils/mail/mail';
@@ -70,8 +70,10 @@ const generateTicket = async (background: string, player: PlayerInformations): P
 };
 
 (async () => {
+  // process.argv[2]
+
   initSentryNode();
-  await toornamentInit();
+  await toornament.init();
 
   const tournaments = await fetchTournaments();
 
@@ -88,7 +90,7 @@ const generateTicket = async (background: string, player: PlayerInformations): P
         const background = getBackground(tournament.name);
 
         if (isSoloTournament) {
-          tournamentParticipants = await fetchPlayerInfosForTickets(tournament.toornamentId, tournament.id);
+          tournamentParticipants = await toornament.fetchPlayerInfosForTickets(tournament.toornamentId, tournament.id);
           await Promise.all(
             // Generates ticket and send it to each player of the tournament
             tournamentParticipants.map(async (player, index, tab, max = tab.length - 1) => {
@@ -111,7 +113,10 @@ const generateTicket = async (background: string, player: PlayerInformations): P
           );
         } else {
           // TeamTournament
-          tournamentParticipants = await fetchTeamsInfosForTickets(tournament.toornamentId, tournament.id);
+          tournamentParticipants = await toornament.fetchTeamsInfosForTickets(tournament.toornamentId, tournament.id);
+
+          console.log('bbbbbbbbbbbbbbbbbbbbbbb');
+
           await Promise.all(
             tournamentParticipants.map(async (team, index, tournamentParticipants) => {
               await Promise.all(
