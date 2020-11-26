@@ -20,14 +20,15 @@ const transporter = nodemailer.createTransport({
   // rateLimit: 1,
 });
 
-// emailType for ticket sending mail
-export const sendTicketsMail = (data: MailData) => {
-  const template = readFileSync(path.join(__dirname, 'sendTickets.htm')).toString();
+// emailType for welcome mail with tickets and discount codes
+export const sendWelcomeEmail = (data: MailData) => {
+  const template = readFileSync(path.join(__dirname, 'welcome.html')).toString();
   const mailContent = {
-    title: 'Votre billet - UTT Arena 2020',
+    title: 'Informations importantes - UTT Arena 2020',
     html: render(template, {
       username: data.username,
-      tournament: data.tournament,
+      gunnarCode: data.gunnarCode,
+      compumsaCode: data.compumsaCode,
     }),
   } as EmailContent;
   return mailContent;

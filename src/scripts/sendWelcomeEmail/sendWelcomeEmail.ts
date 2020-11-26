@@ -6,7 +6,7 @@ import { fetchTournaments } from '../../operations/tournament';
 import * as toornament from '../../utils/toornament';
 import logger from '../../utils/log';
 import { initSentryNode } from '../../utils/sentry';
-import { sendMail, sendTicketsMail } from '../../utils/mail/mail';
+import { sendMail, sendWelcomeEmail } from '../../utils/mail/mail';
 import { EmailAttachment, PlayerInformations, TournamentName } from '../../types';
 
 // Loads the background for the ticket PDF
@@ -45,12 +45,12 @@ const generateTicket = async (background: string, player: PlayerInformations): P
     document.image(background, 0, 0);
     const fontSize = 140;
     const textWidth = document
-      .font('src/scripts/sendTickets/PreussischeVI9Ag2.ttf')
+      .font('src/scripts/sendWelcomeEmail/PreussischeVI9Ag2.ttf')
       .fill('white')
       .fontSize(fontSize)
       .widthOfString(chaine);
     document
-      .font('src/scripts/sendTickets/PreussischeVI9Ag2.ttf')
+      .font('src/scripts/sendWelcomeEmail/PreussischeVI9Ag2.ttf')
       .fill('white')
       .fontSize(fontSize)
       .text(chaine, document.page.width - textWidth - 100, 1665);
@@ -70,17 +70,25 @@ const generateTicket = async (background: string, player: PlayerInformations): P
 };
 
 (async () => {
-  // process.argv[2]
-
   initSentryNode();
   await toornament.init();
 
-  const tournaments = await fetchTournaments();
+  let tournaments = await fetchTournaments();
+
+  // If no argument is provided
+  if (!process.argv[2]) {
+    logger.error(
+      'Please provide an argument for filtering tournaments ("*" for all tournaments or a specific tournament id)',
+    );
+    process.exit(1);
+  } else if (process.argv[2] !== '*') {
+    // Filter tournaments for this tournament only
+    tournaments = tournaments.filter((tournament) => tournament.id === process.argv[2]);
+  }
 
   // Check if the toornament has a toornamentid and a discordCategory (therefore its a team tournament)
   await Promise.all(
     tournaments
-      .filter((tournament) => tournament.id === 'rl')
       .filter((tournament) => tournament.toornamentId)
       .map(async (tournament) => {
         const isSoloTournament = tournament.playersPerTeam === 1;
@@ -96,11 +104,12 @@ const generateTicket = async (background: string, player: PlayerInformations): P
             tournamentParticipants.map(async (player, index, tab, max = tab.length - 1) => {
               const ticket = await generateTicket(background, player);
               await sendMail(
-                sendTicketsMail,
+                sendWelcomeEmail,
                 player.email,
                 {
                   username: player.username,
-                  tournament: tournament.name,
+                  gunnarCode,
+                  compumsaCode,
                 },
                 [ticket],
               );
@@ -114,8 +123,6 @@ const generateTicket = async (background: string, player: PlayerInformations): P
         } else {
           // TeamTournament
           tournamentParticipants = await toornament.fetchTeamsInfosForTickets(tournament.toornamentId, tournament.id);
-
-          console.log('bbbbbbbbbbbbbbbbbbbbbbb');
 
           await Promise.all(
             tournamentParticipants.map(async (team, index, tournamentParticipants) => {
@@ -131,11 +138,12 @@ const generateTicket = async (background: string, player: PlayerInformations): P
                   ) => {
                     const ticket = await generateTicket(background, player);
                     await sendMail(
-                      sendTicketsMail,
+                      sendWelcomeEmail,
                       player.email,
                       {
                         username: player.username,
-                        tournament: tournament.name,
+                        gunnarCode,
+                        compumsaCode,
                       },
                       [ticket],
                     );

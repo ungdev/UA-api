@@ -27,7 +27,10 @@ import { initSentryNode } from '../utils/sentry';
         const isSoloTournament = tournament.playersPerTeam === 1;
 
         let discordParticipants: DiscordParticipants[];
-        let toornamentParticipants = await toornament.fetchParticipantsWithDiscordIds(tournament.toornamentId, tournament.id);
+        let toornamentParticipants = await toornament.fetchParticipantsWithDiscordIds(
+          tournament.toornamentId,
+          tournament.id,
+        );
 
         // Team tournament case
         if (!isSoloTournament) {

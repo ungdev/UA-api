@@ -74,7 +74,7 @@ const fetchParticipants = async (toornamentId: string, tournamentId: string) => 
   } while (cursor < totalParticipants);
 
   return toornamentParticipants;
-}
+};
 
 /**
  * Fetch tournament participants from toornament id
@@ -114,7 +114,10 @@ export const fetchParticipantsWithDiscordIds = async (toornamentId: string, tour
   });
 };
 
-export const fetchPlayerInfosForTickets = async (toornamentId: string, tournamentId: string): Promise<PlayerInformations[]> => {
+export const fetchPlayerInfosForTickets = async (
+  toornamentId: string,
+  tournamentId: string,
+): Promise<PlayerInformations[]> => {
   const toornamentParticipants: ToornamentParticipant[] = await fetchParticipants(toornamentId, tournamentId);
 
   return toornamentParticipants.map((participant: ToornamentParticipant) => {
@@ -134,7 +137,10 @@ export const fetchPlayerInfosForTickets = async (toornamentId: string, tournamen
   });
 };
 
-export const fetchTeamsInfosForTickets = async (toornamentId: string, tournamentId: string): Promise<PlayerInformations[][]> => {
+export const fetchTeamsInfosForTickets = async (
+  toornamentId: string,
+  tournamentId: string,
+): Promise<PlayerInformations[][]> => {
   const toornamentParticipants: ToornamentParticipant[] = await fetchParticipants(toornamentId, tournamentId);
 
   return toornamentParticipants.map((participant: ToornamentParticipant) => {

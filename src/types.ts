@@ -36,8 +36,8 @@ export interface EmailAttachment {
 
 export interface MailData {
   username: string;
-  buttonLink?: string;
-  tournament?: string;
+  gunnarCode: string;
+  compumsaCode: string;
 }
 
 export interface EmailContent {
