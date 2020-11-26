@@ -1,6 +1,6 @@
 import Sentry from '@sentry/node';
 import PDFkit from 'pdfkit';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { fetchTournaments } from '../../operations/tournament';
 import * as toornament from '../../utils/toornament';
@@ -69,6 +69,25 @@ const generateTicket = async (background: string, player: PlayerInformations): P
   };
 };
 
+/**
+ * fetch a code from a CSV file and remove it to assert it won't be sent twice
+ * @param filename the name of the CSV file containing the reduction codes
+ * @returns the first code of the file
+ */
+const fetchAndRemoveCode = (filename: string): string => {
+  const filePath = path.join(__dirname, 'reductionCodes', filename);
+  const codeList = readFileSync(filePath).toString();
+  const commaIndex = codeList.search(',');
+
+  // Get first code
+  const code = codeList.slice(0, commaIndex);
+
+  // Remove first code
+  const newCodeList = codeList.slice(commaIndex + 1);
+  writeFileSync(filePath, newCodeList);
+  return code;
+};
+
 (async () => {
   initSentryNode();
   await toornament.init();
@@ -108,8 +127,8 @@ const generateTicket = async (background: string, player: PlayerInformations): P
                 player.email,
                 {
                   username: player.username,
-                  gunnarCode,
-                  compumsaCode,
+                  gunnarCode: fetchAndRemoveCode('gunnarCodes.csv'),
+                  compumsaCode: fetchAndRemoveCode('compumsaCodes.csv'),
                 },
                 [ticket],
               );
@@ -142,8 +161,8 @@ const generateTicket = async (background: string, player: PlayerInformations): P
                       player.email,
                       {
                         username: player.username,
-                        gunnarCode,
-                        compumsaCode,
+                        gunnarCode: fetchAndRemoveCode('gunnarCodes.csv'),
+                        compumsaCode: fetchAndRemoveCode('compumsaCodes.csv'),
                       },
                       [ticket],
                     );
