@@ -30,7 +30,10 @@ export const isProductionDatabase = (): boolean => databaseHost() === 'mariadb-p
 
 // Mail
 export const arenaWebsite = (): string => process.env.ARENA_WEBSITE;
-export const mailUri = (): string => process.env.MAIL_URI;
+export const mailHost = (): string => process.env.MAIL_HOST;
+export const mailPort = (): number => Number.parseInt(process.env.MAIL_PORT);
+export const mailUser = (): string => process.env.MAIL_USER;
+export const mailPassword = (): string => process.env.MAIL_PASSWORD;
 export const mailSender = (): string => process.env.MAIL_SENDER;
 
 // Redis

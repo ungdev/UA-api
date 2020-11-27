@@ -51,3 +51,16 @@ export const contactValidator = Joi.object({
   subject: Joi.string().required(),
   message: Joi.string().required(),
 });
+
+export const playerValidator = Joi.object({
+  custom_fields: Joi.object({
+    nom_complet: Joi.object({
+      first_name: Joi.string().required(),
+      last_name: Joi.string().required(),
+    })
+      .unknown()
+      .required(),
+  })
+    .unknown()
+    .required(),
+}).unknown();
