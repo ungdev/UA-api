@@ -25,6 +25,17 @@ export interface EmailAttachment {
   content: Buffer;
 }
 
+export interface MailData {
+  username: string;
+  gunnarCode: string;
+  compumsaCode: string;
+}
+
+export interface EmailContent {
+  title: string;
+  html: string;
+}
+
 export interface Contact {
   name: string;
   email: string;
@@ -99,20 +110,37 @@ export type ObjectType = Record<string, unknown>;
 /* eslint-disable camelcase */
 export interface ToornamentPlayerCustomFields {
   discord?: string;
+  nom_complet: {
+    last_name: string;
+    first_name: string;
+  };
 }
 
 export interface ToornamentPlayer {
+  name: string;
+  email: string;
   custom_fields: ToornamentPlayerCustomFields;
 }
 
 export interface ToornamentParticipant {
+  id: string;
   name: string;
+  user_id: string;
+  email: string;
   custom_fields?: ToornamentPlayerCustomFields;
   lineup: Array<ToornamentPlayer>;
+  created_at: string;
 }
 /* eslint-enable camelcase */
 
 export interface DiscordParticipants {
   name: string;
   discordIds: string[];
+}
+
+export interface PlayerInformations {
+  username: string;
+  email: string;
+  firstname: string;
+  lastname: string;
 }
