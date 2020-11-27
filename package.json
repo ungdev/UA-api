@@ -90,7 +90,7 @@
     "discord:sync:start": "node build/src/scripts/discordSync.js",
     "discord:reset:dev": "ts-node-dev --no-notify src/scripts/discordReset.ts",
     "discord:reset:start": "node build/src/scripts/discordReset.js",
-    "send-email:welcome:dev": "ts-node-dev --no-notify src/scripts/sendWelcomeEmail/sendWelcomeEmail.ts",
-    "send-email:welcome:start": "node build/src/scripts/sendWelcomeEmail/sendWelcomeEmail.js"
+    "send-email:welcome:dev": "ts-node-dev --no-notify src/scripts/sendWelcomeEmail.ts",
+    "send-email:welcome:start": "node build/src/scripts/sendWelcomeEmail.js"
   }
 }

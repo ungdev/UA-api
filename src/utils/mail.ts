@@ -3,9 +3,9 @@ import path from 'path';
 import { render } from 'mustache';
 import nodemailer from 'nodemailer';
 import { Address } from 'nodemailer/lib/mailer';
-import { EmailAttachment, EmailContent, MailData } from '../../types';
-import { mailHost, mailPort, mailPassword, mailSender, mailUser } from '../environment';
-import logger from '../log';
+import { EmailAttachment, EmailContent, MailData } from '../types';
+import { mailHost, mailPort, mailPassword, mailSender, mailUser } from './environment';
+import logger from './log';
 
 const transporter = nodemailer.createTransport({
   host: mailHost(),
@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 
 // emailType for welcome mail with tickets and discount codes
 export const sendWelcomeEmail = (data: MailData) => {
-  const template = readFileSync(path.join(__dirname, 'welcome.html')).toString();
+  const template = readFileSync('assets/email/welcome/welcome.html').toString();
   const mailContent = {
     title: 'Informations importantes - UTT Arena 2020',
     html: render(template, {

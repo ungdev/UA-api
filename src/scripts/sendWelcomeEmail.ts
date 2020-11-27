@@ -1,18 +1,20 @@
 import Sentry from '@sentry/node';
 import PDFkit from 'pdfkit';
 import { readFileSync, writeFileSync } from 'fs';
-import path from 'path';
-import { fetchTournaments } from '../../operations/tournament';
-import * as toornament from '../../utils/toornament';
-import logger from '../../utils/log';
-import { initSentryNode } from '../../utils/sentry';
-import { sendMail, sendWelcomeEmail } from '../../utils/mail/mail';
-import { EmailAttachment, PlayerInformations } from '../../types';
+import { fetchTournaments } from '../operations/tournament';
+import * as toornament from '../utils/toornament';
+import logger from '../utils/log';
+import { initSentryNode } from '../utils/sentry';
+import { sendMail, sendWelcomeEmail } from '../utils/mail';
+import { EmailAttachment, PlayerInformations } from '../types';
 
-// Loads the background for the ticket PDF
-const getBackground = (tournamentId: string): string => {
-  const fileName = `${tournamentId}.jpg`;
-  return `data:image/jpg;base64,${readFileSync(path.join(__dirname, 'images', fileName), 'base64')}`;
+const backgrounds = {
+  lol: `data:image/jpg;base64,${readFileSync(`assets/email/welcome/images/lol.jpg`, 'base64')}`,
+  valorant: `data:image/jpg;base64,${readFileSync(`assets/email/welcome/images/valorant.jpg`, 'base64')}`,
+  csgo: `data:image/jpg;base64,${readFileSync(`assets/email/welcome/images/csgo.jpg`, 'base64')}`,
+  ssbu: `data:image/jpg;base64,${readFileSync(`assets/email/welcome/images/ssbu.jpg`, 'base64')}`,
+  rl: `data:image/jpg;base64,${readFileSync(`assets/email/welcome/images/rl.jpg`, 'base64')}`,
+  tft: `data:image/jpg;base64,${readFileSync(`assets/email/welcome/images/tft.jpg`, 'base64')}`,
 };
 
 // Generate the ticket to send in the attachements
@@ -23,12 +25,12 @@ const generateTicket = async (background: string, player: PlayerInformations): P
     document.image(background, 0, 0);
     const fontSize = 140;
     const textWidth = document
-      .font('src/scripts/sendWelcomeEmail/PreussischeVI9Ag2.ttf')
+      .font('assets/email/PreussischeVI9Ag2.ttf')
       .fill('white')
       .fontSize(fontSize)
       .widthOfString(chaine);
     document
-      .font('src/scripts/sendWelcomeEmail/PreussischeVI9Ag2.ttf')
+      .font('assets/email/PreussischeVI9Ag2.ttf')
       .fill('white')
       .fontSize(fontSize)
       .text(chaine, document.page.width - textWidth - 100, 1665);
@@ -53,12 +55,16 @@ const generateTicket = async (background: string, player: PlayerInformations): P
  * @returns the first code of the file
  */
 const fetchAndRemoveCode = (filename: string): string => {
-  const filePath = path.join(__dirname, 'reductionCodes', filename);
+  const filePath = `assets/email/welcome/reductionCodes/${filename}`;
   const codeList = readFileSync(filePath).toString();
   const commaIndex = codeList.search(',');
 
   // Get first code
   const code = codeList.slice(0, commaIndex);
+
+  if (code === '') {
+    throw new Error(`The file ${filename} is empty`);
+  }
 
   // Remove first code
   const newCodeList = codeList.slice(commaIndex + 1);
@@ -92,7 +98,8 @@ const fetchAndRemoveCode = (filename: string): string => {
         let tournamentParticipants;
 
         // Prepare the background to not load it for each player
-        const background = getBackground(tournament.id);
+        // @ts-ignore
+        const background = backgrounds[tournament.id];
 
         if (isSoloTournament) {
           tournamentParticipants = await toornament.fetchPlayerInfosForTickets(tournament.toornamentId, tournament.id);
@@ -113,8 +120,6 @@ const fetchAndRemoveCode = (filename: string): string => {
 
               logger.debug(`↳ Joueur ${index}/${max} du tournoi ${tournament.name}`);
               // Index goes from 0/35 to 35/35 and NOT from 1/36 to 5/36 by exemple
-
-              return 0;
             }),
           );
         } else {
