@@ -7,33 +7,11 @@ import * as toornament from '../../utils/toornament';
 import logger from '../../utils/log';
 import { initSentryNode } from '../../utils/sentry';
 import { sendMail, sendWelcomeEmail } from '../../utils/mail/mail';
-import { EmailAttachment, PlayerInformations, TournamentName } from '../../types';
+import { EmailAttachment, PlayerInformations } from '../../types';
 
 // Loads the background for the ticket PDF
-const getBackground = (tournament: string): string => {
-  let fileName;
-  switch (tournament) {
-    case TournamentName.TFT:
-      fileName = 'TFT.jpg';
-      break;
-    case TournamentName.CSGO:
-      fileName = 'CSGO.jpg';
-      break;
-    case TournamentName.RocketLeague:
-      fileName = 'RL.jpg';
-      break;
-    case TournamentName.SSBU:
-      fileName = 'SSBU.jpg';
-      break;
-    case TournamentName.LOL:
-      fileName = 'LOL.jpg';
-      break;
-    case TournamentName.Valorant:
-      fileName = 'VAL.jpg';
-      break;
-    default:
-      break;
-  }
+const getBackground = (tournamentId: string): string => {
+  const fileName = `${tournamentId}.jpg`;
   return `data:image/jpg;base64,${readFileSync(path.join(__dirname, 'images', fileName), 'base64')}`;
 };
 
@@ -114,7 +92,7 @@ const fetchAndRemoveCode = (filename: string): string => {
         let tournamentParticipants;
 
         // Prepare the background to not load it for each player
-        const background = getBackground(tournament.name);
+        const background = getBackground(tournament.id);
 
         if (isSoloTournament) {
           tournamentParticipants = await toornament.fetchPlayerInfosForTickets(tournament.toornamentId, tournament.id);

@@ -16,15 +16,6 @@ export enum Permission {
   admin = 'admin',
 }
 
-export enum TournamentName {
-  CSGO = 'Counter-Strike : Global Offensive',
-  LOL = 'League of Legends',
-  RocketLeague = 'Rocket League',
-  SSBU = 'Super Smash Bros Ultimate',
-  TFT = 'Teamfight Tactics',
-  Valorant = 'Valorant',
-}
-
 export interface DecodedToken {
   userId: string;
 }
