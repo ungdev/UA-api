@@ -1,8 +1,8 @@
 import { difference, differenceBy } from 'lodash';
 import { fetchTournaments } from '../operations/tournament';
 
-import * as discord from '../utils/discord';
-import * as toornament from '../utils/toornament';
+import * as discord from '../services/discord';
+import * as toornament from '../services/toornament';
 import logger from '../utils/logger';
 import { DiscordParticipants } from '../types';
 

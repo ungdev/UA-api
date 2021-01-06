@@ -1,7 +1,7 @@
 import PDFkit from 'pdfkit';
 import { readFileSync, writeFileSync } from 'fs';
 import { fetchTournaments } from '../operations/tournament';
-import * as toornament from '../utils/toornament';
+import * as toornament from '../services/toornament';
 import logger from '../utils/logger';
 import { sendMail, sendWelcomeEmail } from '../utils/mail';
 import { EmailAttachment, PlayerInformations } from '../types';

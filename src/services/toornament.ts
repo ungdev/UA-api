@@ -2,8 +2,8 @@ import axios from 'axios';
 import qs from 'querystring';
 import { PlayerInformations, ToornamentParticipant } from '../types';
 import { playerValidator } from '../validator';
-import environment from './env';
-import logger from './logger';
+import environment from '../utils/env';
+import logger from '../utils/logger';
 
 // Toornament API axios instance
 const toornamentAPI = axios.create({

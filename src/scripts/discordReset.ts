@@ -1,6 +1,6 @@
 import { fetchTournaments } from '../operations/tournament';
 
-import * as discord from '../utils/discord';
+import * as discord from '../services/discord';
 import logger from '../utils/logger';
 
 (async () => {

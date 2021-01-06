@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 import validateBody from '../middlewares/validateBody';
 import { noContent, unknown } from '../utils/responses';
-import { sendSlackContact } from '../utils/slack';
+import { sendSlackContact } from '../services/slack';
 import { contactValidator } from '../validator';
 
 export default [

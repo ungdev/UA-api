@@ -1,8 +1,8 @@
 import { Tournament } from '@prisma/client';
 import Discord, { GuildMember } from 'discord.js';
-import env from './env';
-import logger from './logger';
-import removeAccents from './removeAccents';
+import env from '../utils/env';
+import logger from '../utils/logger';
+import removeAccents from '../utils/removeAccents';
 
 const bot = new Discord.Client();
 let server: Discord.Guild;

@@ -1,7 +1,7 @@
 import qs from 'querystring';
 import axios from 'axios';
 import { Contact } from '../types';
-import env from './env';
+import env from '../utils/env';
 
 /**
  * Sends a message a the slack bot
