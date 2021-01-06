@@ -1,12 +1,12 @@
 import qs from 'querystring';
 import axios from 'axios';
-import { Contact, ObjectType } from '../types';
+import { Contact } from '../types';
 import { slackContactChannel, slackToken } from './environment';
 
 /**
  * Sends a message a the slack bot
  */
-export const sendSlack = (channel: string, text: string, blocks?: Array<ObjectType>, username?: string) =>
+export const sendSlack = (channel: string, text: string, blocks?: Array<object>, username?: string) =>
   axios.post(
     'https://slack.com/api/chat.postMessage',
     qs.stringify({

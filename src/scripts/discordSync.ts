@@ -1,4 +1,3 @@
-import Sentry from '@sentry/node';
 import differenceBy from 'lodash.differenceby';
 import difference from 'lodash.difference';
 import { fetchTournaments } from '../operations/tournament';
@@ -7,13 +6,11 @@ import * as discord from '../utils/discord';
 import * as toornament from '../utils/toornament';
 import logger from '../utils/log';
 import { DiscordParticipants } from '../types';
-import { initSentryNode } from '../utils/sentry';
 
 /**
  * Create team roles, assign participant roles and create team channels
  */
 (async () => {
-  initSentryNode();
   await discord.init();
   await toornament.init();
 
@@ -83,6 +80,5 @@ import { initSentryNode } from '../utils/sentry';
   process.exit(0);
 })().catch((error) => {
   logger.error(error);
-  Sentry.captureException(error);
   process.exit(1);
 });

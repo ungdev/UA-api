@@ -1,66 +1,97 @@
 import dotenv from 'dotenv';
 
+const { env } = process;
+
 dotenv.config();
 
-// General
-export const nodeEnv = (): string => process.env.NODE_ENV;
-export const isDevelopment = (): boolean => nodeEnv() === 'development';
-export const isProduction = (): boolean => nodeEnv() === 'production';
-export const isTest = (): boolean => nodeEnv() === 'test';
-export const apiPort = (): number => Number.parseInt(process.env.API_PORT);
-export const apiPrefix = (): string => process.env.API_PREFIX || '/';
-export const bcryptLevel = (): number => Number.parseInt(process.env.API_BCRYPT_LEVEL);
-export const jwtSecret = (): string => process.env.JWT_SECRET;
-export const jwtExpires = (): string => process.env.JWT_EXPIRES;
+/**
+ * Checks the configuration to not have any empty configuration variable.
+ *
+ * @private
+ * @param {object} config - Configuration variable.
+ */
+const checkConfiguration = (config: object) => {
+  // Foreach config key, checks if it has a non null value
+  for (const [key, value] of Object.entries(config)) {
+    // Checks if NaN if the value is a number
+    if (typeof value === 'number' && Number.isNaN(value)) {
+      throw new TypeError(`Variable ${key} is not a number`);
+    }
+    // Checks, if the value is a string, that the length is not equals to 0
+    if (typeof value === 'string' && value.length === 0) {
+      throw new TypeError(`Variable ${key} is empty`);
+    }
 
-// Slack
-export const slackToken = (): string => process.env.SLACK_TOKEN;
-export const slackContactChannel = (): string => process.env.SLACK_CONTACT_CHANNEL;
+    // If the variable is an object, checks below
+    if (typeof value === 'object') {
+      checkConfiguration(value);
+    }
 
-// Sentry
-export const sentryUrl = (): string => process.env.SENTRY_URL;
+    // And finally checks the value is not undefined
+    if (value === undefined) {
+      throw new TypeError(`Variable ${key} is undefined`);
+    }
+  }
+};
 
-// Database
-export const databaseHost = (): string => process.env.DATABASE_HOST;
-export const databasePort = (): number => Number.parseInt(process.env.DATABASE_PORT);
-export const databaseUsername = (): string => process.env.DATABASE_USERNAME;
-export const databasePassword = (): string => process.env.DATABASE_PASSWORD;
-export const databaseName = (): string => process.env.DATABASE_NAME;
-export const isProductionDatabase = (): boolean => databaseHost() === 'mariadb-prod';
+const environment = {
+  api: {
+    port: Number(env.API_PORT) || 3000,
+    prefix: env.API_PREFIX || '/',
+  },
+  front: {
+    website: env.ARENA_WEBSITE || 'https://arena.utt.fr',
+  },
+  environment: {
+    development: env.NODE_ENV === 'development',
+    production: env.NODE_ENV === 'production',
+    testing: env.NODE_ENV === 'testing',
+  },
+  bcrpyt: {
+    level: Number(env.API_BCRYPT_LEVEL) || 11,
+  },
+  jwt: {
+    secret: env.JWT_SECRET,
+    expires: env.JWT_EXPIRES,
+  },
+  slack: {
+    token: env.SLACK_TOKEN,
+    contactChannel: env.SLACK_CONTACT_CHANNEL,
+  },
+  database: {
+    host: env.DATABASE_HOST,
+    port: Number.parseInt(process.env.DATABASE_PORT) || 3306,
+    username: env.DATABASE_USERNAME,
+    password: env.DATABASE_PASSWORD,
+  },
+  email: {
+    host: env.EMAIL_HOST,
+    port: Number(env.EMAIL_PORT) || 25,
+    user: env.EMAIL_USER,
+    password: env.EMAIL_PASSWORD,
+    sender: env.EMAIL_SENDER || 'UTT Arena<arena@utt.fr>',
+  },
+  partners: {
+    emails: ['utt.fr', 'utc.fr', 'utbm.fr'],
+  },
+  etudpay: {
+    id: Number(env.ETUPAY_ID),
+    key: env.ETUPAY_KEY,
+    url: env.ETUPAY_URL,
+    successUrl: env.ETUPAY_SUCCESS_URL,
+    errorUrl: env.ETUPAY_ERROR_URL,
+  },
+  toornament: {
+    clientId: env.TOORNAMENT_CLIENT_ID,
+    clientSecret: env.TOORNAMENT_CLIENT_SECRET,
+    key: env.TOORNAMENT_KEY,
+  },
+  discord: {
+    token: env.DISCORD_TOKEN,
+    server: env.DISCORD_SERVER,
+  },
+};
 
-// Mail
-export const arenaWebsite = (): string => process.env.ARENA_WEBSITE;
-export const mailHost = (): string => process.env.MAIL_HOST;
-export const mailPort = (): number => Number.parseInt(process.env.MAIL_PORT);
-export const mailUser = (): string => process.env.MAIL_USER;
-export const mailPassword = (): string => process.env.MAIL_PASSWORD;
-export const mailSender = (): string => process.env.MAIL_SENDER;
+checkConfiguration(environment);
 
-// Redis
-export const redisHost = (): string => process.env.REDIS_HOST;
-export const redisPort = (): number => Number.parseInt(process.env.REDIS_PORT);
-export const redisPassword = (): string => process.env.REDIS_PASSWORD;
-
-// Partners mails
-export const partnersMails = (): string => process.env.PARTNERS_MAILS;
-
-// Etupay
-export const etupayId = (): number => Number.parseInt(process.env.ETUPAY_ID);
-export const etupayKey = (): string => process.env.ETUPAY_KEY;
-export const etupayUrl = (): string => process.env.ETUPAY_URL;
-export const etupaySuccessUrl = (): string => process.env.ETUPAY_SUCCESSURL;
-export const etupayErrorUrl = (): string => process.env.ETUPAY_ERRORURL;
-
-// Toornament
-export const toornamentClientId = (): string => process.env.TOORNAMENT_CLIENT_ID;
-export const toornamentClientSecret = (): string => process.env.TOORNAMENT_CLIENT_SECRET;
-export const toornamentKey = (): string => process.env.TOORNAMENT_KEY;
-
-// DataDog
-export const datadogKey = (): string => process.env.DATADOG_KEY;
-export const datadogProduction = (): string => process.env.DATADOG_PRODUCTION;
-export const datadogDevelopment = (): string => process.env.DATADOG_DEVELOPMENT;
-
-// Discord
-export const discordToken = (): string => process.env.DISCORD_TOKEN;
-export const discordServer = (): string => process.env.DISCORD_SERVER;
+export default environment;

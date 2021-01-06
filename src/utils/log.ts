@@ -5,12 +5,11 @@ import split from 'split';
 import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
-import { datadogDevelopment, datadogKey, datadogProduction, isProduction, isProductionDatabase } from './environment';
 import { getIp } from './network';
 import { getRequestUser } from './user';
 
 // Create console Transport
-const { combine, colorize, printf, json } = format;
+const { combine, colorize, printf } = format;
 const timestamp = moment().format('HH:mm:ss');
 const consoleTransport = new transports.Console({
   format: combine(
@@ -21,25 +20,6 @@ const consoleTransport = new transports.Console({
 });
 
 const loggingTransports: Array<ConsoleTransportInstance | HttpTransportInstance> = [consoleTransport];
-
-// Create datadog transport
-if (isProduction()) {
-  const datadogPath = `/v1/input/${datadogKey()}?ddsource=nodejs&service=${
-    isProductionDatabase() ? datadogProduction() : datadogDevelopment()
-  }`;
-  console.info(`Datadog URL: ${datadogPath}`);
-  const datadogTransport = new transports.Http({
-    host: 'http-intake.logs.datadoghq.com',
-    path: datadogPath,
-    ssl: true,
-    format: json(),
-    level: 'http',
-  });
-  // Log if datadog is unreachable/forbidden
-  datadogTransport.on('warn', (warning) => console.warn(`Datadog ${warning}`));
-
-  loggingTransports.push(datadogTransport);
-}
 
 // Create the production/development logger
 const logger = createLogger({

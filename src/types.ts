@@ -103,9 +103,6 @@ export enum Error {
   Unknown = 'Erreur inconnue',
 }
 
-// Alias type for Object
-export type ObjectType = Record<string, unknown>;
-
 // Toornament
 /* eslint-disable camelcase */
 export interface ToornamentPlayerCustomFields {

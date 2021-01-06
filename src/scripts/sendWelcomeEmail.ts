@@ -1,10 +1,8 @@
-import Sentry from '@sentry/node';
 import PDFkit from 'pdfkit';
 import { readFileSync, writeFileSync } from 'fs';
 import { fetchTournaments } from '../operations/tournament';
 import * as toornament from '../utils/toornament';
 import logger from '../utils/log';
-import { initSentryNode } from '../utils/sentry';
 import { sendMail, sendWelcomeEmail } from '../utils/mail';
 import { EmailAttachment, PlayerInformations } from '../types';
 
@@ -73,7 +71,6 @@ const fetchAndRemoveCode = (filename: string): string => {
 };
 
 (async () => {
-  initSentryNode();
   await toornament.init();
 
   let tournaments = await fetchTournaments();
@@ -168,6 +165,5 @@ const fetchAndRemoveCode = (filename: string): string => {
   process.exit(0);
 })().catch((error) => {
   logger.error(error);
-  Sentry.captureException(error);
   process.exit(1);
 });
