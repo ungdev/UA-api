@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
-import log from '../utils/log';
+import log from '../utils/logger';
 import { Error, DecodedToken } from '../types';
 import { badRequest } from '../utils/responses';
 import { getRequestUser } from '../utils/user';
-import { jwtSecret } from '../utils/environment';
 import { fetchUser } from '../operations/user';
+import env from '../utils/env';
 
 // Check the user's team. If he's in one, it will return an error.
 export const isNotInATeam = (request: Request, response: Response, next: NextFunction) => {
@@ -34,7 +34,7 @@ export const initUserRequest = async (request: Request, response: Response, next
 
   try {
     // Decode the jwt
-    const decodedToken = jwt.verify(token, jwtSecret()) as DecodedToken;
+    const decodedToken = jwt.verify(token, env.jwt.secret) as DecodedToken;
 
     // Fetch the user from the database
     const databaseUser = await fetchUser(decodedToken.userId);

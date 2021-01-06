@@ -1,7 +1,7 @@
 import { fetchTournaments } from '../operations/tournament';
 
 import * as discord from '../utils/discord';
-import logger from '../utils/log';
+import logger from '../utils/logger';
 
 (async () => {
   await discord.init();

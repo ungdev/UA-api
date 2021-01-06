@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { Request, Response } from 'express';
-import { ConsoleTransportInstance, HttpTransportInstance } from 'winston/lib/winston/transports';
+import { ConsoleTransportInstance } from 'winston/lib/winston/transports';
 import split from 'split';
 import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
@@ -19,7 +19,7 @@ const consoleTransport = new transports.Console({
   level: 'silly',
 });
 
-const loggingTransports: Array<ConsoleTransportInstance | HttpTransportInstance> = [consoleTransport];
+const loggingTransports: Array<ConsoleTransportInstance> = [consoleTransport];
 
 // Create the production/development logger
 const logger = createLogger({
@@ -56,5 +56,8 @@ export const morgan = () => {
   const productionFormat = ':ip :username :method :url :status :res[content-length] - :response-time ms';
   const developmentFormat = ':method :url :status :response-time ms - :res[content-length] - :username';
 
-  return morganMiddleware(isProduction() ? productionFormat : developmentFormat, { stream: logStream });
+  // We use process.env.NODE_ENV because this file is imported by env.js
+  return morganMiddleware(process.env.NODE_ENV === 'production' ? productionFormat : developmentFormat, {
+    stream: logStream,
+  });
 };

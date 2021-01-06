@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-process-exit */
 import { PrismaClient } from '@prisma/client';
-import { databaseUsername, databasePassword, databaseHost, databasePort, databaseName, isTest } from './environment';
-import log from './log';
+import env from './env';
+import log from './logger';
 
 const database = new PrismaClient({
   log: [
@@ -20,7 +20,8 @@ const database = new PrismaClient({
   ],
 });
 
-if (!isTest()) {
+// If we are in development, enables database logging
+if (env.development) {
   database.$on('query', (event) => log.debug(event.query));
   database.$on('info', (event) => log.info(event.message));
   database.$on('warn', (event) => log.warn(event.message));
@@ -28,7 +29,7 @@ if (!isTest()) {
 
 // Dump query to initiate the connection
 const setup = async () => {
-  process.env.DATABASE_URL = `mysql://${databaseUsername()}:${databasePassword()}@${databaseHost()}:${databasePort()}/${databaseName()}`;
+  process.env.DATABASE_URL = `mysql://${env.database.username}:${env.database.password}@${env.database.host}:${env.database.port}/${env.database.name}`;
   await database.setting.findMany();
 };
 

@@ -1,19 +1,19 @@
 import { Tournament } from '@prisma/client';
 import Discord, { GuildMember } from 'discord.js';
-import logger from './log';
-import { discordServer, discordToken } from './environment';
+import env from './env';
+import logger from './logger';
 import removeAccents from './removeAccents';
 
 const bot = new Discord.Client();
 let server: Discord.Guild;
 
 export const init = () =>
-  new Promise((resolve, reject) => {
-    if (discordToken()) {
-      bot.login(discordToken());
+  new Promise((resolve) => {
+    if (env.discord.token) {
+      bot.login(env.discord.token);
       bot.on('ready', async () => {
         logger.info('Bot ready');
-        server = await bot.guilds.fetch(discordServer());
+        server = await bot.guilds.fetch(env.discord.server);
 
         // Mandatory to see others members than ourself
         await server.members.fetch();

@@ -1,5 +1,5 @@
 import { User } from '@prisma/client';
-import { pick } from '.';
+import { pick } from 'lodash';
 
 export const filterUserRestricted = (user: User): Partial<User> => {
   return pick(user, ['id', 'type']);

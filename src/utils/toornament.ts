@@ -2,8 +2,8 @@ import axios from 'axios';
 import qs from 'querystring';
 import { PlayerInformations, ToornamentParticipant } from '../types';
 import { playerValidator } from '../validator';
-import { toornamentClientId, toornamentClientSecret, toornamentKey } from './environment';
-import logger from './log';
+import environment from './env';
+import logger from './logger';
 
 // Toornament API axios instance
 const toornamentAPI = axios.create({
@@ -21,8 +21,8 @@ export const init = async () => {
       'https://api.toornament.com/oauth/v2/token',
       qs.stringify({
         grant_type: 'client_credentials',
-        client_id: toornamentClientId(),
-        client_secret: toornamentClientSecret(),
+        client_id: environment.toornament.clientId,
+        client_secret: environment.toornament.clientSecret,
         scope: 'organizer:participant',
       }),
       { headers: { 'content-type': 'application/x-www-form-urlencoded' } },
@@ -31,7 +31,7 @@ export const init = async () => {
     // Set headers
     toornamentAPI.defaults.headers = {
       Authorization: `Bearer ${response.data.access_token}`,
-      'X-Api-Key': toornamentKey(),
+      'X-Api-Key': environment.toornament.key,
     };
   } catch {
     logger.warn('Could not init toornament');

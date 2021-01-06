@@ -1,10 +1,9 @@
-import differenceBy from 'lodash.differenceby';
-import difference from 'lodash.difference';
+import { difference, differenceBy } from 'lodash';
 import { fetchTournaments } from '../operations/tournament';
 
 import * as discord from '../utils/discord';
 import * as toornament from '../utils/toornament';
-import logger from '../utils/log';
+import logger from '../utils/logger';
 import { DiscordParticipants } from '../types';
 
 /**

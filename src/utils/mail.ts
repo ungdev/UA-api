@@ -1,23 +1,20 @@
 import { readFileSync } from 'fs';
-import path from 'path';
 import { render } from 'mustache';
 import nodemailer from 'nodemailer';
 import { Address } from 'nodemailer/lib/mailer';
 import { EmailAttachment, EmailContent, MailData } from '../types';
-import { mailHost, mailPort, mailPassword, mailSender, mailUser } from './environment';
-import logger from './log';
+import env from './env';
+import logger from './logger';
 
 const transporter = nodemailer.createTransport({
-  host: mailHost(),
-  port: mailPort(),
+  host: env.email.host,
+  port: env.email.port,
   auth: {
-    user: mailUser(),
-    pass: mailPassword(),
+    user: env.email.user,
+    pass: env.email.password,
   },
   pool: true,
   maxConnections: 1,
-  // rateDelta: 1,
-  // rateLimit: 1,
 });
 
 // emailType for welcome mail with tickets and discount codes
@@ -43,7 +40,7 @@ export const sendMail = async (
   const mailContent = emailType(data);
   const info = await transporter
     .sendMail({
-      from: mailSender(),
+      from: env.email.sender,
       to,
       subject: mailContent.title,
       html: mailContent.html,

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ObjectSchema } from 'joi';
 import { Error } from '../types';
-import log from '../utils/log';
+import log from '../utils/logger';
 import { badRequest } from '../utils/responses';
 
 export default (schema: ObjectSchema) => (request: Request, response: Response, next: NextFunction): void => {

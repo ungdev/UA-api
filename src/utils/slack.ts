@@ -1,7 +1,7 @@
 import qs from 'querystring';
 import axios from 'axios';
 import { Contact } from '../types';
-import { slackContactChannel, slackToken } from './environment';
+import env from './env';
 
 /**
  * Sends a message a the slack bot
@@ -10,7 +10,7 @@ export const sendSlack = (channel: string, text: string, blocks?: Array<object>,
   axios.post(
     'https://slack.com/api/chat.postMessage',
     qs.stringify({
-      token: slackToken(),
+      token: env.slack.token,
       channel,
       text,
       blocks: JSON.stringify(blocks),
@@ -26,7 +26,7 @@ export const sendSlack = (channel: string, text: string, blocks?: Array<object>,
  */
 export const sendSlackContact = ({ name, email, subject, message }: Contact) => {
   return sendSlack(
-    slackContactChannel(),
+    env.slack.contactChannel,
     message,
     [
       {
