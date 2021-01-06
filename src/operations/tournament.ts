@@ -1,6 +1,6 @@
 import { Tournament } from '@prisma/client';
 import { TournamentWithLockedTeams } from '../types';
-import database from '../utils/database';
+import database from '../services/database';
 import { countTeamsWhere } from './team';
 
 export const fetchTournaments = (): Promise<Tournament[]> => {

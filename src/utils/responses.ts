@@ -43,7 +43,7 @@ export const notAcceptable = (response: Response, type?: Error): void =>
     .json({ error: type || Error.NotAcceptable })
     .end();
 
-export const unknown = (response: Response, type?: Error): void =>
+export const internalServerError = (response: Response, type?: Error): void =>
   response
     .status(500)
     .json({ error: type || Error.Unknown })

@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-process-exit */
 import { PrismaClient } from '@prisma/client';
-import env from './env';
-import log from './logger';
+import env from '../utils/env';
+import log from '../utils/logger';
 
 const database = new PrismaClient({
   log: [

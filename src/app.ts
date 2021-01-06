@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
@@ -7,9 +7,10 @@ import { notFound } from './utils/responses';
 import { Error } from './types';
 import router from './controllers';
 import { checkJson } from './middlewares/checkJson';
-import { morgan } from './utils/logger';
+import logger, { morgan } from './utils/logger';
 import { initUserRequest } from './middlewares/user';
 import env from './utils/env';
+import { internalServerError } from './utils/responses';
 
 const app = express();
 
@@ -31,5 +32,9 @@ app.use(env.api.prefix, router);
 
 // Not found
 app.use((request: Request, response: Response) => notFound(response, Error.RouteNotFound));
+
+app.use((error: Error, request: Request, response: Response, next: NextFunction) =>
+  internalServerError(response, error),
+);
 
 export default app;

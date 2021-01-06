@@ -7,6 +7,7 @@ import contact from './contact';
 import settings from './settings';
 import users from './users';
 import tournaments from './tournaments';
+import items from './items';
 
 const router = Router();
 
@@ -27,5 +28,8 @@ router.use('/users', users);
 
 // Tournaments routes
 router.use('/tournaments', tournaments);
+
+// Items routes
+router.use('/items', items);
 
 export default router;

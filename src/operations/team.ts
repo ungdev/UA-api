@@ -1,5 +1,5 @@
 import { TeamWhereInput } from '@prisma/client';
-import database from '../utils/database';
+import database from '../services/database';
 
 export const countTeamsWhere = (teamArguments: TeamWhereInput): Promise<number> => {
   return database.team.count({
