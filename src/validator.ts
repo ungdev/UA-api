@@ -31,18 +31,13 @@ export const teamValidator = dynamicEntity.append({
   tournamentId: Joi.string().required(),
 });
 
-export const userValidator = dynamicEntity.append({
-  username: Joi.string(),
+export const userValidator = Joi.object({
+  username: Joi.string().required(),
   firstname: Joi.string().required(),
   lastname: Joi.string().required(),
   email: Joi.string().email().required(),
   password: Joi.string().required(),
-  lockedAt: Joi.date(),
-  type: Joi.string()
-    .valid(...Object.keys(UserType))
-    .required(),
-  captainId: Joi.string().length(6).required(),
-  tournamentId: Joi.string().required(),
+  discordId: Joi.string().required(),
 });
 
 export const contactValidator = Joi.object({

@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { fetchItems } from '../../operations/item';
-import { filterItem } from '../../utils/filters';
+import { fetchTeams } from '../../operations/team';
 import { success } from '../../utils/responses';
 
 export default [
@@ -9,10 +8,8 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const items = await fetchItems();
-
-      const result = items.map(filterItem);
-      return success(response, result);
+      const teams = await fetchTeams();
+      return success(response, teams);
     } catch (error) {
       return next(error);
     }

@@ -10,3 +10,7 @@ export const countTeamsWhere = (teamArguments: TeamWhereInput): Promise<number> 
 export const fetchTeam = (id: string) => {
   return database.team.findOne({ where: { id } });
 };
+
+export const fetchTeams = () => {
+  return database.team.findMany();
+};

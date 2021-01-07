@@ -1,7 +1,7 @@
 import chai from 'chai';
 import request from 'supertest';
 import app from '../src/app';
-import database from '../src/utils/database';
+import database from '../src/services/database';
 import { Error } from '../src/types';
 
 chai.should();

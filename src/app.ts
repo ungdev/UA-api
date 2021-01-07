@@ -33,8 +33,13 @@ app.use(env.api.prefix, router);
 // Not found
 app.use((request: Request, response: Response) => notFound(response, Error.RouteNotFound));
 
-app.use((error: Error, request: Request, response: Response, next: NextFunction) =>
-  internalServerError(response, error),
-);
+// In case of unhandled error
+// A try catch must be set on every route with a next(error) in the catch block
+// The eslint disabling is important because the error argument can only be gotten in the 4 arguments function
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((error: Error, request: Request, response: Response, next: NextFunction) => {
+  logger.error(error);
+  return internalServerError(response);
+});
 
 export default app;

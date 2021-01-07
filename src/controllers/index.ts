@@ -8,6 +8,8 @@ import settings from './settings';
 import users from './users';
 import tournaments from './tournaments';
 import items from './items';
+import teams from './teams';
+import auth from './auth';
 
 const router = Router();
 
@@ -17,14 +19,20 @@ router.get('//', status);
 // Settings route
 router.get('/settings', settings);
 
-// Contact route
+// Contact routes
 router.post('/contact', contact);
+
+// Auth routes
+router.use('/auth', auth);
 
 // Documentation
 router.use('/docs', swagger.serve, swagger.setup(swaggerDocument));
 
-// Users routes
+// Users route
 router.use('/users', users);
+
+// Team routes
+router.use('/teams', teams);
 
 // Tournaments routes
 router.use('/tournaments', tournaments);
