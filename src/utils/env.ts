@@ -56,8 +56,12 @@ const env = {
   front: {
     website: process.env.ARENA_WEBSITE || 'https://arena.utt.fr',
   },
-  bcrpyt: {
-    level: Number(process.env.API_BCRYPT_LEVEL) || 11,
+  bcrypt: {
+    rounds: Number(process.env.API_BCRYPT_ROUNDS) || 10,
+  },
+  nanoid: {
+    length: Number(process.env.NANOID_LENGTH) || 6,
+    alphabet: process.env.NANOID_ALPHABET || '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
   },
   jwt: {
     secret: process.env.JWT_SECRET,

@@ -4,6 +4,7 @@
   "private": false,
   "dependencies": {
     "@prisma/client": "^2.10.2",
+    "@types/bcryptjs": "^2.4.2",
     "@types/cors": "^2.8.7",
     "@types/express": "^4.17.8",
     "@types/jsonwebtoken": "^8.5.0",

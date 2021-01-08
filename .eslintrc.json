@@ -28,6 +28,7 @@
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/ban-types": "off",
+    "security/detect-non-literal-regexp": "off",
     "eol-last": "off",
     "no-console": "error",
     "no-alert": "error",

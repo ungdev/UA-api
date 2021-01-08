@@ -1,9 +1,11 @@
 /* eslint-disable unicorn/no-process-exit */
 import { PrismaClient } from '@prisma/client';
 import env from '../utils/env';
-import log from '../utils/logger';
+import logger from '../utils/logger';
 
 const database = new PrismaClient({
+  // Enable color format if in development
+  errorFormat: env.development ? 'pretty' : 'colorless',
   log: [
     {
       emit: 'event',
@@ -22,9 +24,9 @@ const database = new PrismaClient({
 
 // If we are in development, enables database logging
 if (env.development) {
-  database.$on('query', (event) => log.debug(event.query));
-  database.$on('info', (event) => log.info(event.message));
-  database.$on('warn', (event) => log.warn(event.message));
+  database.$on('query', (event) => logger.debug(event.query));
+  database.$on('info', (event) => logger.info(event.message));
+  database.$on('warn', (event) => logger.warn(event.message));
 }
 
 // Dump query to initiate the connection
@@ -34,7 +36,7 @@ const setup = async () => {
 };
 
 setup().catch((error) => {
-  log.error(error);
+  logger.error(error);
   process.exit(1);
 });
 

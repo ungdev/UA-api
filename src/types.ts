@@ -76,13 +76,12 @@ export enum Error {
   AlreadyInTeam = 'Vous êtes déjà dans une équipe',
   LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
   ShopNotAllowed = 'La billetterie est fermée',
+  EmailAlreadyExists = 'Cet email est déjà utilisé',
 
   // 401
   Unauthenticated = "Vous n'êtes pas authentifié",
   ExpiredToken = 'Session expirée. Veuillez vous reconnecter',
   InvalidToken = 'Session invalide',
-  InvalidPassword = 'Mot de passe invalide',
-  InvalidForm = 'Formulaire invalide',
 
   // 403
   Unauthorized = "Vous n'avez pas l'autorisation d'accéder à cette ressource",

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
-import log from '../utils/logger';
+import logger from '../utils/logger';
 import { Error, DecodedToken } from '../types';
 import { badRequest } from '../utils/responses';
 import { getRequestUser } from '../utils/user';
@@ -12,7 +12,7 @@ export const isNotInATeam = (request: Request, response: Response, next: NextFun
   const user = getRequestUser(response);
 
   if (user.teamId) {
-    log.debug(`${request.path} failed : already in team`);
+    logger.debug(`${request.path} failed : already in team`);
 
     return badRequest(response, Error.AlreadyInTeam);
   }
@@ -41,13 +41,13 @@ export const initUserRequest = async (request: Request, response: Response, next
 
     // Store it in `response.locals.user` so that we can use it later
     response.locals.user = databaseUser;
-  } catch (error: unknown) {
+  } catch (error) {
     // Token has expired
     if (error instanceof TokenExpiredError) {
-      log.debug(`token expired since ${error.expiredAt}`);
-    } else {
-      log.error(`invalid token: ${token}`);
+      return badRequest(response, Error.ExpiredToken);
     }
+
+    return badRequest(response, Error.InvalidToken);
   }
 
   return next();

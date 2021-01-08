@@ -103,8 +103,8 @@ model User {
   password      String?
   type          UserType
   permissions   String?
-  registerToken String?
-  resetToken    String?
+  registerToken String?    @unique
+  resetToken    String?    @unique
   place         String?    @unique
   scannedAt     DateTime?
   discordId     String?    @unique
@@ -116,7 +116,6 @@ model User {
   team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
   cartItems     CartItem[]
   carts         Cart[]
-  Team          Team?
 
   @@index([askingTeamId], name: "users_ibfk_1")
   @@index([teamId], name: "users_ibfk_2")
