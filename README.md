@@ -65,3 +65,30 @@ Use `npx prisma generate` to generate your prisma client
 - Seed the database before testing with `mysql -u DATABASE_USER -p DATABASE_NAME < seed.sql` by replacing `DATABASE_USER` and `DATABASE_NAME` with their values
 
 - Run `yarn test`
+
+Create a `local/test.sh` file and put the following content
+
+```bash
+#!/bin/bash -e
+
+# Create the database
+mysql -e "DROP DATABASE IF EXISTS arenatest"
+mysql -e "CREATE DATABASE arenatest CHARACTER SET utf8"
+
+mysql arenatest < seed.sql
+
+# Set your correct environnment variables
+export DATABASE_NAME=arenatest
+export DATBASE_USERNAME=root
+export DATBASE_PASSWORD=root
+
+# Starts the testing
+yarn test
+```
+
+you can then
+
+```bash
+chmod +x local/test.sh
+./local/test.sh # Happy testing !
+```

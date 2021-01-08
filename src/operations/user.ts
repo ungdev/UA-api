@@ -29,7 +29,6 @@ export const createUser = async (
   lastname: string,
   email: string,
   password: string,
-  discordId: string,
 ) => {
   const salt = await bcrpyt.genSalt(env.bcrypt.rounds);
   const hashedPassword = await bcrpyt.hash(password, salt);
@@ -41,7 +40,6 @@ export const createUser = async (
       lastname,
       email,
       password: hashedPassword,
-      discordId,
       type: UserType.player,
       registerToken: nanoid(),
     },

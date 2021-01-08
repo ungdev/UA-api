@@ -49,7 +49,9 @@
     "unicorn/consistent-function-scoping": "off",
     "unicorn/no-fn-reference-in-iterator": "off",
     "security/detect-object-injection": "off",
+    "import/order": "warn",
     "unicorn/no-process-exit": "off",
+    "unicorn/prefer-set-has": "off",
     "unicorn/prevent-abbreviations": [
       "error",
       {

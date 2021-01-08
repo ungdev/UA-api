@@ -6,8 +6,9 @@ import { Error } from '../src/types';
 
 chai.should();
 
-describe.skip('Auth API', () => {
+describe('Auth API', () => {
   const validBody = {
+    username: 'toto',
     firstname: 'John',
     lastname: 'Doe',
     email: 'john.doe@test.com',
@@ -49,7 +50,7 @@ describe.skip('Auth API', () => {
   });
   describe('POST /auth/validate/{token}', () => {
     it('should not accept wrong token', async () => {
-      await request(app).post('/auth/validate/wrongtoken').expect(404, { error: Error.WrongRegisterToken });
+      await request(app).post('/auth/validate/wrongtoken').expect(400, { error: Error.BadRequest });
     });
     it('should validate the user', async () => {
       const newUser = await database.user.findOne({

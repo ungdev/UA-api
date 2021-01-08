@@ -18,7 +18,6 @@ export default [
       lastname: Joi.string().required(),
       email: Joi.string().email().required(),
       password: Joi.string().required(),
-      discordId: Joi.string().required(),
       type: Joi.string().valid(UserType.player, UserType.coach, UserType.visitor),
     }),
   ),
@@ -26,11 +25,11 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { username, firstname, lastname, email, password, discordId } = request.body;
+      const { username, firstname, lastname, email, password } = request.body;
 
       // Tries to create a user
       try {
-        await createUser(username, firstname, lastname, email, password, discordId);
+        await createUser(username, firstname, lastname, email, password);
       } catch (error) {
         // If the email already exists in the database, throw a bad request
         if (error.code === 'P2002' && error.meta && error.meta.target === 'email')

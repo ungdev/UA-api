@@ -77,6 +77,7 @@ export enum Error {
   LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
   ShopNotAllowed = 'La billetterie est fermée',
   EmailAlreadyExists = 'Cet email est déjà utilisé',
+  TournamentFull = 'Le tournoi est complet',
 
   // 401
   Unauthenticated = "Vous n'êtes pas authentifié",
@@ -93,6 +94,7 @@ export enum Error {
   RouteNotFound = 'La route est introuvable',
   UserNotFound = "L'utilisateur est introuvable",
   OrderNotFound = 'La commande est introuvable',
+  TournamentNotFound = 'Le tournoi est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
 
   // 406

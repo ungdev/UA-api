@@ -1,14 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-import { isNotAuthenticated } from '../../middlewares/authentication';
-import { isValidToken } from '../../middlewares/parameters';
-import validateBody from '../../middlewares/validateBody';
-import { createUser, fetchUserByEmail, fetchUserByRegisterToken, removeUserRegisterToken } from '../../operations/user';
-import { filterUser } from '../../utils/filters';
-import { badRequest, created, noContent, success } from '../../utils/responses';
 import bcrpyt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import env from '../../utils/env';
+import { isNotAuthenticated } from '../../middlewares/authentication';
+import validateBody from '../../middlewares/validateBody';
+import { fetchUserByEmail } from '../../operations/user';
+import { filterUser } from '../../utils/filters';
+import { badRequest, success } from '../../utils/responses';
+import { generateToken } from '../../utils/user';
 
 export default [
   // Middlewares
@@ -36,14 +34,12 @@ export default [
       // Compares the hash from the password given
       const isPasswordValid = await bcrpyt.compare(password, user.password);
 
+      const token = generateToken(user);
+
       // If the password is not valid, rejects the request
       if (!isPasswordValid) {
         return badRequest(response);
       }
-
-      const token = jwt.sign({ id: user.id }, env.jwt.secret, {
-        expiresIn: env.jwt.expires,
-      });
 
       return success(response, {
         user: filterUser(user),

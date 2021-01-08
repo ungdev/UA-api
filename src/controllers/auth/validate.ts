@@ -7,7 +7,8 @@ import validateBody from '../../middlewares/validateBody';
 import { createUser, fetchUserByRegisterToken, removeUserRegisterToken } from '../../operations/user';
 import { Error } from '../../types';
 import { filterUser } from '../../utils/filters';
-import { badRequest, created, noContent, success } from '../../utils/responses';
+import { badRequest, created, noContent, notFound, success } from '../../utils/responses';
+import { generateToken } from '../../utils/user';
 import { userValidator } from '../../validator';
 
 export default [
@@ -28,7 +29,12 @@ export default [
 
       await removeUserRegisterToken(user);
 
-      return success(response, filterUser(user));
+      const jwt = generateToken(user);
+
+      return success(response, {
+        jwt,
+        user: filterUser(user),
+      });
     } catch (error) {
       return next(error);
     }

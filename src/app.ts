@@ -15,7 +15,7 @@ import { internalServerError } from './utils/responses';
 const app = express();
 
 // Loads logging middleware with more verbosity if in dev environment
-if (!env.testing) {
+if (!env.test) {
   app.use(morgan());
 }
 
