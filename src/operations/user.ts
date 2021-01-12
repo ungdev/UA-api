@@ -1,7 +1,4 @@
-/* eslint-disable unicorn/no-null */
-// We need to disable the no null to be able to nullify a database field
-
-import bcrpyt from 'bcryptjs';
+import userOperations from 'bcryptjs';
 import { UserType } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
@@ -35,8 +32,8 @@ export const createUser = async (
   email: string,
   password: string,
 ) => {
-  const salt = await bcrpyt.genSalt(env.bcrypt.rounds);
-  const hashedPassword = await bcrpyt.hash(password, salt);
+  const salt = await userOperations.genSalt(env.bcrypt.rounds);
+  const hashedPassword = await userOperations.hash(password, salt);
   return database.user.create({
     data: {
       id: nanoid(),
@@ -58,6 +55,42 @@ export const removeUserRegisterToken = (user: User) => {
     },
     where: {
       id: user.id,
+    },
+  });
+};
+
+export const removeUserResetToken = (user: User) => {
+  return database.user.update({
+    data: {
+      resetToken: null,
+    },
+    where: {
+      id: user.id,
+    },
+  });
+};
+
+export const generateResetToken = (user: User) => {
+  return database.user.update({
+    data: {
+      resetToken: nanoid(),
+    },
+    where: {
+      id: user.id,
+    },
+  });
+};
+
+export const changePassword = async (user: User, newPassword: string) => {
+  const salt = await userOperations.genSalt(env.bcrypt.rounds);
+  const hashedPassword = await userOperations.hash(newPassword, salt);
+
+  return database.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      password: hashedPassword,
     },
   });
 };

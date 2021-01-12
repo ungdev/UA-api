@@ -12,7 +12,3 @@ export const generateToken = (user: User) => {
     expiresIn: env.jwt.expires,
   });
 };
-
-export const hasPaid = (user: User) => {
-  return false;
-};

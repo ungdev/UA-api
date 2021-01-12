@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import request from 'supertest';
 import app from '../src/app';
 import database from '../src/services/database';
-import * as user from '../src/operations/user';
+import * as userOperations from '../src/operations/user';
 import * as userUtils from '../src/utils/user';
 import { Error } from '../src/types';
 import { setLoginAllowed } from '../src/operations/settings';
@@ -27,7 +27,7 @@ describe('Auth API', () => {
     await database.user.deleteMany();
   });
 
-  const validBody = {
+  const userData = {
     username: 'toto',
     firstname: 'John',
     lastname: 'Doe',
@@ -39,30 +39,30 @@ describe('Auth API', () => {
   describe('POST /auth/register', () => {
     it('should get an error as the login is not allowed', async () => {
       await setLoginAllowed(false);
-      await request(app).post('/auth/register').send(validBody).expect(400, { error: Error.LoginNotAllowed });
+      await request(app).post('/auth/register').send(userData).expect(400, { error: Error.LoginNotAllowed });
     });
 
     it('should be able to register as orga', async () => {
       await request(app)
         .post('/auth/register')
         .send({
-          ...validBody,
+          ...userData,
           type: 'orga',
         })
         .expect(400, { error: Error.BadRequest });
     });
 
     it('should throw an internal server error', async () => {
-      sandbox.stub(user, 'createUser').throws('Unexpected error');
+      sandbox.stub(userOperations, 'createUser').throws('Unexpected error');
 
-      await request(app).post('/auth/register').send(validBody).expect(500, { error: Error.Unknown });
+      await request(app).post('/auth/register').send(userData).expect(500, { error: Error.Unknown });
     });
 
     it('should create a user', async () => {
-      await request(app).post('/auth/register').send(validBody).expect(201);
+      await request(app).post('/auth/register').send(userData).expect(201);
       const newUser = await database.user.findUnique({
         where: {
-          email: validBody.email,
+          email: userData.email,
         },
       });
       newUser.firstname.should.be.equal('John');
@@ -70,27 +70,27 @@ describe('Auth API', () => {
     });
 
     it('should not create a duplicate user', async () => {
-      await request(app).post('/auth/register').send(validBody).expect(400);
+      await request(app).post('/auth/register').send(userData).expect(400);
     });
 
     it('should not create a user with incomplete body', async () => {
       await request(app)
         .post('/auth/register')
-        .send({ firstname: validBody.firstname, email: validBody.email })
+        .send({ firstname: userData.firstname, email: userData.email })
         .expect(400);
     });
 
     it('should not accept wrong email', async () => {
       await request(app)
         .post('/auth/register')
-        .send({ ...validBody, email: 'wrong email' })
+        .send({ ...userData, email: 'wrong email' })
         .expect(400);
     });
 
     it('should not accept wrong type', async () => {
       await request(app)
         .post('/auth/register')
-        .send({ ...validBody, type: 'wrong type' })
+        .send({ ...userData, type: 'wrong type' })
         .expect(400);
     });
   });
@@ -101,8 +101,8 @@ describe('Auth API', () => {
       await request(app)
         .post('/auth/login')
         .send({
-          email: validBody.email,
-          password: validBody.password,
+          email: userData.email,
+          password: userData.password,
         })
         .expect(400, { error: Error.EmailNotConfirmed });
     });
@@ -124,12 +124,12 @@ describe('Auth API', () => {
 
     it('should throw an internal server error', async () => {
       // Fake the main function to throw
-      sandbox.stub(user, 'removeUserRegisterToken').throws('Unexpected error');
+      sandbox.stub(userOperations, 'removeUserRegisterToken').throws('Unexpected error');
 
       // Fetch the valid user token
       const newUser = await database.user.findUnique({
         where: {
-          email: validBody.email,
+          email: userData.email,
         },
       });
 
@@ -140,7 +140,7 @@ describe('Auth API', () => {
     it('should validate the user', async () => {
       const newUser = await database.user.findUnique({
         where: {
-          email: validBody.email,
+          email: userData.email,
         },
       });
 
@@ -154,8 +154,8 @@ describe('Auth API', () => {
       await request(app)
         .post('/auth/login')
         .send({
-          email: validBody.email,
-          password: validBody.password,
+          email: userData.email,
+          password: userData.password,
         })
         .expect(400, { error: Error.LoginNotAllowed });
       await setLoginAllowed(true);
@@ -165,7 +165,7 @@ describe('Auth API', () => {
       await request(app)
         .post('/auth/login')
         .send({
-          email: validBody.email,
+          email: userData.email,
         })
         .expect(400, { error: Error.BadRequest });
     });
@@ -174,7 +174,7 @@ describe('Auth API', () => {
       await request(app)
         .post('/auth/login')
         .send({
-          email: validBody.email,
+          email: userData.email,
           password: 'wrongpassword',
         })
         .expect(400, { error: Error.InvalidCredentials });
@@ -185,7 +185,7 @@ describe('Auth API', () => {
         .post('/auth/login')
         .send({
           email: 'wrong@email.fr',
-          password: validBody.password,
+          password: userData.password,
         })
         .expect(400, { error: Error.InvalidCredentials });
     });
@@ -200,8 +200,8 @@ describe('Auth API', () => {
       await request(app)
         .post('/auth/login')
         .send({
-          email: validBody.email,
-          password: validBody.password,
+          email: userData.email,
+          password: userData.password,
         })
         .expect(500, { error: Error.Unknown });
     });
@@ -210,8 +210,8 @@ describe('Auth API', () => {
       const response = await request(app)
         .post('/auth/login')
         .send({
-          email: validBody.email,
-          password: validBody.password,
+          email: userData.email,
+          password: userData.password,
         })
         .expect(200);
 
@@ -226,10 +226,141 @@ describe('Auth API', () => {
         .post('/auth/login')
         .set('Authorization', `Bearer ${authorizationToken}`)
         .send({
-          email: validBody.email,
-          password: validBody.password,
+          email: userData.email,
+          password: userData.password,
         })
         .expect(400, { error: Error.AlreadyAuthenticated });
+    });
+  });
+
+  describe('POST /auth/reset-password', () => {
+    it('should return a bad request because of incorrect body', async () => {
+      await request(app)
+        .post('/auth/reset-password')
+        .send({
+          fake: 'fake',
+        })
+        .expect(400, { error: Error.BadRequest });
+    });
+
+    it('should return a not found because of incorrect email', async () => {
+      await request(app)
+        .post('/auth/reset-password')
+        .send({
+          email: 'fake@email.fr',
+        })
+        .expect(404, { error: Error.UserNotFound });
+    });
+
+    it('should return an error because the login is not allowed', async () => {
+      await setLoginAllowed(false);
+      await request(app)
+        .post('/auth/reset-password')
+        .send({
+          email: userData.email,
+        })
+        .expect(400, { error: Error.LoginNotAllowed });
+    });
+
+    it('should return an internal server error', async () => {
+      sandbox.stub(userOperations, 'fetchUser').throws('Unexpected error');
+
+      await request(app)
+        .post('/auth/reset-password')
+        .send({
+          email: userData.email,
+        })
+        .expect(500, { error: Error.Unknown });
+    });
+
+    it('should return a valid response', async () => {
+      await request(app)
+        .post('/auth/reset-password')
+        .send({
+          email: userData.email,
+        })
+        .expect(204);
+
+      const user = await database.user.findUnique({
+        where: {
+          email: userData.email,
+        },
+      });
+
+      expect(user.resetToken).to.have.lengthOf(6);
+    });
+  });
+
+  describe('POST /auth/reset-password/:uuid', () => {
+    it('should return a bad request due to an incorrect token', async () => {
+      await request(app)
+        .post('/auth/reset-password/incorrectToken')
+        .send({ password: 'new password' })
+        .expect(400, { error: Error.BadRequest });
+    });
+
+    it('should not accept unknown token', async () => {
+      await request(app)
+        .post('/auth/reset-password/A1B2C3')
+        .send({ password: 'new password' })
+        .expect(400, { error: Error.BadRequest });
+    });
+
+    it('should not accept incorrect body', async () => {
+      const user = await userOperations.fetchUser(userData.email, 'email');
+
+      await request(app)
+        .post(`/auth/reset-password/${user.resetToken}`)
+        .send({ fake: 'fake' })
+        .expect(400, { error: Error.BadRequest });
+    });
+
+    it('should return a bad request if the login is disabled', async () => {
+      await setLoginAllowed(false);
+      const user = await userOperations.fetchUser(userData.email, 'email');
+      await request(app)
+        .post(`/auth/reset-password/${user.resetToken}`)
+        .send({ password: 'bonjour' })
+        .expect(400, { error: Error.LoginNotAllowed });
+    });
+
+    it('should return an internal server error', async () => {
+      const user = await userOperations.fetchUser(userData.email, 'email');
+
+      sandbox.stub(userOperations, 'fetchUser').throws('Unexpected error');
+
+      await request(app)
+        .post(`/auth/reset-password/${user.resetToken}`)
+        .send({ password: 'validPassword' })
+        .expect(500, { error: Error.Unknown });
+    });
+
+    it('should reset the password and have a successful login', async () => {
+      let user = await userOperations.fetchUser(userData.email, 'email');
+      const response = await request(app)
+        .post(`/auth/reset-password/${user.resetToken}`)
+        .send({ password: 'validPassword' })
+        .expect(200);
+
+      expect(response.body.token).to.be.a('string');
+      expect(response.body.user).to.be.an('object');
+
+      user = await userOperations.fetchUser(userData.email, 'email');
+
+      expect(user.resetToken).to.be.null;
+    });
+
+    it('should login with the new password', async () => {
+      const response = await request(app)
+        .post('/auth/login')
+        .send({
+          email: userData.email,
+          password: 'validPassword',
+        })
+        .expect(200);
+
+      expect(response.body.token).to.be.a('string');
+      expect(response.body.user).to.be.an('object');
     });
   });
 });

@@ -1,5 +1,3 @@
-/* eslint-disable unicorn/no-null */
-
 import prisma, { Prisma } from '@prisma/client';
 import database from '../services/database';
 import { PrimitiveUser, Team } from '../types';
