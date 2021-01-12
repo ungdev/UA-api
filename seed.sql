@@ -3,112 +3,133 @@ SET time_zone = '+00:00';
 SET foreign_key_checks = 0;
 SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
-
 /****************/
 /**** MODELS ****/
 /****************/
 
-/** Carts **/
-DROP TABLE IF EXISTS `carts`;
-CREATE TABLE `carts` (
-  `id` char(6) PRIMARY KEY,
-  `userId` char(6) NOT NULL,
-  `transactionState` enum('pending', 'paid', 'canceled', 'refused', 'refunded') NOT NULL DEFAULT 'pending',
-  `transactionId` int(11) DEFAULT NULL,
-  `paidAt` datetime DEFAULT NULL,
-  `createdAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  `updatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  CONSTRAINT `carts_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB CHARSET=utf8;
-
 /** CartItems **/
 DROP TABLE IF EXISTS `cartitems`;
 CREATE TABLE `cartitems` (
-  `id` char(6) PRIMARY KEY,
-  `itemId` varchar(255) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `cartId` char(6) NOT NULL,
-  `forUserId` char(6) NOT NULL,
-  `createdAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  `updatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  CONSTRAINT `cartitems_ibfk_1` FOREIGN KEY (`itemId`) REFERENCES `items` (`id`),
-  CONSTRAINT `cartitems_ibfk_2` FOREIGN KEY (`cartId`) REFERENCES `carts` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `cartitems_ibfk_3` FOREIGN KEY (`forUserId`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB CHARSET=utf8;
+  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `itemId` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` int NOT NULL,
+  `cartId` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `forUserId` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `createdAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `cartitems_ibfk_1` (`itemId`),
+  KEY `cartitems_ibfk_2` (`cartId`),
+  KEY `cartitems_ibfk_3` (`forUserId`),
+  CONSTRAINT `cartitems_ibfk_1` FOREIGN KEY (`cartId`) REFERENCES `carts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cartitems_ibfk_2` FOREIGN KEY (`forUserId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cartitems_ibfk_3` FOREIGN KEY (`itemId`) REFERENCES `items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+/** Carts **/
+DROP TABLE IF EXISTS `carts`;
+CREATE TABLE `carts` (
+  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `userId` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `transactionState` enum('pending','paid','canceled','refused','refunded') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `transactionId` int DEFAULT NULL,
+  `paidAt` datetime(3) DEFAULT NULL,
+  `createdAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `carts_ibfk_1` (`userId`),
+  CONSTRAINT `carts_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /** Items **/
 DROP TABLE IF EXISTS `items`;
 CREATE TABLE `items` (
-  `id` varchar(255) PRIMARY KEY,
-  `name` varchar(255) NOT NULL,
-  `category` enum('ticket','item') NOT NULL,
-  `attribute` varchar(255) DEFAULT NULL,
-  `price` int(11) NOT NULL,
-  `reducedPrice` int(11) DEFAULT NULL,
-  `infos` varchar(255) DEFAULT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  `stock` int(11) DEFAULT NULL
-) ENGINE=InnoDB CHARSET=utf8;
+  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category` enum('ticket','item') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attribute` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` int NOT NULL,
+  `reducedPrice` int DEFAULT NULL,
+  `infos` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `stock` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /** Settings **/
 DROP TABLE IF EXISTS `settings`;
 CREATE TABLE `settings` (
-  `id` varchar(255) PRIMARY KEY,
-  `value` tinyint(1) NOT NULL
-) ENGINE=InnoDB CHARSET=utf8;
+  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /** Teams **/
 DROP TABLE IF EXISTS `teams`;
 CREATE TABLE `teams` (
-  `id` char(6) PRIMARY KEY,
-  `name` varchar(255) NOT NULL,
-  `tournamentId` varchar(255) NOT NULL,
-  `captainId` char(6) NOT NULL UNIQUE,
-  `lockedAt` datetime DEFAULT NULL,
-  `createdAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  `updatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  CONSTRAINT `teams_ibfk_1` FOREIGN KEY (`captainId`) REFERENCES `users` (`id`),
-  CONSTRAINT `teams_ibfk_2` FOREIGN KEY (`tournamentId`) REFERENCES `tournaments` (`id`)
-) ENGINE=InnoDB CHARSET=utf8;
+  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tournamentId` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `captainId` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `lockedAt` datetime(3) DEFAULT NULL,
+  `createdAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `teams.captainId_unique` (`captainId`),
+  KEY `teams_ibfk_2` (`tournamentId`),
+  CONSTRAINT `teams_ibfk_1` FOREIGN KEY (`captainId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `teams_ibfk_2` FOREIGN KEY (`tournamentId`) REFERENCES `tournaments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /** Tournaments **/
 DROP TABLE IF EXISTS `tournaments`;
 CREATE TABLE `tournaments` (
-  `id` varchar(255) PRIMARY KEY,
-  `name` varchar(255) NOT NULL UNIQUE,
-  `maxPlayers` int(11) NOT NULL,
-  `playersPerTeam` int(11) NOT NULL,
-  `toornamentId` varchar(255) DEFAULT NULL,
-  `discordRoleId` varchar(255) DEFAULT NULL,
-  `discordStaffRoleId` varchar(255) DEFAULT NULL,
-  `discordVocalCategoryId` varchar(255) DEFAULT NULL,
-  `discordTextCategoryId` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB CHARSET=utf8;
+  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `maxPlayers` int NOT NULL,
+  `playersPerTeam` int NOT NULL,
+  `toornamentId` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `discordRoleId` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `discordStaffRoleId` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `discordVocalCategoryId` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `discordTextCategoryId` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tournaments.name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /** Users **/
 DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
-  `id` char(6) PRIMARY KEY,
-  `username` varchar(255),
-  `firstname` varchar(255) NOT NULL,
-  `lastname` varchar(255) NOT NULL,
-  `email` varchar(255) UNIQUE,
-  `password` varchar(255),
-  `type` enum('player', 'coach', 'visitor', 'orga') NOT NULL,
-  `permissions` varchar(255) DEFAULT NULL,
-  `registerToken` char(6) DEFAULT NULL,
-  `resetToken` char(6) DEFAULT NULL,
-  `place` char(4) DEFAULT NULL UNIQUE,
-  `scannedAt` datetime DEFAULT NULL,
-  `discordId` varchar(255) DEFAULT NULL UNIQUE,
-  `teamId` char(6) DEFAULT NULL,
-  `askingTeamId` char(6) DEFAULT NULL,
-  `createdAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  `updatedAt` datetime(6) NOT NULL DEFAULT current_timestamp(6),
-  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`askingTeamId`) REFERENCES `teams` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `users_ibfk_2` FOREIGN KEY (`teamId`) REFERENCES `teams` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB CHARSET=utf8;
-
+  `id` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `username` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `firstname` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `lastname` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` enum('player','coach','visitor','orga') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `permissions` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `registerToken` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `resetToken` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `place` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `scannedAt` datetime(3) DEFAULT NULL,
+  `discordId` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `teamId` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `askingTeamId` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `createdAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users.email_unique` (`email`),
+  UNIQUE KEY `users.registerToken_unique` (`registerToken`),
+  UNIQUE KEY `users.resetToken_unique` (`resetToken`),
+  UNIQUE KEY `users.place_unique` (`place`),
+  UNIQUE KEY `users.discordId_unique` (`discordId`),
+  KEY `users_ibfk_1` (`askingTeamId`),
+  KEY `users_ibfk_2` (`teamId`),
+  CONSTRAINT `users_ibfk_1` FOREIGN KEY (`askingTeamId`) REFERENCES `teams` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `users_ibfk_2` FOREIGN KEY (`teamId`) REFERENCES `teams` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /***************/
 /**** SEEDS ****/
