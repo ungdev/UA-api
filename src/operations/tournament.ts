@@ -1,19 +1,10 @@
-import { Tournament } from '@prisma/client';
-import { TournamentWithLockedTeams } from '../types';
 import database from '../services/database';
+import { Tournament } from '../types';
 import { countTeamsWhere } from './team';
 
-export const fetchTournaments = (): Promise<Tournament[]> => {
-  return database.tournament.findMany();
-};
-
-export const fetchTournament = (id: string) => {
-  return database.tournament.findOne({ where: { id } });
-};
-
-export const fetchTournamentsWithLockedTeams = async (): Promise<TournamentWithLockedTeams[]> => {
+export const fetchTournaments = async (): Promise<Tournament[]> => {
   // fetch all tournaments
-  const tournaments: Tournament[] = await fetchTournaments();
+  const tournaments = await database.tournament.findMany();
 
   // count all locked teams by tournaments
   const lockedTeamsPerTournaments = await Promise.all(
@@ -32,4 +23,8 @@ export const fetchTournamentsWithLockedTeams = async (): Promise<TournamentWithL
     ...tournament,
     lockedTeamsCount: lockedTeamsPerTournaments[index],
   }));
+};
+
+export const fetchTournament = (id: string) => {
+  return database.tournament.findUnique({ where: { id } });
 };

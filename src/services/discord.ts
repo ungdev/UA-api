@@ -1,5 +1,5 @@
-import { Tournament } from '@prisma/client';
 import Discord, { GuildMember } from 'discord.js';
+import { Tournament } from '../types';
 import env from '../utils/env';
 import logger from '../utils/logger';
 import removeAccents from '../utils/removeAccents';

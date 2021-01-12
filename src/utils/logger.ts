@@ -7,6 +7,7 @@ import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { getIp } from './network';
 import { getRequestUser } from './user';
+import env from './env';
 
 // Create console Transport
 const { combine, colorize, printf } = format;
@@ -17,6 +18,7 @@ const consoleTransport = new transports.Console({
     printf(({ level, message }) => `${timestamp} ${level}: ${message}`),
   ),
   level: 'silly',
+  silent: process.env.NODE_ENV === 'test', // Doesn't log if we are in testing environment
 });
 
 const loggingTransports: Array<ConsoleTransportInstance> = [consoleTransport];

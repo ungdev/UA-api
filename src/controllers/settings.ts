@@ -1,7 +1,7 @@
-import { Setting } from '@prisma/client';
 import { Request, Response } from 'express';
 
 import database from '../services/database';
+import { Setting } from '../types';
 import { success } from '../utils/responses';
 
 export default [

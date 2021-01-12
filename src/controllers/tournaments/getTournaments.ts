@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { fetchTournamentsWithLockedTeams } from '../../operations/tournament';
+import { fetchTournaments } from '../../operations/tournament';
 import { success } from '../../utils/responses';
 
 export default [
@@ -8,7 +8,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const result = await fetchTournamentsWithLockedTeams();
+      const result = await fetchTournaments();
       return success(response, result);
     } catch (error) {
       return next(error);

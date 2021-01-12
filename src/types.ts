@@ -1,5 +1,4 @@
-import { Tournament, User, TransactionState } from '@prisma/client';
-
+import prisma, { TransactionState } from '@prisma/client';
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
  * Redémarrer le serveur dans ce cas là
@@ -47,13 +46,32 @@ export interface Contact {
 /** Databse extensions **/
 /************************/
 
-export interface UserWithHasPaid extends User {
-  hasPaid: boolean;
-}
+// We define all the type here, even if we dont extend them to avoid importing @prisma/client in files and mix both types to avoid potential errors
 
-export interface TournamentWithLockedTeams extends Tournament {
+export type Item = prisma.Item;
+
+export type Setting = prisma.Setting;
+
+export type Cart = prisma.Cart;
+
+export type CartItem = prisma.CartItem;
+
+export type PrimitiveUser = prisma.User & {
+  cartItems: CartItem[];
+};
+
+export type User = PrimitiveUser & {
+  hasPaid: boolean;
+};
+
+export type Tournament = prisma.Tournament & {
   lockedTeamsCount: number;
-}
+};
+
+export type Team = prisma.Team & {
+  users: User[];
+  askingUsers: User[];
+};
 
 /************/
 /** Etupay **/
@@ -78,6 +96,9 @@ export enum Error {
   ShopNotAllowed = 'La billetterie est fermée',
   EmailAlreadyExists = 'Cet email est déjà utilisé',
   TournamentFull = 'Le tournoi est complet',
+  EmailNotConfirmed = "Le compte n'est pas confirmé",
+  InvalidCredentials = 'Identifiants invalides',
+  AlreadyAuthenticated = 'Vous êtes déjà identifié',
 
   // 401
   Unauthenticated = "Vous n'êtes pas authentifié",

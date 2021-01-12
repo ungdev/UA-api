@@ -3,14 +3,17 @@ import Joi from 'joi';
 import bcrpyt from 'bcryptjs';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import validateBody from '../../middlewares/validateBody';
-import { fetchUserByEmail } from '../../operations/user';
 import { filterUser } from '../../utils/filters';
 import { badRequest, success } from '../../utils/responses';
 import { generateToken } from '../../utils/user';
+import { Error } from '../../types';
+import { fetchUser } from '../../operations/user';
+import { isLoginAllowed } from '../../middlewares/settings';
 
 export default [
   // Middlewares
   isNotAuthenticated(),
+  isLoginAllowed(),
   validateBody(
     Joi.object({
       email: Joi.string().email().required(),
@@ -24,11 +27,15 @@ export default [
       const { email, password } = request.body;
 
       // Fetch the user
-      const user = await fetchUserByEmail(email);
+      const user = await fetchUser(email, 'email');
 
       // Chceks if the user exists
       if (!user) {
-        return badRequest(response);
+        return badRequest(response, Error.InvalidCredentials);
+      }
+
+      if (user.registerToken) {
+        return badRequest(response, Error.EmailNotConfirmed);
       }
 
       // Compares the hash from the password given
@@ -38,7 +45,7 @@ export default [
 
       // If the password is not valid, rejects the request
       if (!isPasswordValid) {
-        return badRequest(response);
+        return badRequest(response, Error.InvalidCredentials);
       }
 
       return success(response, {

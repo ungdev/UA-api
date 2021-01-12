@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { Error, DecodedToken } from '../types';
-import { badRequest } from '../utils/responses';
+import { badRequest, notFound } from '../utils/responses';
 import { fetchUser } from '../operations/user';
 import env from '../utils/env';
+import logger from '../utils/logger';
 
 // Fetch user from database if possible
 export const initUserRequest = async (request: Request, response: Response, next: NextFunction) => {
@@ -22,11 +23,22 @@ export const initUserRequest = async (request: Request, response: Response, next
     const decodedToken = jwt.verify(token, env.jwt.secret) as DecodedToken;
 
     // Fetch the user from the database
-    const databaseUser = await fetchUser(decodedToken.userId);
+    const user = await fetchUser(decodedToken.userId);
+
+    if (!user) {
+      return notFound(response, Error.UserNotFound);
+    }
+
+    // Checks that the account is confirmed
+    if (user.registerToken) {
+      return badRequest(response, Error.EmailNotConfirmed);
+    }
 
     // Store it in `response.locals.user` so that we can use it later
-    response.locals.user = databaseUser;
+    response.locals.user = user;
   } catch (error) {
+    logger.error(error);
+
     // Token has expired
     if (error instanceof TokenExpiredError) {
       return badRequest(response, Error.ExpiredToken);

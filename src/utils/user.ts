@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '@prisma/client';
+import { User } from '../types';
 import env from './env';
 
 export const getRequestUser = (response: Response): User | null => {
@@ -8,7 +8,11 @@ export const getRequestUser = (response: Response): User | null => {
 };
 
 export const generateToken = (user: User) => {
-  jwt.sign({ id: user.id }, env.jwt.secret, {
+  return jwt.sign({ userId: user.id }, env.jwt.secret, {
     expiresIn: env.jwt.expires,
   });
+};
+
+export const hasPaid = (user: User) => {
+  return false;
 };

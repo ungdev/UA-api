@@ -1,7 +1,7 @@
 import { Response, NextFunction, Request } from 'express';
 import { getRequestUser } from '../utils/user';
 import { unauthorized, unauthenticated, badRequest } from '../utils/responses';
-import { Permission } from '../types';
+import { Error, Permission } from '../types';
 
 // Checks the user is authenticated. If not, it will return an error
 export const isAuthenticated = () => (request: Request, response: Response, next: NextFunction) => {
@@ -19,7 +19,7 @@ export const isNotAuthenticated = () => (request: Request, response: Response, n
     return next();
   }
 
-  return badRequest(response);
+  return badRequest(response, Error.AlreadyAuthenticated);
 };
 
 // Checks the user has the given permission. If not, it will return an error

@@ -6,6 +6,7 @@
 # production
 /build
 .nyc_output
+coverage
 yarn-error.log
 
 # misc

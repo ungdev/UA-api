@@ -5,11 +5,7 @@ import { getRequestUser } from '../utils/user';
 import { isValidNanoid } from '../utils/nanoid';
 
 // Checks if the user is the captain of the team specified in the URL. If not, it will return an error
-export const isCaptainOfTeamId = () => async (
-  request: Request,
-  response: Response,
-  next: NextFunction,
-): Promise<void> => {
+export const isCaptain = () => async (request: Request, response: Response, next: NextFunction): Promise<void> => {
   const user = getRequestUser(response);
   if (user) {
     const team = await fetchTeam(request.params.teamId);

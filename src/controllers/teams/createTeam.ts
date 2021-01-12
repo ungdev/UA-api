@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { isNotInATeam } from '../../middlewares/team';
 import validateBody from '../../middlewares/validateBody';
-import { fetchTeams } from '../../operations/team';
+import { createTeam, fetchTeams } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
 import { badRequest, notFound, success } from '../../utils/responses';
@@ -12,7 +12,7 @@ export default [
   validateBody(
     Joi.object({
       name: Joi.string().required(),
-      tournamentId: Joi.number().required(),
+      tournamentId: Joi.string(),
     }),
   ),
 
@@ -39,7 +39,9 @@ export default [
         return badRequest(response, Error.TournamentNotFound);
       }
 
-      return success(response, teams);
+      const team = await createTeam(name, tournamentId, response.locals.user.id);
+
+      return success(response, team);
     } catch (error) {
       return next(error);
     }

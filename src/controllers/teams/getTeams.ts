@@ -8,8 +8,8 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const teams = await fetchTeams();
-      return success(response, teams);
+      //const teams = await fetchTeams();
+      return success(response, 'mange tes morts');
     } catch (error) {
       return next(error);
     }

@@ -2,25 +2,30 @@
 // We need to disable the no null to be able to nullify a database field
 
 import bcrpyt from 'bcryptjs';
-import { FindOneUserArgs, User, UserType } from '@prisma/client';
+import { UserType } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
+import { PrimitiveUser, User } from '../types';
 
-export const fetchUsers = (): Promise<User[]> => {
-  return database.user.findMany();
+export const formatUser = (user: PrimitiveUser): User => {
+  if (!user) return null;
+
+  return {
+    ...user,
+    hasPaid: false,
+  };
 };
 
-export const fetchUser = (parameterId: string) => {
-  return database.user.findOne({ where: { id: parameterId } });
-};
+export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> => {
+  const user = await database.user.findUnique({
+    where: { [key]: parameterId },
+    include: {
+      cartItems: true,
+    },
+  });
 
-export const fetchUserByEmail = (email: string) => {
-  return database.user.findOne({ where: { email } });
-};
-
-export const fetchUserByRegisterToken = (registerToken: string) => {
-  return database.user.findOne({ where: { registerToken } });
+  return formatUser(user);
 };
 
 export const createUser = async (
