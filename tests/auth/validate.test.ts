@@ -30,7 +30,7 @@ describe('POST /auth/validate/{token}', () => {
 
   it('should get an error as the login is not allowed', async () => {
     await setLoginAllowed(false);
-    await request(app).post('/auth/validate/wrongtoken').expect(400, { error: Error.LoginNotAllowed });
+    await request(app).post('/auth/validate/wrongtoken').expect(403, { error: Error.LoginNotAllowed });
     await setLoginAllowed(true);
   });
 
@@ -57,7 +57,7 @@ describe('POST /auth/validate/{token}', () => {
         email: user.email,
         password: user.password,
       })
-      .expect(400, { error: Error.EmailNotConfirmed });
+      .expect(403, { error: Error.EmailNotConfirmed });
   });
 
   it('should validate the user', async () => {

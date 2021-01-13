@@ -21,7 +21,7 @@ export const unauthenticated = (response: Response, type?: Error): void =>
     .json({ error: type || Error.Unauthenticated })
     .end();
 
-export const unauthorized = (response: Response, type?: Error): void =>
+export const forbidden = (response: Response, type?: Error): void =>
   response
     .status(403)
     .json({ error: type || Error.Unauthorized })
@@ -38,6 +38,8 @@ export const notAcceptable = (response: Response, type?: Error): void =>
     .status(406)
     .json({ error: type || Error.NotAcceptable })
     .end();
+
+export const conflict = (response: Response, type: Error): void => response.status(409).json({ error: type }).end();
 
 export const internalServerError = (response: Response, type?: Error): void =>
   response

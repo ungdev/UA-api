@@ -9,7 +9,6 @@ export default (schema: ObjectSchema) => (request: Request, response: Response, 
 
   if (error) {
     logger.debug(error.message);
-    console.log('fdsfdsfs');
     return badRequest(response, Error.InvalidBody);
   }
 

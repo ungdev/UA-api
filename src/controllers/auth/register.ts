@@ -5,7 +5,7 @@ import { isNotAuthenticated } from '../../middlewares/authentication';
 import validateBody from '../../middlewares/validateBody';
 import { createUser } from '../../operations/user';
 import { Error } from '../../types';
-import { badRequest, created } from '../../utils/responses';
+import { badRequest, conflict, created } from '../../utils/responses';
 
 export default [
   // Middlewares
@@ -31,7 +31,7 @@ export default [
     } catch (error) {
       // If the email already exists in the database, throw a bad request
       if (error.code === 'P2002' && error.meta && error.meta.target === 'email_unique')
-        return badRequest(response, Error.EmailAlreadyExists);
+        return conflict(response, Error.EmailAlreadyExists);
 
       // Otherwise, forward the error to the central error handling
       return next(error);

@@ -26,7 +26,7 @@ describe('POST /auth/register', () => {
   it('should get an error as the login is not allowed', async () => {
     await setLoginAllowed(false);
 
-    await request(app).post('/auth/register').send(userData).expect(400, { error: Error.LoginNotAllowed });
+    await request(app).post('/auth/register').send(userData).expect(403, { error: Error.LoginNotAllowed });
 
     await setLoginAllowed(true);
   });
@@ -56,7 +56,7 @@ describe('POST /auth/register', () => {
   });
 
   it('should not create a duplicate user', async () => {
-    await request(app).post('/auth/register').send(userData).expect(400, { error: Error.EmailAlreadyExists });
+    await request(app).post('/auth/register').send(userData).expect(409, { error: Error.EmailAlreadyExists });
   });
 
   it('should not create a user with incomplete body', async () => {

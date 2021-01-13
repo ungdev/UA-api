@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { Error, DecodedToken } from '../types';
-import { badRequest, notFound } from '../utils/responses';
+import { badRequest, forbidden, notFound } from '../utils/responses';
 import { fetchUser } from '../operations/user';
 import env from '../utils/env';
 import logger from '../utils/logger';
@@ -31,7 +31,7 @@ export const initUserRequest = async (request: Request, response: Response, next
 
     // Checks that the account is confirmed
     if (user.registerToken) {
-      return badRequest(response, Error.EmailNotConfirmed);
+      return forbidden(response, Error.EmailNotConfirmed);
     }
 
     // Store it in `response.locals.user` so that we can use it later

@@ -4,7 +4,7 @@ import bcrpyt from 'bcryptjs';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import validateBody from '../../middlewares/validateBody';
 import { filterUser } from '../../utils/filters';
-import { badRequest, success } from '../../utils/responses';
+import { badRequest, forbidden, success, unauthenticated } from '../../utils/responses';
 import { generateToken } from '../../utils/user';
 import { Error } from '../../types';
 import { fetchUser } from '../../operations/user';
@@ -29,11 +29,11 @@ export default [
 
       // Chceks if the user exists
       if (!user) {
-        return badRequest(response, Error.InvalidCredentials);
+        return unauthenticated(response, Error.InvalidCredentials);
       }
 
       if (user.registerToken) {
-        return badRequest(response, Error.EmailNotConfirmed);
+        return forbidden(response, Error.EmailNotConfirmed);
       }
 
       // Compares the hash from the password given
@@ -43,7 +43,7 @@ export default [
 
       // If the password is not valid, rejects the request
       if (!isPasswordValid) {
-        return badRequest(response, Error.InvalidCredentials);
+        return unauthenticated(response, Error.InvalidCredentials);
       }
 
       return success(response, {

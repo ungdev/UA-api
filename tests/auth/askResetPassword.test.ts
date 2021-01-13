@@ -26,7 +26,7 @@ describe('POST /auth/reset-password', () => {
     await request(app)
       .post('/auth/reset-password')
       .send({ email: user.email })
-      .expect(400, { error: Error.LoginNotAllowed });
+      .expect(403, { error: Error.LoginNotAllowed });
     await setLoginAllowed(true);
   });
 

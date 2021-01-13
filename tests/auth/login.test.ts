@@ -30,7 +30,7 @@ describe('POST /auth/login', () => {
         email: user.email,
         password,
       })
-      .expect(400, { error: Error.LoginNotAllowed });
+      .expect(403, { error: Error.LoginNotAllowed });
 
     // Allow login for next tests
     await setLoginAllowed(true);
@@ -52,7 +52,7 @@ describe('POST /auth/login', () => {
         email: user.email,
         password: 'wrongpassword',
       })
-      .expect(400, { error: Error.InvalidCredentials });
+      .expect(401, { error: Error.InvalidCredentials });
   });
 
   it('should return an error as incorrect credentials', async () => {
@@ -62,7 +62,7 @@ describe('POST /auth/login', () => {
         email: 'wrong@email.fr',
         password: user.password,
       })
-      .expect(400, { error: Error.InvalidCredentials });
+      .expect(401, { error: Error.InvalidCredentials });
   });
 
   let authorizationToken = '';
@@ -104,6 +104,6 @@ describe('POST /auth/login', () => {
         email: user.email,
         password,
       })
-      .expect(400, { error: Error.AlreadyAuthenticated });
+      .expect(409, { error: Error.AlreadyAuthenticated });
   });
 });

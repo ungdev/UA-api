@@ -5,13 +5,14 @@ import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import * as tournamentOperations from '../../src/operations/tournament';
 import database from '../../src/services/database';
-import { Error, User } from '../../src/types';
+import { Error, Team, User } from '../../src/types';
 import { createFakeConfirmedUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 
-describe('POST /teams', () => {
+describe('POST /teams/:teamId/joinRequests', () => {
   let user: User;
   let token: string;
+  let team: Team;
 
   const teamBody = {
     name: 'ZeBest',
@@ -19,6 +20,7 @@ describe('POST /teams', () => {
   };
 
   before(async () => {
+    team = await createFakeTeam();
     user = await createFakeConfirmedUser();
     token = generateToken(user);
   });
@@ -28,29 +30,25 @@ describe('POST /teams', () => {
     await database.user.deleteMany();
   });
 
+  it('should fail because the team does not exists', async () => {
+    await request(app).post(`/teams/1A2B3C/joinRequests`).expect(404, { error: Error.TeamNotFound });
+  });
+
   it('should fail because the token is not provided', async () => {
-    await request(app).post('/teams').expect(401, { error: Error.Unauthenticated });
+    await request(app).post(`/teams/${team.id}/joinRequests`).expect(401, { error: Error.Unauthenticated });
   });
 
   it('should fail because the user is already in a team', async () => {
-    const team = await createFakeTeam();
-    const [localUser] = team.users;
+    const otherTeam = await createFakeTeam();
+    const [localUser] = otherTeam.users;
 
     const localToken = generateToken(localUser);
 
     await request(app)
-      .post('/teams')
+      .post(`/teams/${team.id}/joinRequests`)
       .send(teamBody)
       .set('Authorization', `Bearer ${localToken}`)
       .expect(409, { error: Error.AlreadyInTeam });
-  });
-
-  it('should fail because the body is incorrect', async () => {
-    await request(app)
-      .post('/teams')
-      .send({ name: teamBody.name })
-      .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: Error.InvalidBody });
   });
 
   it("should fail because the tournament doesn't exists", async () => {
@@ -61,16 +59,7 @@ describe('POST /teams', () => {
       .expect(404, { error: Error.TournamentNotFound });
   });
 
-  it('should fail with an internal server error (test nested check)', async () => {
-    sandbox.stub(teamOperations, 'createTeam').throws('Unexpected error');
-    await request(app)
-      .post('/teams')
-      .send(teamBody)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(500, { error: Error.Unknown });
-  });
-
-  it('should fail with an internal server error (test base catch)', async () => {
+  it.skip('should fail with an internal server error', async () => {
     sandbox.stub(tournamentOperations, 'fetchTournament').throws('Unexpected error');
     await request(app)
       .post('/teams')
@@ -79,7 +68,7 @@ describe('POST /teams', () => {
       .expect(500, { error: Error.Unknown });
   });
 
-  it('should succesfully create a team', async () => {
+  it('should succesfully request to join a team', async () => {
     const response = await request(app)
       .post('/teams')
       .send(teamBody)
@@ -91,7 +80,7 @@ describe('POST /teams', () => {
     expect(response.body.captainId).to.be.equal(user.id);
   });
 
-  it('fail to create a team as it already exists in the tournament', async () => {
+  it('should fail as we already requested for a team', async () => {
     const newUser = await createFakeConfirmedUser();
     const newToken = generateToken(newUser);
 

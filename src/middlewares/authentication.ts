@@ -1,6 +1,6 @@
 import { Response, NextFunction, Request } from 'express';
 import { getRequestUser } from '../utils/user';
-import { unauthorized, unauthenticated, badRequest } from '../utils/responses';
+import { forbidden, unauthenticated, badRequest, conflict } from '../utils/responses';
 import { Error, Permission } from '../types';
 import { isLoginAllowed } from './settings';
 
@@ -25,7 +25,7 @@ export const isNotAuthenticated = [
       return next();
     }
 
-    return badRequest(response, Error.AlreadyAuthenticated);
+    return conflict(response, Error.AlreadyAuthenticated);
   },
 ];
 
@@ -40,6 +40,6 @@ export const hasPermission = [
       return next();
     }
 
-    return unauthorized(response);
+    return forbidden(response);
   },
 ];

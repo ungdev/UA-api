@@ -89,16 +89,9 @@ export interface EtupayResponse {
 /**********/
 
 export enum Error {
+  // More info on https://www.loggly.com/blog/http-status-code-diagram to know where to put an error
+
   // 400
-  AlreadyInTeam = 'Vous êtes déjà dans une équipe',
-  LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
-  ShopNotAllowed = 'La billetterie est fermée',
-  EmailAlreadyExists = 'Cet email est déjà utilisé',
-  TeamAlreadyExists = "Le nom de l'équipe existe déjà",
-  TournamentFull = 'Le tournoi est complet',
-  EmailNotConfirmed = "Le compte n'est pas confirmé",
-  InvalidCredentials = 'Identifiants invalides',
-  AlreadyAuthenticated = 'Vous êtes déjà identifié',
   InvalidBody = 'Corps de la requête invalide',
   MalformedBody = 'Corps de la requête malformé',
   InvalidParameters = 'Paramètres de la requête invalides',
@@ -107,11 +100,15 @@ export enum Error {
   Unauthenticated = "Vous n'êtes pas authentifié",
   ExpiredToken = 'Session expirée. Veuillez vous reconnecter',
   InvalidToken = 'Session invalide',
+  InvalidCredentials = 'Identifiants invalides',
 
   // 403
   Unauthorized = "Vous n'avez pas l'autorisation d'accéder à cette ressource",
   UserAlreadyScanned = "L'utilisateur a déjà scanné son billet",
   NotPaid = "Le billet n'a pas été payé",
+  LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
+  ShopNotAllowed = 'La billetterie est fermée',
+  EmailNotConfirmed = "Le compte n'est pas confirmé",
 
   // 404
   NotFound = 'La ressource est introuvable',
@@ -124,6 +121,13 @@ export enum Error {
 
   // 406
   NotAcceptable = 'Contenu envoyé inacceptable',
+
+  // 409
+  EmailAlreadyExists = 'Cet email est déjà utilisé',
+  TeamAlreadyExists = "Le nom de l'équipe existe déjà",
+  AlreadyAuthenticated = 'Vous êtes déjà identifié',
+  AlreadyInTeam = 'Vous êtes déjà dans une équipe',
+  TournamentFull = 'Le tournoi est complet',
 
   // 500
   Unknown = 'Erreur inconnue',
