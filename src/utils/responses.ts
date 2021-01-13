@@ -13,11 +13,7 @@ export const created = (response: Response, body?: unknown): void => {
 
 export const noContent = (response: Response): void => response.status(204).end();
 
-export const badRequest = (response: Response, type?: Error): void =>
-  response
-    .status(400)
-    .json({ error: type || Error.BadRequest })
-    .end();
+export const badRequest = (response: Response, type: Error): void => response.status(400).json({ error: type }).end();
 
 export const unauthenticated = (response: Response, type?: Error): void =>
   response
@@ -31,7 +27,7 @@ export const unauthorized = (response: Response, type?: Error): void =>
     .json({ error: type || Error.Unauthorized })
     .end();
 
-export const notFound = (response: Response, type?: Error): void =>
+export const notFound = (response: Response, type: Error): void =>
   response
     .status(404)
     .json({ error: type || Error.NotFound })

@@ -18,7 +18,6 @@ model Cart {
   user             User             @relation(fields: [userId], references: [id])
   cartItems        CartItem[]
 
-  @@index([userId], name: "carts_ibfk_1")
   @@map("carts")
 }
 
@@ -34,9 +33,6 @@ model CartItem {
   user      User     @relation(fields: [forUserId], references: [id])
   item      Item     @relation(fields: [itemId], references: [id])
 
-  @@index([itemId], name: "cartitems_ibfk_1")
-  @@index([cartId], name: "cartitems_ibfk_2")
-  @@index([forUserId], name: "cartitems_ibfk_3")
   @@map("cartitems")
 }
 
@@ -75,7 +71,8 @@ model Team {
   askingUsers  User[]     @relation("teamAskingUsers")
   users        User[]     @relation("teamUsers")
 
-  @@index([tournamentId], name: "teams_ibfk_2")
+  @@index([id])
+  @@unique([name, tournamentId])
   @@map("teams")
 }
 
@@ -117,8 +114,7 @@ model User {
   cartItems     CartItem[]
   carts         Cart[]
 
-  @@index([askingTeamId], name: "users_ibfk_1")
-  @@index([teamId], name: "users_ibfk_2")
+  @@index([id])
   @@map("users")
 }
 

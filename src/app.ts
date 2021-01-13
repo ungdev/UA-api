@@ -22,7 +22,7 @@ if (!env.test) {
 app.use(cors(), helmet());
 
 // Body json middlewares
-app.use(bodyParser.json(), checkJson());
+app.use(bodyParser.json(), checkJson);
 
 // Fetch user from database
 app.use(initUserRequest);

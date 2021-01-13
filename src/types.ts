@@ -90,15 +90,18 @@ export interface EtupayResponse {
 
 export enum Error {
   // 400
-  BadRequest = 'Requête invalide',
   AlreadyInTeam = 'Vous êtes déjà dans une équipe',
   LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
   ShopNotAllowed = 'La billetterie est fermée',
   EmailAlreadyExists = 'Cet email est déjà utilisé',
+  TeamAlreadyExists = "Le nom de l'équipe existe déjà",
   TournamentFull = 'Le tournoi est complet',
   EmailNotConfirmed = "Le compte n'est pas confirmé",
   InvalidCredentials = 'Identifiants invalides',
   AlreadyAuthenticated = 'Vous êtes déjà identifié',
+  InvalidBody = 'Corps de la requête invalide',
+  MalformedBody = 'Corps de la requête malformé',
+  InvalidParameters = 'Paramètres de la requête invalides',
 
   // 401
   Unauthenticated = "Vous n'êtes pas authentifié",
@@ -114,6 +117,7 @@ export enum Error {
   NotFound = 'La ressource est introuvable',
   RouteNotFound = 'La route est introuvable',
   UserNotFound = "L'utilisateur est introuvable",
+  TeamNotFound = "L'équipe est introuvable",
   OrderNotFound = 'La commande est introuvable',
   TournamentNotFound = 'Le tournoi est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",

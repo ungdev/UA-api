@@ -913,7 +913,7 @@
         }
       }
     },
-    "/admin/users/{userId}/forcePay": {
+    "/admin/users/{userId}/force-pay": {
       "post": {
         "summary": "Valide le paiement d'un utilisateur",
         "description": "Valide le paiement d'un utilisateur.<br/> **Permission 'entry' ou 'admin' requise.**<br/> *L'utilisateur cible ne doit pas avoir déjà payé sa place.*",
@@ -1108,9 +1108,9 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "username": {
+                  "email": {
                     "type": "string",
-                    "description": "Nom d'utilisateur ou adresse mail de l'utilisateur cible"
+                    "description": "Adresse mail de l'utilisateur cible"
                   },
                   "password": {
                     "type": "string",
@@ -1149,7 +1149,7 @@
         }
       }
     },
-    "/auth/refreshToken": {
+    "/auth/refresh-token": {
       "post": {
         "summary": "Génère un nouveau token d'authentification",
         "description": "Génère un nouveau token d'authentification si le token actuel arrive bientôt à expiration.",
@@ -1251,7 +1251,7 @@
         }
       }
     },
-    "/auth/resetPassword": {
+    "/auth/reset-password": {
       "post": {
         "summary": "Envoie un mail permettant de changer son mot de passe",
         "description": "Envoie un mail contenant un token permettant de réinitialiser son mot de passe.<br/> *La connexion doit être autorisée.*",
@@ -1284,7 +1284,7 @@
         }
       }
     },
-    "/auth/resetPassword/{token}": {
+    "/auth/reset-password/{token}": {
       "post": {
         "summary": "Modifie le mot de passe de l'utilisateur associé au token",
         "description": "Modifie le mot de passe de l'utilisateur associé au token de réinitialisation de mot de passe.<br/> *La connexion doit être autorisée.*",
@@ -1852,7 +1852,7 @@
         }
       }
     },
-    "/teams/{teamId}/joinRequests": {
+    "/teams/{teamId}/join-requests": {
       "post": {
         "summary": "Crée une demande pour rejoindre une équipe",
         "description": "Crée une demande pour rejoindre une équipe.<br/> *L'utilisateur ne doit pas avoir d'équipe.*",
@@ -1898,7 +1898,7 @@
         }
       }
     },
-    "/teams/{teamId}/joinRequests/{userId}": {
+    "/teams/{teamId}/join-requests/{userId}": {
       "delete": {
         "summary": "Annule la demande d'équipe",
         "description": "Annule la demande d'équipe de l'utilisateur cible.<br/> **L'utilisateur doit être l'utilisateur cible ou être le chef de l'équipe cible.**<br/> *L'équipe ne doit pas être verrouillée.* *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*",

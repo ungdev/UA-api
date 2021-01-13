@@ -1,6 +1,10 @@
+/* eslint-disable import/first*/
+process.env.NODE_ENV = 'test';
+
 import chai from 'chai';
 import sinon from 'sinon';
 import { setLoginAllowed } from '../src/operations/settings';
+import database from '../src/services/database';
 
 export const sandbox = sinon.createSandbox();
 
@@ -15,4 +19,6 @@ afterEach('Restore the sandbox after every tests', () => {
 
 after(async () => {
   await setLoginAllowed(false);
+
+  await database.$disconnect();
 });

@@ -5,38 +5,41 @@ import { Error, Permission } from '../types';
 import { isLoginAllowed } from './settings';
 
 // Checks the user is authenticated. If not, it will return an error
-export const isAuthenticated = () => (request: Request, response: Response, next: NextFunction) => {
-  // If there is a user in the locals
-  if (getRequestUser(response)) {
-    // Calls the is login allowed
-    return isLoginAllowed()(request, response, next);
-  }
+export const isAuthenticated = [
+  isLoginAllowed,
+  (request: Request, response: Response, next: NextFunction) => {
+    // If there is a user in the locals
+    if (getRequestUser(response)) {
+      return next();
+    }
 
-  return unauthenticated(response);
-};
+    return unauthenticated(response);
+  },
+];
 
-export const isNotAuthenticated = () => (request: Request, response: Response, next: NextFunction) => {
-  // If there is a user in the locals
-  if (!getRequestUser(response)) {
-    // Calls the is login allowed
-    return isLoginAllowed()(request, response, next);
-  }
+export const isNotAuthenticated = [
+  isLoginAllowed,
+  (request: Request, response: Response, next: NextFunction) => {
+    // If there is a user in the locals
+    if (!getRequestUser(response)) {
+      return next();
+    }
 
-  return badRequest(response, Error.AlreadyAuthenticated);
-};
+    return badRequest(response, Error.AlreadyAuthenticated);
+  },
+];
 
 // Checks the user has the given permission. If not, it will return an error
-export const hasPermission = (permission: Permission) => (request: Request, response: Response, next: NextFunction) => {
-  const user = getRequestUser(response);
+export const hasPermission = [
+  isAuthenticated,
+  (permission: Permission) => (request: Request, response: Response, next: NextFunction) => {
+    const user = getRequestUser(response);
 
-  if (user) {
     // If user has required permission or has "admin" permission
     if (user.permissions.split(',').includes(permission) || user.permissions.split(',').includes(Permission.admin)) {
       return next();
     }
 
     return unauthorized(response);
-  }
-
-  return unauthenticated(response);
-};
+  },
+];

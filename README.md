@@ -29,7 +29,13 @@ Then, connect to your database (MySQL/MariaDB) and enter
 CREATE DATABASE arena CHARACTER SET utf8;
 ```
 
-Create the tables and populate them with
+Create the tables
+
+```
+DATABASE_URL="mysql://user:password@localhost/arena" yarn prisma db push --preview-feature
+```
+
+Populate the tables
 
 ```
 mysql -u DATABASE_USER -p arena < seed.sql
@@ -75,12 +81,14 @@ Create a `local/test.sh` file and put the following content
 mysql -e "DROP DATABASE IF EXISTS arenatest"
 mysql -e "CREATE DATABASE arenatest CHARACTER SET utf8"
 
-mysql arenatest < seed.sql
-
 # Set your correct environnment variables
 export DATABASE_NAME=arenatest
 export DATBASE_USERNAME=root
 export DATBASE_PASSWORD=root
+export DATABASE_URL="mysql://root:root@localhost/arenatest"
+
+yarn prisma db push --preview-feature
+mysql arenatest < seed.sql
 
 # Starts the testing
 yarn test

@@ -38,7 +38,7 @@ describe('POST /auth/register', () => {
         ...userData,
         type: 'orga',
       })
-      .expect(400, { error: Error.BadRequest });
+      .expect(400, { error: Error.InvalidBody });
   });
 
   it('should throw an internal server error', async () => {
@@ -56,27 +56,27 @@ describe('POST /auth/register', () => {
   });
 
   it('should not create a duplicate user', async () => {
-    await request(app).post('/auth/register').send(userData).expect(400);
+    await request(app).post('/auth/register').send(userData).expect(400, { error: Error.EmailAlreadyExists });
   });
 
   it('should not create a user with incomplete body', async () => {
     await request(app)
       .post('/auth/register')
       .send({ firstname: userData.firstname, email: userData.email })
-      .expect(400);
+      .expect(400, { error: Error.InvalidBody });
   });
 
   it('should not accept wrong email', async () => {
     await request(app)
       .post('/auth/register')
       .send({ ...userData, email: 'wrong email' })
-      .expect(400);
+      .expect(400, { error: Error.InvalidBody });
   });
 
   it('should not accept wrong type', async () => {
     await request(app)
       .post('/auth/register')
       .send({ ...userData, type: 'wrong type' })
-      .expect(400);
+      .expect(400, { error: Error.InvalidBody });
   });
 });

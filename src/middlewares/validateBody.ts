@@ -9,7 +9,7 @@ export default (schema: ObjectSchema) => (request: Request, response: Response, 
 
   if (error) {
     logger.debug(error.message);
-    return badRequest(response);
+    return badRequest(response, Error.InvalidBody);
   }
 
   request.body = value;

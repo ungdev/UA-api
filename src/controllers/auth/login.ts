@@ -11,7 +11,7 @@ import { fetchUser } from '../../operations/user';
 
 export default [
   // Middlewares
-  isNotAuthenticated(),
+  ...isNotAuthenticated,
   validateBody(
     Joi.object({
       email: Joi.string().email().required(),

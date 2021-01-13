@@ -5,16 +5,16 @@ import validateBody from '../../middlewares/validateBody';
 import { success } from '../../utils/responses';
 import { updateTeam } from '../../operations/team';
 import { filterTeam } from '../../utils/filters';
+import { getCaptain } from '../../utils/teams';
 
 export default [
   // Middlewares
+  ...isCaptain,
   validateBody(
     Joi.object({
       name: Joi.string().required(),
     }),
   ),
-
-  isCaptain(),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {

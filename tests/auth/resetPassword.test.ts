@@ -39,21 +39,21 @@ describe('POST /auth/reset-password/:uuid', () => {
     await request(app)
       .post('/auth/reset-password/incorrectToken')
       .send({ password: 'new password' })
-      .expect(400, { error: Error.BadRequest });
+      .expect(400, { error: Error.InvalidParameters });
   });
 
   it('should not accept unknown token', async () => {
     await request(app)
       .post('/auth/reset-password/A1B2C3')
       .send({ password: 'new password' })
-      .expect(400, { error: Error.BadRequest });
+      .expect(400, { error: Error.InvalidParameters });
   });
 
   it('should not accept incorrect body', async () => {
     await request(app)
       .post(`/auth/reset-password/${user.resetToken}`)
       .send({ fake: 'fake' })
-      .expect(400, { error: Error.BadRequest });
+      .expect(400, { error: Error.InvalidBody });
   });
 
   it('should return an internal server error', async () => {

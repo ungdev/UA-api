@@ -5,6 +5,7 @@ import prisma from '@prisma/client';
 import { createUser, fetchUser } from '../src/operations/user';
 import database from '../src/services/database';
 import { User } from '../src/types';
+import { createTeam, fetchTeam, joinTeam } from '../src/operations/team';
 
 export const mock = new MockAdapter(axios);
 
@@ -27,4 +28,17 @@ export const createFakeConfirmedUser = async (password = 'awesomePassword'): Pro
   });
 
   return fetchUser(user.id);
+};
+
+export const createFakeTeam = async (members = 1, tournament = 'lol') => {
+  const user = await createFakeConfirmedUser();
+  const team = await createTeam(faker.internet.userName(), tournament, user.id);
+
+  // Create new members (minus 1 because the captain is already created)
+  for (let i = 0; i < members - 1; i += 1) {
+    const partner = await createFakeConfirmedUser();
+    await joinTeam(team.id, partner);
+  }
+
+  return fetchTeam(team.id);
 };

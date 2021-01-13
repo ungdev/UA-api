@@ -8,7 +8,7 @@ import { noContent, notFound } from '../../utils/responses';
 
 export default [
   // Middlewares
-  isNotAuthenticated(),
+  ...isNotAuthenticated,
   validateBody(
     Joi.object({
       email: Joi.string().email().required(),

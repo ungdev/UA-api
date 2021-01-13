@@ -1,30 +1,35 @@
+import prisma from '@prisma/client';
+import { format } from 'morgan';
 import database from '../services/database';
 import { Tournament } from '../types';
-import { countTeamsWhere } from './team';
+
+export const formatTournament = async (tournament: prisma.Tournament): Promise<Tournament> => {
+  if (!tournament) return null;
+
+  const lockedTeamsCount = await database.team.count({
+    where: {
+      tournamentId: tournament.id,
+      lockedAt: {
+        lte: new Date(),
+      },
+    },
+  });
+
+  return {
+    ...tournament,
+    lockedTeamsCount,
+  };
+};
+
+export const fetchTournament = async (id: string): Promise<Tournament> => {
+  const tournament = await database.tournament.findUnique({ where: { id } });
+
+  return formatTournament(tournament);
+};
 
 export const fetchTournaments = async (): Promise<Tournament[]> => {
   // fetch all tournaments
   const tournaments = await database.tournament.findMany();
 
-  // count all locked teams by tournaments
-  const lockedTeamsPerTournaments = await Promise.all(
-    tournaments.map((tournament) => {
-      return countTeamsWhere({
-        tournamentId: tournament.id,
-        lockedAt: {
-          lte: new Date(),
-        },
-      });
-    }),
-  );
-
-  // add count locked teams to tournament object
-  return tournaments.map((tournament, index) => ({
-    ...tournament,
-    lockedTeamsCount: lockedTeamsPerTournaments[index],
-  }));
-};
-
-export const fetchTournament = (id: string) => {
-  return database.tournament.findUnique({ where: { id } });
+  return Promise.all(tournaments.map(formatTournament));
 };

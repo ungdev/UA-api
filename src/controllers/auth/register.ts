@@ -9,7 +9,7 @@ import { badRequest, created } from '../../utils/responses';
 
 export default [
   // Middlewares
-  isNotAuthenticated(),
+  ...isNotAuthenticated,
   validateBody(
     Joi.object({
       username: Joi.string().required(),

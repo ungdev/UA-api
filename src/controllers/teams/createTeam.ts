@@ -5,18 +5,17 @@ import validateBody from '../../middlewares/validateBody';
 import { createTeam, fetchTeams } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
-import { badRequest, notFound, success } from '../../utils/responses';
+import { badRequest, created, notFound } from '../../utils/responses';
 
 export default [
   // Middlewares
+  ...isNotInATeam,
   validateBody(
     Joi.object({
       name: Joi.string().required(),
-      tournamentId: Joi.string(),
+      tournamentId: Joi.string().required(),
     }),
   ),
-
-  isNotInATeam(),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
@@ -39,9 +38,16 @@ export default [
         return badRequest(response, Error.TournamentNotFound);
       }
 
-      const team = await createTeam(name, tournamentId, response.locals.user.id);
+      try {
+        const team = await createTeam(name, tournamentId, response.locals.user.id);
+        return created(response, team);
+      } catch (error) {
+        // If the email already exists in the database, throw a bad request
+        if (error.code === 'P2002' && error.meta && error.meta.target === 'name_tournamentId_unique')
+          return badRequest(response, Error.TeamAlreadyExists);
 
-      return success(response, team);
+        return next(error);
+      }
     } catch (error) {
       return next(error);
     }

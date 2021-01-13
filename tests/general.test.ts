@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../src/app';
 import { setLoginAllowed } from '../src/operations/settings';
+import { Error } from '../src/types';
 import { mock } from './utils';
 
 describe('General API', () => {
@@ -39,14 +40,14 @@ describe('General API', () => {
         subject: 'Test',
         message: 'Test test',
       };
-      await request(app).post('/contact').send(body).expect(400);
+      await request(app).post('/contact').send(body).expect(400, { error: Error.InvalidBody });
     });
     it('should not accept missing parameters in body', async () => {
       const body = {
         subject: 'Test',
         message: 'Test test',
       };
-      await request(app).post('/contact').send(body).expect(400);
+      await request(app).post('/contact').send(body).expect(400, { error: Error.InvalidBody });
     });
   });
 });

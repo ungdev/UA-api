@@ -35,11 +35,11 @@ describe('POST /auth/validate/{token}', () => {
   });
 
   it('should not accept wrong token', async () => {
-    await request(app).post('/auth/validate/wrongtoken').expect(400, { error: Error.BadRequest });
+    await request(app).post('/auth/validate/wrongtoken').expect(400, { error: Error.InvalidParameters });
   });
 
   it('should not accept unknown token', async () => {
-    await request(app).post('/auth/validate/A1B2C3').expect(400, { error: Error.BadRequest });
+    await request(app).post('/auth/validate/A1B2C3').expect(400, { error: Error.InvalidParameters });
   });
 
   it('should throw an internal server error', async () => {

@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { isNotAuthenticated } from '../../middlewares/authentication';
-import { isValidToken } from '../../middlewares/parameters';
 import { fetchUser, removeUserRegisterToken } from '../../operations/user';
+import { Error } from '../../types';
 import { filterUser } from '../../utils/filters';
-import { badRequest, success } from '../../utils/responses';
+import { badRequest, notFound, success } from '../../utils/responses';
 import { generateToken } from '../../utils/user';
 
 export default [
   // Middlewares
-  isNotAuthenticated(),
-  isValidToken(),
+  ...isNotAuthenticated,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
@@ -19,7 +18,7 @@ export default [
       const user = await fetchUser(token, 'registerToken');
 
       if (!user) {
-        return badRequest(response);
+        return badRequest(response, Error.InvalidParameters);
       }
 
       await removeUserRegisterToken(user);

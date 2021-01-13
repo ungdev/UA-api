@@ -1,6 +1,6 @@
 import prisma, { Prisma } from '@prisma/client';
 import database from '../services/database';
-import { PrimitiveUser, Team } from '../types';
+import { PrimitiveUser, Team, User } from '../types';
 import nanoid from '../utils/nanoid';
 import { formatUser } from './user';
 
@@ -25,12 +25,6 @@ export const formatTeam = (team: prisma.Team & { users: PrimitiveUser[]; askingU
     users: team.users.map(formatUser),
     askingUsers: team.users.map(formatUser),
   };
-};
-
-export const countTeamsWhere = (teamArguments: Prisma.TeamWhereInput): Promise<number> => {
-  return database.team.count({
-    where: teamArguments,
-  });
 };
 
 export const fetchTeam = async (id: string): Promise<Team> => {
@@ -103,4 +97,33 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
   });
 
   return formatTeam(team);
+};
+
+export const joinTeam = async (teamId: string, user: User) => {
+  // For this version of prisma, we need to fetch to check if there was already a askingTeam. It should be solved in the next versions
+  // Please correct this if this issue is close and merged https://github.com/prisma/prisma/issues/3069
+
+  let updateAskingTeamId = {};
+
+  if (user.askingTeamId) {
+    updateAskingTeamId = {
+      askingTeam: {
+        disconnect: true,
+      },
+    };
+  }
+
+  await database.user.update({
+    data: {
+      team: {
+        connect: {
+          id: teamId,
+        },
+      },
+      ...updateAskingTeamId,
+    },
+    where: {
+      id: user.id,
+    },
+  });
 };
