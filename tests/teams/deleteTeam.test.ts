@@ -9,7 +9,7 @@ import { createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 import { getCaptain } from '../../src/utils/teams';
 
-describe('PUT /teams', () => {
+describe('delete /teams', () => {
   let captain: User;
   let team: Team;
   let captainToken: string;
@@ -28,22 +28,13 @@ describe('PUT /teams', () => {
 
   it("should error as the team id doesn't exists", async () => {
     await request(app)
-      .put('/teams/A1B2C3')
-      .send({ name: 'yolo' })
+      .delete('/teams/A1B2C3')
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(404, { error: Error.TeamNotFound });
   });
 
-  it('should error as the body is incorrect', async () => {
-    await request(app)
-      .put(`/teams/${team.id}`)
-      .send({ fake: 'fake' })
-      .set('Authorization', `Bearer ${captainToken}`)
-      .expect(400, { error: Error.InvalidBody });
-  });
-
   it('should error as the token is missing', async () => {
-    await request(app).put(`/teams/${team.id}`).send({ name: 'yolo' }).expect(401, { error: Error.Unauthenticated });
+    await request(app).delete(`/teams/${team.id}`).send({ name: 'yolo' }).expect(401, { error: Error.Unauthenticated });
   });
 
   it('should error as the request is not logged as the captain of his team', async () => {
@@ -52,8 +43,7 @@ describe('PUT /teams', () => {
     const otherCaptainToken = generateToken(otherCaptain);
 
     await request(app)
-      .put(`/teams/${team.id}`)
-      .send({ name: 'yolo' })
+      .delete(`/teams/${team.id}`)
       .set('Authorization', `Bearer ${otherCaptainToken}`)
       .expect(403, { error: Error.Unauthorized });
   });
@@ -63,32 +53,24 @@ describe('PUT /teams', () => {
     const memberToken = generateToken(member);
 
     await request(app)
-      .put(`/teams/${team.id}`)
-      .send({ name: 'yolo' })
+      .delete(`/teams/${team.id}`)
       .set('Authorization', `Bearer ${memberToken}`)
       .expect(403, { error: Error.Unauthorized });
   });
 
   it('should throw an internal server error', async () => {
-    sandbox.stub(teamOperations, 'updateTeam').throws('Unknown error');
+    sandbox.stub(teamOperations, 'deleteTeam').throws('Unknown error');
 
     await request(app)
-      .put(`/teams/${team.id}`)
-      .send({ name: 'yolo' })
+      .delete(`/teams/${team.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(500, { error: Error.Unknown });
   });
 
-  it('should update the team', async () => {
-    const response = await request(app)
-      .put(`/teams/${team.id}`)
-      .send({ name: 'yolo' })
-      .set('Authorization', `Bearer ${captainToken}`)
-      .expect(200);
+  it('should delete the team', async () => {
+    await request(app).delete(`/teams/${team.id}`).set('Authorization', `Bearer ${captainToken}`).expect(204);
 
-    const updatedTeam = await teamOperations.fetchTeam(team.id);
-
-    expect(response.body.name).to.be.equal('yolo');
-    expect(updatedTeam.name).to.be.equal('yolo');
+    const deletedTeam = await teamOperations.fetchTeam(team.id);
+    expect(deletedTeam).to.be.null;
   });
 });

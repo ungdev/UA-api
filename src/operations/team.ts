@@ -99,6 +99,14 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
   return formatTeam(team);
 };
 
+export const deleteTeam = (teamId: string) => {
+  return database.team.delete({
+    where: {
+      id: teamId,
+    },
+  });
+};
+
 export const joinTeam = async (teamId: string, user: User) => {
   // For this version of prisma, we need to fetch to check if there was already a askingTeam. It should be solved in the next versions
   // Please correct this if this issue is close and merged https://github.com/prisma/prisma/issues/3069
