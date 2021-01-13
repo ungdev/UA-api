@@ -8,12 +8,10 @@ import { badRequest, success } from '../../utils/responses';
 import { generateToken } from '../../utils/user';
 import { Error } from '../../types';
 import { fetchUser } from '../../operations/user';
-import { isLoginAllowed } from '../../middlewares/settings';
 
 export default [
   // Middlewares
   isNotAuthenticated(),
-  isLoginAllowed(),
   validateBody(
     Joi.object({
       email: Joi.string().email().required(),

@@ -1,0 +1,16 @@
+reporter:
+  - html
+
+all: true
+
+include:
+  - src/**/*.ts
+
+exclude:
+  # The server is never called, so we can't test it
+  - src/server.ts
+
+  # The index are only files that should only contain import and then export (with the exception of the router)
+  # It doesn't need to be tested in particular as it will be used on test for all its routes.
+  # Therefore we remove it to ensure the coerage is more relevant
+  - src/**/index.ts

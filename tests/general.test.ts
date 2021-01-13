@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../src/app';
-import database from '../src/services/database';
+import { setLoginAllowed } from '../src/operations/settings';
 import { mock } from './utils';
 
 describe('General API', () => {
@@ -9,14 +9,7 @@ describe('General API', () => {
       await request(app).get('/settings').expect(200, { shop: false, login: false });
     });
     it('should return the updated value', async () => {
-      await database.setting.update({
-        where: {
-          id: 'login',
-        },
-        data: {
-          value: true,
-        },
-      });
+      await setLoginAllowed(true);
       await request(app).get('/settings').expect(200, { shop: false, login: true });
     });
     it('should not accept POST request', async () => {

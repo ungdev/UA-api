@@ -3,14 +3,13 @@ import cors from 'cors';
 import helmet from 'helmet';
 import bodyParser from 'body-parser';
 
-import { notFound } from './utils/responses';
+import { notFound, internalServerError } from './utils/responses';
 import { Error } from './types';
 import router from './controllers';
 import { checkJson } from './middlewares/checkJson';
 import logger, { morgan } from './utils/logger';
 import { initUserRequest } from './middlewares/user';
 import env from './utils/env';
-import { internalServerError } from './utils/responses';
 
 const app = express();
 

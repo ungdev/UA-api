@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { isValidToken } from '../../middlewares/parameters';
-import { isLoginAllowed } from '../../middlewares/settings';
 import { fetchUser, removeUserRegisterToken } from '../../operations/user';
 import { filterUser } from '../../utils/filters';
 import { badRequest, success } from '../../utils/responses';
@@ -10,7 +9,6 @@ import { generateToken } from '../../utils/user';
 export default [
   // Middlewares
   isNotAuthenticated(),
-  isLoginAllowed(),
   isValidToken(),
 
   // Controller

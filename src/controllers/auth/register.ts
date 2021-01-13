@@ -2,7 +2,6 @@ import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { isNotAuthenticated } from '../../middlewares/authentication';
-import { isLoginAllowed } from '../../middlewares/settings';
 import validateBody from '../../middlewares/validateBody';
 import { createUser } from '../../operations/user';
 import { Error } from '../../types';
@@ -11,7 +10,6 @@ import { badRequest, created } from '../../utils/responses';
 export default [
   // Middlewares
   isNotAuthenticated(),
-  isLoginAllowed(),
   validateBody(
     Joi.object({
       username: Joi.string().required(),

@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { isValidToken } from '../../middlewares/parameters';
-import { isLoginAllowed } from '../../middlewares/settings';
 import validateBody from '../../middlewares/validateBody';
 import { changePassword, fetchUser, removeUserResetToken } from '../../operations/user';
 import { filterUser } from '../../utils/filters';
@@ -12,7 +11,6 @@ import { generateToken } from '../../utils/user';
 export default [
   // Middlewares
   isNotAuthenticated(),
-  isLoginAllowed(),
   isValidToken(),
   validateBody(
     Joi.object({
