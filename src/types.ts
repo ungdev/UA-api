@@ -134,6 +134,8 @@ export enum Error {
   AlreadyAskedATeam = 'Vous avez demandé de vous inscrire dans une équipe',
   NotAskedATeam = "Vous ne demandez l'accès à aucune équipe",
   TeamLocked = "L'équipe est verrouillée",
+  TeamNotFull = "L'équipe est incomplète",
+  TeamFull = "L'équipe est complète",
 
   // 500
   Unknown = 'Erreur inconnue',
