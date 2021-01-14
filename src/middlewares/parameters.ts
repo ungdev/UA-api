@@ -51,7 +51,7 @@ export const isInTeam = [
 // Need teamId and userId
 export const isSelfOrCaptain = [
   ...isAuthenticated,
-  (request: Request, response: Response, next: NextFunction): void => {
+  async (request: Request, response: Response, next: NextFunction) => {
     const user = getRequestUser(response);
     const team = await fetchTeam(request.params.teamId);
 

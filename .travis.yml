@@ -19,8 +19,8 @@ before_install:
 
 script:
   - yarn
-  - yarn api-check
-  - yarn lint
+  - yarn swagger:check
+  - yarn swagger:build
   - yarn build
   - yarn test:coverage
 
