@@ -21,11 +21,7 @@ export const unauthenticated = (response: Response, type?: Error): void =>
     .json({ error: type || Error.Unauthenticated })
     .end();
 
-export const forbidden = (response: Response, type?: Error): void =>
-  response
-    .status(403)
-    .json({ error: type || Error.Unauthorized })
-    .end();
+export const forbidden = (response: Response, type: Error): void => response.status(403).json({ error: type }).end();
 
 export const notFound = (response: Response, type: Error): void =>
   response

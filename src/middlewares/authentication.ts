@@ -1,6 +1,6 @@
 import { Response, NextFunction, Request } from 'express';
 import { getRequestUser } from '../utils/user';
-import { forbidden, unauthenticated, badRequest, conflict } from '../utils/responses';
+import { forbidden, unauthenticated, conflict } from '../utils/responses';
 import { Error, Permission } from '../types';
 import { isLoginAllowed } from './settings';
 
@@ -40,6 +40,6 @@ export const hasPermission = [
       return next();
     }
 
-    return forbidden(response);
+    return forbidden(response, Error.NoPermission);
   },
 ];

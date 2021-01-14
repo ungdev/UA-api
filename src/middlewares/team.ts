@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Error } from '../types';
 import logger from '../utils/logger';
-import { badRequest, conflict } from '../utils/responses';
+import { conflict } from '../utils/responses';
 import { getRequestUser } from '../utils/user';
 import { isAuthenticated } from './authentication';
 

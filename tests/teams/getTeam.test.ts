@@ -30,7 +30,7 @@ describe('GET /teams/:teamId', () => {
     await request(app)
       .get('/teams/A1B2C3')
       .set('Authorization', `Bearer ${captainToken}`)
-      .expect(404, { error: Error.TeamNotFound });
+      .expect(403, { error: Error.NotInTeam }); // Unfortunately, we use a 403 because the middleware thinks you don't have access to this ressource
   });
 
   it('should error as the token is missing', async () => {
@@ -45,7 +45,7 @@ describe('GET /teams/:teamId', () => {
     await request(app)
       .get(`/teams/${team.id}`)
       .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.Unauthorized });
+      .expect(403, { error: Error.NotInTeam });
   });
 
   it('should succeed as the request is logged as the member of the team', async () => {

@@ -55,7 +55,7 @@ describe('PUT /teams/:teamId', () => {
       .put(`/teams/${team.id}`)
       .send({ name: 'yolo' })
       .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.Unauthorized });
+      .expect(403, { error: Error.NotCaptain });
   });
 
   it('should error as the request is logged as the member of the team', async () => {
@@ -66,7 +66,7 @@ describe('PUT /teams/:teamId', () => {
       .put(`/teams/${team.id}`)
       .send({ name: 'yolo' })
       .set('Authorization', `Bearer ${memberToken}`)
-      .expect(403, { error: Error.Unauthorized });
+      .expect(403, { error: Error.NotCaptain });
   });
 
   it('should throw an internal server error', async () => {

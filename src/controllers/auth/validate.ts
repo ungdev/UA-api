@@ -3,7 +3,7 @@ import { isNotAuthenticated } from '../../middlewares/authentication';
 import { fetchUser, removeUserRegisterToken } from '../../operations/user';
 import { Error } from '../../types';
 import { filterUser } from '../../utils/filters';
-import { badRequest, notFound, success } from '../../utils/responses';
+import { badRequest, success } from '../../utils/responses';
 import { generateToken } from '../../utils/user';
 
 export default [

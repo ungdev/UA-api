@@ -7,7 +7,6 @@ import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { getIp } from './network';
 import { getRequestUser } from './user';
-import env from './env';
 
 // Create console Transport
 const { combine, colorize, printf } = format;

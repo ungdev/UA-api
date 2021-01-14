@@ -1,5 +1,4 @@
 import prisma from '@prisma/client';
-import { format } from 'morgan';
 import database from '../services/database';
 import { Tournament } from '../types';
 

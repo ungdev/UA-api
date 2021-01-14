@@ -103,12 +103,15 @@ export enum Error {
   InvalidCredentials = 'Identifiants invalides',
 
   // 403
-  Unauthorized = "Vous n'avez pas l'autorisation d'accéder à cette ressource",
   UserAlreadyScanned = "L'utilisateur a déjà scanné son billet",
   NotPaid = "Le billet n'a pas été payé",
   LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
   ShopNotAllowed = 'La billetterie est fermée',
   EmailNotConfirmed = "Le compte n'est pas confirmé",
+  NoPermission = "Vous n'avez pas la permission d'accéder à cette ressource",
+  NotCaptain = "Vous devez être le capitaine de l'équipe pour modifier cette ressource",
+  NotSelf = 'Vous ne pouvez pas modifier les information de cette personne',
+  NotInTeam = "Vous n'êtes pas dans une équipe",
 
   // 404
   NotFound = 'La ressource est introuvable',
@@ -128,6 +131,9 @@ export enum Error {
   AlreadyAuthenticated = 'Vous êtes déjà identifié',
   AlreadyInTeam = 'Vous êtes déjà dans une équipe',
   TournamentFull = 'Le tournoi est complet',
+  AlreadyAskedATeam = 'Vous avez demandé de vous inscrire dans une équipe',
+  NotAskedATeam = "Vous ne demandez l'accès à aucune équipe",
+  TeamLocked = "L'équipe est verrouillée",
 
   // 500
   Unknown = 'Erreur inconnue',

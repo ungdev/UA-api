@@ -39,6 +39,7 @@
     "radix": "off",
     "import/prefer-default-export": "off",
     "no-await-in-loop": "off",
+    "no-shadow": "warn",
     "no-useless-constructor": "off",
     "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
     "require-await": "warn",

@@ -45,7 +45,7 @@ describe('DELETE /teams/:teamId', () => {
     await request(app)
       .delete(`/teams/${team.id}`)
       .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.Unauthorized });
+      .expect(403, { error: Error.NotCaptain });
   });
 
   it('should error as the request is logged as the member of the team', async () => {
@@ -55,7 +55,7 @@ describe('DELETE /teams/:teamId', () => {
     await request(app)
       .delete(`/teams/${team.id}`)
       .set('Authorization', `Bearer ${memberToken}`)
-      .expect(403, { error: Error.Unauthorized });
+      .expect(403, { error: Error.NotCaptain });
   });
 
   it('should throw an internal server error', async () => {

@@ -5,7 +5,7 @@ import validateBody from '../../middlewares/validateBody';
 import { createTeam, fetchTeams } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
-import { badRequest, conflict, created, notFound } from '../../utils/responses';
+import { conflict, created, notFound } from '../../utils/responses';
 
 export default [
   // Middlewares
@@ -35,7 +35,7 @@ export default [
 
       // If there are more or equal teams than places, return a tournament full
       if (teams.length >= places) {
-        return conflict(response, Error.TournamentNotFound);
+        return conflict(response, Error.TournamentFull);
       }
 
       try {

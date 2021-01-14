@@ -4,7 +4,7 @@ import bcrpyt from 'bcryptjs';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import validateBody from '../../middlewares/validateBody';
 import { filterUser } from '../../utils/filters';
-import { badRequest, forbidden, success, unauthenticated } from '../../utils/responses';
+import { forbidden, success, unauthenticated } from '../../utils/responses';
 import { generateToken } from '../../utils/user';
 import { Error } from '../../types';
 import { fetchUser } from '../../operations/user';

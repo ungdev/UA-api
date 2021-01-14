@@ -5,7 +5,7 @@ import { isNotAuthenticated } from '../../middlewares/authentication';
 import validateBody from '../../middlewares/validateBody';
 import { createUser } from '../../operations/user';
 import { Error } from '../../types';
-import { badRequest, conflict, created } from '../../utils/responses';
+import { conflict, created } from '../../utils/responses';
 
 export default [
   // Middlewares

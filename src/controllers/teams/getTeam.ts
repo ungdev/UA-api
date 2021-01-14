@@ -9,9 +9,13 @@ export default [
   ...isInTeam,
 
   // Controller
-  async (request: Request, response: Response) => {
-    const team = await fetchTeam(request.params.teamId);
+  async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      const team = await fetchTeam(request.params.teamId);
 
-    return success(response, filterTeam(team));
+      return success(response, filterTeam(team));
+    } catch (error) {
+      return next(error);
+    }
   },
 ];

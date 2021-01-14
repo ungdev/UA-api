@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { fetchSetting } from '../operations/settings';
 import { Error } from '../types';
-import { badRequest, forbidden } from '../utils/responses';
+import { forbidden } from '../utils/responses';
 
 export const isLoginAllowed = async (request: Request, response: Response, next: NextFunction) => {
   const login = (await fetchSetting('login')).value;
