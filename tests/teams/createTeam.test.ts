@@ -34,7 +34,7 @@ describe('POST /teams', () => {
 
   it('should fail because the user is already in a team', async () => {
     const team = await createFakeTeam();
-    const [localUser] = team.users;
+    const [localUser] = team.players;
 
     const localToken = generateToken(localUser);
 

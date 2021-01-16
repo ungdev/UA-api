@@ -20,9 +20,16 @@ const teamInclusions = {
 export const formatTeam = (team: prisma.Team & { users: PrimitiveUser[]; askingUsers: PrimitiveUser[] }): Team => {
   if (!team) return null;
 
+  const players = team.users.filter((player) => player.type === 'player');
+  const coaches = team.users.filter((coach) => coach.type === 'coach');
+  const visitors = team.users.filter((visitor) => visitor.type === 'visitor');
+
   return {
     ...team,
-    users: team.users.map(formatUser),
+    users: undefined,
+    players: players.map(formatUser),
+    coaches: coaches.map(formatUser),
+    visitors: visitors.map(formatUser),
     askingUsers: team.users.map(formatUser),
   };
 };

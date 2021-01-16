@@ -69,7 +69,10 @@ export type Tournament = prisma.Tournament & {
 };
 
 export type Team = prisma.Team & {
-  users: User[];
+  users: undefined;
+  players: User[];
+  coaches: User[];
+  visitors: User[];
   askingUsers: User[];
 };
 
@@ -101,6 +104,9 @@ export enum Error {
   ExpiredToken = 'Session expirée. Veuillez vous reconnecter',
   InvalidToken = 'Session invalide',
   InvalidCredentials = 'Identifiants invalides',
+
+  // 402
+  TeamNotPaid = "Tous les membres de l'équipe n'ont pas payé",
 
   // 403
   UserAlreadyScanned = "L'utilisateur a déjà scanné son billet",

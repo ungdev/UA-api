@@ -59,7 +59,7 @@ describe('PUT /teams/:teamId', () => {
   });
 
   it('should error as the request is logged as the member of the team', async () => {
-    const member = team.users.find((user) => user.id !== team.captainId);
+    const member = team.players.find((player) => player.id !== team.captainId);
     const memberToken = generateToken(member);
 
     await request(app)

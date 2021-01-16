@@ -49,7 +49,7 @@ describe('GET /teams/:teamId', () => {
   });
 
   it('should succeed as the request is logged as the member of the team', async () => {
-    const member = team.users.find((user) => user.id !== team.captainId);
+    const member = team.players.find((player) => player.id !== team.captainId);
     const memberToken = generateToken(member);
 
     const response = await request(app)

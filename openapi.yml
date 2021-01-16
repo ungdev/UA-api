@@ -161,7 +161,15 @@ components:
         - $ref: '#/components/schemas/Team'
         - type: object
           properties:
-            users:
+            players:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+            coaches:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+            visitors:
               type: array
               items:
                 $ref: '#/components/schemas/User'

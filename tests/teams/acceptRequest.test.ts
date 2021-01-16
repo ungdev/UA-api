@@ -49,7 +49,7 @@ describe.skip('POST /teams/:teamId/joinRequests/:userId', () => {
   });
 
   it('should fail because the user is a member of the team but not the captain', async () => {
-    const member = team.users.find((teamUsers) => teamUsers.id !== team.captainId);
+    const member = team.players.find((teamUsers) => teamUsers.id !== team.captainId);
     const memberToken = generateToken(member);
 
     await request(app)

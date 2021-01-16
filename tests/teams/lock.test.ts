@@ -49,7 +49,7 @@ describe.skip('POST /teams/:teamId/lock', () => {
   });
 
   it('should error as the request is logged as the member of the team', async () => {
-    const member = team.users.find((user) => user.id !== team.captainId);
+    const member = team.players.find((player) => player.id !== team.captainId);
     const memberToken = generateToken(member);
 
     await request(app)
@@ -76,7 +76,16 @@ describe.skip('POST /teams/:teamId/lock', () => {
       .expect(409, { error: Error.TournamentFull });
   });
 
-  // it.skip('should error some member has not paid', () => {});
+  it('should error some member has not paid', async () => {
+    const notPaidTeam = await createFakeTeam(5);
+    const captain = getCaptain(notPaidTeam);
+    const token = generateToken(captain);
+
+    await request(app)
+      .post(`/teams/${team.id}/lock`)
+      .set('Authorization', `Bearer ${captainToken}`)
+      .expect(402, { error: Error.TeamNotPaid });
+  });
 
   it('should throw an internal server error', async () => {
     // sandbox.stub(teamOperations, 'lockTeam').throws('Unknown error');
