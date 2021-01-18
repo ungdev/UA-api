@@ -37,7 +37,6 @@ export const filterTeam = (team: Team) => {
     ...filteredTeam,
     players: team.players.map(filterUser),
     coaches: team.coaches.map(filterUser),
-    visitors: team.visitors.map(filterUser),
     askingUsers: team.askingUsers.map(filterUser),
   };
 };

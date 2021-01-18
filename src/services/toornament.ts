@@ -1,7 +1,7 @@
 import axios from 'axios';
 import qs from 'querystring';
 import { PlayerInformations, ToornamentParticipant } from '../types';
-import { playerValidator } from '../validator';
+import { playerValidator } from '../utils/validators';
 import environment from '../utils/env';
 import logger from '../utils/logger';
 

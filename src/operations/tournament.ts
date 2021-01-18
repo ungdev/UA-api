@@ -14,9 +14,16 @@ export const formatTournament = async (tournament: prisma.Tournament): Promise<T
     },
   });
 
+  const slots = tournament.maxPlayers / tournament.playersPerTeam;
+
+  // Calculate the number of places left. We use the max function to ensure the number is always positive
+  // It is a case that never should happend
+  const placesLeft = Math.max(0, slots - lockedTeamsCount);
+
   return {
     ...tournament,
     lockedTeamsCount,
+    placesLeft,
   };
 };
 

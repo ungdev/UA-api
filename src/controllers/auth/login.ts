@@ -8,14 +8,15 @@ import { forbidden, success, unauthenticated } from '../../utils/responses';
 import { generateToken } from '../../utils/user';
 import { Error } from '../../types';
 import { fetchUser } from '../../operations/user';
+import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
   ...isNotAuthenticated,
   validateBody(
     Joi.object({
-      email: Joi.string().email().required(),
-      password: Joi.string().required(),
+      email: validators.email,
+      password: validators.password,
     }),
   ),
 

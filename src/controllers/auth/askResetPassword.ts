@@ -5,13 +5,14 @@ import validateBody from '../../middlewares/validateBody';
 import { fetchUser, generateResetToken } from '../../operations/user';
 import { Error } from '../../types';
 import { noContent, notFound } from '../../utils/responses';
+import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
   ...isNotAuthenticated,
   validateBody(
     Joi.object({
-      email: Joi.string().email().required(),
+      email: validators.email,
     }),
   ),
 

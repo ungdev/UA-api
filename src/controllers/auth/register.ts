@@ -6,18 +6,19 @@ import validateBody from '../../middlewares/validateBody';
 import { createUser } from '../../operations/user';
 import { Error } from '../../types';
 import { conflict, created } from '../../utils/responses';
+import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
   ...isNotAuthenticated,
   validateBody(
     Joi.object({
-      username: Joi.string().required(),
-      firstname: Joi.string().required(),
-      lastname: Joi.string().required(),
-      email: Joi.string().email().required(),
-      password: Joi.string().required(),
-      type: Joi.string().valid(UserType.player, UserType.coach, UserType.visitor),
+      username: validators.username,
+      firstname: validators.firstname,
+      lastname: validators.lastname,
+      email: validators.email,
+      password: validators.password,
+      type: validators.type,
     }),
   ),
 

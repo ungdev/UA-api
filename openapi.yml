@@ -93,7 +93,7 @@ components:
       properties:
         id:
           type: string
-          example: V1StGX
+          example: V1STGX
         type:
           $ref: '#/components/schemas/Type'
         hasPaid:
@@ -169,10 +169,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/User'
-            visitors:
-              type: array
-              items:
-                $ref: '#/components/schemas/User'
             askingUsers:
               type: array
               items:
@@ -194,7 +190,7 @@ components:
           example: 8MF1b0
         userId:
           type: string
-          example: V1StGX
+          example: V1STGX
         transactionState:
           type: string
           enum: [pending, paid, canceled, refused, refunded]
@@ -221,7 +217,7 @@ components:
           type: integer
         forUserId:
           type: string
-          example: V1StGX
+          example: V1STGX
 
     CartWithCartItems:
       allOf:
@@ -1641,7 +1637,7 @@ paths:
                       items:
                         type: string
                       example:
-                        - V1StGX
+                        - V1STGX
                     visitors:
                       type: array
                       description: Liste des billets accompagnateurs à acheter

@@ -16,7 +16,7 @@ const consoleTransport = new transports.Console({
     colorize(),
     printf(({ level, message }) => `${timestamp} ${level}: ${message}`),
   ),
-  level: 'silly',
+  level: process.env.NODE_ENV === 'production' ? 'warn' : 'silly',
   silent: process.env.NODE_ENV === 'test', // Doesn't log if we are in testing environment
 });
 

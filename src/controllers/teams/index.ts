@@ -6,6 +6,7 @@ import updateTeam from './updateTeam';
 import deleteTeam from './deleteTeam';
 import createTeamRequest from './createTeamRequest';
 import deleteTeamRequest from './deleteTeamRequest';
+import lockTeam from './lockTeam';
 
 const router = Router();
 
@@ -17,5 +18,7 @@ router.delete('/:teamId', deleteTeam);
 
 router.post('/:teamId/joinRequests', createTeamRequest);
 router.delete('/:teamId/joinRequests/:userId', deleteTeamRequest);
+
+router.post('/:teamId/lock', lockTeam);
 
 export default router;

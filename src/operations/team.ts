@@ -2,7 +2,7 @@ import prisma from '@prisma/client';
 import database from '../services/database';
 import { PrimitiveUser, Team, User } from '../types';
 import nanoid from '../utils/nanoid';
-import { formatUser } from './user';
+import { fetchUser, formatUser } from './user';
 
 const teamInclusions = {
   users: {
@@ -22,14 +22,12 @@ export const formatTeam = (team: prisma.Team & { users: PrimitiveUser[]; askingU
 
   const players = team.users.filter((player) => player.type === 'player');
   const coaches = team.users.filter((coach) => coach.type === 'coach');
-  const visitors = team.users.filter((visitor) => visitor.type === 'visitor');
 
   return {
     ...team,
     users: undefined,
     players: players.map(formatUser),
     coaches: coaches.map(formatUser),
-    visitors: visitors.map(formatUser),
     askingUsers: team.users.map(formatUser),
   };
 };
@@ -181,4 +179,41 @@ export const joinTeam = async (teamId: string, user: User) => {
       id: user.id,
     },
   });
+};
+
+export const lockTeam = async (teamId: string) => {
+  // We want to group all queries in one transaction. It is not possible currently, but keep being updated on prisma
+
+  const askingUsers = await database.user.findMany({
+    where: {
+      askingTeamId: teamId,
+    },
+  });
+
+  await database.$transaction(
+    askingUsers.map((user) =>
+      database.user.update({
+        data: {
+          askingTeam: {
+            disconnect: true,
+          },
+        },
+        where: {
+          id: user.id,
+        },
+      }),
+    ),
+  );
+
+  const updatedTeam = await database.team.update({
+    data: {
+      lockedAt: new Date(),
+    },
+    where: {
+      id: teamId,
+    },
+    include: teamInclusions,
+  });
+
+  return formatTeam(updatedTeam);
 };

@@ -66,13 +66,13 @@ export type User = PrimitiveUser & {
 
 export type Tournament = prisma.Tournament & {
   lockedTeamsCount: number;
+  placesLeft: number;
 };
 
 export type Team = prisma.Team & {
   users: undefined;
   players: User[];
   coaches: User[];
-  visitors: User[];
   askingUsers: User[];
 };
 
@@ -127,9 +127,6 @@ export enum Error {
   OrderNotFound = 'La commande est introuvable',
   TournamentNotFound = 'Le tournoi est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
-
-  // 406
-  NotAcceptable = 'Contenu envoyé inacceptable',
 
   // 409
   EmailAlreadyExists = 'Cet email est déjà utilisé',

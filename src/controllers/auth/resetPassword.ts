@@ -7,13 +7,14 @@ import { Error } from '../../types';
 import { filterUser } from '../../utils/filters';
 import { badRequest, success } from '../../utils/responses';
 import { generateToken } from '../../utils/user';
+import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
   ...isNotAuthenticated,
   validateBody(
     Joi.object({
-      password: Joi.string().required(),
+      password: validators.password,
     }),
   ),
 

@@ -5,13 +5,14 @@ import validateBody from '../../middlewares/validateBody';
 import { success } from '../../utils/responses';
 import { updateTeam } from '../../operations/team';
 import { filterTeam } from '../../utils/filters';
+import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
   ...isCaptain,
   validateBody(
     Joi.object({
-      name: Joi.string().required(),
+      name: validators.teamName,
     }),
   ),
 

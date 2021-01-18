@@ -6,14 +6,15 @@ import { createTeam, fetchTeams } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
 import { conflict, created, notFound } from '../../utils/responses';
+import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
   ...isNotInATeam,
   validateBody(
     Joi.object({
-      name: Joi.string().required(),
-      tournamentId: Joi.string().required(),
+      name: validators.teamName,
+      tournamentId: validators.id,
     }),
   ),
 
@@ -28,13 +29,8 @@ export default [
         return notFound(response, Error.TournamentNotFound);
       }
 
-      const teams = await fetchTeams(tournament.id);
-
-      // Retreives the places of the tournament
-      const places = tournament.maxPlayers / tournament.playersPerTeam;
-
       // If there are more or equal teams than places, return a tournament full
-      if (teams.length >= places) {
+      if (tournament.placesLeft === 0) {
         return conflict(response, Error.TournamentFull);
       }
 
