@@ -1650,13 +1650,13 @@ paths:
                           lastname:
                             type: string
                             description: Nom de l'accompagnateur
-                items:
+                supplements:
                   type: array
                   description: Liste des items (goodies) à acheter
                   items:
                     type: object
                     properties:
-                      itemId:
+                      id:
                         type: integer
                         description: Identifiant de l'item à acheter
                       quantity:

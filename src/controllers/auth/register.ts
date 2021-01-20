@@ -24,11 +24,11 @@ export default [
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
-    const { username, firstname, lastname, email, password } = request.body;
+    const { username, firstname, lastname, email, password, type } = request.body;
 
     // Tries to create a user
     try {
-      await createUser(username, firstname, lastname, email, password);
+      await createUser(username, firstname, lastname, email, password, type);
     } catch (error) {
       // If the email already exists in the database, throw a bad request
       if (error.code === 'P2002' && error.meta && error.meta.target === 'email_unique')

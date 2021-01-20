@@ -1,5 +1,5 @@
 import faker from 'faker';
-import prisma from '@prisma/client';
+import prisma, { UserType } from '@prisma/client';
 import request from 'supertest';
 import app from '../../src/app';
 import database from '../../src/services/database';
@@ -20,6 +20,7 @@ describe('POST /auth/validate/{token}', () => {
       faker.name.lastName(),
       faker.internet.email(),
       password,
+      UserType.player,
     );
   });
 
@@ -47,7 +48,7 @@ describe('POST /auth/validate/{token}', () => {
     sandbox.stub(userOperations, 'removeUserRegisterToken').throws('Unexpected error');
 
     // Request to validate the user
-    await request(app).post(`/auth/validate/${user.registerToken}`).expect(500, { error: Error.Unknown });
+    await request(app).post(`/auth/validate/${user.registerToken}`).expect(500, { error: Error.InternalServerError });
   });
 
   it('should not log in as the account is not validated', async () => {

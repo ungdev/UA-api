@@ -28,8 +28,6 @@ export const badRequest = (response: Response, error: Error): void => respondErr
 export const unauthenticated = (response: Response, error?: Error): void =>
   respondError(response, error || Error.Unauthenticated, 401);
 
-export const paymentRequired = (response: Response, error: Error): void => respondError(response, error, 402);
-
 export const forbidden = (response: Response, error: Error): void => respondError(response, error, 403);
 
 export const notFound = (response: Response, error: Error): void => respondError(response, error, 404);
@@ -37,4 +35,4 @@ export const notFound = (response: Response, error: Error): void => respondError
 export const conflict = (response: Response, error: Error): void => respondError(response, error, 409);
 
 export const internalServerError = (response: Response, error?: Error): void =>
-  respondError(response, error || Error.Unknown, 500);
+  respondError(response, error || Error.InternalServerError, 500);

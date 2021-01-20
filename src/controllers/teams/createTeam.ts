@@ -14,7 +14,7 @@ export default [
   validateBody(
     Joi.object({
       name: validators.teamName,
-      tournamentId: validators.id,
+      tournamentId: Joi.string().required(),
     }),
   ),
 

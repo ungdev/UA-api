@@ -42,7 +42,7 @@ describe('POST /teams', () => {
       .post('/teams')
       .send(teamBody)
       .set('Authorization', `Bearer ${localToken}`)
-      .expect(409, { error: Error.AlreadyInTeam });
+      .expect(403, { error: Error.AlreadyInTeam });
   });
 
   it('should fail because the body is incorrect', async () => {
@@ -67,7 +67,7 @@ describe('POST /teams', () => {
       .post('/teams')
       .send(teamBody)
       .set('Authorization', `Bearer ${token}`)
-      .expect(500, { error: Error.Unknown });
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should fail with an internal server error (test base catch)', async () => {
@@ -76,7 +76,7 @@ describe('POST /teams', () => {
       .post('/teams')
       .send(teamBody)
       .set('Authorization', `Bearer ${token}`)
-      .expect(500, { error: Error.Unknown });
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should succesfully create a team', async () => {

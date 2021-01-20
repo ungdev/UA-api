@@ -74,7 +74,7 @@ describe.skip('POST /teams/:teamId/joinRequests/:userId', () => {
     await request(app)
       .post(`/teams/${team.id}/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(500, { error: Error.Unknown });
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should succesfully cancel accept the user', async () => {
@@ -95,6 +95,6 @@ describe.skip('POST /teams/:teamId/joinRequests/:userId', () => {
     await request(app)
       .post(`/teams/${team.id}/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(409, { error: Error.NotAskedATeam });
+      .expect(403, { error: Error.NotAskedATeam });
   });
 });

@@ -44,7 +44,7 @@ describe('POST /auth/register', () => {
   it('should throw an internal server error', async () => {
     sandbox.stub(userOperations, 'createUser').throws('Unexpected error');
 
-    await request(app).post('/auth/register').send(userData).expect(500, { error: Error.Unknown });
+    await request(app).post('/auth/register').send(userData).expect(500, { error: Error.InternalServerError });
   });
 
   it('should create a user', async () => {

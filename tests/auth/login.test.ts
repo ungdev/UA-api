@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import prisma from '@prisma/client';
+import prisma, { UserType } from '@prisma/client';
 import app from '../../src/app';
 import * as userUtils from '../../src/utils/user';
 import { Error } from '../../src/types';
@@ -14,7 +14,7 @@ describe('POST /auth/login', () => {
   let user: prisma.User;
 
   before(async () => {
-    user = await createFakeConfirmedUser(password);
+    user = await createFakeConfirmedUser(UserType.player, password);
   });
 
   after(async () => {
@@ -78,7 +78,7 @@ describe('POST /auth/login', () => {
         email: user.email,
         password,
       })
-      .expect(500, { error: Error.Unknown });
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should validate the login', async () => {
@@ -104,6 +104,6 @@ describe('POST /auth/login', () => {
         email: user.email,
         password,
       })
-      .expect(409, { error: Error.AlreadyAuthenticated });
+      .expect(403, { error: Error.AlreadyAuthenticated });
   });
 });

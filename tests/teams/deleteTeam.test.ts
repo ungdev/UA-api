@@ -64,7 +64,7 @@ describe('DELETE /teams/:teamId', () => {
     await request(app)
       .delete(`/teams/${team.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
-      .expect(500, { error: Error.Unknown });
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should delete the team', async () => {

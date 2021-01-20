@@ -31,6 +31,7 @@ export const createUser = async (
   lastname: string,
   email: string,
   password: string,
+  type: UserType,
 ) => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
   const hashedPassword = await userOperations.hash(password, salt);
@@ -41,12 +42,22 @@ export const createUser = async (
       firstname,
       lastname,
       email,
+      type,
       password: hashedPassword,
-      type: UserType.player,
       registerToken: nanoid(),
     },
   });
 };
+
+export const createVisitor = (firstname: string, lastname: string) =>
+  database.user.create({
+    data: {
+      id: nanoid(),
+      firstname,
+      lastname,
+      type: UserType.visitor,
+    },
+  });
 
 export const removeUserRegisterToken = (user: User) => {
   return database.user.update({

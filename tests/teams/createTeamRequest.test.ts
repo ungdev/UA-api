@@ -44,7 +44,7 @@ describe('POST /teams/:teamId/joinRequests', () => {
     await request(app)
       .post(`/teams/${team.id}/joinRequests`)
       .set('Authorization', `Bearer ${localToken}`)
-      .expect(409, { error: Error.AlreadyInTeam });
+      .expect(403, { error: Error.AlreadyInTeam });
   });
 
   it('should fail with an internal server error', async () => {
@@ -52,7 +52,7 @@ describe('POST /teams/:teamId/joinRequests', () => {
     await request(app)
       .post(`/teams/${team.id}/joinRequests`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(500, { error: Error.Unknown });
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should succesfully request to join a team', async () => {
@@ -68,7 +68,7 @@ describe('POST /teams/:teamId/joinRequests', () => {
     await request(app)
       .post(`/teams/${team.id}/joinRequests`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(409, { error: Error.AlreadyAskedATeam });
+      .expect(403, { error: Error.AlreadyAskedATeam });
   });
 
   it('should failed as we already asked another team', async () => {
@@ -77,6 +77,6 @@ describe('POST /teams/:teamId/joinRequests', () => {
     await request(app)
       .post(`/teams/${otherTeam.id}/joinRequests`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(409, { error: Error.AlreadyAskedATeam });
+      .expect(403, { error: Error.AlreadyAskedATeam });
   });
 });

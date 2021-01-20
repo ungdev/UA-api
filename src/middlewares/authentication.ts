@@ -1,3 +1,4 @@
+import { UserType } from '@prisma/client';
 import { Response, NextFunction, Request } from 'express';
 import { getRequestUser } from '../utils/user';
 import { forbidden, unauthenticated, conflict } from '../utils/responses';
@@ -8,12 +9,26 @@ import { isLoginAllowed } from './settings';
 export const isAuthenticated = [
   isLoginAllowed,
   (request: Request, response: Response, next: NextFunction) => {
-    // If there is a user in the locals
-    if (getRequestUser(response)) {
-      return next();
+    // Retreives the user
+    const user = getRequestUser(response);
+
+    // The user must exists
+    if (!user) {
+      return unauthenticated(response);
     }
 
-    return unauthenticated(response);
+    // It mustn't be a visitor
+    if (user.type === UserType.visitor) {
+      return forbidden(response, Error.LoginAsVisitor);
+    }
+
+    // It must be activated
+    if (user.registerToken) {
+      return forbidden(response, Error.EmailNotConfirmed);
+    }
+
+    // NB, those conditions should never happen as there are in the login session, but could happend if a user is changed in the database
+    return next();
   },
 ];
 
@@ -25,7 +40,7 @@ export const isNotAuthenticated = [
       return next();
     }
 
-    return conflict(response, Error.AlreadyAuthenticated);
+    return forbidden(response, Error.AlreadyAuthenticated);
   },
 ];
 

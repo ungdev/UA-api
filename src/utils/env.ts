@@ -50,7 +50,7 @@ const env = {
   partners: {
     emails: ['utt.fr', 'utc.fr', 'utbm.fr'],
   },
-  etudpay: {
+  etupay: {
     id: Number(process.env.ETUPAY_ID),
     key: process.env.ETUPAY_KEY,
     url: process.env.ETUPAY_URL || 'https://etupay.utt.fr/initiate',

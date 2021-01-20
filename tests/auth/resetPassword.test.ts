@@ -62,7 +62,7 @@ describe('POST /auth/reset-password/:uuid', () => {
     await request(app)
       .post(`/auth/reset-password/${user.resetToken}`)
       .send({ password: 'validPassword' })
-      .expect(500, { error: Error.Unknown });
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should reset the password', async () => {

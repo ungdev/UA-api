@@ -17,6 +17,9 @@ describe.skip('POST /teams/:teamId/lock', () => {
   before(async () => {
     team = await createFakeTeam(5);
 
+    // Make everyone paid
+    team.players = team.players.map((player) => ({ ...player, hasPaid: true }));
+
     captain = getCaptain(team);
     captainToken = generateToken(captain);
   });
@@ -64,36 +67,36 @@ describe.skip('POST /teams/:teamId/lock', () => {
     const halfToken = generateToken(halfCaptain);
 
     await request(app)
-      .post(`/teams/${team.id}/lock`)
+      .post(`/teams/${halfTeam.id}/lock`)
       .set('Authorization', `Bearer ${halfToken}`)
-      .expect(409, { error: Error.TeamNotFound });
+      .expect(403, { error: Error.TeamNotFull });
   });
 
-  it('should error has the tournament is full', async () => {
+  it.skip('should error has the tournament is full', async () => {
     await request(app)
       .post(`/teams/${team.id}/lock`)
       .set('Authorization', `Bearer ${captainToken}`)
-      .expect(409, { error: Error.TournamentFull });
+      .expect(403, { error: Error.TournamentFull });
   });
 
-  it('should error some member has not paid', async () => {
+  it('should error if some member has not paid', async () => {
     const notPaidTeam = await createFakeTeam(5);
-    const captain = getCaptain(notPaidTeam);
-    const token = generateToken(captain);
+    const notPaidCaptain = getCaptain(notPaidTeam);
+    const notPaidToken = generateToken(notPaidCaptain);
 
     await request(app)
-      .post(`/teams/${team.id}/lock`)
-      .set('Authorization', `Bearer ${captainToken}`)
+      .post(`/teams/${notPaidTeam.id}/lock`)
+      .set('Authorization', `Bearer ${notPaidToken}`)
       .expect(402, { error: Error.TeamNotPaid });
   });
 
   it('should throw an internal server error', async () => {
-    // sandbox.stub(teamOperations, 'lockTeam').throws('Unknown error');
+    sandbox.stub(teamOperations, 'lockTeam').throws('Unknown error');
 
     await request(app)
       .post(`/teams/${team.id}/lock`)
       .set('Authorization', `Bearer ${captainToken}`)
-      .expect(500, { error: Error.Unknown });
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should lock the team', async () => {
@@ -111,7 +114,7 @@ describe.skip('POST /teams/:teamId/lock', () => {
     await request(app)
       .post(`/teams/${team.id}/lock`)
       .set('Authorization', `Bearer ${captainToken}`)
-      .expect(409, Error.TeamLocked);
+      .expect(403, Error.TeamLocked);
   });
 
   it('should error has the tournament is full', async () => {
@@ -132,6 +135,6 @@ describe.skip('POST /teams/:teamId/lock', () => {
     await request(app)
       .post(`/teams/${team.id}/lock`)
       .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(409, { error: Error.TournamentFull });
+      .expect(403, { error: Error.TournamentFull });
   });
 });

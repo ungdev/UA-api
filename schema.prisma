@@ -30,7 +30,7 @@ model CartItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
   cart      Cart     @relation(fields: [cartId], references: [id])
-  user      User     @relation(fields: [forUserId], references: [id])
+  forUser   User     @relation(fields: [forUserId], references: [id])
   item      Item     @relation(fields: [itemId], references: [id])
 
   @@map("cartitems")
@@ -128,7 +128,7 @@ enum TransactionState {
 
 enum ItemCategory {
   ticket
-  item
+  supplement
 }
 
 enum UserType {

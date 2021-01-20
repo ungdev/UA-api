@@ -48,11 +48,19 @@ export interface Contact {
 
 // We define all the type here, even if we dont extend them to avoid importing @prisma/client in files and mix both types to avoid potential errors
 
-export type Item = prisma.Item;
+export type Item = prisma.Item & {
+  left?: number;
+};
 
 export type Setting = prisma.Setting;
 
 export type Cart = prisma.Cart;
+
+export interface PrimitiveCartItem {
+  itemId: string;
+  quantity: number;
+  forUserId: string;
+}
 
 export type CartItem = prisma.CartItem;
 
@@ -95,22 +103,24 @@ export enum Error {
   // More info on https://www.loggly.com/blog/http-status-code-diagram to know where to put an error
 
   // 400
+  // Used when the request contains a bad syntax and makes the request unprocessable
   InvalidBody = 'Corps de la requête invalide',
   MalformedBody = 'Corps de la requête malformé',
   InvalidParameters = 'Paramètres de la requête invalides',
+  BasketEmpty = 'Le panier est vide',
 
   // 401
+  // The user credentials were refused or not provided
   Unauthenticated = "Vous n'êtes pas authentifié",
   ExpiredToken = 'Session expirée. Veuillez vous reconnecter',
   InvalidToken = 'Session invalide',
   InvalidCredentials = 'Identifiants invalides',
 
-  // 402
-  TeamNotPaid = "Tous les membres de l'équipe n'ont pas payé",
-
   // 403
+  // The server understood the request but refuses to authorize it
   UserAlreadyScanned = "L'utilisateur a déjà scanné son billet",
   NotPaid = "Le billet n'a pas été payé",
+  TeamNotPaid = "Tous les membres de l'équipe n'ont pas payé",
   LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
   ShopNotAllowed = 'La billetterie est fermée',
   EmailNotConfirmed = "Le compte n'est pas confirmé",
@@ -118,30 +128,37 @@ export enum Error {
   NotCaptain = "Vous devez être le capitaine de l'équipe pour modifier cette ressource",
   NotSelf = 'Vous ne pouvez pas modifier les information de cette personne',
   NotInTeam = "Vous n'êtes pas dans une équipe",
+  LoginAsVisitor = 'Vous ne pouvez pas vous connecter en tant que visiteur',
+  AlreadyAuthenticated = 'Vous êtes déjà identifié',
+  NotPlayerOrCoach = "L'utilisateur n'est pas un joueur ou un coach",
+  AlreadyPaid = 'Le joueur possède déjà une place',
+  TeamLocked = "L'équipe est verrouillée",
+  TeamNotFull = "L'équipe est incomplète",
+  TeamFull = "L'équipe est complète",
+  AlreadyInTeam = 'Vous êtes déjà dans une équipe',
+  TournamentFull = 'Le tournoi est complet',
+  AlreadyAskedATeam = 'Vous avez déjà demandé de vous inscrire dans une équipe',
+  NotAskedATeam = "Vous ne demandez l'accès à aucune équipe",
 
   // 404
+  // The server can't find the requested resource
   NotFound = 'La ressource est introuvable',
   RouteNotFound = 'La route est introuvable',
   UserNotFound = "L'utilisateur est introuvable",
   TeamNotFound = "L'équipe est introuvable",
   OrderNotFound = 'La commande est introuvable',
+  ItemNotFound = "L'object est introuvable",
   TournamentNotFound = 'Le tournoi est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
 
   // 409
+  // Indicates a request conflict with current state of the target resource
   EmailAlreadyExists = 'Cet email est déjà utilisé',
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
-  AlreadyAuthenticated = 'Vous êtes déjà identifié',
-  AlreadyInTeam = 'Vous êtes déjà dans une équipe',
-  TournamentFull = 'Le tournoi est complet',
-  AlreadyAskedATeam = 'Vous avez demandé de vous inscrire dans une équipe',
-  NotAskedATeam = "Vous ne demandez l'accès à aucune équipe",
-  TeamLocked = "L'équipe est verrouillée",
-  TeamNotFull = "L'équipe est incomplète",
-  TeamFull = "L'équipe est complète",
 
   // 500
-  Unknown = 'Erreur inconnue',
+  // The server encountered an unexpected condition that prevented it from fulfilling the request
+  InternalServerError = 'Erreur inconnue',
 }
 
 // Toornament

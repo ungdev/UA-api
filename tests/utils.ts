@@ -1,7 +1,7 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import faker from 'faker';
-import prisma from '@prisma/client';
+import prisma, { UserType } from '@prisma/client';
 import { createUser, fetchUser } from '../src/operations/user';
 import database from '../src/services/database';
 import { User } from '../src/types';
@@ -9,13 +9,14 @@ import { createTeam, fetchTeam, joinTeam } from '../src/operations/team';
 
 export const mock = new MockAdapter(axios);
 
-export const createFakeConfirmedUser = async (password = 'awesomePassword'): Promise<User> => {
+export const createFakeConfirmedUser = async (type = UserType.player, password = 'awesomePassword'): Promise<User> => {
   const user: prisma.User = await createUser(
     faker.internet.userName(),
     faker.name.firstName(),
     faker.name.lastName(),
     faker.internet.email(),
     password,
+    type,
   );
 
   await database.user.update({

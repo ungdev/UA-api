@@ -56,7 +56,7 @@ describe('POST /auth/reset-password', () => {
       .send({
         email: user.email,
       })
-      .expect(500, { error: Error.Unknown });
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should return a valid response', async () => {

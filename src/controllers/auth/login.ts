@@ -37,6 +37,10 @@ export default [
         return forbidden(response, Error.EmailNotConfirmed);
       }
 
+      if (user.type === 'visitor') {
+        return forbidden(response, Error.LoginAsVisitor);
+      }
+
       // Compares the hash from the password given
       const isPasswordValid = await bcrpyt.compare(password, user.password);
 

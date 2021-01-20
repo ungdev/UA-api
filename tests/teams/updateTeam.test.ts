@@ -76,7 +76,7 @@ describe('PUT /teams/:teamId', () => {
       .put(`/teams/${team.id}`)
       .send({ name: 'yolo' })
       .set('Authorization', `Bearer ${captainToken}`)
-      .expect(500, { error: Error.Unknown });
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should update the team', async () => {

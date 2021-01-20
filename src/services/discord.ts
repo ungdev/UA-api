@@ -2,7 +2,7 @@ import Discord, { GuildMember } from 'discord.js';
 import { Tournament } from '../types';
 import env from '../utils/env';
 import logger from '../utils/logger';
-import removeAccents from '../utils/removeAccents';
+import { removeAccents } from '../utils/helpers';
 
 const bot = new Discord.Client();
 let server: Discord.Guild;

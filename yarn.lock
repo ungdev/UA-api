@@ -736,10 +736,10 @@
     "@typescript-eslint/types" "4.2.0"
     eslint-visitor-keys "^2.0.0"
 
-"@ung/node-etupay@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@ung/node-etupay/-/node-etupay-2.0.1.tgz#92ef4a23790a82859ef9ae0919cc6fc705b468ea"
-  integrity sha512-k7wdvcNbHyH9M7JrPAPr0A/8GpHnoWxeb9uSRioZYH8UZmmDiCkZ/1OnVMhUjbvx1S2H6ueWruY4aexU+t++Cw==
+"@ung/node-etupay@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@ung/node-etupay/-/node-etupay-2.0.2.tgz#4afeb2b4d9a5fc0c138830df74d9b2044a41cb6a"
+  integrity sha512-b+focOIjJ/A2zIW2nN8I4a2WhLCvsjOjrZC6cdfkdakZ/l6lPng6SKazbtjQHQ5YtGLmHKzdVZLCulsF0v44lQ==
   dependencies:
     atob "^2.0.3"
     btoa "^1.1.2"
