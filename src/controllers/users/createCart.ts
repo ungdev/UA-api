@@ -13,6 +13,7 @@ import { badRequest, created, forbidden, notFound, success } from '../../utils/r
 import { getRequestUser } from '../../utils/user';
 import * as validators from '../../utils/validators';
 import database from '../../services/database';
+import { isShopAllowed } from '../../middlewares/settings';
 
 export interface PayBody {
   tickets: {
@@ -30,6 +31,7 @@ export interface PayBody {
 
 export default [
   // Middlewares
+  isShopAllowed,
   ...isSelf,
 
   validateBody(

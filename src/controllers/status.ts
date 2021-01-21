@@ -1,21 +1,18 @@
-import { Request, Response } from 'express';
-import database from '../services/database';
+import { NextFunction, Request, Response } from 'express';
+import { fetchSettings } from '../operations/settings';
 import { success } from '../utils/responses';
 
 export default [
-  async (request: Request, response: Response) => {
-    let databaseStatus = true;
-
+  async (request: Request, response: Response, next: NextFunction) => {
     // Try to reach the database
     try {
-      await database.setting.findMany();
-    } catch {
-      databaseStatus = false;
-    }
+      await fetchSettings();
 
-    return success(response, {
-      http: true,
-      database: databaseStatus,
-    });
+      return success(response, {
+        http: true,
+      });
+    } catch (error) {
+      return next(error);
+    }
   },
 ];

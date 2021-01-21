@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 
 import validateBody from '../middlewares/validateBody';
-import { noContent, internalServerError } from '../utils/responses';
+import { noContent } from '../utils/responses';
 import { sendSlackContact } from '../services/slack';
 import * as validators from '../utils/validators';
 
@@ -18,11 +18,13 @@ export default [
   ),
 
   // Controller
-  async (request: Request, response: Response) => {
-    const slackResponse = await sendSlackContact(request.body);
-    if (slackResponse.status !== 200 || slackResponse.data.ok === false) {
-      return internalServerError(response);
+  async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      await sendSlackContact(request.body);
+
+      return noContent(response);
+    } catch (error) {
+      return next(error);
     }
-    return noContent(response);
   },
 ];

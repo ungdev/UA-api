@@ -1,34 +1,17 @@
-import qs from 'querystring';
-import axios from 'axios';
+import { WebClient } from '@slack/web-api';
 import { Contact } from '../types';
 import env from '../utils/env';
 
-/**
- * Sends a message a the slack bot
- */
-export const sendSlack = (channel: string, text: string, blocks?: Array<object>, username?: string) =>
-  axios.post(
-    'https://slack.com/api/chat.postMessage',
-    qs.stringify({
-      token: env.slack.token,
-      channel,
-      text,
-      blocks: JSON.stringify(blocks),
-      username,
-    }),
-    {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded/json; charset=utf-8' },
-    },
-  );
+const slack = new WebClient(env.slack.token);
 
 /**
  * Sends a Slack message contact
  */
-export const sendSlackContact = ({ name, email, subject, message }: Contact) => {
-  return sendSlack(
-    env.slack.contactChannel,
-    message,
-    [
+export const sendSlackContact = ({ name, email, subject, message }: Contact) =>
+  slack.chat.postMessage({
+    channel: env.slack.contactChannel,
+    text: message,
+    blocks: [
       {
         type: 'section',
         text: {
@@ -47,6 +30,5 @@ export const sendSlackContact = ({ name, email, subject, message }: Contact) => 
         },
       },
     ],
-    'UTT Arena - Contact',
-  );
-};
+    username: 'UTT Arena - Contact',
+  });

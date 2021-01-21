@@ -10,11 +10,10 @@ import { getRequestUser } from './user';
 
 // Create console Transport
 const { combine, colorize, printf } = format;
-const timestamp = moment().format('HH:mm:ss');
 const consoleTransport = new transports.Console({
   format: combine(
     colorize(),
-    printf(({ level, message }) => `${timestamp} ${level}: ${message}`),
+    printf(({ level, message }) => `${moment().format('HH:mm:ss')} ${level}: ${message}`),
   ),
   level: process.env.NODE_ENV === 'production' ? 'warn' : 'silly',
   silent: process.env.NODE_ENV === 'test', // Doesn't log if we are in testing environment

@@ -100,7 +100,6 @@ export interface EtupayResponse {
 /**********/
 /** Misc **/
 /**********/
-
 export enum Error {
   // More info on https://www.loggly.com/blog/http-status-code-diagram to know where to put an error
 
@@ -157,6 +156,9 @@ export enum Error {
   // Indicates a request conflict with current state of the target resource
   EmailAlreadyExists = 'Cet email est déjà utilisé',
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
+
+  // 415
+  UnsupportedMediaType = "Le format de la requête n'est pas supporté",
 
   // 500
   // The server encountered an unexpected condition that prevented it from fulfilling the request

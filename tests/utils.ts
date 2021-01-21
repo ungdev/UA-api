@@ -1,13 +1,9 @@
-import axios from 'axios';
-import MockAdapter from 'axios-mock-adapter';
 import faker from 'faker';
 import prisma, { UserType } from '@prisma/client';
 import { createUser, fetchUser, removeUserRegisterToken } from '../src/operations/user';
 import { User } from '../src/types';
 import { createTeam, fetchTeam, joinTeam } from '../src/operations/team';
 import { forcePay } from '../src/operations/carts';
-
-export const mock = new MockAdapter(axios);
 
 export const createFakeUser = async ({
   username = faker.internet.userName(),

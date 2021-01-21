@@ -5,7 +5,7 @@ import logger from '../utils/logger';
 
 const database = new PrismaClient({
   // Enable color format if in development
-  errorFormat: env.development ? 'pretty' : 'colorless',
+  errorFormat: 'pretty',
   log: [
     {
       emit: 'event',
@@ -22,8 +22,8 @@ const database = new PrismaClient({
   ],
 });
 
-// If we are in development, enables database logging
-if (env.development) {
+// If we are not indevelopment, enables database logging
+if (!env.production) {
   database.$on('query', (event) => logger.debug(event.query));
   database.$on('info', (event) => logger.info(event.message));
   database.$on('warn', (event) => logger.warn(event.message));

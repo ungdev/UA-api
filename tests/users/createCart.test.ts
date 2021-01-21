@@ -11,6 +11,7 @@ import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/user';
 import { PayBody } from '../../src/controllers/users/createCart';
 import env from '../../src/utils/env';
+import { setShopAllowed } from '../../src/operations/settings';
 
 describe('POST /users/:userId/carts', () => {
   let user: User;
@@ -45,6 +46,18 @@ describe('POST /users/:userId/carts', () => {
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.user.deleteMany();
+  });
+
+  it('should fail as the shop is deactivated', async () => {
+    await setShopAllowed(false);
+
+    await request(app)
+      .post(`/users/${user.id}/carts`)
+      .send(validCart)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403, { error: Error.ShopNotAllowed });
+
+    await setShopAllowed(true);
   });
 
   it('should fail because the user is not itself', async () => {

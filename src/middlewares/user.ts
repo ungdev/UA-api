@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { Error, DecodedToken } from '../types';
-import { badRequest, forbidden, notFound } from '../utils/responses';
+import { forbidden, notFound, unauthenticated } from '../utils/responses';
 import { fetchUser } from '../operations/user';
 import env from '../utils/env';
 import logger from '../utils/logger';
@@ -41,10 +41,10 @@ export const initUserRequest = async (request: Request, response: Response, next
 
     // Token has expired
     if (error instanceof TokenExpiredError) {
-      return badRequest(response, Error.ExpiredToken);
+      return unauthenticated(response, Error.ExpiredToken);
     }
 
-    return badRequest(response, Error.InvalidToken);
+    return unauthenticated(response, Error.InvalidToken);
   }
 
   return next();
