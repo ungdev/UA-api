@@ -17,3 +17,5 @@ yarn-error.log
 /.idea
 
 /local
+
+openapi.json
