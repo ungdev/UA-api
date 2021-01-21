@@ -41,6 +41,12 @@ Populate the tables
 mysql -u DATABASE_USER -p arena < seed.sql
 ```
 
+Generate the documentation
+
+```
+yarn swagger:build
+```
+
 ## Configuration
 
 Copy the file .env.example to .env and then edit it with your values :
