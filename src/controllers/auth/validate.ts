@@ -21,7 +21,7 @@ export default [
         return badRequest(response, Error.InvalidParameters);
       }
 
-      await removeUserRegisterToken(user);
+      await removeUserRegisterToken(user.id);
 
       const jwt = generateToken(user);
 

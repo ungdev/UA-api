@@ -1,44 +1,66 @@
+/* eslint-disable consistent-return */
 import dotenv from 'dotenv';
 import logger from './logger';
 
+dotenv.config();
+
 // Load dotenv only if we are not in testing
 // The testing must be able to be loaded without any environment variable except the DATABASE
-if (process.env.NODE_ENV !== 'testing') {
-  dotenv.config();
-}
+// We had to use a function to check if we are in testing environment instead of just loading dotenv if we are not
+// The reason is because prisma also loads dotenv and injects the variables
+const loadEnv = (key: string) => {
+  // If we are in test env, do not inject dotenv variables
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+  // Return the loaded environment key
+  return process.env[key];
+};
+
+// Returns the key only if we are not in production
+// Used when you want to have a default option for only testing and dev environment
+// An example is to make sure you don't put fake credentials in a production environoemnt
+export const notInProduction = <T = string>(key: T) => {
+  if (process.env.NODE_ENV !== 'production') {
+    return key;
+  }
+};
+
+const loadIntEnv = (key: string) => Number(loadEnv(key));
 
 const env = {
   development: process.env.NODE_ENV === 'development',
   production: process.env.NODE_ENV === 'production',
   test: process.env.NODE_ENV === 'test',
   api: {
-    port: Number(process.env.API_PORT) || 3000,
-    prefix: process.env.API_PREFIX || '/',
+    port: loadIntEnv('API_PORT') || 3000,
+    prefix: loadEnv('API_PREFIX') || '/',
   },
   front: {
-    website: process.env.ARENA_WEBSITE || 'https://arena.utt.fr',
+    website: loadEnv('API_PREFIX') || 'https://arena.utt.fr',
   },
   bcrypt: {
-    rounds: Number(process.env.API_BCRYPT_ROUNDS) || 10,
+    rounds: loadIntEnv('API_BCRYPT_ROUNDS') || 10,
   },
   nanoid: {
-    length: Number(process.env.NANOID_LENGTH) || 6,
-    alphabet: process.env.NANOID_ALPHABET || '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    length: loadIntEnv('NANOID_LENGTH') || 6,
+    // We use an olphabet with only maj and numbers because the database comparison in database is case insensitive
+    alphabet: loadEnv('NANOID_ALPHABET') || '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
   },
   jwt: {
-    secret: process.env.JWT_SECRET || 'randomLongString',
-    expires: process.env.JWT_EXPIRES || '1y',
+    secret: loadEnv('JWT_SECRET') || notInProduction('LongRandomKey'),
+    expires: loadEnv('NANOID_ALPHABET') || '1y',
   },
   slack: {
-    token: process.env.SLACK_TOKEN,
-    contactChannel: process.env.SLACK_CONTACT_CHANNEL,
+    token: loadEnv('SLACK_TOKEN'),
+    contactChannel: loadEnv('SLACK_CONTACT_CHANNEL'),
   },
   database: {
-    host: process.env.DATABASE_HOST || 'localhost',
-    port: Number.parseInt(process.env.DATABASE_PORT) || 3306,
-    username: process.env.DATABASE_USERNAME,
-    password: process.env.DATABASE_PASSWORD,
-    name: process.env.DATABASE_NAME,
+    host: loadEnv('DATABASE_HOST') || 'localhost',
+    port: loadIntEnv('DATABASE_PORT') || 3306,
+    username: loadEnv('DATABASE_USERNAME') || notInProduction('test'),
+    password: loadEnv('DATABASE_PASSWORD') || notInProduction('test'),
+    name: loadEnv('DATABASE_NAME') || 'arena',
   },
   email: {
     host: process.env.EMAIL_HOST,
@@ -51,11 +73,12 @@ const env = {
     emails: ['utt.fr', 'utc.fr', 'utbm.fr'],
   },
   etupay: {
-    id: Number(process.env.ETUPAY_ID),
-    key: process.env.ETUPAY_KEY,
-    url: process.env.ETUPAY_URL || 'https://etupay.utt.fr/initiate',
-    successUrl: process.env.ETUPAY_SUCCESS_URL || 'https://arena.utt.fr/dashboard/payment?type=success',
-    errorUrl: process.env.ETUPAY_ERROR_URL || 'https://arena.utt.fr/dashboard/payment?type=error',
+    id: loadIntEnv('ETUPAY_ID') || notInProduction(1),
+    // random key genereated with require('crypto').randomBytes(32).toString('base64')
+    key: loadEnv('ETUPAY_KEY') || notInProduction('0Op1QauLn++f1ioyaBNQSJZrg4HCxkRt5c8KFFoGB54='),
+    url: loadEnv('ETUPAY_KEY') || 'https://etupay.utt.fr/initiate',
+    successUrl: loadEnv('ETUPAY_SUCCESS_URL') || 'https://arena.utt.fr/dashboard/payment?type=success',
+    errorUrl: loadEnv('ETUPAY_ERROR_URL') || 'https://arena.utt.fr/dashboard/payment?type=error',
   },
   toornament: {
     clientId: process.env.TOORNAMENT_CLIENT_ID,

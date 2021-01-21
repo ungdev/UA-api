@@ -6,17 +6,17 @@ import * as userOperations from '../../src/operations/user';
 import { Error, User } from '../../src/types';
 import { setLoginAllowed } from '../../src/operations/settings';
 import { sandbox } from '../setup';
-import { createFakeConfirmedUser } from '../utils';
+import { createFakeUser } from '../utils';
 
 describe('POST /auth/reset-password/:uuid', () => {
   let user: User;
 
   before(async () => {
     // Creates a fake user
-    user = await createFakeConfirmedUser();
+    user = await createFakeUser();
 
     // Generate a reset token as if we asked to reset the password
-    const updatedUser = await userOperations.generateResetToken(user);
+    const updatedUser = await userOperations.generateResetToken(user.id);
 
     user.resetToken = updatedUser.resetToken;
   });

@@ -29,12 +29,10 @@ if (env.development) {
   database.$on('warn', (event) => logger.warn(event.message));
 }
 
-// Dump query to initiate the connection
 const setup = async () => {
   process.env.DATABASE_URL = `mysql://${env.database.username}:${env.database.password}@${env.database.host}:${env.database.port}/${env.database.name}`;
   await database.setting.findMany();
 };
-
 setup().catch((error) => {
   logger.error(error);
   process.exit(1);

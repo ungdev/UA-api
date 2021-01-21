@@ -5,7 +5,7 @@ import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
-import { createFakeConfirmedUser, createFakeTeam } from '../utils';
+import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 
 describe('POST /teams/:teamId/joinRequests', () => {
@@ -15,7 +15,7 @@ describe('POST /teams/:teamId/joinRequests', () => {
 
   before(async () => {
     team = await createFakeTeam();
-    user = await createFakeConfirmedUser();
+    user = await createFakeUser();
     token = generateToken(user);
   });
 

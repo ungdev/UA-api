@@ -7,21 +7,15 @@ import * as userOperations from '../../src/operations/user';
 import { Error } from '../../src/types';
 import { setLoginAllowed } from '../../src/operations/settings';
 import { sandbox } from '../setup';
+import { createFakeUser } from '../utils';
 
 describe('POST /auth/validate/{token}', () => {
   const password = 'yolo59';
   let user: prisma.User;
 
   before(async () => {
-    // Creates a fake user
-    user = await userOperations.createUser(
-      faker.internet.userName(),
-      faker.name.firstName(),
-      faker.name.lastName(),
-      faker.internet.email(),
-      password,
-      UserType.player,
-    );
+    // Creates a fake user not confirmed
+    user = await createFakeUser({ password, confirmed: false });
   });
 
   after(async () => {

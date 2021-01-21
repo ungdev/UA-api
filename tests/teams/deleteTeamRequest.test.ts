@@ -5,7 +5,7 @@ import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
-import { createFakeConfirmedUser, createFakeTeam } from '../utils';
+import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
@@ -17,7 +17,7 @@ describe('DELETE /teams/:teamId/joinRequests/:userId', () => {
 
   before(async () => {
     team = await createFakeTeam(2);
-    user = await createFakeConfirmedUser();
+    user = await createFakeUser();
     await teamOperations.askJoinTeam(team.id, user.id);
     token = generateToken(user);
   });
@@ -41,7 +41,7 @@ describe('DELETE /teams/:teamId/joinRequests/:userId', () => {
   });
 
   it('should fail because the user is a random with no rights', async () => {
-    const randomUser = await createFakeConfirmedUser();
+    const randomUser = await createFakeUser();
     const randomUserToken = generateToken(randomUser);
 
     await request(app)

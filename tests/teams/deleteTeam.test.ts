@@ -8,6 +8,7 @@ import { Error, Team, User } from '../../src/types';
 import { createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 import { getCaptain } from '../../src/utils/teams';
+import { fetchUser } from '../../src/operations/user';
 
 describe('DELETE /teams/:teamId', () => {
   let captain: User;
@@ -72,5 +73,8 @@ describe('DELETE /teams/:teamId', () => {
 
     const deletedTeam = await teamOperations.fetchTeam(team.id);
     expect(deletedTeam).to.be.null;
+
+    const updatedCaptain = await fetchUser(captain.id);
+    expect(updatedCaptain.teamId).to.be.null;
   });
 });

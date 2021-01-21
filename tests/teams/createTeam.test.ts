@@ -6,7 +6,7 @@ import * as teamOperations from '../../src/operations/team';
 import * as tournamentOperations from '../../src/operations/tournament';
 import database from '../../src/services/database';
 import { Error, User } from '../../src/types';
-import { createFakeConfirmedUser, createFakeTeam } from '../utils';
+import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 
 describe('POST /teams', () => {
@@ -19,7 +19,7 @@ describe('POST /teams', () => {
   };
 
   before(async () => {
-    user = await createFakeConfirmedUser();
+    user = await createFakeUser();
     token = generateToken(user);
   });
 
@@ -92,7 +92,7 @@ describe('POST /teams', () => {
   });
 
   it('fail to create a team as it already exists in the tournament', async () => {
-    const newUser = await createFakeConfirmedUser();
+    const newUser = await createFakeUser();
     const newToken = generateToken(newUser);
 
     await request(app)
@@ -103,7 +103,7 @@ describe('POST /teams', () => {
   });
 
   it('should success to create a team with the same name but in a different tournament', async () => {
-    const newUser = await createFakeConfirmedUser();
+    const newUser = await createFakeUser();
     const newToken = generateToken(newUser);
 
     const response = await request(app)

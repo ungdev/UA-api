@@ -1,20 +1,20 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import prisma, { UserType } from '@prisma/client';
+import prisma from '@prisma/client';
 import app from '../../src/app';
 import * as userUtils from '../../src/utils/user';
 import { Error } from '../../src/types';
 import { setLoginAllowed } from '../../src/operations/settings';
 import database from '../../src/services/database';
 import { sandbox } from '../setup';
-import { createFakeConfirmedUser } from '../utils';
+import { createFakeUser } from '../utils';
 
 describe('POST /auth/login', () => {
   const password = 'bonjour123456';
   let user: prisma.User;
 
   before(async () => {
-    user = await createFakeConfirmedUser(UserType.player, password);
+    user = await createFakeUser({ password });
   });
 
   after(async () => {

@@ -2,42 +2,52 @@ import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import faker from 'faker';
 import prisma, { UserType } from '@prisma/client';
-import { createUser, fetchUser } from '../src/operations/user';
-import database from '../src/services/database';
+import { createUser, fetchUser, removeUserRegisterToken } from '../src/operations/user';
 import { User } from '../src/types';
 import { createTeam, fetchTeam, joinTeam } from '../src/operations/team';
+import { forcePay } from '../src/operations/carts';
 
 export const mock = new MockAdapter(axios);
 
-export const createFakeConfirmedUser = async (type = UserType.player, password = 'awesomePassword'): Promise<User> => {
-  const user: prisma.User = await createUser(
-    faker.internet.userName(),
-    faker.name.firstName(),
-    faker.name.lastName(),
-    faker.internet.email(),
-    password,
-    type,
-  );
+export const createFakeUser = async ({
+  username = faker.internet.userName(),
+  firstname = faker.name.firstName(),
+  lastname = faker.name.lastName(),
+  email = faker.internet.email(),
+  password = faker.internet.password(),
+  type = UserType.player,
+  confirmed = true,
+  paid = false,
+}: {
+  username?: string;
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  password?: string;
+  type?: UserType;
+  confirmed?: boolean;
+  paid?: boolean;
+} = {}): Promise<User> => {
+  const user: prisma.User = await createUser(username, firstname, lastname, email, password, type);
 
-  await database.user.update({
-    data: {
-      registerToken: null,
-    },
-    where: {
-      id: user.id,
-    },
-  });
+  if (confirmed) {
+    await removeUserRegisterToken(user.id);
+  }
+
+  if (paid) {
+    await forcePay(user.id, user.type);
+  }
 
   return fetchUser(user.id);
 };
 
 export const createFakeTeam = async (members = 1, tournament = 'lol') => {
-  const user = await createFakeConfirmedUser();
+  const user = await createFakeUser();
   const team = await createTeam(faker.internet.userName(), tournament, user.id);
 
   // Create new members (minus 1 because the captain is already created)
   for (let i = 0; i < members - 1; i += 1) {
-    const partner = await createFakeConfirmedUser();
+    const partner = await createFakeUser();
     await joinTeam(team.id, partner);
   }
 

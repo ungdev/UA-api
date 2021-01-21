@@ -1,25 +1,38 @@
 import userOperations from 'bcryptjs';
-import { UserType } from '@prisma/client';
+import { TransactionState, UserType } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
 import { PrimitiveUser, User } from '../types';
 
+export const userInclusions = {
+  cartItems: {
+    include: {
+      cart: true,
+    },
+  },
+};
+
 export const formatUser = (user: PrimitiveUser): User => {
   if (!user) return null;
 
+  if (user.cartItems.some((cartItem) => cartItem.forUserId !== user.id))
+    throw new Error('Error just to make sure of something');
+
+  const hasPaid = user.cartItems.some(
+    (cartItem) => cartItem.itemId === 'ticket-player' && cartItem.cart.transactionState === TransactionState.paid,
+  );
+
   return {
     ...user,
-    hasPaid: false,
+    hasPaid,
   };
 };
 
 export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> => {
   const user = await database.user.findUnique({
     where: { [key]: parameterId },
-    include: {
-      cartItems: true,
-    },
+    include: userInclusions,
   });
 
   return formatUser(user);
@@ -59,35 +72,35 @@ export const createVisitor = (firstname: string, lastname: string) =>
     },
   });
 
-export const removeUserRegisterToken = (user: User) => {
+export const removeUserRegisterToken = (userId: string) => {
   return database.user.update({
     data: {
       registerToken: null,
     },
     where: {
-      id: user.id,
+      id: userId,
     },
   });
 };
 
-export const removeUserResetToken = (user: User) => {
+export const removeUserResetToken = (userId: string) => {
   return database.user.update({
     data: {
       resetToken: null,
     },
     where: {
-      id: user.id,
+      id: userId,
     },
   });
 };
 
-export const generateResetToken = (user: User) => {
+export const generateResetToken = (userId: string) => {
   return database.user.update({
     data: {
       resetToken: nanoid(),
     },
     where: {
-      id: user.id,
+      id: userId,
     },
   });
 };
@@ -105,3 +118,5 @@ export const changePassword = async (user: User, newPassword: string) => {
     },
   });
 };
+
+export const deleteUser = (id: string) => database.user.delete({ where: { id } });

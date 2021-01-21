@@ -50,8 +50,9 @@ describe('POST /auth/register', () => {
   it('should create a user', async () => {
     await request(app).post('/auth/register').send(userData).expect(201);
     const newUser = await userOperations.fetchUser(userData.email, 'email');
-    newUser.firstname.should.be.equal('John');
-    newUser.id.should.have.lengthOf(6);
+
+    expect(newUser.firstname).to.be.equal('John');
+    expect(newUser.id).to.match(/[\dA-Z]{6}/);
     expect(newUser.registerToken).to.have.lengthOf(6);
   });
 

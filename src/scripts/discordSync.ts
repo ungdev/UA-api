@@ -58,7 +58,6 @@ import { DiscordParticipants } from '../types';
             },
           ];
         }
-
         await Promise.all(
           toornamentParticipants.map(async (toornamentParticipant) => {
             const discordParticipant = discordParticipants.find(

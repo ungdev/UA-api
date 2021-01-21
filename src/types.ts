@@ -65,7 +65,9 @@ export interface PrimitiveCartItem {
 export type CartItem = prisma.CartItem;
 
 export type PrimitiveUser = prisma.User & {
-  cartItems: CartItem[];
+  cartItems: (CartItem & {
+    cart: Cart;
+  })[];
 };
 
 export type User = PrimitiveUser & {
@@ -107,7 +109,7 @@ export enum Error {
   InvalidBody = 'Corps de la requête invalide',
   MalformedBody = 'Corps de la requête malformé',
   InvalidParameters = 'Paramètres de la requête invalides',
-  BasketEmpty = 'Le panier est vide',
+  EmptyBasket = 'Le panier est vide',
 
   // 401
   // The user credentials were refused or not provided

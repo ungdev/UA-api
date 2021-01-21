@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app';
 import { sandbox } from '../setup';
@@ -15,6 +16,7 @@ describe('GET /items', () => {
   it('should return 200 with an array of items', async () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').expect(200);
-    response.body.should.to.have.lengthOf(items.length);
+
+    expect(response.body).to.have.lengthOf(items.length);
   });
 });

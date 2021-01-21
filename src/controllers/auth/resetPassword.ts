@@ -30,7 +30,7 @@ export default [
         return badRequest(response, Error.InvalidParameters);
       }
 
-      await removeUserResetToken(user);
+      await removeUserResetToken(user.id);
       await changePassword(user, password);
 
       const jwt = generateToken(user);

@@ -2,18 +2,14 @@ import prisma from '@prisma/client';
 import database from '../services/database';
 import { PrimitiveUser, Team, User } from '../types';
 import nanoid from '../utils/nanoid';
-import { fetchUser, formatUser } from './user';
+import { formatUser, userInclusions } from './user';
 
 const teamInclusions = {
   users: {
-    include: {
-      cartItems: true,
-    },
+    include: userInclusions,
   },
   askingUsers: {
-    include: {
-      cartItems: true,
-    },
+    include: userInclusions,
   },
 };
 
@@ -73,18 +69,7 @@ export const createTeam = async (name: string, tournamentId: string, captainId: 
     where: {
       captainId,
     },
-    include: {
-      users: {
-        include: {
-          cartItems: true,
-        },
-      },
-      askingUsers: {
-        include: {
-          cartItems: true,
-        },
-      },
-    },
+    include: teamInclusions,
   });
 
   return formatTeam(team);
@@ -124,9 +109,7 @@ export const askJoinTeam = async (teamId: string, userId: string) => {
     where: {
       id: userId,
     },
-    include: {
-      cartItems: true,
-    },
+    include: userInclusions,
   });
 
   return formatUser(updatedUser);
@@ -144,9 +127,7 @@ export const cancelTeamRequest = async (userId: string) => {
     where: {
       id: userId,
     },
-    include: {
-      cartItems: true,
-    },
+    include: userInclusions,
   });
 
   return formatUser(updatedUser);

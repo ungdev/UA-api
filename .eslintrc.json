@@ -54,6 +54,8 @@
     "unicorn/no-process-exit": "off",
     "unicorn/prefer-set-has": "off",
     "unicorn/no-null": "off",
+    "unicorn/no-array-callback-reference": "off",
+    "arrow-body-style": "warn",
     "unicorn/prevent-abbreviations": [
       "error",
       {

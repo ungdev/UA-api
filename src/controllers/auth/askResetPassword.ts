@@ -27,7 +27,7 @@ export default [
         return notFound(response, Error.UserNotFound);
       }
 
-      await generateResetToken(user);
+      await generateResetToken(user.id);
 
       return noContent(response);
     } catch (error) {

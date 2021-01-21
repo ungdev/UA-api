@@ -131,11 +131,11 @@ components:
               nullable: true
             teamId:
               type: string
-              example: Z5jdHi
+              example: Z5JDHI
               nullable: true
             askingTeamId:
               type: string
-              example: i8yNHk
+              example: I8YNHK
               nullable: true
 
     Team:
@@ -151,9 +151,8 @@ components:
         captainId:
           type: string
           example: XiHGta
-        lockedAt:
-          type: string
-          format: date-time
+        locked:
+          type: boolean
           nullable: true
 
     TeamWithUsers:
@@ -1656,7 +1655,7 @@ paths:
                   items:
                     type: object
                     properties:
-                      id:
+                      itemId:
                         type: integer
                         description: Identifiant de l'item à acheter
                       quantity:
@@ -1672,6 +1671,11 @@ paths:
                 properties:
                   url:
                     type: string
+                    description: URL vers EtuPay
+                  price:
+                    type: integer
+                    description: Prix du panier en centimes
+
         400:
           $ref: '#/components/responses/400Errored'
         401:

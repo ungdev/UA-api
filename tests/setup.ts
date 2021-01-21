@@ -2,14 +2,15 @@
 process.env.NODE_ENV = 'test';
 
 import chai from 'chai';
+import chaiString from 'chai-string';
 import sinon from 'sinon';
-import { setLoginAllowed } from '../src/operations/settings';
 import database from '../src/services/database';
+import { setLoginAllowed } from '../src/operations/settings';
 
 export const sandbox = sinon.createSandbox();
 
 before(async () => {
-  chai.should();
+  chai.use(chaiString);
   await setLoginAllowed(true);
 });
 

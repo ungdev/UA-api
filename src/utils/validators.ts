@@ -3,7 +3,7 @@ import { TransactionState, UserType } from '@prisma/client';
 
 // General
 export const id = Joi.string()
-  .regex(/^[A-Z]{6}$/)
+  .regex(/^[\dA-Z]{6}$/)
   .required();
 
 // User

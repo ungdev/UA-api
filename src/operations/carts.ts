@@ -1,11 +1,11 @@
-import { TransactionState } from '@prisma/client';
+import { TransactionState, UserType } from '@prisma/client';
 
 import database from '../services/database';
-import { PrimitiveCartItem } from '../types';
+import { PrimitiveCartItem, User } from '../types';
 import nanoid from '../utils/nanoid';
 
-export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) => {
-  return database.cart.create({
+export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
+  database.cart.create({
     data: {
       id: nanoid(),
       user: {
@@ -32,10 +32,9 @@ export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) => {
       },
     },
   });
-};
 
-export const payCart = (cartId: string, transactionId: number) => {
-  return database.cart.update({
+export const payCart = (cartId: string, transactionId: number) =>
+  database.cart.update({
     data: {
       transactionState: TransactionState.paid,
       paidAt: new Date(),
@@ -43,6 +42,38 @@ export const payCart = (cartId: string, transactionId: number) => {
     },
     where: {
       id: cartId,
+    },
+  });
+
+export const forcePay = (userId: string, userType: UserType) => {
+  let itemId;
+
+  if (userType === UserType.player) {
+    itemId = 'ticket-player';
+  } else if (userType === UserType.coach) {
+    itemId = 'ticket-coach';
+  } else {
+    throw new Error(`Can't pay for ${userType}`);
+  }
+
+  return database.cart.create({
+    data: {
+      id: nanoid(),
+      transactionState: TransactionState.paid,
+      paidAt: new Date(),
+      user: {
+        connect: { id: userId },
+      },
+      cartItems: {
+        create: [
+          {
+            id: nanoid(),
+            itemId,
+            quantity: 1,
+            forUserId: userId,
+          },
+        ],
+      },
     },
   });
 };

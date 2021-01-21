@@ -6,14 +6,14 @@ import { Error, User } from '../../src/types';
 import { setLoginAllowed } from '../../src/operations/settings';
 import database from '../../src/services/database';
 import { sandbox } from '../setup';
-import { createFakeConfirmedUser } from '../utils';
+import { createFakeUser } from '../utils';
 
 describe('POST /auth/reset-password', () => {
   let user: User;
 
   before(async () => {
     // Creates a fake user with email validated
-    user = await createFakeConfirmedUser();
+    user = await createFakeUser();
   });
 
   after(async () => {
