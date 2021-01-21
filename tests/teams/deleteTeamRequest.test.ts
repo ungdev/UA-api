@@ -16,7 +16,7 @@ describe('DELETE /teams/:teamId/joinRequests/:userId', () => {
   let team: Team;
 
   before(async () => {
-    team = await createFakeTeam(2);
+    team = await createFakeTeam({ members: 2 });
     user = await createFakeUser();
     await teamOperations.askJoinTeam(team.id, user.id);
     token = generateToken(user);

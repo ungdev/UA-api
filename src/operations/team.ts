@@ -24,7 +24,7 @@ export const formatTeam = (team: prisma.Team & { users: PrimitiveUser[]; askingU
     users: undefined,
     players: players.map(formatUser),
     coaches: coaches.map(formatUser),
-    askingUsers: team.users.map(formatUser),
+    askingUsers: team.askingUsers.map(formatUser),
   };
 };
 

@@ -1,6 +1,6 @@
-import { ErrorRequestHandler, Request, Response, NextFunction, json } from 'express';
+import { Request, Response, NextFunction, json } from 'express';
 import { Error } from '../types';
-import { badRequest, unsupportedMediaType } from '../utils/responses';
+import { unsupportedMediaType } from '../utils/responses';
 
 /**
  * Checks if the header content-type is added on POST/PUT/PATCH/DELETE methods.
@@ -21,12 +21,4 @@ export default [
   },
 
   json(),
-
-  (error: ErrorRequestHandler, request: Request, response: Response, next: NextFunction) => {
-    if (error instanceof SyntaxError) {
-      return badRequest(response, Error.MalformedBody);
-    }
-
-    return next();
-  },
 ];

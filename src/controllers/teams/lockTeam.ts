@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { isCaptain } from '../../middlewares/parameters';
-import { forbidden, noContent } from '../../utils/responses';
+import { forbidden, noContent, success } from '../../utils/responses';
 import { fetchTeam, lockTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
@@ -20,6 +20,10 @@ export default [
         return forbidden(response, Error.TournamentFull);
       }
 
+      if (team.lockedAt) {
+        return forbidden(response, Error.TeamLocked);
+      }
+
       // Checks if the team is full
       if (team.players.length < tournament.playersPerTeam) {
         return forbidden(response, Error.TeamNotFull);
@@ -30,9 +34,9 @@ export default [
         return forbidden(response, Error.TeamNotPaid);
       }
 
-      await lockTeam(team.id);
+      const lockedTeam = await lockTeam(team.id);
 
-      return noContent(response);
+      return success(response, lockedTeam);
     } catch (error) {
       return next(error);
     }

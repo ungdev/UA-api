@@ -16,7 +16,7 @@ describe('DELETE /teams/:teamId', () => {
   let captainToken: string;
 
   before(async () => {
-    team = await createFakeTeam(2);
+    team = await createFakeTeam({ members: 2 });
 
     captain = getCaptain(team);
     captainToken = generateToken(captain);

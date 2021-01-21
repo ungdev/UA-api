@@ -1,11 +1,11 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express, { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 
-import { notFound, internalServerError } from './utils/responses';
+import { notFound, internalServerError, badRequest } from './utils/responses';
 import { Error } from './types';
 import router from './controllers';
-import json from './middlewares/checkJson';
+import json from './middlewares/json';
 import logger, { morgan } from './utils/logger';
 import { initUserRequest } from './middlewares/user';
 import env from './utils/env';
@@ -32,7 +32,11 @@ app.use((request: Request, response: Response) => notFound(response, Error.Route
 // A try catch must be set on every route with a next(error) in the catch block
 // The eslint disabling is important because the error argument can only be gotten in the 4 arguments function
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((error: Error, request: Request, response: Response, next: NextFunction) => {
+app.use((error: ErrorRequestHandler, request: Request, response: Response, next: NextFunction) => {
+  if (error instanceof SyntaxError) {
+    return badRequest(response, Error.MalformedBody);
+  }
+
   logger.error(error);
   return internalServerError(response);
 });

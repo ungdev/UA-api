@@ -8,25 +8,32 @@ import { Error, Team, User } from '../../src/types';
 import { createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 import { getCaptain } from '../../src/utils/teams';
+import { fetchTournament } from '../../src/operations/tournament';
 
-describe.skip('POST /teams/:teamId/lock', () => {
+describe('POST /teams/:teamId/lock', () => {
   let captain: User;
   let team: Team;
   let captainToken: string;
 
-  before(async () => {
-    team = await createFakeTeam(5);
+  let lolMaxPlayers: number;
 
-    // Make everyone paid
-    team.players = team.players.map((player) => ({ ...player, hasPaid: true }));
+  before(async () => {
+    team = await createFakeTeam({ members: 5, paid: true });
 
     captain = getCaptain(team);
     captainToken = generateToken(captain);
+
+    const lol = await fetchTournament('lol');
+    lolMaxPlayers = lol.maxPlayers;
   });
 
   after(async () => {
+    await database.cartItem.deleteMany();
+    await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
+
+    await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lol' } });
   });
 
   it("should error as the team id doesn't exists", async () => {
@@ -62,7 +69,7 @@ describe.skip('POST /teams/:teamId/lock', () => {
   });
 
   it('should error as the team is not full', async () => {
-    const halfTeam = await createFakeTeam(2);
+    const halfTeam = await createFakeTeam({ members: 2 });
     const halfCaptain = getCaptain(halfTeam);
     const halfToken = generateToken(halfCaptain);
 
@@ -72,22 +79,15 @@ describe.skip('POST /teams/:teamId/lock', () => {
       .expect(403, { error: Error.TeamNotFull });
   });
 
-  it.skip('should error has the tournament is full', async () => {
-    await request(app)
-      .post(`/teams/${team.id}/lock`)
-      .set('Authorization', `Bearer ${captainToken}`)
-      .expect(403, { error: Error.TournamentFull });
-  });
-
   it('should error if some member has not paid', async () => {
-    const notPaidTeam = await createFakeTeam(5);
+    const notPaidTeam = await createFakeTeam({ members: 5 });
     const notPaidCaptain = getCaptain(notPaidTeam);
     const notPaidToken = generateToken(notPaidCaptain);
 
     await request(app)
       .post(`/teams/${notPaidTeam.id}/lock`)
       .set('Authorization', `Bearer ${notPaidToken}`)
-      .expect(402, { error: Error.TeamNotPaid });
+      .expect(403, { error: Error.TeamNotPaid });
   });
 
   it('should throw an internal server error', async () => {
@@ -108,13 +108,14 @@ describe.skip('POST /teams/:teamId/lock', () => {
     const updatedTeam = await teamOperations.fetchTeam(team.id);
     expect(updatedTeam.lockedAt).to.be.not.null;
     expect(response.body.lockedAt).to.be.not.null;
+    expect(response.body.askingUsers).to.have.lengthOf(0);
   });
 
   it('should error as the team is already locked', async () => {
     await request(app)
       .post(`/teams/${team.id}/lock`)
       .set('Authorization', `Bearer ${captainToken}`)
-      .expect(403, Error.TeamLocked);
+      .expect(403, { error: Error.TeamLocked });
   });
 
   it('should error has the tournament is full', async () => {
@@ -133,7 +134,7 @@ describe.skip('POST /teams/:teamId/lock', () => {
     });
 
     await request(app)
-      .post(`/teams/${team.id}/lock`)
+      .post(`/teams/${otherTeam.id}/lock`)
       .set('Authorization', `Bearer ${otherCaptainToken}`)
       .expect(403, { error: Error.TournamentFull });
   });

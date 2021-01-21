@@ -37,13 +37,13 @@ export const createFakeUser = async ({
   return fetchUser(user.id);
 };
 
-export const createFakeTeam = async (members = 1, tournament = 'lol') => {
-  const user = await createFakeUser();
+export const createFakeTeam = async ({ members = 1, tournament = 'lol', paid = false } = {}) => {
+  const user = await createFakeUser({ paid });
   const team = await createTeam(faker.internet.userName(), tournament, user.id);
 
   // Create new members (minus 1 because the captain is already created)
   for (let i = 0; i < members - 1; i += 1) {
-    const partner = await createFakeUser();
+    const partner = await createFakeUser({ paid });
     await joinTeam(team.id, partner);
   }
 

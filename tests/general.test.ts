@@ -3,7 +3,6 @@ import app from '../src/app';
 import * as settingsOperations from '../src/operations/settings';
 import { Error } from '../src/types';
 import { sandbox } from './setup';
-import database from '../src/services/database';
 import * as slackService from '../src/services/slack';
 
 describe('General API', () => {
