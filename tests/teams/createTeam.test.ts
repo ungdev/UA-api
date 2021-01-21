@@ -13,6 +13,8 @@ describe('POST /teams', () => {
   let user: User;
   let token: string;
 
+  let lolMaxPlayers: number;
+
   const teamBody = {
     name: 'ZeBest',
     tournamentId: 'lol',
@@ -21,11 +23,16 @@ describe('POST /teams', () => {
   before(async () => {
     user = await createFakeUser();
     token = generateToken(user);
+
+    const lol = await tournamentOperations.fetchTournament('lol');
+    lolMaxPlayers = lol.maxPlayers;
   });
 
   after(async () => {
     await database.team.deleteMany();
     await database.user.deleteMany();
+
+    await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lol' } });
   });
 
   it('should fail because the token is not provided', async () => {
@@ -115,5 +122,27 @@ describe('POST /teams', () => {
     expect(response.body.name).to.be.equal(teamBody.name);
     expect(response.body.tournamentId).to.be.equal('csgo');
     expect(response.body.captainId).to.be.equal(newUser.id);
+  });
+
+  it('should error as the tournament is full', async () => {
+    await createFakeTeam({ members: 5, locked: true });
+    const otherUser = await createFakeUser();
+    const otherToken = generateToken(otherUser);
+
+    // We limit the tournament to only one team (as only one has locked)
+    await database.tournament.update({
+      data: {
+        maxPlayers: 5,
+      },
+      where: {
+        id: 'lol',
+      },
+    });
+
+    await request(app)
+      .post('/teams')
+      .send({ name: 'otherName', tournamentId: teamBody.tournamentId })
+      .set('Authorization', `Bearer ${otherToken}`)
+      .expect(403, { error: Error.TournamentFull });
   });
 });

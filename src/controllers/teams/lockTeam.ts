@@ -1,13 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import { isCaptain } from '../../middlewares/parameters';
-import { forbidden, noContent, success } from '../../utils/responses';
+import { isCaptain, teamNotLocked } from '../../middlewares/parameters';
+import { forbidden, success } from '../../utils/responses';
 import { fetchTeam, lockTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
+import { filterTeam } from '../../utils/filters';
 
 export default [
   // Middlewares
   ...isCaptain,
+  teamNotLocked,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
@@ -18,10 +20,6 @@ export default [
       // If there are more or equal teams than places, return a tournament full
       if (tournament.placesLeft === 0) {
         return forbidden(response, Error.TournamentFull);
-      }
-
-      if (team.lockedAt) {
-        return forbidden(response, Error.TeamLocked);
       }
 
       // Checks if the team is full
@@ -36,7 +34,7 @@ export default [
 
       const lockedTeam = await lockTeam(team.id);
 
-      return success(response, lockedTeam);
+      return success(response, filterTeam(lockedTeam));
     } catch (error) {
       return next(error);
     }

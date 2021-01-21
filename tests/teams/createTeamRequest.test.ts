@@ -7,6 +7,7 @@ import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
+import { getCaptain } from '../../src/utils/teams';
 
 describe('POST /teams/:teamId/joinRequests', () => {
   let user: User;
@@ -55,6 +56,15 @@ describe('POST /teams/:teamId/joinRequests', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
+  it('should error as the team is locked', async () => {
+    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
+
+    await request(app)
+      .post(`/teams/${lockedTeam.id}/joinRequests`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403, { error: Error.TeamLocked });
+  });
+
   it('should succesfully request to join a team', async () => {
     const response = await request(app)
       .post(`/teams/${team.id}/joinRequests`)
@@ -64,14 +74,14 @@ describe('POST /teams/:teamId/joinRequests', () => {
     expect(response.body.askingTeamId).to.be.equal(team.id);
   });
 
-  it('should failed as we already asked for the same team', async () => {
+  it('should fail as we already asked for the same team', async () => {
     await request(app)
       .post(`/teams/${team.id}/joinRequests`)
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.AlreadyAskedATeam });
   });
 
-  it('should failed as we already asked another team', async () => {
+  it('should fail as we already asked another team', async () => {
     const otherTeam = await createFakeTeam();
 
     await request(app)

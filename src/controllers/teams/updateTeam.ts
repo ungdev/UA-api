@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-import { isCaptain } from '../../middlewares/parameters';
+import { isCaptain, teamNotLocked } from '../../middlewares/parameters';
 import validateBody from '../../middlewares/validateBody';
 import { success } from '../../utils/responses';
 import { updateTeam } from '../../operations/team';
@@ -15,6 +15,7 @@ export default [
       name: validators.teamName,
     }),
   ),
+  teamNotLocked,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {

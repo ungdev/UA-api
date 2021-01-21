@@ -23,6 +23,20 @@ export const isCaptain = [
   },
 ];
 
+// Checks the team is locked
+export const teamNotLocked = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
+  const team = await fetchTeam(request.params.teamId);
+
+  if (!team) {
+    return notFound(response, Error.TeamNotFound);
+  }
+
+  if (team.lockedAt) {
+    return forbidden(response, Error.TeamLocked);
+  }
+  return next();
+};
+
 // Checks if the user is who he pretends to be. If not, it will return an error
 export const isSelf = [
   ...isAuthenticated,

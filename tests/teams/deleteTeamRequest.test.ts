@@ -80,30 +80,38 @@ describe('DELETE /teams/:teamId/joinRequests/:userId', () => {
   });
 
   it('should succesfully cancel the team joining (as itself)', async () => {
-    const response = await request(app)
+    await request(app)
       .delete(`/teams/${team.id}/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(200);
+      .expect(204);
 
     const deletedRequestUser = await fetchUser(user.id);
 
-    expect(response.body.askingTeamId).to.be.null;
     expect(deletedRequestUser.askingTeamId).to.be.null;
 
     await teamOperations.askJoinTeam(team.id, user.id);
+  });
+
+  it('should error as the team is locked', async () => {
+    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
+    const lockedCaptain = getCaptain(lockedTeam);
+    const lockedToken = generateToken(lockedCaptain);
+
+    await request(app)
+      .delete(`/teams/${lockedTeam.id}/joinRequests/${user.id}`)
+      .set('Authorization', `Bearer ${lockedToken}`)
+      .expect(403, { error: Error.TeamLocked });
   });
 
   it('should succesfully cancel the team joining (as the captain of the team)', async () => {
     const captain = getCaptain(team);
     const captainToken = generateToken(captain);
 
-    const response = await request(app)
+    await request(app)
       .delete(`/teams/${team.id}/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
-      .expect(200);
+      .expect(204);
     const deletedRequestUser = await fetchUser(user.id);
-
-    expect(response.body.askingTeamId).to.be.null;
     expect(deletedRequestUser.askingTeamId).to.be.null;
   });
 

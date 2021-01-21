@@ -79,6 +79,18 @@ describe('PUT /teams/:teamId', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
+  it('should error as the team is locked', async () => {
+    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
+    const lockedCaptain = getCaptain(lockedTeam);
+    const lockedToken = generateToken(lockedCaptain);
+
+    await request(app)
+      .put(`/teams/${lockedTeam.id}`)
+      .send({ name: 'yolo' })
+      .set('Authorization', `Bearer ${lockedToken}`)
+      .expect(403, { error: Error.TeamLocked });
+  });
+
   it('should update the team', async () => {
     const response = await request(app)
       .put(`/teams/${team.id}`)

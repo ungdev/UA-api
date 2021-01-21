@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Error } from '../types';
 import logger from '../utils/logger';
-import { conflict, forbidden } from '../utils/responses';
+import { forbidden } from '../utils/responses';
 import { getRequestUser } from '../utils/user';
 import { isAuthenticated } from './authentication';
 

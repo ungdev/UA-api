@@ -1,14 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import { isSelfOrCaptain } from '../../middlewares/parameters';
+import { isSelfOrCaptain, teamNotLocked } from '../../middlewares/parameters';
 import { cancelTeamRequest } from '../../operations/team';
 import { fetchUser } from '../../operations/user';
 import { Error } from '../../types';
 import { filterUser } from '../../utils/filters';
-import { conflict, forbidden, success } from '../../utils/responses';
+import { conflict, forbidden, noContent, success } from '../../utils/responses';
 
 export default [
   // Middlewares
   ...isSelfOrCaptain,
+  teamNotLocked,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
@@ -17,9 +18,9 @@ export default [
 
       if (!user.askingTeamId) return forbidden(response, Error.NotAskedATeam);
 
-      const updatedUser = await cancelTeamRequest(user.id);
+      await cancelTeamRequest(user.id);
 
-      return success(response, filterUser(updatedUser));
+      return noContent(response);
     } catch (error) {
       return next(error);
     }

@@ -68,6 +68,17 @@ describe('DELETE /teams/:teamId', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
+  it('should error as the team is locked', async () => {
+    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
+    const lockedCaptain = getCaptain(lockedTeam);
+    const lockedToken = generateToken(lockedCaptain);
+
+    await request(app)
+      .delete(`/teams/${lockedTeam.id}`)
+      .set('Authorization', `Bearer ${lockedToken}`)
+      .expect(403, { error: Error.TeamLocked });
+  });
+
   it('should delete the team', async () => {
     await request(app).delete(`/teams/${team.id}`).set('Authorization', `Bearer ${captainToken}`).expect(204);
 

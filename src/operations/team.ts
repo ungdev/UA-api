@@ -115,10 +115,10 @@ export const askJoinTeam = async (teamId: string, userId: string) => {
   return formatUser(updatedUser);
 };
 
-export const cancelTeamRequest = async (userId: string) => {
+export const cancelTeamRequest = async (userId: string) =>
   // Warning: for this version of prisma, this method is not idempotent. It will throw an error if there is no asking team. It should be solved in the next versions
   // Please correct this if this issue is closed and merged https://github.com/prisma/prisma/issues/3069
-  const updatedUser = await database.user.update({
+  database.user.update({
     data: {
       askingTeam: {
         disconnect: true,
@@ -127,11 +127,7 @@ export const cancelTeamRequest = async (userId: string) => {
     where: {
       id: userId,
     },
-    include: userInclusions,
   });
-
-  return formatUser(updatedUser);
-};
 
 export const joinTeam = async (teamId: string, user: User) => {
   // For this version of prisma, we need to fetch to check if there was already a askingTeam. It should be solved in the next versions

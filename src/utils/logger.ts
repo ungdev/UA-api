@@ -18,7 +18,7 @@ const consoleTransport = new transports.Console({
     printf(({ level, message }) => `${moment().format('HH:mm:ss')} ${level}: ${message}`),
   ),
   level: process.env.LOG_LEVEL || 'silly',
-  //silent: process.env.NODE_ENV === 'test', // Doesn't log if we are in testing environment
+  silent: process.env.NODE_ENV === 'test', // Doesn't log if we are in testing environment
 });
 
 const loggingTransports: Array<ConsoleTransportInstance> = [consoleTransport];

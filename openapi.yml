@@ -1301,17 +1301,8 @@ paths:
             type: string
           required: true
       responses:
-        200:
-          description: La demande a bien été annulée. Les informations de l'équipe et de l'utilisateur sont renvoyées.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  team:
-                    $ref: '#/components/schemas/TeamWithUsers'
-                  user:
-                    $ref: '#/components/schemas/User'
+        204:
+          description: La demande a bien été annulée.
         400:
           $ref: '#/components/responses/400Errored'
         401:

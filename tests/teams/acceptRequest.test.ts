@@ -1,3 +1,4 @@
+import { UserType } from '@prisma/client';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app';
@@ -10,16 +11,19 @@ import { generateToken } from '../../src/utils/user';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
-describe.skip('POST /teams/:teamId/joinRequests/:userId', () => {
+describe('POST /teams/:teamId/joinRequests/:userId', () => {
   let user: User;
-  let token: string;
   let team: Team;
+  let captain: User;
+  let token: string;
 
   before(async () => {
     team = await createFakeTeam({ members: 2 });
     user = await createFakeUser();
     await teamOperations.askJoinTeam(team.id, user.id);
-    token = generateToken(user);
+
+    captain = getCaptain(team);
+    token = generateToken(captain);
   });
 
   after(async () => {
@@ -45,7 +49,7 @@ describe.skip('POST /teams/:teamId/joinRequests/:userId', () => {
     await request(app)
       .post(`/teams/${team.id}/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${randomUserToken}`)
-      .expect(403, { error: Error.NotSelf });
+      .expect(403, { error: Error.NotCaptain });
   });
 
   it('should fail because the user is a member of the team but not the captain', async () => {
@@ -69,29 +73,66 @@ describe.skip('POST /teams/:teamId/joinRequests/:userId', () => {
       .expect(403, { error: Error.NotCaptain });
   });
 
-  it.skip('should fail with an internal server error', async () => {
-    sandbox.stub(teamOperations, 'cancelTeamRequest').throws('Unexpected error');
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(teamOperations, 'joinTeam').throws('Unexpected error');
     await request(app)
       .post(`/teams/${team.id}/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should succesfully cancel accept the user', async () => {
-    const captain = getCaptain(team);
-    const captainToken = generateToken(captain);
+  it('should error as the team is locked', async () => {
+    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
+    const lockedCaptain = getCaptain(lockedTeam);
+    const lockedToken = generateToken(lockedCaptain);
 
-    const response = await request(app)
-      .post(`/teams/${team.id}/joinRequests/${user.id}`)
-      .set('Authorization', `Bearer ${captainToken}`)
-      .expect(200);
-    const deletedRequestUser = await fetchUser(user.id);
-
-    expect(response.body.askingTeamId).to.be.null;
-    expect(deletedRequestUser.askingTeamId).to.be.null;
+    await request(app)
+      .post(`/teams/${lockedTeam.id}/joinRequests/${user.id}`)
+      .set('Authorization', `Bearer ${lockedToken}`)
+      .expect(403, { error: Error.TeamLocked });
   });
 
-  it('should fail as the user has removed the request', async () => {
+  it('should fail as the team is full', async () => {
+    const fullTeam = await createFakeTeam({ members: 5 });
+    const otherUser = await createFakeUser();
+
+    const fullCaptain = getCaptain(fullTeam);
+    const fullToken = generateToken(fullCaptain);
+    await teamOperations.askJoinTeam(fullTeam.id, otherUser.id);
+
+    await request(app)
+      .post(`/teams/${fullTeam.id}/joinRequests/${otherUser.id}`)
+      .set('Authorization', `Bearer ${fullToken}`)
+      .expect(403, { error: Error.TeamFull });
+  });
+
+  it('should succeed to join a full team as a coach', async () => {
+    const fullTeam = await createFakeTeam({ members: 5 });
+    const otherUser = await createFakeUser({ type: UserType.coach });
+
+    const fullCaptain = getCaptain(fullTeam);
+    const fullToken = generateToken(fullCaptain);
+    await teamOperations.askJoinTeam(fullTeam.id, otherUser.id);
+
+    await request(app)
+      .post(`/teams/${fullTeam.id}/joinRequests/${otherUser.id}`)
+      .set('Authorization', `Bearer ${fullToken}`)
+      .expect(200);
+  });
+
+  it('should succesfully join the team', async () => {
+    const { body } = await request(app)
+      .post(`/teams/${team.id}/joinRequests/${user.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    const updatedUser = await fetchUser(user.id);
+
+    expect(body.players).to.have.lengthOf(team.players.length + 1);
+    expect(updatedUser.askingTeamId).to.be.null;
+  });
+
+  it('should fail because the user has not asked for a team', async () => {
     await request(app)
       .post(`/teams/${team.id}/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
