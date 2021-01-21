@@ -108,6 +108,7 @@ export enum Error {
   InvalidBody = 'Corps de la requête invalide',
   MalformedBody = 'Corps de la requête malformé',
   InvalidParameters = 'Paramètres de la requête invalides',
+  InvalidQueryParameters = 'Paramètres de la requête invalides (query)',
   EmptyBasket = 'Le panier est vide',
 
   // 401

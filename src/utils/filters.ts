@@ -40,3 +40,13 @@ export const filterTeam = (team: Team) => {
     askingUsers: team.askingUsers.map(filterUser),
   };
 };
+
+export const filterTeamPublic = (team: Team) => {
+  const filteredTeam = pick(team, ['id', 'name', 'tournamentId', 'captainId', 'lockedAt']);
+
+  return {
+    ...filteredTeam,
+    players: team.players.map(filterUser),
+    coaches: team.coaches.map(filterUser),
+  };
+};

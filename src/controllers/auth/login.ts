@@ -2,13 +2,14 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import bcrpyt from 'bcryptjs';
 import { isNotAuthenticated } from '../../middlewares/authentication';
-import validateBody from '../../middlewares/validateBody';
+import { validateBody } from '../../middlewares/validation';
 import { filterUser } from '../../utils/filters';
 import { forbidden, success, unauthenticated } from '../../utils/responses';
 import { generateToken } from '../../utils/user';
 import { Error } from '../../types';
 import { fetchUser } from '../../operations/user';
 import * as validators from '../../utils/validators';
+import { UserType } from '@prisma/client';
 
 export default [
   // Middlewares
@@ -37,7 +38,7 @@ export default [
         return forbidden(response, Error.EmailNotConfirmed);
       }
 
-      if (user.type === 'visitor') {
+      if (user.type === UserType.visitor) {
         return forbidden(response, Error.LoginAsVisitor);
       }
 

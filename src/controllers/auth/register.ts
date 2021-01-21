@@ -2,7 +2,7 @@ import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { isNotAuthenticated } from '../../middlewares/authentication';
-import validateBody from '../../middlewares/validateBody';
+import { validateBody } from '../../middlewares/validation';
 import { createUser } from '../../operations/user';
 import { Error } from '../../types';
 import { conflict, created } from '../../utils/responses';

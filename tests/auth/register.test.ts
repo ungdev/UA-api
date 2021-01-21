@@ -80,19 +80,4 @@ describe('POST /auth/register', () => {
       .send({ ...userData, type: 'wrong type' })
       .expect(400, { error: Error.InvalidBody });
   });
-
-  it('should not accept incorrect media type (sending text/plain)', async () => {
-    await request(app)
-      .post('/auth/register')
-      .send('mange tes morts')
-      .expect(415, { error: Error.UnsupportedMediaType });
-  });
-
-  it('should not accept incorrect json type', async () => {
-    await request(app)
-      .post('/auth/register')
-      .send('mange tes morts')
-      .set('Content-Type', 'application/json')
-      .expect(400, { error: Error.MalformedBody });
-  });
 });

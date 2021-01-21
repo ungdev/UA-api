@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import prisma from '@prisma/client';
+import prisma, { UserType } from '@prisma/client';
 import app from '../../src/app';
 import * as userUtils from '../../src/utils/user';
 import { Error } from '../../src/types';
@@ -8,6 +8,7 @@ import { setLoginAllowed } from '../../src/operations/settings';
 import database from '../../src/services/database';
 import { sandbox } from '../setup';
 import { createFakeUser } from '../utils';
+import { generateToken } from '../../src/utils/user';
 
 describe('POST /auth/login', () => {
   const password = 'bonjour123456';
@@ -63,6 +64,21 @@ describe('POST /auth/login', () => {
         password: user.password,
       })
       .expect(401, { error: Error.InvalidCredentials });
+  });
+
+  // This case should never happen
+  it('should error because the user is a visitor', async () => {
+    const visitorEmail = 'bonjour@lol.fr';
+    const visitorPassword = 'randomPass';
+    await createFakeUser({ type: UserType.visitor, email: visitorEmail, password: visitorPassword });
+
+    await request(app)
+      .post('/auth/login')
+      .send({
+        email: visitorEmail,
+        password: visitorPassword,
+      })
+      .expect(403, { error: Error.LoginAsVisitor });
   });
 
   let authorizationToken = '';

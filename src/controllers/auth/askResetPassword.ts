@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { isNotAuthenticated } from '../../middlewares/authentication';
-import validateBody from '../../middlewares/validateBody';
+import { validateBody } from '../../middlewares/validation';
 import { fetchUser, generateResetToken } from '../../operations/user';
 import { Error } from '../../types';
 import { noContent, notFound } from '../../utils/responses';

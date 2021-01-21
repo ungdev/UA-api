@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import Basket from '../../services/etupay';
 import { isSelf } from '../../middlewares/parameters';
-import validateBody from '../../middlewares/validateBody';
+import { validateBody } from '../../middlewares/validation';
 import { createCart } from '../../operations/carts';
 import { fetchItems } from '../../operations/item';
 import { createVisitor, deleteUser, fetchUser } from '../../operations/user';

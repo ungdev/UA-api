@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { isCaptain, teamNotLocked } from '../../middlewares/parameters';
-import validateBody from '../../middlewares/validateBody';
+import { validateBody } from '../../middlewares/validation';
 import { success } from '../../utils/responses';
 import { updateTeam } from '../../operations/team';
 import { filterTeam } from '../../utils/filters';

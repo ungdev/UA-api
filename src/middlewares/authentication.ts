@@ -1,7 +1,6 @@
-import { UserType } from '@prisma/client';
 import { Response, NextFunction, Request } from 'express';
 import { getRequestUser } from '../utils/user';
-import { forbidden, unauthenticated, conflict } from '../utils/responses';
+import { forbidden, unauthenticated } from '../utils/responses';
 import { Error, Permission } from '../types';
 import { isLoginAllowed } from './settings';
 
@@ -17,17 +16,6 @@ export const isAuthenticated = [
       return unauthenticated(response);
     }
 
-    // It mustn't be a visitor
-    if (user.type === UserType.visitor) {
-      return forbidden(response, Error.LoginAsVisitor);
-    }
-
-    // It must be activated
-    if (user.registerToken) {
-      return forbidden(response, Error.EmailNotConfirmed);
-    }
-
-    // NB, those conditions should never happen as there are in the login session, but could happend if a user is changed in the database
     return next();
   },
 ];

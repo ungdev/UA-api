@@ -34,12 +34,15 @@ export const fetchTeam = async (id: string): Promise<Team> => {
   return formatTeam(team);
 };
 
-export const fetchTeams = (tournamentId: string) => {
-  return database.team.findMany({
+export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
+  const teams = await database.team.findMany({
     where: {
       tournamentId,
     },
+    include: teamInclusions,
   });
+
+  return teams.map(formatTeam);
 };
 
 export const createTeam = async (name: string, tournamentId: string, captainId: string): Promise<Team> => {

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 
-import validateBody from '../middlewares/validateBody';
+import { validateBody } from '../middlewares/validation';
 import { noContent } from '../utils/responses';
 import { sendSlackContact } from '../services/slack';
 import * as validators from '../utils/validators';
