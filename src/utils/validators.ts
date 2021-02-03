@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { TransactionState, UserType } from '@prisma/client';
+import { UserType } from '@prisma/client';
 
 // General
 export const id = Joi.string()

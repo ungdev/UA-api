@@ -1,5 +1,4 @@
-import faker from 'faker';
-import prisma, { UserType } from '@prisma/client';
+import prisma from '@prisma/client';
 import request from 'supertest';
 import app from '../../src/app';
 import database from '../../src/services/database';

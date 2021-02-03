@@ -90,7 +90,7 @@ describe('POST /users/:userId/carts', () => {
       { tickets: { visitors: [], supplements: [] } },
     ];
 
-    badBodies.forEach((badBody, index) => {
+    for (const [index, badBody] of badBodies.entries()) {
       it(`should not accept this bad body (${index + 1}/${badBodies.length})`, async () => {
         await request(app)
           .post(`/users/${user.id}/carts`)
@@ -98,11 +98,11 @@ describe('POST /users/:userId/carts', () => {
           .send(badBody)
           .expect(400, { error: Error.InvalidBody });
       });
-    });
+    }
   });
 
   describe('test fail quantity (negative, null and float)', () => {
-    [-1, 0, 0.25].forEach((quantity) => {
+    for (const quantity of [-1, 0, 0.25]) {
       it(`should fail as the quantity ${quantity}`, async () => {
         await request(app)
           .post(`/users/${user.id}/carts`)
@@ -113,7 +113,7 @@ describe('POST /users/:userId/carts', () => {
           })
           .expect(400, { error: Error.InvalidBody });
       });
-    });
+    }
   });
 
   it('should fail because the basket is empty', async () => {

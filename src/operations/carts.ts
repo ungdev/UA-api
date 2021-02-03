@@ -1,7 +1,7 @@
 import { TransactionState, UserType } from '@prisma/client';
 
 import database from '../services/database';
-import { PrimitiveCartItem, User } from '../types';
+import { PrimitiveCartItem } from '../types';
 import nanoid from '../utils/nanoid';
 
 export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>

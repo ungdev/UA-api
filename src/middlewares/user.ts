@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
+import { UserType } from '@prisma/client';
 import { Error, DecodedToken } from '../types';
 import { forbidden, notFound, unauthenticated } from '../utils/responses';
 import { fetchUser } from '../operations/user';
 import env from '../utils/env';
 import logger from '../utils/logger';
-import { UserType } from '@prisma/client';
 
 // Fetch user from database if possible
 export const initUserRequest = async (request: Request, response: Response, next: NextFunction) => {

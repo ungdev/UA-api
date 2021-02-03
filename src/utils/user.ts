@@ -3,12 +3,9 @@ import jwt from 'jsonwebtoken';
 import { User } from '../types';
 import env from './env';
 
-export const getRequestUser = (response: Response): User | null => {
-  return response.locals.user;
-};
+export const getRequestUser = (response: Response): User | null => response.locals.user;
 
-export const generateToken = (user: User) => {
-  return jwt.sign({ userId: user.id }, env.jwt.secret, {
+export const generateToken = (user: User) =>
+  jwt.sign({ userId: user.id }, env.jwt.secret, {
     expiresIn: env.jwt.expires,
   });
-};

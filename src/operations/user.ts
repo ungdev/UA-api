@@ -72,8 +72,8 @@ export const createVisitor = (firstname: string, lastname: string) =>
     },
   });
 
-export const removeUserRegisterToken = (userId: string) => {
-  return database.user.update({
+export const removeUserRegisterToken = (userId: string) =>
+  database.user.update({
     data: {
       registerToken: null,
     },
@@ -81,10 +81,9 @@ export const removeUserRegisterToken = (userId: string) => {
       id: userId,
     },
   });
-};
 
-export const removeUserResetToken = (userId: string) => {
-  return database.user.update({
+export const removeUserResetToken = (userId: string) =>
+  database.user.update({
     data: {
       resetToken: null,
     },
@@ -92,10 +91,9 @@ export const removeUserResetToken = (userId: string) => {
       id: userId,
     },
   });
-};
 
-export const generateResetToken = (userId: string) => {
-  return database.user.update({
+export const generateResetToken = (userId: string) =>
+  database.user.update({
     data: {
       resetToken: nanoid(),
     },
@@ -103,7 +101,6 @@ export const generateResetToken = (userId: string) => {
       id: userId,
     },
   });
-};
 
 export const changePassword = async (user: User, newPassword: string) => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);

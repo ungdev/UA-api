@@ -9,10 +9,9 @@ import { fetchItems } from '../../operations/item';
 import { createVisitor, deleteUser, fetchUser } from '../../operations/user';
 import { Cart, Error, PrimitiveCartItem } from '../../types';
 import { encodeToBase64, isPartnerSchool, removeAccents } from '../../utils/helpers';
-import { badRequest, created, forbidden, notFound, success } from '../../utils/responses';
+import { badRequest, created, forbidden, notFound } from '../../utils/responses';
 import { getRequestUser } from '../../utils/user';
 import * as validators from '../../utils/validators';
-import database from '../../services/database';
 import { isShopAllowed } from '../../middlewares/settings';
 
 export interface PayBody {
@@ -57,7 +56,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const body: PayBody = request.body;
+      const { body } = request;
 
       const user = getRequestUser(response);
       const items = await fetchItems();
@@ -168,7 +167,7 @@ export default [
         const item = items.find((findItem) => findItem.id === cartItem.itemId);
 
         // Retreives the price of the item
-        let { price } = item;
+        let itemPrice = item.price;
 
         // Checks if the category is a ticket and the reduce price exists
         if (item.category === ItemCategory.ticket && item.reducedPrice) {
@@ -177,12 +176,12 @@ export default [
 
           // If the ticket is a partner school, set the price to the reduced price
           if (isPartnerSchool(forUser.email)) {
-            price = item.reducedPrice;
+            itemPrice = item.reducedPrice;
           }
         }
 
         // Add the item to the etupay basket
-        basket.addItem(removeAccents(item.name), price, cartItem.quantity);
+        basket.addItem(removeAccents(item.name), itemPrice, cartItem.quantity);
       }
 
       // Returns a answer with the etupay url

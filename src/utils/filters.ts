@@ -1,9 +1,7 @@
 import { pick } from 'lodash';
 import { Item, Team, Tournament, User } from '../types';
 
-export const filterUserRestricted = (user: User) => {
-  return pick(user, ['id', 'type']);
-};
+export const filterUserRestricted = (user: User) => pick(user, ['id', 'type']);
 
 export const filterUser = (user: User) =>
   pick(user, [
@@ -22,13 +20,11 @@ export const filterUser = (user: User) =>
     'askingTeamId',
   ]);
 
-export const filterItem = (item: Item) => {
-  return pick(item, ['id', 'name', 'category', 'attribute', 'price', 'infos', 'image']);
-};
+export const filterItem = (item: Item) =>
+  pick(item, ['id', 'name', 'category', 'attribute', 'price', 'infos', 'image']);
 
-export const filterTournament = (tournament: Tournament) => {
-  return pick(tournament, 'id', 'name', 'shortName', 'maxPlayers', 'playersPerTeam', 'lockedTeamsCount');
-};
+export const filterTournament = (tournament: Tournament) =>
+  pick(tournament, 'id', 'name', 'shortName', 'maxPlayers', 'playersPerTeam', 'lockedTeamsCount');
 
 export const filterTeam = (team: Team) => {
   const filteredTeam = pick(team, ['id', 'name', 'tournamentId', 'captainId', 'lockedAt']);

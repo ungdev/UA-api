@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import bcrpyt from 'bcryptjs';
+import { UserType } from '@prisma/client';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { validateBody } from '../../middlewares/validation';
 import { filterUser } from '../../utils/filters';
@@ -9,7 +10,6 @@ import { generateToken } from '../../utils/user';
 import { Error } from '../../types';
 import { fetchUser } from '../../operations/user';
 import * as validators from '../../utils/validators';
-import { UserType } from '@prisma/client';
 
 export default [
   // Middlewares

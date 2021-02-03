@@ -2,9 +2,7 @@ import database from '../services/database';
 
 export const fetchSettings = () => database.setting.findMany();
 
-export const fetchSetting = (id: 'login' | 'shop') => {
-  return database.setting.findUnique({ where: { id } });
-};
+export const fetchSetting = (id: 'login' | 'shop') => database.setting.findUnique({ where: { id } });
 
 const setSettingAllowed = (id: string, allowed: boolean) =>
   database.setting.update({

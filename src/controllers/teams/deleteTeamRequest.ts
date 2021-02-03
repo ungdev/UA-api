@@ -3,8 +3,7 @@ import { isSelfOrCaptain, teamNotLocked } from '../../middlewares/parameters';
 import { cancelTeamRequest } from '../../operations/team';
 import { fetchUser } from '../../operations/user';
 import { Error } from '../../types';
-import { filterUser } from '../../utils/filters';
-import { conflict, forbidden, noContent, success } from '../../utils/responses';
+import { forbidden, noContent } from '../../utils/responses';
 
 export default [
   // Middlewares

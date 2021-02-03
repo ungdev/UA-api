@@ -8,7 +8,6 @@ import { setLoginAllowed } from '../../src/operations/settings';
 import database from '../../src/services/database';
 import { sandbox } from '../setup';
 import { createFakeUser } from '../utils';
-import { generateToken } from '../../src/utils/user';
 
 describe('POST /auth/login', () => {
   const password = 'bonjour123456';

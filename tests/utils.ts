@@ -46,7 +46,7 @@ export const createFakeTeam = async ({ members = 1, tournament = 'lol', paid = f
   }
 
   // Create new members (minus 1 because the captain is already created)
-  for (let i = 0; i < members - 1; i += 1) {
+  for (let index = 0; index < members - 1; index += 1) {
     const partner = await createFakeUser({ paid });
     await joinTeam(team.id, partner);
   }

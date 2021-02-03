@@ -5,10 +5,9 @@ export default [
   // Middlewares
 
   // Controller
-  (request: Request, response: Response) => {
+  (request: Request, response: Response) =>
     // const users: User[] = await fetchUsers();
     // const result = users.map(filterUserRestricted);
 
-    return success(response, 'mange tes grands morts');
-  },
+    success(response, 'mange tes grands morts'),
 ];

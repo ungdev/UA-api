@@ -37,6 +37,8 @@
     "import/extensions": "off",
     "import/no-cycle": "off",
     "radix": "off",
+    "no-loop-func": "off",
+    "unicorn/no-array-reduce": "off",
     "prefer-destructuring": "warn",
     "import/prefer-default-export": "off",
     "no-await-in-loop": "off",
