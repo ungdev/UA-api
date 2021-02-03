@@ -70,11 +70,14 @@ describe('GET /teams/:teamId', () => {
   });
 
   it('should succeed as the captain', async () => {
-    const response = await request(app)
+    const { body } = await request(app)
       .get(`/teams/${team.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(200);
 
-    expect(response.body.name).to.be.equal(team.name);
+    expect(body.name).to.be.equal(team.name);
+
+    // Check if the object was filtered
+    expect(body.updatedAt).to.be.undefined;
   });
 });

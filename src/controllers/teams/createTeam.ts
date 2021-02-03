@@ -5,6 +5,7 @@ import { validateBody } from '../../middlewares/validation';
 import { createTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
+import { filterTeam } from '../../utils/filters';
 import { conflict, created, forbidden, notFound } from '../../utils/responses';
 import * as validators from '../../utils/validators';
 
@@ -36,7 +37,7 @@ export default [
 
       try {
         const team = await createTeam(name, tournamentId, response.locals.user.id);
-        return created(response, team);
+        return created(response, filterTeam(team));
       } catch (error) {
         // If the email already exists in the database, throw a bad request
         if (error.code === 'P2002' && error.meta && error.meta.target === 'name_tournamentId_unique')

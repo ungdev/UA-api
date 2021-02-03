@@ -1,4 +1,3 @@
-import path from 'path';
 import { NextFunction, Request, Response } from 'express';
 import { fetchSettings } from '../operations/settings';
 import { success } from '../utils/responses';
@@ -9,9 +8,11 @@ export default [
     try {
       await fetchSettings();
 
+      const documentationUrl = `${env.front.website}${env.api.prefix}${env.api.prefix === '/' ? 'docs' : '/docs'}`;
+
       return success(response, {
         http: true,
-        docs: path.join(env.front.website, env.api.prefix, 'docs'),
+        documentation: documentationUrl,
       });
     } catch (error) {
       return next(error);

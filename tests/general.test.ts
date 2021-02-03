@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import request from 'supertest';
 import app from '../src/app';
 import * as settingsOperations from '../src/operations/settings';
@@ -8,7 +9,10 @@ import * as slackService from '../src/services/slack';
 describe('General API', () => {
   describe('GET /', () => {
     it('should return succesfully', async () => {
-      await request(app).get('/').expect(200, { http: true });
+      const { body } = await request(app).get('/').expect(200);
+
+      expect(body.http).to.be.true;
+      expect(body.documentation).to.match(/https?:\/\/[\w.]+\/docs/);
     });
 
     it('should return an internal server error', async () => {

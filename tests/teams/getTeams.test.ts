@@ -46,5 +46,8 @@ describe('GET /teams', () => {
     const { body } = await request(app).get('/teams?tournamentId=lol&locked=true').expect(200);
 
     expect(body).to.have.lengthOf(1);
+
+    // Check if the object was filtered
+    expect(body[0].updatedAt).to.be.undefined;
   });
 });

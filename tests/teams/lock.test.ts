@@ -100,15 +100,18 @@ describe('POST /teams/:teamId/lock', () => {
   });
 
   it('should lock the team', async () => {
-    const response = await request(app)
+    const { body } = await request(app)
       .post(`/teams/${team.id}/lock`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(200);
 
     const updatedTeam = await teamOperations.fetchTeam(team.id);
     expect(updatedTeam.lockedAt).to.be.not.null;
-    expect(response.body.lockedAt).to.be.not.null;
-    expect(response.body.askingUsers).to.have.lengthOf(0);
+    expect(body.lockedAt).to.be.not.null;
+    expect(body.askingUsers).to.have.lengthOf(0);
+
+    // Check if the object was filtered
+    expect(body.updatedAt).to.be.undefined;
   });
 
   it('should error as the team is already locked', async () => {

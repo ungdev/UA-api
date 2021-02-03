@@ -130,6 +130,9 @@ describe('POST /teams/:teamId/joinRequests/:userId', () => {
 
     expect(body.players).to.have.lengthOf(team.players.length + 1);
     expect(updatedUser.askingTeamId).to.be.null;
+
+    // Check if the object was filtered
+    expect(body.updatedAt).to.be.undefined;
   });
 
   it('should fail because the user has not asked for a team', async () => {

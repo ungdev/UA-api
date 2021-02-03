@@ -113,15 +113,18 @@ describe('POST /teams', () => {
     const newUser = await createFakeUser();
     const newToken = generateToken(newUser);
 
-    const response = await request(app)
+    const { body } = await request(app)
       .post('/teams')
       .send({ name: teamBody.name, tournamentId: 'csgo' })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(201);
 
-    expect(response.body.name).to.be.equal(teamBody.name);
-    expect(response.body.tournamentId).to.be.equal('csgo');
-    expect(response.body.captainId).to.be.equal(newUser.id);
+    expect(body.name).to.be.equal(teamBody.name);
+    expect(body.tournamentId).to.be.equal('csgo');
+    expect(body.captainId).to.be.equal(newUser.id);
+
+    // Check if the object was filtered
+    expect(body.updatedAt).to.be.undefined;
   });
 
   it('should error as the tournament is full', async () => {

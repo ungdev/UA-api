@@ -65,12 +65,15 @@ describe('POST /teams/:teamId/joinRequests', () => {
   });
 
   it('should succesfully request to join a team', async () => {
-    const response = await request(app)
+    const { body } = await request(app)
       .post(`/teams/${team.id}/joinRequests`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    expect(response.body.askingTeamId).to.be.equal(team.id);
+    expect(body.askingTeamId).to.be.equal(team.id);
+
+    // Check if the object was filtered
+    expect(body.updatedAt).to.be.undefined;
   });
 
   it('should fail as we already asked for the same team', async () => {

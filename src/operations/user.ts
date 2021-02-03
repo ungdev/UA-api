@@ -62,6 +62,24 @@ export const createUser = async (
   });
 };
 
+export const updateUser = async (userId: string, username: string, newPassword: string): Promise<User> => {
+  const salt = await userOperations.genSalt(env.bcrypt.rounds);
+  const hashedPassword = await userOperations.hash(newPassword, salt);
+
+  const user = await database.user.update({
+    data: {
+      username,
+      password: hashedPassword,
+    },
+    where: {
+      id: userId,
+    },
+    include: userInclusions,
+  });
+
+  return formatUser(user);
+};
+
 export const createVisitor = (firstname: string, lastname: string) =>
   database.user.create({
     data: {

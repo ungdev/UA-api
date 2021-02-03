@@ -7,7 +7,7 @@ import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/user';
 
-describe.only('POST /users/:userId/carts', () => {
+describe('POST /users/:userId/carts', () => {
   let user: User;
   let token: string;
 

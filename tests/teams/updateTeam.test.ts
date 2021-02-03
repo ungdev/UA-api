@@ -92,7 +92,7 @@ describe('PUT /teams/:teamId', () => {
   });
 
   it('should update the team', async () => {
-    const response = await request(app)
+    const { body } = await request(app)
       .put(`/teams/${team.id}`)
       .send({ name: 'yolo' })
       .set('Authorization', `Bearer ${captainToken}`)
@@ -100,7 +100,10 @@ describe('PUT /teams/:teamId', () => {
 
     const updatedTeam = await teamOperations.fetchTeam(team.id);
 
-    expect(response.body.name).to.be.equal('yolo');
+    expect(body.name).to.be.equal('yolo');
     expect(updatedTeam.name).to.be.equal('yolo');
+
+    // Check if the object was filtered
+    expect(body.updatedAt).to.be.undefined;
   });
 });
