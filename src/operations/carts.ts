@@ -1,8 +1,18 @@
 import { TransactionState, UserType } from '@prisma/client';
 
 import database from '../services/database';
-import { PrimitiveCartItem } from '../types';
+import { CartWithCartItems, PrimitiveCartItem } from '../types';
 import nanoid from '../utils/nanoid';
+
+export const fetchCarts = (userId: string): Promise<CartWithCartItems[]> =>
+  database.cart.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      cartItems: true,
+    },
+  });
 
 export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
   database.cart.create({

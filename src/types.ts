@@ -54,15 +54,18 @@ export type Item = prisma.Item & {
 
 export type Setting = prisma.Setting;
 
+export type CartItem = prisma.CartItem;
 export type Cart = prisma.Cart;
+
+export type CartWithCartItems = prisma.Cart & {
+  cartItems: CartItem[];
+};
 
 export interface PrimitiveCartItem {
   itemId: string;
   quantity: number;
   forUserId: string;
 }
-
-export type CartItem = prisma.CartItem;
 
 export type PrimitiveUser = prisma.User & {
   cartItems: (CartItem & {

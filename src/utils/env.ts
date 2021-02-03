@@ -37,7 +37,7 @@ const env = {
     prefix: loadEnv('API_PREFIX') || '/',
   },
   front: {
-    website: loadEnv('API_PREFIX') || 'https://arena.utt.fr',
+    website: loadEnv('API_WEBSITE') || 'https://arena.utt.fr',
   },
   bcrypt: {
     rounds: loadIntEnv('API_BCRYPT_ROUNDS') || 10,
