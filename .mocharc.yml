@@ -5,3 +5,5 @@ file:
 spec: 'tests/**/*.test.ts'
 
 watch-extensions: ts
+
+timeout: 10000

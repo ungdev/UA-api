@@ -78,4 +78,5 @@ Use `npx prisma generate` to generate your prisma client
 
 ## How to test
 
+
 The tests must be able to run without any environment variables except the database
