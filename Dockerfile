@@ -14,6 +14,7 @@ RUN yarn --frozen-lockfile
 COPY ./ ./
 
 RUN yarn openapi:build
+RUN yarn prisma generate
 RUN yarn build
 
 CMD yarn start

@@ -41,10 +41,16 @@ Populate the tables
 mysql -u DATABASE_USER -p arena < seed.sql
 ```
 
-Generate the documentation
+Generate the documentation (redo this command when you update openapi.yml)
 
 ```
 yarn swagger:build
+```
+
+Generate the prisma client (redo this command when you update schema.prisma)
+
+```
+yarn prisma generate
 ```
 
 ## Configuration
