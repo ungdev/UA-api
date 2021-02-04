@@ -1,4 +1,4 @@
-import prisma from '@prisma/client';
+import prisma, { TournamentId } from '@prisma/client';
 import database from '../services/database';
 import { Tournament } from '../types';
 
@@ -27,7 +27,7 @@ export const formatTournament = async (tournament: prisma.Tournament): Promise<T
   };
 };
 
-export const fetchTournament = async (id: string): Promise<Tournament> => {
+export const fetchTournament = async (id: TournamentId): Promise<Tournament> => {
   const tournament = await database.tournament.findUnique({ where: { id } });
 
   return formatTournament(tournament);

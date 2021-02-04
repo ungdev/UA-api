@@ -1,4 +1,4 @@
-import prisma from '@prisma/client';
+import prisma, { TournamentId } from '@prisma/client';
 import database from '../services/database';
 import { PrimitiveUser, Team, User } from '../types';
 import nanoid from '../utils/nanoid';
@@ -34,7 +34,7 @@ export const fetchTeam = async (id: string): Promise<Team> => {
   return formatTeam(team);
 };
 
-export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
+export const fetchTeams = async (tournamentId: TournamentId): Promise<Team[]> => {
   const teams = await database.team.findMany({
     where: {
       tournamentId,
@@ -45,7 +45,7 @@ export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
   return teams.map(formatTeam);
 };
 
-export const createTeam = async (name: string, tournamentId: string, captainId: string): Promise<Team> => {
+export const createTeam = async (name: string, tournamentId: TournamentId, captainId: string): Promise<Team> => {
   // Update the user to create a transaction update (update the user AND create the team)
   await database.user.update({
     data: {
