@@ -10,6 +10,7 @@ import tournaments from './tournaments';
 import items from './items';
 import teams from './teams';
 import auth from './auth';
+import callbacks from './callbacks';
 
 const router = Router();
 
@@ -39,5 +40,8 @@ router.use('/tournaments', tournaments);
 
 // Items routes
 router.use('/items', items);
+
+// Callbacks routes
+router.use('/callbacks', callbacks);
 
 export default router;
