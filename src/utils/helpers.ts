@@ -54,5 +54,12 @@ export const decryptQrCode = (encrypted: Buffer) => {
 // More info : https://stackoverflow.com/a/37511463
 export const removeAccents = (string: string): string => string.normalize('NFD').replace(/[\u0300-\u036F]/g, '');
 
+export const formatPrice = (cents: number) => {
+  const euros = cents / 100;
+  return euros.toLocaleString('fr-fr', { style: 'currency', currency: 'EUR' });
+};
+
 // Checks if the email ends with a school partner domain
-export const isPartnerSchool = (email: string) => env.partners.emails.some((partner) => email.endsWith(partner));
+export const isPartnerSchool = (email: string) => env.email.partners.some((partner) => email.endsWith(partner));
+
+export const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min) + min);

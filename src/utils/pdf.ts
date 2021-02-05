@@ -43,8 +43,6 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
 
   const encryptedUserId = encryptQrCode(user.id);
 
-  // Ignore while this PR (by me ^^) hasn't been merged https://github.com/DefinitelyTyped/DefinitelyTyped/pull/51041
-  // @ts-ignore
   const qrcode = await QRCode.toDataURL([{ data: encryptedUserId, mode: 'byte' }], {
     width: qrCodeSize,
     margin: 1,

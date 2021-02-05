@@ -68,10 +68,11 @@ const env = {
     port: Number(process.env.EMAIL_PORT) || 25,
     user: process.env.EMAIL_USER,
     password: process.env.EMAIL_PASSWORD,
-    sender: process.env.EMAIL_SENDER || 'UTT Arena<arena@utt.fr>',
-  },
-  partners: {
-    emails: ['utt.fr', 'utc.fr', 'utbm.fr'],
+    sender: process.env.EMAIL_SENDER || 'UTT Arena <arena@utt.fr>',
+    subjects: {
+      payment: process.env.EMAIL_SUBJECT_PAYMENT || 'Reçu de votre paiement',
+    },
+    partners: ['utt.fr', 'utc.fr', 'utbm.fr'],
   },
   etupay: {
     id: loadIntEnv('ETUPAY_ID') || notInProduction(1),

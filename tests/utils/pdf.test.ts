@@ -6,7 +6,7 @@ import { createCart, fetchCart, updateCart } from '../../src/operations/carts';
 import { generateTicket } from '../../src/utils/pdf';
 import { getCaptain } from '../../src/utils/teams';
 
-describe.only('Tests the PDF utils', () => {
+describe('Tests the PDF utils', () => {
   for (const tournamentId in TournamentId) {
     it(`should generate a PDF ticket for ${tournamentId}`, async () => {
       // Create a fake user and add it in a random team
