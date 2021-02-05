@@ -1,9 +1,10 @@
 import faker from 'faker';
-import prisma, { UserType } from '@prisma/client';
+import prisma, { TournamentId, UserType } from '@prisma/client';
 import { createUser, fetchUser, removeUserRegisterToken } from '../src/operations/user';
 import { User } from '../src/types';
 import { createTeam, fetchTeam, joinTeam, lockTeam } from '../src/operations/team';
 import { forcePay } from '../src/operations/carts';
+import { bool, boolean, number } from 'joi';
 
 export const createFakeUser = async ({
   username = faker.internet.userName(),
@@ -37,7 +38,17 @@ export const createFakeUser = async ({
   return fetchUser(user.id);
 };
 
-export const createFakeTeam = async ({ members = 1, tournament = 'lol', paid = false, locked = false } = {}) => {
+export const createFakeTeam = async ({
+  members = 1,
+  tournament = TournamentId.lol,
+  paid = false,
+  locked = false,
+}: {
+  members?: number;
+  tournament?: TournamentId;
+  paid?: boolean;
+  locked?: boolean;
+} = {}) => {
   const user = await createFakeUser({ paid });
   const team = await createTeam(faker.internet.userName(), tournament, user.id);
 

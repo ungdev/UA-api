@@ -1,5 +1,6 @@
 /* eslint-disable consistent-return */
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 import logger from './logger';
 
 dotenv.config();
@@ -74,11 +75,19 @@ const env = {
   },
   etupay: {
     id: loadIntEnv('ETUPAY_ID') || notInProduction(1),
-    // random key genereated with require('crypto').randomBytes(32).toString('base64')
-    key: loadEnv('ETUPAY_KEY') || notInProduction('0Op1QauLn++f1ioyaBNQSJZrg4HCxkRt5c8KFFoGB54='),
+    // random 256 bits key genereated if not in production
+    key: loadEnv('ETUPAY_KEY') || notInProduction(crypto.randomBytes(32).toString('base64')),
     url: loadEnv('ETUPAY_KEY') || 'https://etupay.utt.fr/initiate',
     successUrl: loadEnv('ETUPAY_SUCCESS_URL') || 'https://arena.utt.fr/dashboard/payment?type=success',
     errorUrl: loadEnv('ETUPAY_ERROR_URL') || 'https://arena.utt.fr/dashboard/payment?type=error',
+  },
+  qrcode: {
+    // random 128 bits key generated if not in production
+    key: loadEnv('QRCODE_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
+
+    // The initial vector is global and not local to not having to store it in the QR Codes.
+    // As we encrypt unique ids, it doesn't matter to have a static initial vector
+    initialVector: loadEnv('QRCODE_IV') || notInProduction(crypto.randomBytes(16).toString('base64')),
   },
   toornament: {
     clientId: process.env.TOORNAMENT_CLIENT_ID,

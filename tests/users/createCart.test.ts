@@ -127,6 +127,37 @@ describe('POST /users/:userId/carts', () => {
       .expect(400, { error: Error.EmptyBasket });
   });
 
+  it('should fail because the user id is listed twice', async () => {
+    await request(app)
+      .post(`/users/${user.id}/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        tickets: { userIds: [user.id, user.id], visitors: [] },
+        supplements: [],
+      })
+      .expect(400, { error: Error.InvalidBody });
+  });
+
+  it('should fail because a supplement is listed twice', async () => {
+    await request(app)
+      .post(`/users/${user.id}/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        tickets: { userIds: [], visitors: [] },
+        supplements: [
+          {
+            itemId: 'ethernet-7',
+            quantity: 4,
+          },
+          {
+            itemId: 'ethernet-7',
+            quantity: 1,
+          },
+        ],
+      })
+      .expect(400, { error: Error.InvalidBody });
+  });
+
   it('should fail as the user does not exists', async () => {
     await request(app)
       .post(`/users/${user.id}/carts`)

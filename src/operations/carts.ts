@@ -1,8 +1,15 @@
 import { TransactionState, UserType } from '@prisma/client';
 
 import database from '../services/database';
-import { CartWithCartItems, PrimitiveCartItem } from '../types';
+import { Cart, CartWithCartItems, DetailedCart, PrimitiveCartItem } from '../types';
 import nanoid from '../utils/nanoid';
+
+export const fetchCart = (cartId: string): Promise<Cart> =>
+  database.cart.findUnique({
+    where: {
+      id: cartId,
+    },
+  });
 
 export const fetchCarts = (userId: string): Promise<CartWithCartItems[]> =>
   database.cart.findMany({
@@ -43,15 +50,28 @@ export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
     },
   });
 
-export const payCart = (cartId: string, transactionId: number) =>
+export const updateCart = (
+  cartId: string,
+  transactionId: number,
+  transactionState: TransactionState,
+): Promise<DetailedCart> =>
   database.cart.update({
     data: {
-      transactionState: TransactionState.paid,
+      transactionState,
       paidAt: new Date(),
       transactionId,
     },
     where: {
       id: cartId,
+    },
+    include: {
+      user: true,
+      cartItems: {
+        include: {
+          item: true,
+          forUser: true,
+        },
+      },
     },
   });
 

@@ -1,10 +1,17 @@
+import { ItemCategory } from '@prisma/client';
+import { User } from 'discord.js';
+import QRCode from 'qrcode';
 import { readFileSync } from 'fs';
 import { render } from 'mustache';
 import nodemailer from 'nodemailer';
-import { Address } from 'nodemailer/lib/mailer';
-import { EmailAttachment, EmailContent, MailData } from '../types';
-import env from './env';
-import logger from './logger';
+import Mail, { Address } from 'nodemailer/lib/mailer';
+import { fetchItems } from '../operations/item';
+import { fetchUser } from '../operations/user';
+import { CartItem, CartWithCartItems, DetailedCart, EmailContent, MailData } from '../types';
+import env from '../utils/env';
+import { encryptQrCode } from '../utils/helpers';
+import logger from '../utils/logger';
+import { generateTicket } from '../utils/pdf';
 
 const transporter = nodemailer.createTransport({
   host: env.email.host,
@@ -31,11 +38,11 @@ export const sendWelcomeEmail = (data: MailData) => {
   return mailContent;
 };
 
-export const sendMail = async (
+export const sendEmail = async (
   emailType: { (data: MailData): EmailContent },
   to: string | Address | Array<string | Address>,
   data: MailData,
-  attachments?: EmailAttachment[],
+  attachments?: Mail.Attachment[],
 ) => {
   const mailContent = emailType(data);
   const info = await transporter
@@ -55,4 +62,14 @@ export const sendMail = async (
       }
     });
   return info;
+};
+
+export const sendTickets = async (cart: DetailedCart) => {
+  // Filter the cart items to have only the tickets
+  const tickets = cart.cartItems.filter((cartItem) => cartItem.item.category === ItemCategory.ticket);
+
+  // Generate all the pdf tickets
+  const pdfTickets = await Promise.all(tickets.map(generateTicket));
+
+  // template : username, array => [cartitem.item.name, cartitem.quantity, catitem.item.category, cartitem.item.price]
 };

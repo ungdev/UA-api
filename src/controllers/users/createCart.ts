@@ -1,7 +1,7 @@
 import { ItemCategory, UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-import Basket from '../../services/etupay';
+import { Basket } from '../../services/etupay';
 import { isSelf } from '../../middlewares/parameters';
 import { validateBody } from '../../middlewares/validation';
 import { createCart } from '../../operations/carts';
@@ -37,7 +37,7 @@ export default [
     Joi.object({
       tickets: Joi.object({
         // We add the optionnal to allow empty array
-        userIds: Joi.array().items(validators.id.optional()).required(),
+        userIds: Joi.array().items(validators.id.optional()).unique().required(),
         visitors: Joi.array()
           .items(Joi.object({ firstname: validators.firstname, lastname: validators.lastname }))
           .required(),
@@ -49,6 +49,7 @@ export default [
             quantity: validators.quantity,
           }),
         )
+        .unique((a, b) => a.itemId === b.itemId)
         .required(),
     }).required(),
   ),

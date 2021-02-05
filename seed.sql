@@ -25,5 +25,5 @@ INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`) VALUES
 ('valorant', 'Valorant', 80, 5),
 ('csgo', 'Counter-Strike : Global Offensive', 80, 5),
 ('ssbu', 'Super Smash Bros Ultimate', 64, 1),
-('rocket-league', 'Rocket League', 48, 3),
+('rl', 'Rocket League', 48, 3),
 ('tft', 'Teamfight Tactics', 64, 1);

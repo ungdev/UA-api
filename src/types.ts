@@ -1,4 +1,5 @@
 import prisma, { TransactionState } from '@prisma/client';
+import Mail from 'nodemailer/lib/mailer';
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
  * Redémarrer le serveur dans ce cas là
@@ -8,7 +9,7 @@ import prisma, { TransactionState } from '@prisma/client';
 /** General **/
 /*************/
 
-export enum Permission {
+export const enum Permission {
   stream = 'stream',
   entry = 'entry',
   anim = 'anim',
@@ -19,16 +20,16 @@ export interface DecodedToken {
   userId: string;
 }
 
-export interface EmailAttachment {
-  filename: string;
-  content: Buffer;
-}
-
 export interface MailData {
   username: string;
   gunnarCode: string;
   compumsaCode: string;
 }
+
+export type EmailAttachement = Mail.Attachment & {
+  filename: string;
+  content: Buffer;
+};
 
 export interface EmailContent {
   title: string;
@@ -55,10 +56,21 @@ export type Item = prisma.Item & {
 export type Setting = prisma.Setting;
 
 export type CartItem = prisma.CartItem;
+
+export type DetailedCartItem = CartItem & {
+  item: prisma.Item;
+  forUser: prisma.User;
+};
+
 export type Cart = prisma.Cart;
 
-export type CartWithCartItems = prisma.Cart & {
+export type CartWithCartItems = Cart & {
   cartItems: CartItem[];
+};
+
+export type DetailedCart = Cart & {
+  cartItems: DetailedCartItem[];
+  user: prisma.User;
 };
 
 export interface PrimitiveCartItem {
@@ -103,7 +115,7 @@ export interface EtupayResponse {
 /**********/
 /** Misc **/
 /**********/
-export enum Error {
+export const enum Error {
   // More info on https://www.loggly.com/blog/http-status-code-diagram to know where to put an error
 
   // 400
@@ -137,6 +149,7 @@ export enum Error {
   AlreadyAuthenticated = 'Vous êtes déjà identifié',
   NotPlayerOrCoach = "L'utilisateur n'est pas un joueur ou un coach",
   AlreadyPaid = 'Le joueur possède déjà une place',
+  AlreadyErrored = 'Vous ne pouvez pas valider une transaction échouée',
   TeamLocked = "L'équipe est verrouillée",
   TeamNotFull = "L'équipe est incomplète",
   TeamFull = "L'équipe est complète",
@@ -151,6 +164,7 @@ export enum Error {
   RouteNotFound = 'La route est introuvable',
   UserNotFound = "L'utilisateur est introuvable",
   TeamNotFound = "L'équipe est introuvable",
+  CartNotFound = 'Le panier est introuvable',
   OrderNotFound = 'La commande est introuvable',
   ItemNotFound = "L'object est introuvable",
   TournamentNotFound = 'Le tournoi est introuvable',

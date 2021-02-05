@@ -1,3 +1,4 @@
+import { TournamentId } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { validateQuery } from '../../middlewares/validation';
@@ -19,7 +20,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { tournamentId, locked } = request.query as { tournamentId: string; locked: string };
+      const { tournamentId, locked } = request.query as { tournamentId: TournamentId; locked: string };
       const lockedCasted = Boolean(locked);
 
       const tournament = await fetchTournament(tournamentId);
