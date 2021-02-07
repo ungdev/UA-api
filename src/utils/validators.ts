@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { UserType } from '@prisma/client';
+import { TournamentId, UserType } from '@prisma/client';
 
 // General
 export const id = Joi.string()
@@ -20,3 +20,8 @@ export const teamName = Joi.string().required();
 
 // Cart
 export const quantity = Joi.number().integer().min(1).required();
+
+// Tournament
+export const tournamentId = Joi.string()
+  .valid(...Object.keys(TournamentId))
+  .required();

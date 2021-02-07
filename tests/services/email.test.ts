@@ -13,8 +13,15 @@ import env from '../../src/utils/env';
 import { expect } from 'chai';
 import { address } from 'faker';
 import { sandbox } from '../setup';
+import database from '../../src/services/database';
 
 describe('Tests the email utils', () => {
+  after(async () => {
+    await database.cartItem.deleteMany();
+    await database.cart.deleteMany();
+    await database.user.deleteMany();
+  });
+
   it('test sendEmail function by using an SMTP server', async () => {
     // Create a fake SMTP server
     const server = new SMTPServer({
@@ -68,7 +75,7 @@ describe('Tests the email utils', () => {
   });
 
   // We also use this test to have a preview of the email generated in the artifacts
-  it.skip(`should generate a payment template`, async () => {
+  it(`should generate a payment template`, async () => {
     // Create a fake user and add it in a random team
     const user = await createFakeUser();
     const visitor = await createFakeUser({ type: UserType.visitor });

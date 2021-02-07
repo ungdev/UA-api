@@ -14,6 +14,10 @@ describe('Test middlewares', () => {
     await database.user.deleteMany();
   });
 
+  describe('Test general middleware', () => {
+    it('should return a not found error', () => request(app).get('/randomRoute').expect(404, Error.RouteNotFound));
+  });
+
   describe('Test JSON middleware', () => {
     it('should not accept incorrect media type (sending text/plain)', async () => {
       await request(app)

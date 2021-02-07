@@ -65,7 +65,7 @@ describe('POST /teams', () => {
       .post('/teams')
       .send({ name: teamBody.name, tournamentId: 'factorio' })
       .set('Authorization', `Bearer ${token}`)
-      .expect(404, { error: Error.TournamentNotFound });
+      .expect(400, { error: Error.InvalidBody });
   });
 
   it('should fail with an internal server error (test nested check)', async () => {

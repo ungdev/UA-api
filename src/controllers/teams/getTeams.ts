@@ -7,13 +7,14 @@ import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
 import { filterTeam } from '../../utils/filters';
 import { notFound, success } from '../../utils/responses';
+import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
   validateQuery(
     Joi.object({
       locked: Joi.string().valid('true', 'false').optional(),
-      tournamentId: Joi.string().required(),
+      tournamentId: validators.tournamentId,
     }),
   ),
 
@@ -22,12 +23,6 @@ export default [
     try {
       const { tournamentId, locked } = request.query as { tournamentId: TournamentId; locked: string };
       const lockedCasted = Boolean(locked);
-
-      const tournament = await fetchTournament(tournamentId);
-
-      if (!tournament) {
-        return notFound(response, Error.TournamentNotFound);
-      }
 
       const teams = await fetchTeams(tournamentId);
 

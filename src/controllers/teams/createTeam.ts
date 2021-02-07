@@ -15,7 +15,7 @@ export default [
   validateBody(
     Joi.object({
       name: validators.teamName,
-      tournamentId: Joi.string().required(),
+      tournamentId: validators.tournamentId,
     }),
   ),
 
@@ -25,10 +25,6 @@ export default [
       const { name, tournamentId } = request.body;
 
       const tournament = await fetchTournament(tournamentId);
-
-      if (!tournament) {
-        return notFound(response, Error.TournamentNotFound);
-      }
 
       // If there are more or equal teams than places, return a tournament full
       if (tournament.placesLeft === 0) {
