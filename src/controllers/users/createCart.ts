@@ -9,7 +9,7 @@ import { fetchItems } from '../../operations/item';
 import { createVisitor, deleteUser, fetchUser } from '../../operations/user';
 import { Cart, Error, PrimitiveCartItem } from '../../types';
 import { encodeToBase64, isPartnerSchool, removeAccents } from '../../utils/helpers';
-import { badRequest, created, forbidden, notFound } from '../../utils/responses';
+import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestUser } from '../../utils/user';
 import * as validators from '../../utils/validators';
 import { isShopAllowed } from '../../middlewares/settings';
@@ -116,8 +116,9 @@ export default [
         });
       }
 
-      // Checks if the basket is empty
-      if (cartItems.length === 0) {
+      // Checks if the basket is empty and there is no visitors
+      // This check is used before the visitors because the visitors write in database
+      if (cartItems.length === 0 && body.tickets.visitors.length === 0) {
         return badRequest(response, Error.EmptyBasket);
       }
 
@@ -149,6 +150,24 @@ export default [
             .map((cartItem) => deleteUser(cartItem.forUserId)),
         );
         return next(error);
+      }
+
+      // Calculate if each cart item is available
+      const itemsWithStock = items.filter((item) => item.left);
+
+      // Foreach item where there is a stock
+      for (const item of itemsWithStock) {
+        // Checks how many items the user has orders and takes account the quantity
+        const cartItemsCount = cartItems.reduce((previous, cartItem) => {
+          if (cartItem.itemId === item.id) {
+            return previous + cartItem.quantity;
+          }
+        }, 0);
+
+        // If the user has ordered at least one team and the items left are less than in stock, throw an error
+        if (cartItemsCount > 0 && item.left < cartItemsCount) {
+          return gone(response, Error.ItemOutOfStock);
+        }
       }
 
       // Creates a etupay basket. The accents need to be removed as on the website they don't appear otherwise

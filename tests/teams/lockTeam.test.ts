@@ -139,6 +139,6 @@ describe('POST /teams/:teamId/lock', () => {
     await request(app)
       .post(`/teams/${otherTeam.id}/lock`)
       .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.TournamentFull });
+      .expect(410, { error: Error.TournamentFull });
   });
 });

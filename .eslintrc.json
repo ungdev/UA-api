@@ -20,7 +20,7 @@
     "sourceType": "module"
   },
   "rules": {
-    "prettier/prettier": "warning",
+    "prettier/prettier": "warn",
     "no-async-promise-executor": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",

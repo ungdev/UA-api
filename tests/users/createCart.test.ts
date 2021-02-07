@@ -1,5 +1,6 @@
 import { UserType } from '@prisma/client';
 import request from 'supertest';
+import faker from 'faker';
 import { expect } from 'chai';
 import app from '../../src/app';
 import { sandbox } from '../setup';
@@ -37,7 +38,7 @@ describe('POST /users/:userId/carts', () => {
     const coach = await createFakeUser({ type: UserType.coach });
     const partnerUser = await createFakeUser({ email: 'toto@utt.fr' });
 
-    // Add two tickets
+    // Add three tickets
     validCart.tickets.userIds.push(user.id, coach.id, partnerUser.id);
   });
 
@@ -180,7 +181,7 @@ describe('POST /users/:userId/carts', () => {
       .expect(404, { error: Error.ItemNotFound });
   });
 
-  it('should fail as the user is an orga', async () => {
+  it('should fail as you try to order a ticket for an orga', async () => {
     const orga = await createFakeUser({ type: UserType.orga });
     await request(app)
       .post(`/users/${user.id}/carts`)
@@ -211,6 +212,48 @@ describe('POST /users/:userId/carts', () => {
     await database.cartItem.deleteMany({ where: { forUserId: paidUser.id } });
     await database.cart.deleteMany({ where: { userId: paidUser.id } });
     await database.user.delete({ where: { id: paidUser.id } });
+  });
+
+  it('should fail as the item is no longer available', async () => {
+    const visitors: { firstname: string; lastname: string }[] = [];
+
+    for (let i = 0; i < 3; i++) {
+      visitors.push({ firstname: faker.name.firstName(), lastname: faker.name.lastName() });
+    }
+
+    const items = await itemOperations.fetchItems();
+    const currentVisitorStock = items.find((item) => item.id === 'ticket-visitor').stock;
+
+    await database.item.update({
+      data: { stock: 2 },
+      where: { id: 'ticket-visitor' },
+    });
+
+    await request(app)
+      .post(`/users/${user.id}/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        tickets: { userIds: [], visitors },
+        supplements: [],
+      })
+      .expect(410, { error: Error.ItemOutOfStock });
+
+    await database.item.update({
+      data: { stock: currentVisitorStock },
+      where: { id: 'ticket-visitor' },
+    });
+
+    // Clean what the test has created
+    const cartItems = await database.cartItem.findMany();
+
+    // Check that there are 3 carts items in case previous tests hasn't correctly been cleaned
+    expect(cartItems.length).to.be.equal(3);
+
+    const visitorIds = cartItems.map((cartItem) => cartItem.forUserId);
+
+    await database.cartItem.deleteMany();
+    await database.cart.deleteMany();
+    await database.user.deleteMany({ where: { id: { in: visitorIds } } });
   });
 
   it('should fail with an internal server error (inner try/catch)', async () => {

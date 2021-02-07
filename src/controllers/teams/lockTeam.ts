@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { isCaptain, teamNotLocked } from '../../middlewares/parameters';
-import { forbidden, success } from '../../utils/responses';
+import { forbidden, gone, success } from '../../utils/responses';
 import { fetchTeam, lockTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
@@ -19,7 +19,7 @@ export default [
 
       // If there are more or equal teams than places, return a tournament full
       if (tournament.placesLeft === 0) {
-        return forbidden(response, Error.TournamentFull);
+        return gone(response, Error.TournamentFull);
       }
 
       // Checks if the team is full

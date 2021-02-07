@@ -159,7 +159,6 @@ export const enum Error {
   TeamNotFull = "L'équipe est incomplète",
   TeamFull = "L'équipe est complète",
   AlreadyInTeam = 'Vous êtes déjà dans une équipe',
-  TournamentFull = 'Le tournoi est complet',
   AlreadyAskedATeam = 'Vous avez déjà demandé de vous inscrire dans une équipe',
   NotAskedATeam = "Vous ne demandez l'accès à aucune équipe",
 
@@ -171,7 +170,7 @@ export const enum Error {
   TeamNotFound = "L'équipe est introuvable",
   CartNotFound = 'Le panier est introuvable',
   OrderNotFound = 'La commande est introuvable',
-  ItemNotFound = "L'object est introuvable",
+  ItemNotFound = "L'objet est introuvable",
   TournamentNotFound = 'Le tournoi est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
 
@@ -179,6 +178,11 @@ export const enum Error {
   // Indicates a request conflict with current state of the target resource
   EmailAlreadyExists = 'Cet email est déjà utilisé',
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
+
+  // 410
+  // indicates that access to the target resource is no longer available at the server.
+  TournamentFull = 'Le tournoi est complet',
+  ItemOutOfStock = "L'objet demandé n'est plus en stock",
 
   // 415
   UnsupportedMediaType = "Le format de la requête n'est pas supporté",

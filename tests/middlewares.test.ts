@@ -15,7 +15,8 @@ describe('Test middlewares', () => {
   });
 
   describe('Test general middleware', () => {
-    it('should return a not found error', () => request(app).get('/randomRoute').expect(404, Error.RouteNotFound));
+    it('should return a not found error', () =>
+      request(app).get('/randomRoute').expect(404, { error: Error.RouteNotFound }));
   });
 
   describe('Test JSON middleware', () => {

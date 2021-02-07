@@ -34,6 +34,8 @@ export const notFound = (response: Response, error: Error): void => respondError
 
 export const conflict = (response: Response, error: Error): void => respondError(response, error, 409);
 
+export const gone = (response: Response, error: Error): void => respondError(response, error, 410);
+
 export const unsupportedMediaType = (response: Response, error: Error): void => respondError(response, error, 415);
 
 export const internalServerError = (response: Response, error?: Error): void =>
