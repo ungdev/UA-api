@@ -5,8 +5,16 @@ import { DetailedCart, DetailedCartItem, Error } from '../../src/types';
 import { createCart, fetchCart, updateCart } from '../../src/operations/carts';
 import { generateTicket } from '../../src/utils/pdf';
 import { getCaptain } from '../../src/utils/teams';
+import database from '../../src/services/database';
 
 describe('Tests the PDF utils', () => {
+  after(async () => {
+    await database.team.deleteMany();
+    await database.cartItem.deleteMany();
+    await database.cart.deleteMany();
+    await database.user.deleteMany();
+  });
+
   for (const tournamentId in TournamentId) {
     it(`should generate a PDF ticket for ${tournamentId}`, async () => {
       // Create a fake user and add it in a random team

@@ -1,4 +1,5 @@
 import prisma, { TransactionState } from '@prisma/client';
+import { ErrorRequestHandler } from 'express';
 import Mail from 'nodemailer/lib/mailer';
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
@@ -111,6 +112,10 @@ export interface EtupayResponse {
   paid: boolean;
   serviceData: string;
 }
+
+export type EtupayError = ErrorRequestHandler & {
+  message: string;
+};
 
 /**********/
 /** Misc **/

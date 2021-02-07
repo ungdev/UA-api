@@ -18,6 +18,8 @@ const loadEnv = (key: string) => {
   return process.env[key];
 };
 
+const loadIntEnv = (key: string) => Number(loadEnv(key));
+
 // Returns the key only if we are not in production
 // Used when you want to have a default option for only testing and dev environment
 // An example is to make sure you don't put fake credentials in a production environoemnt
@@ -26,8 +28,6 @@ export const notInProduction = <T = string>(key: T) => {
     return key;
   }
 };
-
-const loadIntEnv = (key: string) => Number(loadEnv(key));
 
 const env = {
   development: process.env.NODE_ENV === 'development',
@@ -64,13 +64,16 @@ const env = {
     name: loadEnv('DATABASE_NAME') || 'arena',
   },
   email: {
-    host: process.env.EMAIL_HOST,
-    port: Number(process.env.EMAIL_PORT) || 25,
-    user: process.env.EMAIL_USER,
-    password: process.env.EMAIL_PASSWORD,
-    sender: process.env.EMAIL_SENDER || 'UTT Arena <arena@utt.fr>',
+    host: loadEnv('EMAIL_HOST') || 'localhost',
+    port: loadIntEnv('EMAIL_PORT') || 2525,
+    user: loadEnv('EMAIL_USER'),
+    password: loadEnv('EMAIL_PASSWORD'),
+    sender: {
+      name: loadEnv('EMAIL_SENDER_NAME') || 'UTT Arena',
+      address: loadEnv('EMAIL_SENDER_ADDRESS') || 'arena@utt.fr',
+    },
     subjects: {
-      payment: process.env.EMAIL_SUBJECT_PAYMENT || 'Reçu de votre paiement',
+      payment: loadEnv('EMAIL_SUBJECT_PAYMENT') || 'Reçu de votre paiement',
     },
     partners: ['utt.fr', 'utc.fr', 'utbm.fr'],
   },
@@ -91,13 +94,13 @@ const env = {
     initialVector: loadEnv('QRCODE_IV') || notInProduction(crypto.randomBytes(16).toString('base64')),
   },
   toornament: {
-    clientId: process.env.TOORNAMENT_CLIENT_ID,
-    clientSecret: process.env.TOORNAMENT_CLIENT_SECRET,
-    key: process.env.TOORNAMENT_KEY,
+    clientId: loadEnv('TOORNAMENT_CLIENT_ID'),
+    clientSecret: loadEnv('TOORNAMENT_CLIENT_SECRET'),
+    key: loadEnv('TOORNAMENT_KEY'),
   },
   discord: {
-    token: process.env.DISCORD_TOKEN,
-    server: process.env.DISCORD_SERVER,
+    token: loadEnv('DISCORD_TOKEN'),
+    server: loadEnv('DISCORD_SERVER'),
   },
 };
 

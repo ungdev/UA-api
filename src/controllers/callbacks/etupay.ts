@@ -1,37 +1,33 @@
 import { TransactionState } from '@prisma/client';
-import { NextFunction, Request, Response } from 'express';
+import { ErrorRequestHandler, NextFunction, request, Request, Response } from 'express';
 import { fetchCart, updateCart } from '../../operations/carts';
 import { sendTickets } from '../../services/email';
 import * as etupay from '../../services/etupay';
-import { Error, EtupayResponse } from '../../types';
+import { Error, EtupayError, EtupayResponse } from '../../types';
 import env from '../../utils/env';
 import { decodeFromBase64 } from '../../utils/helpers';
 import { badRequest, forbidden, notFound, success } from '../../utils/responses';
 
 // Called by the client
 export const clientCallback = [
+  // Use the middleware to decrypt the data
   etupay.middleware,
+
+  // Create a small middleware to be able to handle payload errors.
+  (error: EtupayError, request: Request, response: Response, next: NextFunction) => {
+    return badRequest(response, Error.InvalidQueryParameters);
+  },
+
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      if (!request.query.payload) {
-        return badRequest(response, Error.InvalidQueryParameters);
-      }
-
       let etupayResponse: EtupayResponse;
-      let cartId: string;
 
-      // Decode the payload and retreive the cartId
-      try {
-        // Retreive the base64 payload
-        etupayResponse = response.locals.etupay;
+      // Retreive the base64 payload
+      etupayResponse = response.locals.etupay;
 
-        // Decode the base64 string to an object
-        const decoded = decodeFromBase64(etupayResponse.serviceData);
-        cartId = decoded.cartId;
-      } catch {
-        // If there is an error, it's due to a bad base64 decoding
-        return badRequest(response, Error.InvalidQueryParameters);
-      }
+      // Decode the base64 string to an object
+      const decoded = decodeFromBase64(etupayResponse.serviceData);
+      const cartId = decoded.cartId;
 
       // Fetch the cart from the cartId
       const cart = await fetchCart(cartId);
@@ -70,4 +66,4 @@ export const clientCallback = [
 ];
 
 // Called by the bank few minutes after
-export const bankCallback = (request: Request, response: Response) => success(response, { transaction: 'valid' });
+export const bankCallback = (request: Request, response: Response) => success(response, { api: 'ok' });

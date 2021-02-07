@@ -13,7 +13,7 @@ import { encryptQrCode, formatPrice } from '../utils/helpers';
 import logger from '../utils/logger';
 import { generateTicket } from '../utils/pdf';
 
-const transporter = nodemailer.createTransport({
+export const transporter = nodemailer.createTransport({
   host: env.email.host,
   port: env.email.port,
   auth: {
@@ -21,7 +21,12 @@ const transporter = nodemailer.createTransport({
     pass: env.email.password,
   },
   pool: true,
+  secure: false,
   maxConnections: 1,
+  tls: {
+    // Rejects TLS errors only if we are not in test environment. (Rejects due to self signed certificate)
+    rejectUnauthorized: !env.test,
+  },
 });
 
 // emailType for welcome mail with tickets and discount codes
@@ -38,42 +43,16 @@ export const sendWelcomeEmail = (data: MailData) => {
   return mailContent;
 };
 
-// export const sendEmail = async (
-//   emailType: { (data: MailData): EmailContent },
-//   to: string | Address | Array<string | Address>,
-//   data: MailData,
-//   attachments?: Mail.Attachment[],
-// ) => {
-//   const mailContent = emailType(data);
-//   const info = await transporter
-//     .sendMail({
-//       from: env.email.sender,
-//       to,
-//       subject: mailContent.title,
-//       html: mailContent.html,
-//       attachments,
-//     })
-//     .then((response) => {
-//       if (response.messageId) {
-//         logger.debug(response.messageId);
-//       } else {
-//         const logMessage = `Mail to ${to} not delivered ?`;
-//         logger.error(logMessage);
-//       }
-//     });
-//   return info;
-// };
-
 export const sendEmail = async (to: string, subject: string, html: string, attachments?: EmailAttachement[]) => {
+  const from = `${env.email.sender.name} <${env.email.sender.address}>`;
+
   const info = await transporter.sendMail({
-    from: env.email.sender,
+    from,
     to,
     subject,
     html,
     attachments,
   });
-
-  console.log(info);
 };
 
 export const generatePayementHtml = (cart: DetailedCart) => {
