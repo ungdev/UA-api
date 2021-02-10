@@ -10,13 +10,6 @@ import Mail from 'nodemailer/lib/mailer';
 /** General **/
 /*************/
 
-export const enum Permission {
-  stream = 'stream',
-  entry = 'entry',
-  anim = 'anim',
-  admin = 'admin',
-}
-
 export interface DecodedToken {
   userId: string;
 }
@@ -42,6 +35,13 @@ export interface Contact {
   email: string;
   subject: string;
   message: string;
+}
+
+export const enum Permission {
+  stream = 'stream',
+  entry = 'entry',
+  anim = 'anim',
+  admin = 'admin',
 }
 
 /************************/

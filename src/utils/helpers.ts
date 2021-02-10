@@ -4,7 +4,6 @@
 
 import crypto from 'crypto';
 import env from './env';
-import * as validators from './validators';
 
 export const encodeToBase64 = (object: object) => {
   const data = JSON.stringify(object);

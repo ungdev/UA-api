@@ -1,8 +1,8 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
 import fs from 'fs/promises';
 import { TournamentId, TransactionState } from '@prisma/client';
 import { createFakeTeam, createFakeUser } from '../utils';
-import { DetailedCart, DetailedCartItem, Error } from '../../src/types';
-import { createCart, fetchCart, updateCart } from '../../src/operations/carts';
+import { createCart, updateCart } from '../../src/operations/carts';
 import { generateTicket } from '../../src/utils/pdf';
 import { getCaptain } from '../../src/utils/teams';
 import database from '../../src/services/database';

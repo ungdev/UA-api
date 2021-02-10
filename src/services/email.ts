@@ -1,15 +1,10 @@
 import { ItemCategory } from '@prisma/client';
-import { User } from 'discord.js';
-import QRCode from 'qrcode';
 import { readFileSync } from 'fs';
 import { render } from 'mustache';
 import nodemailer from 'nodemailer';
-import Mail, { Address } from 'nodemailer/lib/mailer';
-import { fetchItems } from '../operations/item';
-import { fetchUser } from '../operations/user';
-import { CartItem, CartWithCartItems, DetailedCart, EmailAttachement, EmailContent, MailData } from '../types';
+import { DetailedCart, EmailAttachement, EmailContent, MailData } from '../types';
 import env from '../utils/env';
-import { encryptQrCode, formatPrice } from '../utils/helpers';
+import { formatPrice } from '../utils/helpers';
 import logger from '../utils/logger';
 import { generateTicket } from '../utils/pdf';
 
@@ -46,13 +41,15 @@ export const sendWelcomeEmail = (data: MailData) => {
 export const sendEmail = async (to: string, subject: string, html: string, attachments?: EmailAttachement[]) => {
   const from = `${env.email.sender.name} <${env.email.sender.address}>`;
 
-  const info = await transporter.sendMail({
+  await transporter.sendMail({
     from,
     to,
     subject,
     html,
     attachments,
   });
+
+  logger.info(`Send email to ${to}`);
 };
 
 export const generatePayementHtml = (cart: DetailedCart) => {

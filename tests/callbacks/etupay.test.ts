@@ -1,19 +1,14 @@
-import { TransactionState, UserType } from '@prisma/client';
 import crypto from 'crypto';
 import request from 'supertest';
-import { expect } from 'chai';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as cartOperations from '../../src/operations/carts';
-import * as itemOperations from '../../src/operations/item';
 import database from '../../src/services/database';
-import { Cart, Error, User } from '../../src/types';
+import { Cart, Error } from '../../src/types';
 import { createFakeUser } from '../utils';
-import { generateToken } from '../../src/utils/user';
-import { PayBody } from '../../src/controllers/users/createCart';
 import env from '../../src/utils/env';
-import { setShopAllowed } from '../../src/operations/settings';
 import { encodeToBase64, randomInt } from '../../src/utils/helpers';
+import * as emailOperations from '../../src/services/email';
 
 const createEtupayPayload = (etupayBody: object) => {
   // Strinigifies the etupay body
@@ -52,7 +47,7 @@ describe('POST /callbacks/etupay', () => {
   it('should return a valid answer', () => request(app).post('/callbacks/etupay').expect(200, { api: 'ok' }));
 });
 
-describe('GET /callbacks/etupay', () => {
+describe.only('GET /callbacks/etupay', () => {
   let cart: Cart;
   let paidPayload: string;
   let refusedPayload: string;
@@ -134,8 +129,15 @@ describe('GET /callbacks/etupay', () => {
   it('should reject as the payment is already errored', () =>
     request(app).get(`/callbacks/etupay?payload=${refusedPayload}`).expect(403, { error: Error.AlreadyErrored }));
 
-  it('should successfully redirect to the success url', () =>
-    request(app).get(`/callbacks/etupay?payload=${paidPayload}`).expect(302).expect('Location', env.etupay.successUrl));
+  it('should successfully redirect to the success url', () => {
+    // The function send email has been tested by a test unit. We skip it to not having to setup a fake SMTP server
+    sandbox.stub(emailOperations, 'sendEmail').resolves();
+
+    return request(app)
+      .get(`/callbacks/etupay?payload=${paidPayload}`)
+      .expect(302)
+      .expect('Location', env.etupay.successUrl);
+  });
 
   it('should fail as the cart is already paid', () =>
     request(app).get(`/callbacks/etupay?payload=${paidPayload}`).expect(403, { error: Error.AlreadyPaid }));

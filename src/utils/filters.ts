@@ -1,5 +1,5 @@
 import { pick } from 'lodash';
-import { Cart, CartItem, CartWithCartItems, Item, Team, Tournament, User } from '../types';
+import { CartItem, CartWithCartItems, Item, Team, Tournament, User } from '../types';
 
 export const filterUserRestricted = (user: User) => pick(user, ['id', 'type']);
 

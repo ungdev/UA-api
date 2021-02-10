@@ -217,7 +217,7 @@ describe('POST /users/:userId/carts', () => {
   it('should fail as the item is no longer available', async () => {
     const visitors: { firstname: string; lastname: string }[] = [];
 
-    for (let i = 0; i < 3; i++) {
+    for (let index = 0; index < 3; index += 1) {
       visitors.push({ firstname: faker.name.firstName(), lastname: faker.name.lastName() });
     }
 

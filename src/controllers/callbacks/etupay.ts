@@ -1,9 +1,9 @@
 import { TransactionState } from '@prisma/client';
-import { ErrorRequestHandler, NextFunction, request, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { fetchCart, updateCart } from '../../operations/carts';
 import { sendTickets } from '../../services/email';
 import * as etupay from '../../services/etupay';
-import { Error, EtupayError, EtupayResponse } from '../../types';
+import { Error, EtupayError } from '../../types';
 import env from '../../utils/env';
 import { decodeFromBase64 } from '../../utils/helpers';
 import { badRequest, forbidden, notFound, success } from '../../utils/responses';
@@ -14,20 +14,16 @@ export const clientCallback = [
   etupay.middleware,
 
   // Create a small middleware to be able to handle payload errors.
-  (error: EtupayError, request: Request, response: Response, next: NextFunction) => {
-    return badRequest(response, Error.InvalidQueryParameters);
-  },
+  (error: EtupayError, request: Request, response: Response) => badRequest(response, Error.InvalidQueryParameters),
 
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      let etupayResponse: EtupayResponse;
-
       // Retreive the base64 payload
-      etupayResponse = response.locals.etupay;
+      const etupayResponse = response.locals.etupay;
 
       // Decode the base64 string to an object
       const decoded = decodeFromBase64(etupayResponse.serviceData);
-      const cartId = decoded.cartId;
+      const { cartId } = decoded;
 
       // Fetch the cart from the cartId
       const cart = await fetchCart(cartId);
@@ -55,8 +51,8 @@ export const clientCallback = [
         return response.redirect(env.etupay.errorUrl);
       }
 
-      // Send the tickets to the user. We do not await this function to have the redirection imediately
-      sendTickets(updatedCart);
+      // Send the tickets to the user
+      await sendTickets(updatedCart);
 
       return response.redirect(env.etupay.successUrl);
     } catch (error) {

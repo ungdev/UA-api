@@ -1,3 +1,4 @@
+import { TransactionState } from '@prisma/client';
 import database from '../services/database';
 import { Item } from '../types';
 
@@ -18,6 +19,11 @@ export const fetchItems = async (): Promise<Item[]> => {
           const cartItems = await database.cartItem.findMany({
             where: {
               itemId: item.id,
+              cart: {
+                transactionState: {
+                  in: [TransactionState.paid, TransactionState.pending],
+                },
+              },
             },
           });
 

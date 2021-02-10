@@ -1,12 +1,10 @@
-import { CartItem, TournamentId } from '@prisma/client';
-import { readFileSync, createWriteStream } from 'fs';
+import { TournamentId } from '@prisma/client';
+import { readFileSync } from 'fs';
 import QRCode from 'qrcode';
 import PDFkit from 'pdfkit';
-import { fetchUser } from '../operations/user';
 import { encryptQrCode } from './helpers';
 import { fetchTeam } from '../operations/team';
-import { DetailedCartItem, EmailAttachement, Error } from '../types';
-import Mail from 'nodemailer/lib/mailer';
+import { DetailedCartItem, EmailAttachement } from '../types';
 
 const loadImage = (tournamentId: string) =>
   `data:image/jpg;base64,${readFileSync(`assets/email/backgrounds/${tournamentId}.jpg`, 'base64')}`;
@@ -76,8 +74,8 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
 
     // Concat all chunks in one buffer
     document.on('end', () => {
-      const pdf = Buffer.concat(buffers);
-      resolve(pdf);
+      const assembledPdf = Buffer.concat(buffers);
+      resolve(assembledPdf);
     });
 
     document.on('error', reject);

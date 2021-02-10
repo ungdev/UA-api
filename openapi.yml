@@ -250,6 +250,31 @@ components:
           type: string
           nullable: true
 
+    Log:
+      type: object
+      properties:
+        id:
+          type: string
+          example: A1E4FD
+        event:
+          type: string
+          example: create
+        userId:
+          type: string
+          example: A1E4FD
+        username:
+          type: string
+          example: Herel
+        targetId:
+          type: string
+          example: A1E4FD
+        targetName:
+          type: string
+          example: UA
+        targetType:
+          type: string
+          example: team
+
   responses:
     400Errored:
       description: Requête erronée
@@ -512,17 +537,12 @@ paths:
           schema:
             type: boolean
         - in: query
-          name: pageSize
-          description: "(Pagination) Longueur de la page. Doit être utilisé avec 'pageIndex'"
-          schema:
-            type: integer
-            minimum: 1
-        - in: query
-          name: pageIndex
-          description: "(Pagination) Indice de la page. Doit être utilisé avec 'pageSize'"
+          name: page
+          description: '(Pagination) Indice de la page'
           schema:
             type: integer
             minimum: 0
+          required: true
       responses:
         200:
           description: La liste de tous les utilisateurs filtrés est renvoyée
@@ -608,6 +628,59 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CartWithCartItems'
+        400:
+          $ref: '#/components/responses/400Errored'
+        401:
+          $ref: '#/components/responses/401Unauthenticated'
+        403:
+          $ref: '#/components/responses/403Unauthorized'
+        404:
+          $ref: '#/components/responses/404UserNotFound'
+
+  /admin/logs:
+    get:
+      summary: Récupère les actions effectués par les utilisateurs
+      description: Récupère les actions effectués par les utilisateurs.<br/>
+        **Permission 'admin' requise.**
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+        - in: query
+          name: teamId
+          schema:
+            type: string
+        - in: query
+          name: page
+          description: '(Pagination) Indice de la page'
+          schema:
+            type: integer
+            minimum: 0
+          required: true
+
+      responses:
+        200:
+          description: Un tableau de logsf
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Log'
+                  pageIndex:
+                    type: number
+                    example: 1
+                  maxPages:
+                    type: number
+                    example: 5
         400:
           $ref: '#/components/responses/400Errored'
         401:

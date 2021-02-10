@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import crypto from 'crypto';
 import { encryptQrCode, decryptQrCode } from '../../src/utils/helpers';
 
 describe('Test helpers', () => {

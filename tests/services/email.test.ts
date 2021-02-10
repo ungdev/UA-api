@@ -1,18 +1,14 @@
-import { SMTPServer, SMTPServerAddress, SMTPServerSession } from 'smtp-server';
-import fs from 'fs/promises';
-import mangetesmorts from 'fs';
-import { ItemCategory, TournamentId, TransactionState, UserType } from '@prisma/client';
-import { createFakeTeam, createFakeUser } from '../utils';
-import { DetailedCart, DetailedCartItem, PrimitiveCartItem } from '../../src/types';
-import { createCart, fetchCart, updateCart } from '../../src/operations/carts';
-import { generatePayementHtml, sendEmail, sendTickets } from '../../src/services/email';
+import fs from 'fs';
+import { SMTPServer } from 'smtp-server';
+import { ItemCategory, TransactionState, UserType } from '@prisma/client';
+import { expect } from 'chai';
+import { createFakeUser } from '../utils';
+import { PrimitiveCartItem } from '../../src/types';
+import { createCart, updateCart } from '../../src/operations/carts';
+import { generatePayementHtml, sendEmail } from '../../src/services/email';
 import { randomInt } from '../../src/utils/helpers';
-import { getCaptain } from '../../src/utils/teams';
 import { fetchItems } from '../../src/operations/item';
 import env from '../../src/utils/env';
-import { expect } from 'chai';
-import { address } from 'faker';
-import { sandbox } from '../setup';
 import database from '../../src/services/database';
 
 describe('Tests the email utils', () => {
@@ -102,6 +98,6 @@ describe('Tests the email utils', () => {
 
     const html = generatePayementHtml(detailedCart);
 
-    await fs.writeFile('artifacts/payment.html', html);
+    fs.writeFileSync('artifacts/payment.html', html);
   });
 });

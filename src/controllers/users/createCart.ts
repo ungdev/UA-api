@@ -162,6 +162,8 @@ export default [
           if (cartItem.itemId === item.id) {
             return previous + cartItem.quantity;
           }
+
+          return previous;
         }, 0);
 
         // If the user has ordered at least one team and the items left are less than in stock, throw an error

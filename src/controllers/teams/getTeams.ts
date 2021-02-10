@@ -3,10 +3,8 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { validateQuery } from '../../middlewares/validation';
 import { fetchTeams } from '../../operations/team';
-import { fetchTournament } from '../../operations/tournament';
-import { Error } from '../../types';
 import { filterTeam } from '../../utils/filters';
-import { notFound, success } from '../../utils/responses';
+import { success } from '../../utils/responses';
 import * as validators from '../../utils/validators';
 
 export default [

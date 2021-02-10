@@ -4,7 +4,6 @@ import { createUser, fetchUser, removeUserRegisterToken } from '../src/operation
 import { User } from '../src/types';
 import { createTeam, fetchTeam, joinTeam, lockTeam } from '../src/operations/team';
 import { forcePay } from '../src/operations/carts';
-import { bool, boolean, number } from 'joi';
 
 export const createFakeUser = async ({
   username = faker.internet.userName(),
