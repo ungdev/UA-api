@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { fetchCart, updateCart } from '../../operations/carts';
 import { sendTickets } from '../../services/email';
 import * as etupay from '../../services/etupay';
-import { Error, EtupayError } from '../../types';
+import { Error, EtupayError, EtupayResponse } from '../../types';
 import env from '../../utils/env';
 import { decodeFromBase64 } from '../../utils/helpers';
 import { badRequest, forbidden, notFound, success } from '../../utils/responses';
@@ -19,7 +19,7 @@ export const clientCallback = [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       // Retreive the base64 payload
-      const etupayResponse = response.locals.etupay;
+      const etupayResponse = response.locals.etupay as EtupayResponse;
 
       // Decode the base64 string to an object
       const decoded = decodeFromBase64(etupayResponse.serviceData);
@@ -47,7 +47,7 @@ export const clientCallback = [
       const updatedCart = await updateCart(cartId, etupayResponse.transactionId, etupayResponse.step);
 
       // If the transaction state wasn't paid, redirect to the error url
-      if (etupayResponse.step !== TransactionState.paid) {
+      if (!etupayResponse.paid) {
         return response.redirect(env.etupay.errorUrl);
       }
 
