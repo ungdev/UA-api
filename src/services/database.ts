@@ -23,6 +23,7 @@ const database = new PrismaClient({
 });
 
 // If we are not in production, enables database logging
+// The logging level is reduced as prisma produces lots of logs
 if (!env.production) {
   database.$on('query', (event) => logger.silly(event.query));
   database.$on('info', (event) => logger.debug(event.message));

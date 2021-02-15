@@ -25,6 +25,7 @@ describe('PUT /users/:userId', () => {
 
   after(async () => {
     // Delete the user created
+    await database.log.deleteMany();
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.user.deleteMany();
@@ -85,5 +86,20 @@ describe('PUT /users/:userId', () => {
 
     // Check if the object was filtered
     expect(body.updatedAt).to.be.undefined;
+
+    const logs = await database.log.findMany();
+    expect(logs).to.have.lengthOf(1);
+
+    const [log] = logs;
+
+    // Check if the log is correct and doesn't include the password fields
+    expect(log).to.deep.equal({
+      path: `/users/${user.id}`,
+      body: { username: body.username },
+      method: 'PUT',
+      userId: body.id,
+      id: log.id,
+      createdAt: log.createdAt,
+    });
   });
 });

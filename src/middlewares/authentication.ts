@@ -3,6 +3,7 @@ import { getRequestUser } from '../utils/user';
 import { forbidden, unauthenticated } from '../utils/responses';
 import { Error, Permission } from '../types';
 import { isLoginAllowed } from './settings';
+import { createLog } from '../operations/log';
 
 // Checks the user is authenticated. If not, it will return an error
 export const isAuthenticated = [
@@ -14,6 +15,19 @@ export const isAuthenticated = [
     // The user must exists
     if (!user) {
       return unauthenticated(response);
+    }
+
+    // Logs the request if it makes modifications and if was successful
+
+    // Check if the request has the goal to make modifications
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
+      // Wait the response to be ended
+      response.on('finish', async () => {
+        // Checks if the response was successful (is a 2xx response)
+        if (Math.floor(response.statusCode / 100) === 2) {
+          await createLog(request.method, request.originalUrl, user.id, request.body);
+        }
+      });
     }
 
     return next();

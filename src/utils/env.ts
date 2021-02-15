@@ -1,7 +1,6 @@
 /* eslint-disable consistent-return */
 import dotenv from 'dotenv';
 import crypto from 'crypto';
-import logger from './logger';
 
 dotenv.config();
 
@@ -102,7 +101,14 @@ const env = {
     token: loadEnv('DISCORD_TOKEN'),
     server: loadEnv('DISCORD_SERVER'),
   },
+  log: {
+    level: loadEnv('LOG_LEVEL') || 'silly',
+  },
 };
+
+// Create a warn log array to use it after winsotn initialization
+// We can't import Winsotn as there would be a circular dependency because winston depends of this file
+export const warnLogs: string[] = [];
 
 const optionalVariables = ['email.user', 'email.password'];
 
@@ -112,7 +118,8 @@ const throwOrWarn = (key: string, reason: string) => {
   // We only use the litteral check because the env.development variable is not defined yet
   // Check if we are not in production or the variable is optional
   if (process.env.NODE_ENV !== 'production' || optionalVariables.includes(key)) {
-    logger.warn(message);
+    // Push the warn log to the array
+    warnLogs.push(message);
   } else {
     throw new TypeError(message);
   }

@@ -23,6 +23,7 @@ describe('DELETE /teams/:teamId/joinRequests/:userId', () => {
   });
 
   after(async () => {
+    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });

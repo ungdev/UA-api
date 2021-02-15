@@ -7,6 +7,7 @@ import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { getIp } from './network';
 import { getRequestUser } from './user';
+import env, { warnLogs } from './env';
 
 // We can't require env here or we will have a require loop
 
@@ -17,8 +18,8 @@ const consoleTransport = new transports.Console({
     colorize(),
     printf(({ level, message }) => `${moment().format('HH:mm:ss')} ${level}: ${message}`),
   ),
-  level: process.env.LOG_LEVEL || 'silly',
-  silent: process.env.NODE_ENV === 'test', // Doesn't log if we are in testing environment
+  level: env.log.level,
+  silent: env.test, // Doesn't log if we are in testing environment
 });
 
 const loggingTransports: Array<ConsoleTransportInstance> = [consoleTransport];
@@ -36,6 +37,11 @@ logger.error = (error) => {
     logger.log({ level: 'error', message: error });
   }
 };
+
+// Logs the warning produced by the env file
+for (const log of warnLogs) {
+  logger.warn(log);
+}
 
 export default logger;
 

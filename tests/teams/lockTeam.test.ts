@@ -28,6 +28,7 @@ describe('POST /teams/:teamId/lock', () => {
   });
 
   after(async () => {
+    await database.log.deleteMany();
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();

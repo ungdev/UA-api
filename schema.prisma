@@ -59,17 +59,17 @@ model Setting {
 }
 
 model Team {
-  id           String     @id
+  id           String         @id
   name         String
   tournamentId TournamentId
-  captainId    String     @unique
+  captainId    String         @unique
   lockedAt     DateTime?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now()) @updatedAt
-  captain      User       @relation(fields: [captainId], references: [id])
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
-  askingUsers  User[]     @relation("teamAskingUsers")
-  users        User[]     @relation("teamUsers")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now()) @updatedAt
+  captain      User           @relation(fields: [captainId], references: [id])
+  tournament   Tournament     @relation(fields: [tournamentId], references: [id])
+  askingUsers  User[]         @relation("teamAskingUsers")
+  users        User[]         @relation("teamUsers")
 
   @@index([id])
   @@unique([name, tournamentId])
@@ -89,6 +89,19 @@ model Tournament {
   teams                  Team[]
 
   @@map("tournaments")
+}
+
+model Log {
+  id               String     @id
+  method           String
+  path             String
+  body             Json?
+  userId           String
+  createdAt        DateTime        @default(now())
+  user             User            @relation(fields: [userId], references: [id])
+
+  @@index([id])
+  @@map("logs")
 }
 
 model User {
