@@ -9,6 +9,7 @@ import deleteTeamRequest from './deleteTeamRequest';
 import lockTeam from './lockTeam';
 import acceptRequest from './acceptRequest';
 import kickUser from './kickUser';
+import promoteCaptain from './promoteCaptain';
 
 const router = Router();
 
@@ -18,6 +19,7 @@ router.get('/:teamId', getTeam);
 router.put('/:teamId', updateTeam);
 router.delete('/:teamId', deleteTeam);
 router.delete('/:teamId/users/:userId', kickUser);
+router.put('/:teamId/captain/:userId', promoteCaptain);
 
 router.post('/:teamId/joinRequests', createTeamRequest);
 router.delete('/:teamId/joinRequests/:userId', deleteTeamRequest);

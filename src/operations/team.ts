@@ -145,6 +145,18 @@ export const kickUser = (userId: string) =>
     },
   });
 
+export const promoteUser = (teamId: string, newCaptainId: string) =>
+  database.team.update({
+    data: {
+      captain: {
+        connect: { id: newCaptainId },
+      },
+    },
+    where: {
+      id: teamId,
+    },
+  });
+
 export const joinTeam = async (teamId: string, user: User) => {
   // For this version of prisma, we need to fetch to check if there was already a askingTeam. It should be solved in the next versions
   // Please correct this if this issue is close and merged https://github.com/prisma/prisma/issues/3069

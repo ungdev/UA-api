@@ -1,3 +1,4 @@
+import { UserType } from '@prisma/client';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app';
@@ -10,7 +11,7 @@ import { generateToken } from '../../src/utils/user';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
-describe.only('DELETE /teams/:teamId/users/:userId', () => {
+describe('DELETE /teams/:teamId/users/:userId', () => {
   let userToKick: User;
 
   let userToKickToken: string;
@@ -124,7 +125,7 @@ describe.only('DELETE /teams/:teamId/users/:userId', () => {
     await teamOperations.joinTeam(team.id, removedUser);
   });
 
-  it('should succesfully kick the user (as the captain of the team)', async () => {
+  it('should succesfully kick the user (as the captain of the team and as a player)', async () => {
     const captain = getCaptain(team);
     const captainToken = generateToken(captain);
 
@@ -135,6 +136,28 @@ describe.only('DELETE /teams/:teamId/users/:userId', () => {
 
     const kickedUser = await fetchUser(userToKick.id);
     expect(kickedUser.teamId).to.be.null;
+
+    // Rejoin the team for next tests
+    await teamOperations.joinTeam(team.id, kickedUser);
+  });
+
+  it('should succesfully kick the user (as the captain of the team and as a coach)', async () => {
+    const captain = getCaptain(team);
+    const captainToken = generateToken(captain);
+
+    // Set the captain to a coach
+    await database.user.update({ data: { type: UserType.coach }, where: { id: captain.id } });
+
+    await request(app)
+      .delete(`/teams/${team.id}/users/${userToKick.id}`)
+      .set('Authorization', `Bearer ${captainToken}`)
+      .expect(204);
+
+    const kickedUser = await fetchUser(userToKick.id);
+    expect(kickedUser.teamId).to.be.null;
+
+    // Rejoin the team for next tests
+    await teamOperations.joinTeam(team.id, kickedUser);
   });
 
   it('should fail as the user has already been kicked', async () => {
