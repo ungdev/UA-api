@@ -100,7 +100,8 @@ model Log {
   createdAt        DateTime        @default(now())
   user             User            @relation(fields: [userId], references: [id])
 
-  @@index([id])
+  // We create an index on the userId as the search most of the time used with a userId
+  @@index([userId])
   @@map("logs")
 }
 

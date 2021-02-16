@@ -14,7 +14,10 @@ export const clientCallback = [
   etupay.middleware,
 
   // Create a small middleware to be able to handle payload errors.
-  (error: EtupayError, request: Request, response: Response) => badRequest(response, Error.InvalidQueryParameters),
+  // The eslint disabling is important because the error argument can only be gotten in the 4 arguments function
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (error: EtupayError, request: Request, response: Response, next: NextFunction) =>
+    badRequest(response, Error.InvalidQueryParameters),
 
   async (request: Request, response: Response, next: NextFunction) => {
     try {
