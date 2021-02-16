@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import * as Sentry from '@sentry/node';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { UserType } from '@prisma/client';
 import { Error, DecodedToken } from '../types';
@@ -39,6 +40,9 @@ export const initUserRequest = async (request: Request, response: Response, next
     if (user.type === UserType.visitor) {
       return forbidden(response, Error.LoginAsVisitor);
     }
+
+    // Set the sentry user to identify the problem in case of 500
+    Sentry.setUser({ id: user.id, username: user.username, email: user.email });
 
     // Store it in `response.locals.user` so that we can use it later
     response.locals.user = user;

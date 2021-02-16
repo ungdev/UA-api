@@ -9,11 +9,11 @@ import { unsupportedMediaType } from '../utils/responses';
  */
 export default [
   (request: Request, response: Response, next: NextFunction) => {
-    const noBodyMethods = ['HEAD', 'GET'];
+    const bodyMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
     const contentType = request.get('Content-Type');
 
-    // Checks if the method doesn't allow body or the body is empty
-    if (noBodyMethods.includes(request.method) || !contentType || contentType === 'application/json') {
+    // Continues if the method can't contain a body, or that the content type is not precised or that is precised to be json
+    if (!bodyMethods.includes(request.method) || !contentType || contentType === 'application/json') {
       return next();
     }
 

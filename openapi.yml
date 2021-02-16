@@ -1059,6 +1059,18 @@ paths:
         400:
           $ref: '#/components/responses/400Errored'
 
+  /test-sentry:
+    get:
+      summary: Lance une erreur 500 pour vérifier que Sentry gère bien l'erreur
+      description: Pour des raisons de sécurité, il est nécessaire d'exécuter la requête depuis le serveur
+      tags:
+        - Général
+      responses:
+        500:
+          description: Le serveur a bien lancé une erreur interne
+        403:
+          $ref: '#/components/responses/403Unauthorized'
+
   /items:
     get:
       summary: Renvoie la liste des items en vente

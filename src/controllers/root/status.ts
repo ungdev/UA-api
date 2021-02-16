@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { fetchSettings } from '../operations/settings';
-import { success } from '../utils/responses';
-import env from '../utils/env';
+import { fetchSettings } from '../../operations/settings';
+import { success } from '../../utils/responses';
+import env from '../../utils/env';
 
 export default [
   async (request: Request, response: Response, next: NextFunction) => {
