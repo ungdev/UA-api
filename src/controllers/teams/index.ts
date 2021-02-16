@@ -8,6 +8,7 @@ import createTeamRequest from './createTeamRequest';
 import deleteTeamRequest from './deleteTeamRequest';
 import lockTeam from './lockTeam';
 import acceptRequest from './acceptRequest';
+import kickUser from './kickUser';
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.post('/', createTeam);
 router.get('/:teamId', getTeam);
 router.put('/:teamId', updateTeam);
 router.delete('/:teamId', deleteTeam);
+router.delete('/:teamId/users/:userId', kickUser);
 
 router.post('/:teamId/joinRequests', createTeamRequest);
 router.delete('/:teamId/joinRequests/:userId', deleteTeamRequest);
