@@ -155,9 +155,6 @@ describe('DELETE /teams/:teamId/users/:userId', () => {
 
     const kickedUser = await fetchUser(userToKick.id);
     expect(kickedUser.teamId).to.be.null;
-
-    // Rejoin the team for next tests
-    await teamOperations.joinTeam(team.id, kickedUser);
   });
 
   it('should fail as the user has already been kicked', async () => {

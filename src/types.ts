@@ -173,6 +173,7 @@ export const enum Error {
   OrderNotFound = 'La commande est introuvable',
   ItemNotFound = "L'objet est introuvable",
   TournamentNotFound = 'Le tournoi est introuvable',
+  TicketNotFound = 'Le ticket est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
 
   // 409
