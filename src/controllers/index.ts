@@ -10,6 +10,7 @@ import teams from './teams';
 import auth from './auth';
 import tickets from './tickets';
 import callbacks from './callbacks';
+import admin from './admin';
 
 const router = Router();
 
@@ -39,5 +40,8 @@ router.use('/tickets', tickets);
 
 // Callbacks routes
 router.use('/callbacks', callbacks);
+
+// Admin routes
+router.use('/admin', admin);
 
 export default router;
