@@ -75,6 +75,12 @@ export const updateCart = (
     },
   });
 
+export const refundCart = (cartId: string): Promise<Cart> =>
+  database.cart.update({
+    data: { transactionState: TransactionState.refunded },
+    where: { id: cartId },
+  });
+
 export const forcePay = (userId: string, userType: UserType) => {
   let itemId;
 
