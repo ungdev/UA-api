@@ -1,5 +1,4 @@
 import { TransactionState } from '@prisma/client';
-import { request } from 'express';
 import database from '../services/database';
 import { Item } from '../types';
 

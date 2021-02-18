@@ -2,11 +2,10 @@ import { ItemCategory, TransactionState } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import { isAuthenticated } from '../../middlewares/authentication';
 import { fetchCartItem } from '../../operations/cartItem';
-import { fetchCart, fetchCarts } from '../../operations/carts';
-import { fetchTournaments } from '../../operations/tournament';
+import { fetchCart } from '../../operations/carts';
 import { Error } from '../../types';
 import { generateTicket } from '../../utils/pdf';
-import { forbidden, notFound, success } from '../../utils/responses';
+import { forbidden, notFound } from '../../utils/responses';
 import { getRequestUser } from '../../utils/user';
 
 export default [
