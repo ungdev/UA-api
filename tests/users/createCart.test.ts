@@ -14,7 +14,7 @@ import { PayBody } from '../../src/controllers/users/createCart';
 import env from '../../src/utils/env';
 import { setShopAllowed } from '../../src/operations/settings';
 
-describe.only('POST /users/current/carts', () => {
+describe('POST /users/current/carts', () => {
   let user: User;
   let token: string;
 

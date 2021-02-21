@@ -7,7 +7,7 @@ import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/user';
 
-describe('POST /users/:userId/carts', () => {
+describe('POST /users/current/carts', () => {
   let user: User;
   let token: string;
 
@@ -23,27 +23,21 @@ describe('POST /users/:userId/carts', () => {
     await database.user.deleteMany();
   });
 
-  it('should fail because the user is not itself', async () => {
-    const otherUser = await createFakeUser();
-    const otherToken = generateToken(otherUser);
-
-    await request(app)
-      .get(`/users/${user.id}/carts`)
-      .set('Authorization', `Bearer ${otherToken}`)
-      .expect(403, { error: Error.NotSelf });
+  it('should fail because the user is not authenticated', async () => {
+    await request(app).get(`/users/current/carts`).expect(401, { error: Error.Unauthenticated });
   });
 
   it('should throw an unexpected error', async () => {
     sandbox.stub(cartOperations, 'fetchCarts').throws('Unexpected error');
 
     await request(app)
-      .get(`/users/${user.id}/carts`)
+      .get(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .expect(500, { error: Error.InternalServerError });
   });
 
   it('should return an empty cart', async () => {
-    await request(app).get(`/users/${user.id}/carts`).set('Authorization', `Bearer ${token}`).expect(200, []);
+    await request(app).get(`/users/current/carts`).set('Authorization', `Bearer ${token}`).expect(200, []);
   });
 
   it('should return a pending cart', async () => {
@@ -60,7 +54,7 @@ describe('POST /users/:userId/carts', () => {
     const [cartItem] = cart.cartItems;
 
     await request(app)
-      .get(`/users/${user.id}/carts`)
+      .get(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200, [
         {
