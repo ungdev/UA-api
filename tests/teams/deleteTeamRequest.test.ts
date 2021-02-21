@@ -10,7 +10,7 @@ import { generateToken } from '../../src/utils/user';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
-describe.only('DELETE /teams/current/joinRequests/:userId', () => {
+describe('DELETE /teams/current/joinRequests/:userId', () => {
   let user: User;
   let token: string;
   let team: Team;
