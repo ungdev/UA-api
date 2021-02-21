@@ -10,7 +10,7 @@ import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/user';
 import { getCaptain } from '../../src/utils/teams';
 
-describe.only('PUT /teams/current/captain/:userId', () => {
+describe('PUT /teams/current/captain/:userId', () => {
   let captain: User;
   let team: Team;
   let captainToken: string;
@@ -41,17 +41,6 @@ describe.only('PUT /teams/current/captain/:userId', () => {
       .put(`/teams/current/captain/A12B3C`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(404, { error: Error.UserNotFound });
-  });
-
-  it('should error as the request is not logged as the captain of his team', async () => {
-    const otherTeam = await createFakeTeam();
-    const otherCaptain = getCaptain(otherTeam);
-    const otherCaptainToken = generateToken(otherCaptain);
-
-    await request(app)
-      .put(`/teams/current/captain/${futureCaptain.id}`)
-      .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.NotInTeam });
   });
 
   it('should error as the user is in another team', async () => {

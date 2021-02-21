@@ -37,8 +37,10 @@ export const isAuthenticated = [
 export const isNotAuthenticated = [
   isLoginAllowed,
   (request: Request, response: Response, next: NextFunction) => {
+    const { user } = getRequestInfo(response);
+
     // If there is a user in the locals
-    if (!getRequestInfo(response)) {
+    if (!user) {
       return next();
     }
 

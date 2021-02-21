@@ -9,7 +9,7 @@ import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 import { fetchUser } from '../../src/operations/user';
 
-describe.only('DELETE /teams/current/joinRequests/current', () => {
+describe('DELETE /teams/current/joinRequests/current', () => {
   let user: User;
   let token: string;
   let team: Team;

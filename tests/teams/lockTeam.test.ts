@@ -41,17 +41,6 @@ describe('POST /teams/current/lock', () => {
     await request(app).post('/teams/current/lock').expect(401, { error: Error.Unauthenticated });
   });
 
-  it('should error as the request is not logged as the captain of his team', async () => {
-    const otherTeam = await createFakeTeam();
-    const otherCaptain = getCaptain(otherTeam);
-    const otherCaptainToken = generateToken(otherCaptain);
-
-    await request(app)
-      .post('/teams/current/lock')
-      .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.NotCaptain });
-  });
-
   it('should error as the team is not full', async () => {
     const halfTeam = await createFakeTeam({ members: 2 });
     const halfCaptain = getCaptain(halfTeam);

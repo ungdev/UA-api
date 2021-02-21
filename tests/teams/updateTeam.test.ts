@@ -9,7 +9,7 @@ import { createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 import { getCaptain } from '../../src/utils/teams';
 
-describe('PUT /teams/:teamId', () => {
+describe('PUT /teams/current', () => {
   let captain: User;
   let team: Team;
   let captainToken: string;
@@ -27,36 +27,16 @@ describe('PUT /teams/:teamId', () => {
     await database.user.deleteMany();
   });
 
-  it("should error as the team id doesn't exists", async () => {
-    await request(app)
-      .put('/teams/A1B2C3')
-      .send({ name: 'yolo' })
-      .set('Authorization', `Bearer ${captainToken}`)
-      .expect(404, { error: Error.TeamNotFound });
-  });
-
   it('should error as the body is incorrect', async () => {
     await request(app)
-      .put(`/teams/${team.id}`)
+      .put('/teams/current')
       .send({ fake: 'fake' })
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(400, { error: Error.InvalidBody });
   });
 
   it('should error as the token is missing', async () => {
-    await request(app).put(`/teams/${team.id}`).send({ name: 'yolo' }).expect(401, { error: Error.Unauthenticated });
-  });
-
-  it('should error as the request is not logged as the captain of his team', async () => {
-    const otherTeam = await createFakeTeam();
-    const otherCaptain = getCaptain(otherTeam);
-    const otherCaptainToken = generateToken(otherCaptain);
-
-    await request(app)
-      .put(`/teams/${team.id}`)
-      .send({ name: 'yolo' })
-      .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.NotCaptain });
+    await request(app).put('/teams/current').send({ name: 'yolo' }).expect(401, { error: Error.Unauthenticated });
   });
 
   it('should error as the request is logged as the member of the team', async () => {
@@ -64,7 +44,7 @@ describe('PUT /teams/:teamId', () => {
     const memberToken = generateToken(member);
 
     await request(app)
-      .put(`/teams/${team.id}`)
+      .put('/teams/current')
       .send({ name: 'yolo' })
       .set('Authorization', `Bearer ${memberToken}`)
       .expect(403, { error: Error.NotCaptain });
@@ -74,7 +54,7 @@ describe('PUT /teams/:teamId', () => {
     sandbox.stub(teamOperations, 'updateTeam').throws('Unknown error');
 
     await request(app)
-      .put(`/teams/${team.id}`)
+      .put('/teams/current')
       .send({ name: 'yolo' })
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(500, { error: Error.InternalServerError });
@@ -86,7 +66,7 @@ describe('PUT /teams/:teamId', () => {
     const lockedToken = generateToken(lockedCaptain);
 
     await request(app)
-      .put(`/teams/${lockedTeam.id}`)
+      .put('/teams/current')
       .send({ name: 'yolo' })
       .set('Authorization', `Bearer ${lockedToken}`)
       .expect(403, { error: Error.TeamLocked });
@@ -94,7 +74,7 @@ describe('PUT /teams/:teamId', () => {
 
   it('should update the team', async () => {
     const { body } = await request(app)
-      .put(`/teams/${team.id}`)
+      .put('/teams/current')
       .send({ name: 'yolo' })
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(200);
@@ -106,5 +86,17 @@ describe('PUT /teams/:teamId', () => {
 
     // Check if the object was filtered
     expect(body.updatedAt).to.be.undefined;
+  });
+
+  it('should error the team name already exists', async () => {
+    const otherTeam = await createFakeTeam();
+    const otherCaptain = getCaptain(otherTeam);
+    const otherCaptainToken = generateToken(otherCaptain);
+
+    await request(app)
+      .put('/teams/current')
+      .send({ name: 'yolo' })
+      .set('Authorization', `Bearer ${otherCaptainToken}`)
+      .expect(409, { error: Error.TeamAlreadyExists });
   });
 });
