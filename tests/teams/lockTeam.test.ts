@@ -10,7 +10,7 @@ import { generateToken } from '../../src/utils/user';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchTournament } from '../../src/operations/tournament';
 
-describe.only('POST /teams/current/lock', () => {
+describe('POST /teams/current/lock', () => {
   let captain: User;
   let team: Team;
   let captainToken: string;

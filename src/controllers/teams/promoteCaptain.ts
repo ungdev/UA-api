@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
-import { fetchTeam, promoteUser } from '../../operations/team';
+import { promoteUser } from '../../operations/team';
 import { fetchUser } from '../../operations/user';
 import { Error } from '../../types';
 import { filterTeam } from '../../utils/filters';
-import { forbidden, success } from '../../utils/responses';
+import { forbidden, notFound, success } from '../../utils/responses';
+import { getRequestInfo } from '../../utils/user';
 
 export default [
   // Middlewares
@@ -14,18 +15,21 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { userId, teamId } = request.params;
+      const { team } = getRequestInfo(response);
+
+      const { userId } = request.params;
 
       const userToPromote = await fetchUser(userId);
 
+      // Check if the user exists
+      if (!userToPromote) return notFound(response, Error.UserNotFound);
+
       // Check that the user is in the team id
-      if (userToPromote.teamId !== teamId) return forbidden(response, Error.NotInTeam);
+      if (userToPromote.teamId !== team.id) return forbidden(response, Error.NotInTeam);
 
-      await promoteUser(teamId, userId);
+      const updatedTeam = await promoteUser(team.id, userId);
 
-      const team = await fetchTeam(teamId);
-
-      return success(response, filterTeam(team));
+      return success(response, filterTeam(updatedTeam));
     } catch (error) {
       return next(error);
     }

@@ -10,7 +10,7 @@ import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/user';
 import { getCaptain } from '../../src/utils/teams';
 
-describe('PUT /teams/:teamId/captain/:userId', () => {
+describe.only('PUT /teams/current/captain/:userId', () => {
   let captain: User;
   let team: Team;
   let captainToken: string;
@@ -32,17 +32,15 @@ describe('PUT /teams/:teamId/captain/:userId', () => {
     await database.user.deleteMany();
   });
 
-  it("should error as the team id doesn't exists", async () => {
-    await request(app)
-      .put(`/teams/A1B2C3/captain/${futureCaptain.id}`)
-      .set('Authorization', `Bearer ${captainToken}`)
-      .expect(404, { error: Error.TeamNotFound });
+  it('should error as the token is missing', async () => {
+    await request(app).put(`/teams/current/captain/${futureCaptain.id}`).expect(401, { error: Error.Unauthenticated });
   });
 
-  it('should error as the token is missing', async () => {
+  it('should error as the user is unknown', async () => {
     await request(app)
-      .put(`/teams/${team.id}/captain/${futureCaptain.id}`)
-      .expect(401, { error: Error.Unauthenticated });
+      .put(`/teams/current/captain/A12B3C`)
+      .set('Authorization', `Bearer ${captainToken}`)
+      .expect(404, { error: Error.UserNotFound });
   });
 
   it('should error as the request is not logged as the captain of his team', async () => {
@@ -51,9 +49,9 @@ describe('PUT /teams/:teamId/captain/:userId', () => {
     const otherCaptainToken = generateToken(otherCaptain);
 
     await request(app)
-      .put(`/teams/${team.id}/captain/${futureCaptain.id}`)
+      .put(`/teams/current/captain/${futureCaptain.id}`)
       .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.NotCaptain });
+      .expect(403, { error: Error.NotInTeam });
   });
 
   it('should error as the user is in another team', async () => {
@@ -61,7 +59,7 @@ describe('PUT /teams/:teamId/captain/:userId', () => {
     const otherMember = otherTeam.players.find((player) => player.id !== otherTeam.captainId);
 
     await request(app)
-      .put(`/teams/${team.id}/captain/${otherMember.id}`)
+      .put(`/teams/current/captain/${otherMember.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(403, { error: Error.NotInTeam });
   });
@@ -70,7 +68,7 @@ describe('PUT /teams/:teamId/captain/:userId', () => {
     const memberToken = generateToken(futureCaptain);
 
     await request(app)
-      .put(`/teams/${team.id}/captain/${futureCaptain.id}`)
+      .put(`/teams/current/captain/${futureCaptain.id}`)
       .set('Authorization', `Bearer ${memberToken}`)
       .expect(403, { error: Error.NotCaptain });
   });
@@ -79,7 +77,7 @@ describe('PUT /teams/:teamId/captain/:userId', () => {
     sandbox.stub(teamOperations, 'promoteUser').throws('Unknown error');
 
     await request(app)
-      .put(`/teams/${team.id}/captain/${futureCaptain.id}`)
+      .put(`/teams/current/captain/${futureCaptain.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
@@ -92,14 +90,14 @@ describe('PUT /teams/:teamId/captain/:userId', () => {
     const futureLockedCaptain = lockedTeam.players.find((player) => player.id !== lockedTeam.captainId);
 
     await request(app)
-      .put(`/teams/${lockedTeam.id}/captain/${futureLockedCaptain.id}`)
+      .put(`/teams/current/captain/${futureLockedCaptain.id}`)
       .set('Authorization', `Bearer ${lockedToken}`)
       .expect(403, { error: Error.TeamLocked });
   });
 
   it('should promote the new captain', async () => {
     const { body } = await request(app)
-      .put(`/teams/${team.id}/captain/${futureCaptain.id}`)
+      .put(`/teams/current/captain/${futureCaptain.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(200);
 
@@ -114,7 +112,7 @@ describe('PUT /teams/:teamId/captain/:userId', () => {
 
   it('should promote the new captain again (check idempotency)', async () => {
     const { body } = await request(app)
-      .put(`/teams/${team.id}/captain/${futureCaptain.id}`)
+      .put(`/teams/current/captain/${futureCaptain.id}`)
       .set('Authorization', `Bearer ${generateToken(futureCaptain)}`)
       .expect(200);
 
@@ -129,7 +127,7 @@ describe('PUT /teams/:teamId/captain/:userId', () => {
 
   it('should error as the old captain is trying to promote someone', async () => {
     await request(app)
-      .put(`/teams/${team.id}/captain/${futureCaptain.id}`)
+      .put(`/teams/current/captain/${futureCaptain.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(403, { error: Error.NotCaptain });
   });
@@ -139,7 +137,7 @@ describe('PUT /teams/:teamId/captain/:userId', () => {
     await teamOperations.joinTeam(team.id, coach);
 
     const { body } = await request(app)
-      .put(`/teams/${team.id}/captain/${coach.id}`)
+      .put(`/teams/current/captain/${coach.id}`)
       .set('Authorization', `Bearer ${generateToken(futureCaptain)}`)
       .expect(200);
 
