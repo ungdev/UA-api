@@ -8,7 +8,7 @@ import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/user';
 
-describe('PUT /users/:userId', () => {
+describe.only('PUT /users/current', () => {
   let user: User;
   let token: string;
 
@@ -33,33 +33,26 @@ describe('PUT /users/:userId', () => {
 
   it('shoud fail because the body is empty', async () => {
     await request(app)
-      .put(`/users/${user.id}`)
+      .put(`/users/current`)
       .set('Authorization', `Bearer ${token}`)
       .expect(400, { error: Error.InvalidBody });
   });
 
   it('shoud fail because the password is missing', async () => {
     await request(app)
-      .put(`/users/${user.id}`)
+      .put(`/users/current`)
       .set('Authorization', `Bearer ${token}`)
       .send({ username: 'bonjour', newPassowrd: 'Bonjour123456' })
       .expect(400, { error: Error.InvalidBody });
   });
 
   it('should fail because the user is not itself', async () => {
-    const otherUser = await createFakeUser();
-    const otherToken = generateToken(otherUser);
-
-    await request(app)
-      .put(`/users/${user.id}`)
-      .set('Authorization', `Bearer ${otherToken}`)
-      .send(validBody)
-      .expect(403, { error: Error.NotSelf });
+    await request(app).put(`/users/current`).send(validBody).expect(401, { error: Error.Unauthenticated });
   });
 
   it('should fail as the password is invalid', async () => {
     await request(app)
-      .put(`/users/${user.id}`)
+      .put(`/users/current`)
       .set('Authorization', `Bearer ${token}`)
       .send({ ...validBody, password: 'wrongPassword' })
       .expect(401, { error: Error.InvalidCredentials });
@@ -69,7 +62,7 @@ describe('PUT /users/:userId', () => {
     sandbox.stub(userOperations, 'updateUser').throws('Unexpected error');
 
     await request(app)
-      .put(`/users/${user.id}`)
+      .put(`/users/current`)
       .set('Authorization', `Bearer ${token}`)
       .send(validBody)
       .expect(500, { error: Error.InternalServerError });
@@ -77,7 +70,7 @@ describe('PUT /users/:userId', () => {
 
   it('should update the user', async () => {
     const { body } = await request(app)
-      .put(`/users/${user.id}`)
+      .put(`/users/current`)
       .set('Authorization', `Bearer ${token}`)
       .send(validBody)
       .expect(200);
@@ -94,7 +87,7 @@ describe('PUT /users/:userId', () => {
 
     // Check if the log is correct and doesn't include the password fields
     expect(log).to.deep.equal({
-      path: `/users/${user.id}`,
+      path: `/users/current`,
       body: { username: body.username },
       method: 'PUT',
       userId: body.id,
