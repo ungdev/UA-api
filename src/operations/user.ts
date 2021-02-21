@@ -120,6 +120,16 @@ export const generateResetToken = (userId: string) =>
     },
   });
 
+export const scanUser = (userId: string) =>
+  database.user.update({
+    data: {
+      scannedAt: new Date(),
+    },
+    where: {
+      id: userId,
+    },
+  });
+
 export const changePassword = async (user: User, newPassword: string) => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
   const hashedPassword = await userOperations.hash(newPassword, salt);
