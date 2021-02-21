@@ -69,7 +69,7 @@ describe('DELETE /teams/:teamId/joinRequests/:userId', () => {
     await request(app)
       .delete(`/teams/${team.id}/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.NotSelf });
+      .expect(403, { error: Error.NotInTeam });
   });
 
   it('should fail with an internal server error', async () => {
@@ -99,7 +99,7 @@ describe('DELETE /teams/:teamId/joinRequests/:userId', () => {
     const lockedToken = generateToken(lockedCaptain);
 
     await request(app)
-      .delete(`/teams/${lockedTeam.id}/joinRequests/${user.id}`)
+      .delete(`/teams/current/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${lockedToken}`)
       .expect(403, { error: Error.TeamLocked });
   });
@@ -109,7 +109,7 @@ describe('DELETE /teams/:teamId/joinRequests/:userId', () => {
     const captainToken = generateToken(captain);
 
     await request(app)
-      .delete(`/teams/${team.id}/joinRequests/${user.id}`)
+      .delete(`/teams/current/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(204);
     const deletedRequestUser = await fetchUser(user.id);
@@ -118,8 +118,8 @@ describe('DELETE /teams/:teamId/joinRequests/:userId', () => {
 
   it('should fail as the user has removed the request', async () => {
     await request(app)
-      .delete(`/teams/${team.id}/joinRequests/${user.id}`)
+      .delete(`/teams/current/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(403, { error: Error.NotAskedATeam });
+      .expect(403, { error: Error.NotAskedTeam });
   });
 });

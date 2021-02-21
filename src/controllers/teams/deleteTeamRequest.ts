@@ -15,7 +15,7 @@ export default [
     try {
       const user = await fetchUser(request.params.userId);
 
-      if (!user.askingTeamId) return forbidden(response, Error.NotAskedATeam);
+      if (!user.askingTeamId) return forbidden(response, Error.NotAskedTeam);
 
       await cancelTeamRequest(user.id);
 

@@ -12,7 +12,7 @@ export const isCaptain = [
     const { user, team } = getRequestInfo(response);
 
     if (!team) {
-      return notFound(response, Error.TeamNotFound);
+      return forbidden(response, Error.NotInTeam);
     }
 
     if (user.id === team.captainId) {
@@ -43,7 +43,7 @@ export const isTeamNotLocked = (request: Request, response: Response, next: Next
   const { team } = getRequestInfo(response);
 
   if (!team) {
-    return notFound(response, Error.TeamNotFound);
+    return forbidden(response, Error.NotInTeam);
   }
 
   if (team.lockedAt) {
@@ -67,11 +67,11 @@ export const isInATeam = [
 // Need teamId and userId
 export const isSelfOrCaptain = [
   ...isAuthenticated,
-  async (request: Request, response: Response, next: NextFunction) => {
+  (request: Request, response: Response, next: NextFunction) => {
     const { user, team } = getRequestInfo(response);
 
     if (!team) {
-      return notFound(response, Error.TeamNotFound);
+      return forbidden(response, Error.NotInTeam);
     }
 
     // Check if the user is either the captain of the team or iteself

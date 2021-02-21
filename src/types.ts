@@ -160,7 +160,7 @@ export const enum Error {
   TeamFull = "L'équipe est complète",
   AlreadyInTeam = 'Vous êtes déjà dans une équipe',
   AlreadyAskedATeam = 'Vous avez déjà demandé de vous inscrire dans une équipe',
-  NotAskedATeam = "Vous ne demandez l'accès à aucune équipe",
+  NotAskedTeam = "Vous ne demandez l'accès à l'équipe",
   CaptainCannotQuit = "Un capitaine ne peut pas se bannir, veuillez dissoudre l'équipe ou nommer un autre chef d'équipe",
 
   // 404

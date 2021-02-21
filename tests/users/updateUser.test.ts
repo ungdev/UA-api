@@ -8,7 +8,7 @@ import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/user';
 
-describe.only('PUT /users/current', () => {
+describe('PUT /users/current', () => {
   let user: User;
   let token: string;
 

@@ -18,8 +18,11 @@ const consoleTransport = new transports.Console({
     colorize(),
     printf(({ level, message }) => `${moment().format('HH:mm:ss')} ${level}: ${message}`),
   ),
-  level: env.log.level,
-  silent: env.test, // Doesn't log if we are in testing environment
+  //level: env.log.level,
+  //silent: env.test, // Doesn't log if we are in testing environment
+
+  level: 'verbose',
+  silent: false,
 });
 
 const loggingTransports: Array<ConsoleTransportInstance> = [consoleTransport];
