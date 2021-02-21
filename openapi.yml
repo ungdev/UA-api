@@ -1325,9 +1325,10 @@ paths:
 
   /teams/current/join-requests/{userId}:
     delete:
-      summary: Annule la demande d'équipe
-      description: Annule la demande d'équipe de l'utilisateur cible.<br/>
-        **L'utilisateur doit être l'utilisateur cible ou être le chef de l'équipe cible.**<br/>
+      summary: Refuse la demande d'équipe
+      description: Refuse la demande d'équipe de l'utilisateur cible.<br/>
+        **L'utilisateur doit être le chef de l'équipe cible.**<br/>
+        *L'équipe ne doit pas être verrouillée.*
         *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*
       tags:
         - Teams
@@ -1385,6 +1386,27 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
+  /teams/current/join-requests/current:
+    delete:
+      summary: Annule la demande d'équipe
+      description: Annule la demande d'équipe de l'utilisateur cible.<br/>
+        *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*
+      tags:
+        - Teams
+      security:
+        - BearerAuth: []
+      responses:
+        204:
+          description: La demande a bien été annulée.
+        400:
+          $ref: '#/components/responses/400Errored'
+        401:
+          $ref: '#/components/responses/401Unauthenticated'
+        403:
+          $ref: '#/components/responses/403Unauthorized'
+        404:
+          $ref: '#/components/responses/404UserNotFound'
+
   /teams/current/lock:
     post:
       summary: Verrouille l'équipe
@@ -1416,7 +1438,7 @@ paths:
     delete:
       summary: Retire l'utilisateur de l'équipe
       description: Retire l'utilisateur de l'équipe.<br/>
-        **L'utilisateur doit être l'utilisateur cible ou être le chef de l'équipe cible.**<br/>
+        **L'utilisateur doit être le chef de l'équipe cible.**<br/>
         *L'utilisateur cible doit être dans l'équipe cible.*
         *L'équipe ne doit pas être verrouillée.*
         *Le chef d'équipe ne peut pas quitter l'équipe.*
@@ -1431,6 +1453,29 @@ paths:
           schema:
             type: string
           required: true
+      responses:
+        204:
+          description: L'utilisateur a bien été retiré de l'équipe.
+        400:
+          $ref: '#/components/responses/400Errored'
+        401:
+          $ref: '#/components/responses/401Unauthenticated'
+        403:
+          $ref: '#/components/responses/403Unauthorized'
+        404:
+          $ref: '#/components/responses/404UserNotFound'
+
+  /teams/current/users/current:
+    delete:
+      summary: Quitte l'équipe
+      description: Quitte l'équipe.<br/>
+        *L'utilisateur cible doit être dans l'équipe cible.*
+        *L'équipe ne doit pas être verrouillée.*
+        *Le chef d'équipe ne peut pas quitter l'équipe.*
+      tags:
+        - Teams
+      security:
+        - BearerAuth: []
       responses:
         204:
           description: L'utilisateur a bien été retiré de l'équipe.

@@ -12,14 +12,17 @@ import { getCaptain } from '../../src/utils/teams';
 
 describe('DELETE /teams/current/joinRequests/:userId', () => {
   let user: User;
-  let token: string;
+  let captain: User;
+  let captainToken: string;
   let team: Team;
 
   before(async () => {
     team = await createFakeTeam({ members: 2 });
     user = await createFakeUser();
     await teamOperations.askJoinTeam(team.id, user.id);
-    token = generateToken(user);
+
+    captain = getCaptain(team);
+    captainToken = generateToken(captain);
   });
 
   after(async () => {
@@ -55,7 +58,7 @@ describe('DELETE /teams/current/joinRequests/:userId', () => {
   it('should fail as the user is unknown', async () => {
     await request(app)
       .delete(`/teams/current/joinRequests/A12BC3`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${captainToken}`)
       .expect(404, { error: Error.UserNotFound });
   });
 
@@ -71,30 +74,14 @@ describe('DELETE /teams/current/joinRequests/:userId', () => {
   });
 
   it('should fail with an internal server error', async () => {
-    sandbox.stub(teamOperations, 'cancelTeamRequest').throws('Unexpected error');
+    sandbox.stub(teamOperations, 'deleteTeamRequest').throws('Unexpected error');
     await request(app)
       .delete(`/teams/current/joinRequests/${user.id}`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${captainToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should succesfully cancel the team joining (as itself)', async () => {
-    await request(app)
-      .delete(`/teams/current/joinRequests/${user.id}`)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(204);
-
-    const deletedRequestUser = await fetchUser(user.id);
-
-    expect(deletedRequestUser.askingTeamId).to.be.null;
-
-    await teamOperations.askJoinTeam(team.id, user.id);
-  });
-
-  it('should succesfully cancel the team joining (as the captain of the team)', async () => {
-    const captain = getCaptain(team);
-    const captainToken = generateToken(captain);
-
+  it('should succesfully cancel the team joining', async () => {
     await request(app)
       .delete(`/teams/current/joinRequests/${user.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
@@ -106,7 +93,7 @@ describe('DELETE /teams/current/joinRequests/:userId', () => {
   it('should fail as the user has removed the request', async () => {
     await request(app)
       .delete(`/teams/current/joinRequests/${user.id}`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${captainToken}`)
       .expect(403, { error: Error.NotAskedTeam });
   });
 });

@@ -11,10 +11,10 @@ import { generateToken } from '../../src/utils/user';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
-describe('DELETE /teams/:teamId/users/:userId', () => {
+describe('DELETE /teams/current/users/:userId', () => {
   let userToKick: User;
 
-  let userToKickToken: string;
+  let captainToken: string;
   let team: Team;
 
   before(async () => {
@@ -22,7 +22,9 @@ describe('DELETE /teams/:teamId/users/:userId', () => {
 
     // Find a user that is not a captain
     userToKick = team.players.find((player) => player.id !== team.captainId);
-    userToKickToken = generateToken(userToKick);
+
+    const captain = getCaptain(team);
+    captainToken = generateToken(captain);
   });
 
   after(async () => {
@@ -32,14 +34,7 @@ describe('DELETE /teams/:teamId/users/:userId', () => {
   });
 
   it('should fail because the token is not provided', async () => {
-    await request(app).delete(`/teams/${team.id}/users/${userToKick.id}`).expect(401, { error: Error.Unauthenticated });
-  });
-
-  it('should fail because the team does not exists', async () => {
-    await request(app)
-      .delete(`/teams/1A2B3C/users/${userToKick.id}`)
-      .set('Authorization', `Bearer ${userToKickToken}`)
-      .expect(404, { error: Error.TeamNotFound });
+    await request(app).delete(`/teams/current/users/${userToKick.id}`).expect(401, { error: Error.Unauthenticated });
   });
 
   it('should fail because the user is a random with no rights', async () => {
@@ -47,9 +42,9 @@ describe('DELETE /teams/:teamId/users/:userId', () => {
     const randomUserToken = generateToken(randomUser);
 
     await request(app)
-      .delete(`/teams/${team.id}/users/${userToKick.id}`)
+      .delete(`/teams/current/users/${userToKick.id}`)
       .set('Authorization', `Bearer ${randomUserToken}`)
-      .expect(403, { error: Error.NotSelf });
+      .expect(403, { error: Error.NotInTeam });
   });
 
   it('should fail because the user is a member of the team but not the captain or not the user', async () => {
@@ -57,9 +52,9 @@ describe('DELETE /teams/:teamId/users/:userId', () => {
     const memberToken = generateToken(member);
 
     await request(app)
-      .delete(`/teams/${team.id}/users/${userToKick.id}`)
+      .delete(`/teams/current/users/${userToKick.id}`)
       .set('Authorization', `Bearer ${memberToken}`)
-      .expect(403, { error: Error.NotSelf });
+      .expect(403, { error: Error.NotCaptain });
   });
 
   it('should fail as the user is the captain of another team', async () => {
@@ -68,34 +63,24 @@ describe('DELETE /teams/:teamId/users/:userId', () => {
     const otherCaptainToken = generateToken(otherCaptain);
 
     await request(app)
-      .delete(`/teams/${team.id}/users/${userToKick.id}`)
+      .delete(`/teams/current/users/${userToKick.id}`)
       .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.NotSelf });
+      .expect(403, { error: Error.NotInTeam });
   });
 
   it('should fail with an internal server error', async () => {
     sandbox.stub(teamOperations, 'kickUser').throws('Unexpected error');
     await request(app)
-      .delete(`/teams/${team.id}/users/${userToKick.id}`)
-      .set('Authorization', `Bearer ${userToKickToken}`)
+      .delete(`/teams/current/users/${userToKick.id}`)
+      .set('Authorization', `Bearer ${captainToken}`)
       .expect(500, { error: Error.InternalServerError });
-  });
-
-  it('should fail as the user has selected a wrong team', async () => {
-    const otherTeam = await createFakeTeam();
-
-    await request(app)
-      .delete(`/teams/${otherTeam.id}/users/${userToKick.id}`)
-      .set('Authorization', `Bearer ${userToKickToken}`)
-      .expect(403, { error: Error.NotInTeam });
   });
 
   it('should fail because the user tried to remove itself as a captain', async () => {
     const captain = getCaptain(team);
-    const captainToken = generateToken(captain);
 
     await request(app)
-      .delete(`/teams/${team.id}/users/${captain.id}`)
+      .delete(`/teams/current/users/${captain.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(403, { error: Error.CaptainCannotQuit });
   });
@@ -106,31 +91,14 @@ describe('DELETE /teams/:teamId/users/:userId', () => {
     const lockedToken = generateToken(lockedCaptain);
 
     await request(app)
-      .delete(`/teams/${lockedTeam.id}/users/${userToKick.id}`)
+      .delete(`/teams/current/users/${userToKick.id}`)
       .set('Authorization', `Bearer ${lockedToken}`)
       .expect(403, { error: Error.TeamLocked });
   });
 
-  it('should succesfully quit the team (as itself)', async () => {
-    await request(app)
-      .delete(`/teams/${team.id}/users/${userToKick.id}`)
-      .set('Authorization', `Bearer ${userToKickToken}`)
-      .expect(204);
-
-    const removedUser = await fetchUser(userToKick.id);
-
-    expect(removedUser.teamId).to.be.null;
-
-    // Rejoin the team for next tests
-    await teamOperations.joinTeam(team.id, removedUser);
-  });
-
   it('should succesfully kick the user (as the captain of the team and as a player)', async () => {
-    const captain = getCaptain(team);
-    const captainToken = generateToken(captain);
-
     await request(app)
-      .delete(`/teams/${team.id}/users/${userToKick.id}`)
+      .delete(`/teams/current/users/${userToKick.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(204);
 
@@ -143,13 +111,12 @@ describe('DELETE /teams/:teamId/users/:userId', () => {
 
   it('should succesfully kick the user (as the captain of the team and as a coach)', async () => {
     const captain = getCaptain(team);
-    const captainToken = generateToken(captain);
 
     // Set the captain to a coach
     await database.user.update({ data: { type: UserType.coach }, where: { id: captain.id } });
 
     await request(app)
-      .delete(`/teams/${team.id}/users/${userToKick.id}`)
+      .delete(`/teams/current/users/${userToKick.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(204);
 
@@ -159,8 +126,8 @@ describe('DELETE /teams/:teamId/users/:userId', () => {
 
   it('should fail as the user has already been kicked', async () => {
     await request(app)
-      .delete(`/teams/${team.id}/users/${userToKick.id}`)
-      .set('Authorization', `Bearer ${userToKickToken}`)
+      .delete(`/teams/current/users/${userToKick.id}`)
+      .set('Authorization', `Bearer ${captainToken}`)
       .expect(403, { error: Error.NotInTeam });
   });
 });
