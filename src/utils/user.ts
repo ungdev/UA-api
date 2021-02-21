@@ -1,11 +1,11 @@
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../types';
+import { Team, User } from '../types';
 import env from './env';
 
 export const getRequestInfo = (response: Response) => ({
-  user: response.locals.user,
-  team: response.locals.team,
+  user: response.locals.user as User,
+  team: response.locals.team as Team,
 });
 
 export const generateToken = (user: User) =>

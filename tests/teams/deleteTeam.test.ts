@@ -10,7 +10,7 @@ import { generateToken } from '../../src/utils/user';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchUser } from '../../src/operations/user';
 
-describe.only('DELETE /teams/current', () => {
+describe('DELETE /teams/current', () => {
   let captain: User;
   let team: Team;
   let captainToken: string;

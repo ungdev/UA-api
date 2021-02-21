@@ -63,21 +63,3 @@ export const isInATeam = [
     return forbidden(response, Error.NotInTeam);
   },
 ];
-
-// Need teamId and userId
-export const isSelfOrCaptain = [
-  ...isAuthenticated,
-  (request: Request, response: Response, next: NextFunction) => {
-    const { user, team } = getRequestInfo(response);
-
-    if (!team) {
-      return forbidden(response, Error.NotInTeam);
-    }
-
-    // Check if the user is either the captain of the team or iteself
-    if (user.id === team.captainId || user.id === request.params.userId) {
-      return next();
-    }
-    return forbidden(response, Error.NotSelf);
-  },
-];

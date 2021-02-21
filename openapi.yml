@@ -1328,7 +1328,6 @@ paths:
       summary: Annule la demande d'équipe
       description: Annule la demande d'équipe de l'utilisateur cible.<br/>
         **L'utilisateur doit être l'utilisateur cible ou être le chef de l'équipe cible.**<br/>
-        *L'équipe ne doit pas être verrouillée.*
         *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*
       tags:
         - Teams
