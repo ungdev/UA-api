@@ -96,6 +96,13 @@ describe('DELETE /teams/current/users/:userId', () => {
       .expect(403, { error: Error.TeamLocked });
   });
 
+  it('should error as the user does not exists', async () => {
+    await request(app)
+      .delete(`/teams/current/users/A12B3C`)
+      .set('Authorization', `Bearer ${captainToken}`)
+      .expect(404, { error: Error.UserNotFound });
+  });
+
   it('should succesfully kick the user (as the captain of the team and as a player)', async () => {
     await request(app)
       .delete(`/teams/current/users/${userToKick.id}`)

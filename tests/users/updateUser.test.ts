@@ -46,7 +46,7 @@ describe('PUT /users/current', () => {
       .expect(400, { error: Error.InvalidBody });
   });
 
-  it('should fail because the user is not itself', async () => {
+  it('should fail because the user is not authenticated', async () => {
     await request(app).put(`/users/current`).send(validBody).expect(401, { error: Error.Unauthenticated });
   });
 

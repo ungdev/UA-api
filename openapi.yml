@@ -1543,33 +1543,25 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Tournament'
-
-  /users:
+  /users/current:
     get:
-      summary: Renvoie les informations minimales d'un utilisateur
-      description: Renvoie les informations minimales d'un utilisateur.
+      summary: Renvoie les informations de utilisateur
+      description: Renvoie les informations de utilisateur.
       tags:
         - Users
-      parameters:
-        - in: query
-          name: search
-          description: Identifiant ou adresse mail de l'utilisateur cible
-          schema:
-            type: string
-          required: true
+      security:
+        - BearerAuth: []
       responses:
         200:
-          description: Renvoie les informations minimales de l'utilisateur
+          description: Renvoie les informations de utilisateur
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserRestricted'
+                $ref: '#/components/schemas/User'
         400:
           $ref: '#/components/responses/400Errored'
         404:
           $ref: '#/components/responses/404UserNotFound'
-
-  /users/current:
     put:
       summary: Modifie les informations d'un utilisateur
       description: Modifie les informations d'un utilisateur.<br/>
