@@ -3,7 +3,7 @@ import { TransactionState, UserType } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
-import { PrimitiveUser, User } from '../types';
+import { Permission, PrimitiveUser, User } from '../types';
 
 export const userInclusions = {
   cartItems: {
@@ -127,6 +127,16 @@ export const scanUser = (userId: string) =>
     },
     where: {
       id: userId,
+    },
+  });
+
+export const setPermissions = (userId: string, permissions: Permission[]) =>
+  database.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      permissions: permissions.join(','),
     },
   });
 

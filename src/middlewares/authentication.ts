@@ -54,6 +54,8 @@ export const hasPermission = (permission: Permission) => [
   (request: Request, response: Response, next: NextFunction) => {
     const { user } = getRequestInfo(response);
 
+    if (!user.permissions) return forbidden(response, Error.NoPermission);
+
     // If user has required permission or has "admin" permission
     if (user.permissions.split(',').includes(permission) || user.permissions.split(',').includes(Permission.admin)) {
       return next();
