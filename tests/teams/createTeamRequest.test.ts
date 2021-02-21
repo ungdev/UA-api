@@ -8,7 +8,7 @@ import { Error, Team, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 
-describe('POST /teams/:teamId/joinRequests', () => {
+describe.only('POST /teams/:teamId/joinRequests', () => {
   let user: User;
   let token: string;
   let team: Team;
