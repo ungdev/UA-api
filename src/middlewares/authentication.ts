@@ -49,9 +49,9 @@ export const isNotAuthenticated = [
 ];
 
 // Checks the user has the given permission. If not, it will return an error
-export const hasPermission = [
+export const hasPermission = (permission: Permission) => [
   ...isAuthenticated,
-  (permission: Permission) => (request: Request, response: Response, next: NextFunction) => {
+  (request: Request, response: Response, next: NextFunction) => {
     const { user } = getRequestInfo(response);
 
     // If user has required permission or has "admin" permission
