@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
 import { forbidden, gone, success } from '../../utils/responses';
-import { fetchTeam, lockTeam } from '../../operations/team';
+import { lockTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
 import { filterTeam } from '../../utils/filters';
+import { getRequestInfo } from '../../utils/user';
 
 export default [
   // Middlewares
@@ -14,7 +15,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const team = await fetchTeam(request.params.teamId);
+      const { team } = getRequestInfo(response);
       const tournament = await fetchTournament(team.tournamentId);
 
       // If there are more or equal teams than places, return a tournament full

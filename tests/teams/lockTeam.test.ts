@@ -10,7 +10,7 @@ import { generateToken } from '../../src/utils/user';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchTournament } from '../../src/operations/tournament';
 
-describe('POST /teams/:teamId/lock', () => {
+describe.only('POST /teams/current/lock', () => {
   let captain: User;
   let team: Team;
   let captainToken: string;
@@ -37,15 +37,8 @@ describe('POST /teams/:teamId/lock', () => {
     await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lol' } });
   });
 
-  it("should error as the team id doesn't exists", async () => {
-    await request(app)
-      .post('/teams/A1B2C3/lock')
-      .set('Authorization', `Bearer ${captainToken}`)
-      .expect(404, { error: Error.TeamNotFound });
-  });
-
   it('should error as the token is missing', async () => {
-    await request(app).post(`/teams/${team.id}/lock`).expect(401, { error: Error.Unauthenticated });
+    await request(app).post('/teams/current/lock').expect(401, { error: Error.Unauthenticated });
   });
 
   it('should error as the request is not logged as the captain of his team', async () => {
@@ -54,18 +47,8 @@ describe('POST /teams/:teamId/lock', () => {
     const otherCaptainToken = generateToken(otherCaptain);
 
     await request(app)
-      .post(`/teams/${team.id}/lock`)
+      .post('/teams/current/lock')
       .set('Authorization', `Bearer ${otherCaptainToken}`)
-      .expect(403, { error: Error.NotCaptain });
-  });
-
-  it('should error as the request is logged as the member of the team', async () => {
-    const member = team.players.find((player) => player.id !== team.captainId);
-    const memberToken = generateToken(member);
-
-    await request(app)
-      .post(`/teams/${team.id}/lock`)
-      .set('Authorization', `Bearer ${memberToken}`)
       .expect(403, { error: Error.NotCaptain });
   });
 
@@ -75,7 +58,7 @@ describe('POST /teams/:teamId/lock', () => {
     const halfToken = generateToken(halfCaptain);
 
     await request(app)
-      .post(`/teams/${halfTeam.id}/lock`)
+      .post('/teams/current/lock')
       .set('Authorization', `Bearer ${halfToken}`)
       .expect(403, { error: Error.TeamNotFull });
   });
@@ -86,7 +69,7 @@ describe('POST /teams/:teamId/lock', () => {
     const notPaidToken = generateToken(notPaidCaptain);
 
     await request(app)
-      .post(`/teams/${notPaidTeam.id}/lock`)
+      .post('/teams/current/lock')
       .set('Authorization', `Bearer ${notPaidToken}`)
       .expect(403, { error: Error.TeamNotPaid });
   });
@@ -95,14 +78,14 @@ describe('POST /teams/:teamId/lock', () => {
     sandbox.stub(teamOperations, 'lockTeam').throws('Unknown error');
 
     await request(app)
-      .post(`/teams/${team.id}/lock`)
+      .post('/teams/current/lock')
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
 
   it('should lock the team', async () => {
     const { body } = await request(app)
-      .post(`/teams/${team.id}/lock`)
+      .post('/teams/current/lock')
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(200);
 
@@ -117,7 +100,7 @@ describe('POST /teams/:teamId/lock', () => {
 
   it('should error as the team is already locked', async () => {
     await request(app)
-      .post(`/teams/${team.id}/lock`)
+      .post('/teams/current/lock')
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(403, { error: Error.TeamLocked });
   });
@@ -138,7 +121,7 @@ describe('POST /teams/:teamId/lock', () => {
     });
 
     await request(app)
-      .post(`/teams/${otherTeam.id}/lock`)
+      .post('/teams/current/lock')
       .set('Authorization', `Bearer ${otherCaptainToken}`)
       .expect(410, { error: Error.TournamentFull });
   });
