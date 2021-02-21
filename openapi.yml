@@ -789,7 +789,7 @@ paths:
       parameters:
         - in: path
           name: qrcode
-          description: Contenu du QR code présent sur le billet
+          description: Contenu du QR code présent sur le billet chiffré
           schema:
             type: string
           required: true
@@ -1059,18 +1059,6 @@ paths:
         400:
           $ref: '#/components/responses/400Errored'
 
-  /test-sentry:
-    get:
-      summary: Lance une erreur 500 pour vérifier que Sentry gère bien l'erreur
-      description: Pour des raisons de sécurité, il est nécessaire d'exécuter la requête depuis le serveur
-      tags:
-        - Général
-      responses:
-        500:
-          description: Le serveur a bien lancé une erreur interne
-        403:
-          $ref: '#/components/responses/403Unauthorized'
-
   /items:
     get:
       summary: Renvoie la liste des items en vente
@@ -1191,7 +1179,7 @@ paths:
         401:
           $ref: '#/components/responses/401Unauthenticated'
 
-  /teams/{teamId}:
+  /teams/current:
     delete:
       summary: Détruit l'équipe
       description: Détruit l'équipe cible.<br/>
@@ -1201,13 +1189,6 @@ paths:
         - Teams
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
       responses:
         204:
           description: L'équipe a bien été détruite
@@ -1228,13 +1209,6 @@ paths:
         - Teams
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
       responses:
         200:
           description: Renvoie les informations de l'équipe
@@ -1259,13 +1233,6 @@ paths:
         - Teams
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
       requestBody:
         required: true
         content:
@@ -1292,7 +1259,7 @@ paths:
         404:
           $ref: '#/components/responses/404TeamNotFound'
 
-  /teams/{teamId}/captain/{userId}:
+  /teams/current/captain/{userId}:
     put:
       summary: Définit le nouveau chef d'équipe
       description: Transfère son rôle de chef d'équipe.<br/>
@@ -1304,12 +1271,6 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
         - in: path
           name: userId
           description: Identifiant du nouveau chef d'équipe
@@ -1362,7 +1323,7 @@ paths:
         404:
           $ref: '#/components/responses/404TeamNotFound'
 
-  /teams/{teamId}/join-requests/{userId}:
+  /teams/current/join-requests/{userId}:
     delete:
       summary: Annule la demande d'équipe
       description: Annule la demande d'équipe de l'utilisateur cible.<br/>
@@ -1374,12 +1335,6 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
         - in: path
           name: userId
           description: Identifiant de l'utilisateur cible
@@ -1410,12 +1365,6 @@ paths:
         - BearerAuth: []
       parameters:
         - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
-        - in: path
           name: userId
           description: Identifiant de l'utilisateur cible
           schema:
@@ -1437,7 +1386,7 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
-  /teams/{teamId}/lock:
+  /teams/current/lock:
     post:
       summary: Verrouille l'équipe
       description: Verrouille l'équipe cible.<br/>
@@ -1448,13 +1397,6 @@ paths:
         - Teams
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
       responses:
         200:
           description: L'équipe a bien été verrouillée. Ses informations sont renvoyées.
@@ -1471,7 +1413,7 @@ paths:
         404:
           $ref: '#/components/responses/404TeamNotFound'
 
-  /teams/{teamId}/users/{userId}:
+  /teams/current/users/{userId}:
     delete:
       summary: Retire l'utilisateur de l'équipe
       description: Retire l'utilisateur de l'équipe.<br/>
@@ -1484,12 +1426,6 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
         - in: path
           name: userId
           description: Identifiant de l'utilisateur cible
@@ -1589,7 +1525,7 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
-  /users/{userId}:
+  /users/current:
     put:
       summary: Modifie les informations d'un utilisateur
       description: Modifie les informations d'un utilisateur.<br/>
@@ -1598,13 +1534,6 @@ paths:
         - Users
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: userId
-          description: Identifiant de l'utilisateur cible
-          schema:
-            type: string
-          required: true
       requestBody:
         required: true
         content:
@@ -1636,7 +1565,7 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
-  /users/{userId}/carts:
+  /users/current/carts:
     get:
       summary: Renvoie la liste des achats de l'utilisateur
       description: Renvoie la liste des achats de l'utilisateur.<br/>
@@ -1645,13 +1574,6 @@ paths:
         - Users
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: userId
-          description: Identifiant de l'utilisateur cible
-          schema:
-            type: string
-          required: true
       responses:
         200:
           description: Renvoie la liste des achats de l'utilisateur
@@ -1681,13 +1603,6 @@ paths:
         - Users
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: userId
-          description: Identifiant de l'utilisateur cible
-          schema:
-            type: string
-          required: true
       requestBody:
         required: true
         content:
