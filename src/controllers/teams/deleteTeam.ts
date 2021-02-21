@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { isCaptain, teamNotLocked } from '../../middlewares/parameters';
+import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
 import { noContent } from '../../utils/responses';
 import { deleteTeam } from '../../operations/team';
 
 export default [
   // Middlewares
   ...isCaptain,
-  teamNotLocked,
+  isTeamNotLocked,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {

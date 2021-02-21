@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
-import { isInTeam } from '../../middlewares/parameters';
+import { isInATeam } from '../../middlewares/team';
 import { success } from '../../utils/responses';
 import { fetchTeam } from '../../operations/team';
 import { filterTeam } from '../../utils/filters';
 
 export default [
   // Middlewares
-  ...isInTeam,
+  ...isInATeam,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {

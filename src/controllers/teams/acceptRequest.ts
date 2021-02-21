@@ -1,6 +1,6 @@
 import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
-import { isCaptain, teamNotLocked } from '../../middlewares/parameters';
+import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
 import { forbidden, success } from '../../utils/responses';
 import { fetchTeam, joinTeam } from '../../operations/team';
 import { filterTeam } from '../../utils/filters';
@@ -11,7 +11,7 @@ import { fetchTournament } from '../../operations/tournament';
 export default [
   // Middlewares
   ...isCaptain,
-  teamNotLocked,
+  isTeamNotLocked,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {

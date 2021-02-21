@@ -7,8 +7,8 @@ const router = Router();
 
 // router.get('/', getUser);
 
-router.put('/:userId', updateUser);
-router.post('/:userId/carts', createCart);
-router.get('/:userId/carts', getCarts);
+router.put('/current', updateUser);
+router.post('/current/carts', createCart);
+router.get('/current/carts', getCarts);
 
 export default router;

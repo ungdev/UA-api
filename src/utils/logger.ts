@@ -6,7 +6,7 @@ import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { getIp } from './network';
-import { getRequestUser } from './user';
+import { getRequestInfo } from './user';
 import env, { warnLogs } from './env';
 
 // We can't require env here or we will have a require loop
@@ -56,7 +56,7 @@ export const morgan = () => {
 
   // Load morgan variables
   morganMiddleware.token('username', (request: Request, response: Response) => {
-    const user = getRequestUser(response);
+    const { user } = getRequestInfo(response);
     return (user && user.username) || 'anonymous';
   });
   morganMiddleware.token('ip', getIp);

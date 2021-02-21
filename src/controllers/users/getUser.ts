@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
+import { isAuthenticated } from '../../middlewares/authentication';
 import { success } from '../../utils/responses';
 
 export default [
   // Middlewares
+  ...isAuthenticated,
 
   // Controller
   (request: Request, response: Response) =>

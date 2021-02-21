@@ -1,22 +1,21 @@
 import { NextFunction, Request, Response } from 'express';
-import { teamNotLocked } from '../../middlewares/parameters';
-import { isNotInATeam } from '../../middlewares/team';
+import { isNotInATeam, isTeamNotLocked } from '../../middlewares/team';
 import { askJoinTeam, fetchTeam } from '../../operations/team';
 import { Error } from '../../types';
 import { filterUser } from '../../utils/filters';
 import { forbidden, success } from '../../utils/responses';
-import { getRequestUser } from '../../utils/user';
+import { getRequestInfo } from '../../utils/user';
 
 export default [
   // Middlewares
   ...isNotInATeam,
-  teamNotLocked,
+  isTeamNotLocked,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const team = await fetchTeam(request.params.teamId);
-      const user = getRequestUser(response);
+      const { user } = getRequestInfo(response);
 
       if (user.askingTeamId) return forbidden(response, Error.AlreadyAskedATeam);
 

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { isSelfOrCaptain, teamNotLocked } from '../../middlewares/parameters';
+import { isSelfOrCaptain, isTeamNotLocked } from '../../middlewares/team';
 import { fetchTeam, kickUser } from '../../operations/team';
 import { fetchUser } from '../../operations/user';
 import { Error } from '../../types';
@@ -8,7 +8,7 @@ import { forbidden, noContent } from '../../utils/responses';
 export default [
   // Middlewares
   ...isSelfOrCaptain,
-  teamNotLocked,
+  isTeamNotLocked,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {

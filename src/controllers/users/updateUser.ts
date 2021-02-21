@@ -1,18 +1,18 @@
 import Joi from 'joi';
 import bcrpyt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
-import { isSelf } from '../../middlewares/parameters';
-import { getRequestUser } from '../../utils/user';
+import { getRequestInfo } from '../../utils/user';
 import { filterUser } from '../../utils/filters';
 import { success, unauthenticated } from '../../utils/responses';
 import { validateBody } from '../../middlewares/validation';
 import * as validators from '../../utils/validators';
 import { Error } from '../../types';
 import { updateUser } from '../../operations/user';
+import { isAuthenticated } from '../../middlewares/authentication';
 
 export default [
   // Middlewares
-  ...isSelf,
+  ...isAuthenticated,
 
   validateBody(
     Joi.object({
@@ -27,7 +27,7 @@ export default [
     const { username, password, newPassword } = request.body;
 
     try {
-      const user = getRequestUser(response);
+      const { user } = getRequestInfo(response);
 
       // Compares the hash from the password given
       const isPasswordValid = await bcrpyt.compare(password, user.password);

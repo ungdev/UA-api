@@ -6,7 +6,7 @@ import { fetchCart } from '../../operations/carts';
 import { Error } from '../../types';
 import { generateTicket } from '../../utils/pdf';
 import { forbidden, notFound } from '../../utils/responses';
-import { getRequestUser } from '../../utils/user';
+import { getRequestInfo } from '../../utils/user';
 
 export default [
   // Middlewares
@@ -24,7 +24,7 @@ export default [
       if (!ticket || ticket.item.category !== ItemCategory.ticket) return notFound(response, Error.TicketNotFound);
 
       // Retreive the associated cart
-      const user = getRequestUser(response);
+      const { user } = getRequestInfo(response);
       const cart = await fetchCart(ticket.cartId);
 
       // Check if the cart belongs to the user

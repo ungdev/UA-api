@@ -2,7 +2,6 @@ import { ItemCategory, UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { Basket } from '../../services/etupay';
-import { isSelf } from '../../middlewares/parameters';
 import { validateBody } from '../../middlewares/validation';
 import { createCart } from '../../operations/carts';
 import { fetchItems } from '../../operations/item';
@@ -10,9 +9,10 @@ import { createVisitor, deleteUser, fetchUser } from '../../operations/user';
 import { Cart, Error, PrimitiveCartItem } from '../../types';
 import { encodeToBase64, isPartnerSchool, removeAccents } from '../../utils/helpers';
 import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
-import { getRequestUser } from '../../utils/user';
+import { getRequestInfo } from '../../utils/user';
 import * as validators from '../../utils/validators';
 import { isShopAllowed } from '../../middlewares/settings';
+import { isAuthenticated } from '../../middlewares/authentication';
 
 export interface PayBody {
   tickets: {
@@ -31,7 +31,7 @@ export interface PayBody {
 export default [
   // Middlewares
   isShopAllowed,
-  ...isSelf,
+  ...isAuthenticated,
 
   validateBody(
     Joi.object({
@@ -59,7 +59,7 @@ export default [
     try {
       const { body } = request;
 
-      const user = getRequestUser(response);
+      const { user } = getRequestInfo(response);
       const items = await fetchItems();
 
       const cartItems: PrimitiveCartItem[] = [];

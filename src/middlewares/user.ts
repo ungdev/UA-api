@@ -7,6 +7,7 @@ import { forbidden, notFound, unauthenticated } from '../utils/responses';
 import { fetchUser } from '../operations/user';
 import env from '../utils/env';
 import logger from '../utils/logger';
+import { fetchTeam } from '../operations/team';
 
 // Fetch user from database if possible
 export const initUserRequest = async (request: Request, response: Response, next: NextFunction) => {
@@ -46,6 +47,12 @@ export const initUserRequest = async (request: Request, response: Response, next
 
     // Store it in `response.locals.user` so that we can use it later
     response.locals.user = user;
+
+    // If the user has a team, fetch it and put it in the locals
+    if (user.teamId) {
+      const team = await fetchTeam(user.teamId);
+      response.locals.team = team;
+    }
   } catch (error) {
     logger.error(error);
 

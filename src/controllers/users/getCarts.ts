@@ -1,18 +1,18 @@
 import { NextFunction, Request, Response } from 'express';
-import { isSelf } from '../../middlewares/parameters';
 import { fetchCarts } from '../../operations/carts';
-import { getRequestUser } from '../../utils/user';
+import { getRequestInfo } from '../../utils/user';
 import { filterCartWithCartItems } from '../../utils/filters';
 import { success } from '../../utils/responses';
+import { isAuthenticated } from '../../middlewares/authentication';
 
 export default [
   // Middlewares
-  ...isSelf,
+  ...isAuthenticated,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const user = getRequestUser(response);
+      const { user } = getRequestInfo(response);
       const carts = await fetchCarts(user.id);
 
       return success(response, carts.map(filterCartWithCartItems));

@@ -1,5 +1,5 @@
 import { Response, NextFunction, Request } from 'express';
-import { getRequestUser } from '../utils/user';
+import { getRequestInfo } from '../utils/user';
 import { forbidden, unauthenticated } from '../utils/responses';
 import { Error, Permission } from '../types';
 import { isLoginAllowed } from './settings';
@@ -10,7 +10,7 @@ export const isAuthenticated = [
   isLoginAllowed,
   (request: Request, response: Response, next: NextFunction) => {
     // Retreives the user
-    const user = getRequestUser(response);
+    const { user } = getRequestInfo(response);
 
     // The user must exists
     if (!user) {
@@ -38,7 +38,7 @@ export const isNotAuthenticated = [
   isLoginAllowed,
   (request: Request, response: Response, next: NextFunction) => {
     // If there is a user in the locals
-    if (!getRequestUser(response)) {
+    if (!getRequestInfo(response)) {
       return next();
     }
 
@@ -50,7 +50,7 @@ export const isNotAuthenticated = [
 export const hasPermission = [
   isAuthenticated,
   (permission: Permission) => (request: Request, response: Response, next: NextFunction) => {
-    const user = getRequestUser(response);
+    const { user } = getRequestInfo(response);
 
     // If user has required permission or has "admin" permission
     if (user.permissions.split(',').includes(permission) || user.permissions.split(',').includes(Permission.admin)) {

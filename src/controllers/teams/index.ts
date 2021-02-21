@@ -15,16 +15,16 @@ const router = Router();
 
 router.get('/', getTeams);
 router.post('/', createTeam);
-router.get('/:teamId', getTeam);
-router.put('/:teamId', updateTeam);
-router.delete('/:teamId', deleteTeam);
-router.delete('/:teamId/users/:userId', kickUser);
-router.put('/:teamId/captain/:userId', promoteCaptain);
+router.get('/current', getTeam);
+router.put('/current', updateTeam);
+router.delete('/current', deleteTeam);
+router.delete('/current/users/:userId', kickUser);
+router.put('/current/captain/:userId', promoteCaptain);
 
 router.post('/:teamId/joinRequests', createTeamRequest);
-router.delete('/:teamId/joinRequests/:userId', deleteTeamRequest);
-router.post('/:teamId/joinRequests/:userId', acceptRequest);
+router.delete('/current/joinRequests/:userId', deleteTeamRequest);
+router.post('/current/joinRequests/:userId', acceptRequest);
 
-router.post('/:teamId/lock', lockTeam);
+router.post('/current/lock', lockTeam);
 
 export default router;

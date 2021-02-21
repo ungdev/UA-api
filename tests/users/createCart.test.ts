@@ -14,7 +14,7 @@ import { PayBody } from '../../src/controllers/users/createCart';
 import env from '../../src/utils/env';
 import { setShopAllowed } from '../../src/operations/settings';
 
-describe('POST /users/:userId/carts', () => {
+describe.only('POST /users/current/carts', () => {
   let user: User;
   let token: string;
 
@@ -54,7 +54,7 @@ describe('POST /users/:userId/carts', () => {
     await setShopAllowed(false);
 
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .send(validCart)
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.ShopNotAllowed });
@@ -62,23 +62,13 @@ describe('POST /users/:userId/carts', () => {
     await setShopAllowed(true);
   });
 
-  it('should fail because the user is not itself', async () => {
-    const otherUser = await createFakeUser();
-    const otherToken = generateToken(otherUser);
-
-    await request(app)
-      .post(`/users/${user.id}/carts`)
-      .send(validCart)
-      .set('Authorization', `Bearer ${otherToken}`)
-      .expect(403, { error: Error.NotSelf });
-
-    // Delete the user to not make the results wrong for the success test
-    await database.user.delete({ where: { id: otherUser.id } });
+  it('should fail because the user is not authenticated', async () => {
+    await request(app).post(`/users/current/carts`).send(validCart).expect(401, { error: Error.Unauthenticated });
   });
 
   it('should fail because the body is missing', async () => {
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .expect(400, { error: Error.InvalidBody });
   });
@@ -95,7 +85,7 @@ describe('POST /users/:userId/carts', () => {
     for (const [index, badBody] of badBodies.entries()) {
       it(`should not accept this bad body (${index + 1}/${badBodies.length})`, async () => {
         await request(app)
-          .post(`/users/${user.id}/carts`)
+          .post(`/users/current/carts`)
           .set('Authorization', `Bearer ${token}`)
           .send(badBody)
           .expect(400, { error: Error.InvalidBody });
@@ -107,7 +97,7 @@ describe('POST /users/:userId/carts', () => {
     for (const quantity of [-1, 0, 0.25]) {
       it(`should fail as the quantity ${quantity}`, async () => {
         await request(app)
-          .post(`/users/${user.id}/carts`)
+          .post(`/users/current/carts`)
           .set('Authorization', `Bearer ${token}`)
           .send({
             tickets: { userIds: [], visitors: [] },
@@ -120,7 +110,7 @@ describe('POST /users/:userId/carts', () => {
 
   it('should fail because the basket is empty', async () => {
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         tickets: { userIds: [], visitors: [] },
@@ -131,7 +121,7 @@ describe('POST /users/:userId/carts', () => {
 
   it('should fail because the user id is listed twice', async () => {
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         tickets: { userIds: [user.id, user.id], visitors: [] },
@@ -142,7 +132,7 @@ describe('POST /users/:userId/carts', () => {
 
   it('should fail because a supplement is listed twice', async () => {
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         tickets: { userIds: [], visitors: [] },
@@ -162,7 +152,7 @@ describe('POST /users/:userId/carts', () => {
 
   it('should fail as the user does not exists', async () => {
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         tickets: { userIds: ['A1Z2E3'], visitors: [] },
@@ -173,7 +163,7 @@ describe('POST /users/:userId/carts', () => {
 
   it('should fail as the supplement does not exists', async () => {
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         tickets: { userIds: [], visitors: [] },
@@ -185,7 +175,7 @@ describe('POST /users/:userId/carts', () => {
   it('should fail as you try to order a ticket for an orga', async () => {
     const orga = await createFakeUser({ type: UserType.orga });
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         tickets: { userIds: [orga.id], visitors: [] },
@@ -201,7 +191,7 @@ describe('POST /users/:userId/carts', () => {
     const paidUser = await createFakeUser({ paid: true });
 
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         tickets: { userIds: [paidUser.id], visitors: [] },
@@ -231,7 +221,7 @@ describe('POST /users/:userId/carts', () => {
     });
 
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         tickets: { userIds: [], visitors },
@@ -261,7 +251,7 @@ describe('POST /users/:userId/carts', () => {
     sandbox.stub(cartOperations, 'createCart').throws('Unexpected error');
 
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send(validCart)
       .expect(500, { error: Error.InternalServerError });
@@ -271,7 +261,7 @@ describe('POST /users/:userId/carts', () => {
     sandbox.stub(itemOperations, 'fetchItems').throws('Unexpected error');
 
     await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send(validCart)
       .expect(500, { error: Error.InternalServerError });
@@ -279,7 +269,7 @@ describe('POST /users/:userId/carts', () => {
 
   it('should successfuly create a cart', async () => {
     const { body } = await request(app)
-      .post(`/users/${user.id}/carts`)
+      .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send(validCart)
       .expect(201);
