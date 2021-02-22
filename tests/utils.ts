@@ -33,7 +33,7 @@ export const createFakeUser = async ({
   }
 
   if (paid) {
-    await forcePay(user.id, user.type);
+    await forcePay(user);
   }
 
   if (permission) {

@@ -779,23 +779,27 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
-  /admin/scan/{qrcode}:
+  /admin/scan/:
     post:
       summary: Scanne le billet d'un utilisateur
       description: Renvoie les informations de l'utilisateur.<br/>
         **Permission 'entry' ou 'admin' requise.**<br/>
         *Le billet ne doit pas avoir été déjà scanné.*
+        *Le billet est passé dans le body et non dans les paramètres car il est chiffré en base64 et peut contenir des slashs*
       tags:
         - Admin
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: qrcode
-          description: Contenu du QR code présent sur le billet chiffré
-          schema:
-            type: string
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                qrcode:
+                  type: string
+                  description: Contenu du QR code présent sur le billet chiffré
       responses:
         200:
           description: Renvoie les informations de l'utilisateur et son équipe

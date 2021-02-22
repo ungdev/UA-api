@@ -3,6 +3,6 @@ import scan from './scan';
 
 const router = Router();
 
-router.post('/scan/:qrcode', scan);
+router.post('/', scan);
 
 export default router;
