@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error } from '../../../types';
-import { noContent, notFound } from '../../../utils/responses';
+import { forbidden, noContent, notFound } from '../../../utils/responses';
 import { fetchCart, refundCart } from '../../../operations/carts';
+import { TransactionState } from '@prisma/client';
 
 export default [
   // Middlewares
@@ -15,7 +16,12 @@ export default [
 
       // Check if the user exists
       if (!cart) {
-        return notFound(response, Error.UserNotFound);
+        return notFound(response, Error.CartNotFound);
+      }
+
+      // Check if the cart is paid
+      if (cart.transactionState !== TransactionState.paid) {
+        return forbidden(response, Error.NotPaid);
       }
 
       await refundCart(cart.id);
