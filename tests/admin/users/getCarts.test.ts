@@ -8,7 +8,7 @@ import * as cartOperations from '../../../src/operations/carts';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/user';
 
-describe('POST /admin/users/:userId/force-pay', () => {
+describe.only('GET /admin/users/:userId/carts', () => {
   let user: User;
   let admin: User;
   let adminToken: string;
@@ -28,45 +28,68 @@ describe('POST /admin/users/:userId/force-pay', () => {
   });
 
   it('should error as the user is not authenticated', () =>
-    request(app).post(`/admin/users/${user.id}/force-pay`).expect(401, { error: Error.Unauthenticated }));
+    request(app).get(`/admin/users/${user.id}/carts`).expect(401, { error: Error.Unauthenticated }));
 
   it('should error as the user is not an administrator', () => {
     const userToken = generateToken(user);
     return request(app)
-      .post(`/admin/users/${user.id}/force-pay`)
+      .get(`/admin/users/${user.id}/carts`)
       .set('Authorization', `Bearer ${userToken}`)
       .expect(403, { error: Error.NoPermission });
   });
 
   it('should error as the user is not found', () =>
     request(app)
-      .post('/admin/users/A12B3C/force-pay')
+      .get('/admin/users/A12B3C/carts')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(404, { error: Error.UserNotFound }));
 
   it('should throw an internal server error', async () => {
     // Fake the main function to throw
-    sandbox.stub(cartOperations, 'forcePay').throws('Unexpected error');
+    sandbox.stub(cartOperations, 'fetchCarts').throws('Unexpected error');
 
-    // Request to login
     await request(app)
-      .post(`/admin/users/${user.id}/force-pay`)
+      .get(`/admin/users/${user.id}/carts`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should force pay the user', async () => {
-    const { body } = await request(app)
-      .post(`/admin/users/${user.id}/force-pay`)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200);
+  it('should return an empty cart', () =>
+    request(app).get(`/admin/users/${user.id}/carts`).set('Authorization', `Bearer ${adminToken}`).expect(200, []));
 
-    expect(body.hasPaid).to.be.true;
+  it('should return a pending cart', async () => {
+    await cartOperations.createCart(user.id, [
+      {
+        itemId: 'ethernet-5',
+        quantity: 1,
+        forUserId: user.id,
+      },
+    ]);
+
+    const carts = await cartOperations.fetchCarts(user.id);
+    const [cart] = carts;
+    const [cartItem] = cart.cartItems;
+
+    await request(app)
+      .get(`/admin/users/${user.id}/carts`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, [
+        {
+          id: cart.id,
+          userId: user.id,
+          transactionState: cart.transactionState,
+          paidAt: null,
+          transactionId: null,
+          cartItems: [
+            {
+              id: cartItem.id,
+              quantity: 1,
+              cartId: cart.id,
+              itemId: 'ethernet-5',
+              forUserId: user.id,
+            },
+          ],
+        },
+      ]);
   });
-
-  it('should fail as the user has already been force payed', () =>
-    request(app)
-      .post(`/admin/users/${user.id}/force-pay`)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .expect(403, { error: Error.AlreadyPaid }));
 });
