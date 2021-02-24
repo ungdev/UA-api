@@ -1,25 +1,22 @@
+import { expect } from 'chai';
 import request from 'supertest';
-import { TransactionState } from '@prisma/client';
 import app from '../../../src/app';
 import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Cart, Error, Permission, User } from '../../../src/types';
+import { Error, Permission, User } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/user';
 
-describe('POST /admin/carts/:cartId/refund', () => {
+describe.only('POST /admin/users/:userId/force-pay', () => {
   let user: User;
   let admin: User;
   let adminToken: string;
-  let cart: Cart;
 
   before(async () => {
     user = await createFakeUser();
     admin = await createFakeUser({ permission: Permission.admin });
     adminToken = generateToken(admin);
-
-    cart = await cartOperations.createCart(user.id, [{ itemId: 'ticket-player', quantity: 1, forUserId: user.id }]);
   });
 
   after(async () => {
@@ -31,49 +28,45 @@ describe('POST /admin/carts/:cartId/refund', () => {
   });
 
   it('should error as the user is not authenticated', () =>
-    request(app).post(`/admin/carts/${cart.id}/refund`).expect(401, { error: Error.Unauthenticated }));
+    request(app).post(`/admin/users/${user.id}/force-pay`).expect(401, { error: Error.Unauthenticated }));
 
   it('should error as the user is not an administrator', () => {
     const userToken = generateToken(user);
     return request(app)
-      .post(`/admin/carts/${cart.id}/refund`)
+      .post(`/admin/users/${user.id}/force-pay`)
       .set('Authorization', `Bearer ${userToken}`)
       .expect(403, { error: Error.NoPermission });
   });
 
-  it('should error as the cart is not found', () =>
+  it('should error as the user is not found', () =>
     request(app)
-      .post('/admin/carts/A12B3C/refund')
+      .post('/admin/users/A12B3C/force-pay')
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(404, { error: Error.CartNotFound }));
-
-  it('should error because the cart is not yet payed', () =>
-    request(app)
-      .post(`/admin/carts/${cart.id}/refund`)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .expect(403, { error: Error.NotPaid }));
+      .expect(404, { error: Error.UserNotFound }));
 
   it('should throw an internal server error', async () => {
-    await database.cart.update({
-      data: { transactionState: TransactionState.paid },
-      where: { id: cart.id },
-    });
     // Fake the main function to throw
-    sandbox.stub(cartOperations, 'refundCart').throws('Unexpected error');
+    sandbox.stub(cartOperations, 'forcePay').throws('Unexpected error');
 
     // Request to login
     await request(app)
-      .post(`/admin/carts/${cart.id}/refund`)
+      .post(`/admin/users/${user.id}/force-pay`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should refund the cart', async () => {
-    await database.cart.update({
-      data: { transactionState: TransactionState.paid },
-      where: { id: cart.id },
-    });
+  it('should force pay the user', async () => {
+    const { body } = await request(app)
+      .post(`/admin/users/${user.id}/force-pay`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
 
-    return request(app).post(`/admin/carts/${cart.id}/refund`).set('Authorization', `Bearer ${adminToken}`).expect(204);
+    expect(body.hasPaid).to.be.true;
   });
+
+  it('should fail as the user has already been force payed', () =>
+    request(app)
+      .post(`/admin/users/${user.id}/force-pay`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(403, { error: Error.AlreadyPaid }));
 });

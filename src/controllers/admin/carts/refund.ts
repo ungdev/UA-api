@@ -1,9 +1,9 @@
+import { TransactionState } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error } from '../../../types';
 import { forbidden, noContent, notFound } from '../../../utils/responses';
 import { fetchCart, refundCart } from '../../../operations/carts';
-import { TransactionState } from '@prisma/client';
 
 export default [
   // Middlewares
