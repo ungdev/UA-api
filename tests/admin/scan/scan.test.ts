@@ -7,10 +7,10 @@ import { Cart, Error, Permission, User } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/user';
-import { encodeToBase64, encryptQrCode } from '../../../src/utils/helpers';
+import { encryptQrCode } from '../../../src/utils/helpers';
 import { forcePay } from '../../../src/operations/carts';
 
-describe.only('POST /admin/scan/:qrcode', () => {
+describe('POST /admin/scan/:qrcode', () => {
   let user: User;
   let admin: User;
   let adminToken: string;
