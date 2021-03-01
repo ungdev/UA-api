@@ -48,14 +48,16 @@ export const createFakeTeam = async ({
   tournament = TournamentId.lol,
   paid = false,
   locked = false,
+  name,
 }: {
   members?: number;
   tournament?: TournamentId;
   paid?: boolean;
   locked?: boolean;
+  name?: string;
 } = {}) => {
   const user = await createFakeUser({ paid });
-  const team = await createTeam(faker.internet.userName(), tournament, user.id);
+  const team = await createTeam(name || faker.internet.userName(), tournament, user.id);
 
   if (locked) {
     await lockTeam(team.id);

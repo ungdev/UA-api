@@ -1,7 +1,7 @@
 import prisma, { TransactionState, UserType } from '@prisma/client';
 
 import database from '../services/database';
-import { Cart, CartWithCartItems, DetailedCart, PrimitiveCartItem, User } from '../types';
+import { Cart, CartWithCartItems, DetailedCart, PrimitiveCartItem } from '../types';
 import nanoid from '../utils/nanoid';
 
 export const fetchCart = (cartId: string): Promise<Cart> =>

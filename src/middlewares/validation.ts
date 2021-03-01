@@ -29,7 +29,7 @@ export const validateQuery = (schema: ObjectSchema) => (
   const { error, value } = schema.validate(request.query);
 
   if (error) {
-    logger.debug(error.message);
+    logger.verbose(error.message);
     return badRequest(response, Error.InvalidQueryParameters);
   }
 
@@ -51,6 +51,16 @@ export const validateParameter = (schema: Schema) => (
   if (error) {
     logger.debug(error.message);
     return badRequest(response, Error.InvalidParameters);
+  }
+
+  return next();
+};
+
+export const enforceQueryString = (request: Request, response: Response, next: NextFunction) => {
+  for (const query of Object.keys(request.query)) {
+    if (Array.isArray(query)) {
+      return badRequest(response, Error.InvalidQueryParameters);
+    }
   }
 
   return next();

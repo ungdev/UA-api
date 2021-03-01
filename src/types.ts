@@ -1,4 +1,4 @@
-import prisma, { TransactionState } from '@prisma/client';
+import prisma, { TournamentId, TransactionState, UserType } from '@prisma/client';
 import { ErrorRequestHandler } from 'express';
 import Mail from 'nodemailer/lib/mailer';
 /**
@@ -88,6 +88,24 @@ export type PrimitiveUser = prisma.User & {
 
 export type User = PrimitiveUser & {
   hasPaid: boolean;
+  name: string;
+};
+
+export type UserWithTeam = User & {
+  team: prisma.Team;
+};
+
+// We need to use here a type instead of an interface as it is used for a casting that wouldn't work on an interface
+export type UserSearchQuery = {
+  username: string;
+  name: string;
+  email: string;
+  type: UserType;
+  permission: Permission;
+  team: string;
+  tournament: TournamentId;
+  scanned: string;
+  place: string;
 };
 
 export type Tournament = prisma.Tournament & {

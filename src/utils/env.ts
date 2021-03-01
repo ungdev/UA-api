@@ -38,6 +38,7 @@ const env = {
   api: {
     port: loadIntEnv('API_PORT') || 3000,
     prefix: loadEnv('API_PREFIX') || '/',
+    itemsPerPage: 50,
   },
   front: {
     website: loadEnv('API_WEBSITE') || 'https://arena.utt.fr',

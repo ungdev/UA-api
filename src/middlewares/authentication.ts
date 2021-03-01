@@ -1,9 +1,10 @@
 import { Response, NextFunction, Request } from 'express';
-import { getRequestInfo } from '../utils/user';
+import { getRequestInfo } from '../utils/users';
 import { forbidden, unauthenticated } from '../utils/responses';
 import { Error, Permission } from '../types';
 import { isLoginAllowed } from './settings';
 import { createLog } from '../operations/log';
+import { deserializePermissions } from '../utils/helpers';
 
 // Checks the user is authenticated. If not, it will return an error
 export const isAuthenticated = [
@@ -49,16 +50,24 @@ export const isNotAuthenticated = [
 ];
 
 // Checks the user has the given permission. If not, it will return an error
-export const hasPermission = (permission: Permission) => [
+// Multiple permissions can be chained to allow mutliple permissions to access the ressource
+export const hasPermission = (...permissions: Permission[]) => [
   ...isAuthenticated,
   (request: Request, response: Response, next: NextFunction) => {
     const { user } = getRequestInfo(response);
 
     if (!user.permissions) return forbidden(response, Error.NoPermission);
 
-    // If user has required permission or has "admin" permission
-    if (user.permissions.split(',').includes(permission) || user.permissions.split(',').includes(Permission.admin)) {
+    const userPermissions = deserializePermissions(user.permissions);
+
+    // If user is admin
+    if (userPermissions.includes(Permission.admin)) {
       return next();
+    }
+
+    // If the user has the permission of one permission required
+    for (const permission of permissions) {
+      if (userPermissions.includes(permission)) return next();
     }
 
     return forbidden(response, Error.NoPermission);

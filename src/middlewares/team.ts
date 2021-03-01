@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Error } from '../types';
 import { forbidden } from '../utils/responses';
-import { getRequestInfo } from '../utils/user';
+import { getRequestInfo } from '../utils/users';
 import { isAuthenticated } from './authentication';
 
 // Checks if the user is the captain of his team. If not, it will return an error.

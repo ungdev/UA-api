@@ -6,7 +6,7 @@ import database from '../../../src/services/database';
 import { Cart, Error, Permission, User } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import { sandbox } from '../../setup';
-import { generateToken } from '../../../src/utils/user';
+import { generateToken } from '../../../src/utils/users';
 
 describe('POST /admin/carts/:cartId/refund', () => {
   let user: User;

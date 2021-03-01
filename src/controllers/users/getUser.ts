@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { isAuthenticated } from '../../middlewares/authentication';
 import { filterUser } from '../../utils/filters';
 import { success } from '../../utils/responses';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares

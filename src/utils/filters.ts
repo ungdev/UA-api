@@ -1,5 +1,5 @@
 import { pick } from 'lodash';
-import { CartItem, CartWithCartItems, Item, Team, Tournament, User } from '../types';
+import { CartItem, CartWithCartItems, Item, Team, Tournament, User, UserWithTeam } from '../types';
 
 export const filterUserRestricted = (user: User) => pick(user, ['id', 'type']);
 
@@ -9,8 +9,7 @@ export const filterUser = (user: User) =>
     'type',
     'hasPaid',
     'username',
-    'firstname',
-    'lastname',
+    'name',
     'email',
     'permissions',
     'place',
@@ -19,6 +18,16 @@ export const filterUser = (user: User) =>
     'teamId',
     'askingTeamId',
   ]);
+
+export const filterUserWithTeam = (user: UserWithTeam) => {
+  const filteredUser = filterUser(user);
+  const filteredTeam = user.team ? pick(user.team, ['id', 'name', 'tournamentId', 'captainId', 'lockedAt']) : undefined;
+
+  return {
+    ...filteredUser,
+    team: filteredTeam,
+  };
+};
 
 export const filterItem = (item: Item) =>
   pick(item, ['id', 'name', 'category', 'attribute', 'price', 'infos', 'image']);

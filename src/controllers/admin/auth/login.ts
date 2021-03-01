@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { UserType } from '@prisma/client';
 import { filterUser } from '../../../utils/filters';
-import { generateToken } from '../../../utils/user';
+import { generateToken } from '../../../utils/users';
 import { fetchUser } from '../../../operations/user';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error } from '../../../types';

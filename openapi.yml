@@ -109,9 +109,7 @@ components:
             username:
               type: string
               nullable: true
-            firstname:
-              type: string
-            lastname:
+            name:
               type: string
             email:
               type: string
@@ -479,13 +477,8 @@ paths:
           schema:
             type: string
         - in: query
-          name: firstname
-          description: Recherche par prénom
-          schema:
-            type: string
-        - in: query
-          name: lastname
-          description: Recherche par nom
+          name: name
+          description: Recherche par nom (prénom et/ou nom de famille)
           schema:
             type: string
         - in: query
@@ -501,11 +494,6 @@ paths:
         - in: query
           name: place
           description: Recherche par place
-          schema:
-            type: string
-        - in: query
-          name: discordId
-          description: Recherche par identifiant Discord
           schema:
             type: string
         - in: query
@@ -530,11 +518,6 @@ paths:
           schema:
             $ref: '#/components/schemas/Permission'
         - in: query
-          name: paid
-          description: Filtre les utilisateurs en fonction de s'ils ont payé ou non
-          schema:
-            type: boolean
-        - in: query
           name: scanned
           description: Filtre les utilisateurs en fonction de s'ils ont été scannés ou non
           schema:
@@ -552,9 +535,20 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UserWithTeam'
+                type: object
+                properties:
+                  itemsPerPage:
+                    type: number
+                  currentPage:
+                    type: number
+                  totalItems:
+                    type: number
+                  totalPages:
+                    type: number
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserWithTeam'
         400:
           $ref: '#/components/responses/400Errored'
         401:

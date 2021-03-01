@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import bcrpyt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 import { filterUser } from '../../utils/filters';
 import { success, unauthenticated } from '../../utils/responses';
 import { validateBody } from '../../middlewares/validation';

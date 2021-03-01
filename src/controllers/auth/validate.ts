@@ -4,7 +4,7 @@ import { fetchUser, removeUserRegisterToken } from '../../operations/user';
 import { Error } from '../../types';
 import { filterUser } from '../../utils/filters';
 import { badRequest, success } from '../../utils/responses';
-import { generateToken } from '../../utils/user';
+import { generateToken } from '../../utils/users';
 
 export default [
   // Middlewares

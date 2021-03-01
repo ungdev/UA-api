@@ -3,7 +3,7 @@ import { isAuthenticated } from '../../middlewares/authentication';
 import { deleteTeamRequest } from '../../operations/team';
 import { Error } from '../../types';
 import { forbidden, noContent } from '../../utils/responses';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares

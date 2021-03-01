@@ -11,7 +11,7 @@ import { morgan } from './utils/logger';
 import { initUserRequest } from './middlewares/user';
 import env from './utils/env';
 import errorHandler from './middlewares/errorHandler';
-import { validateParameter } from './middlewares/validation';
+import { enforceQueryString, validateParameter } from './middlewares/validation';
 import * as validators from './utils/validators';
 
 const app = express();
@@ -28,7 +28,8 @@ app.use(cors(), helmet());
 // Use json middleware to check and parse json body
 app.use(json);
 
-// Validate the parameters that contains an id
+// Validate the parameters that contains an id and check that query paramers doesn't contain an array
+app.use(enforceQueryString);
 app.param(['userId', 'teamId', 'cartId', 'cartItemId'], validateParameter(validators.id));
 
 // Fetch user from database
