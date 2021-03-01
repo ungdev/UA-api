@@ -6,7 +6,7 @@ import database from '../../../src/services/database';
 import { Cart, Error, Permission, User } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
-import { generateToken } from '../../../src/utils/user';
+import { generateToken } from '../../../src/utils/users';
 import { encryptQrCode } from '../../../src/utils/helpers';
 import { forcePay } from '../../../src/operations/carts';
 

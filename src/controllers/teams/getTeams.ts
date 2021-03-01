@@ -11,8 +11,8 @@ export default [
   // Middlewares
   validateQuery(
     Joi.object({
-      locked: Joi.string().valid('true', 'false').optional(),
       tournamentId: validators.tournamentId.required(),
+      locked: validators.stringBoolean,
     }),
   ),
 

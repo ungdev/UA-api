@@ -6,7 +6,7 @@ import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { getIp } from './network';
-import { getRequestInfo } from './user';
+import { getRequestInfo } from './users';
 import env, { warnLogs } from './env';
 
 // We can't require env here or we will have a require loop

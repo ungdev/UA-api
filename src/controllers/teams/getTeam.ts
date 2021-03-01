@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { isInATeam } from '../../middlewares/team';
 import { success } from '../../utils/responses';
 import { filterTeam } from '../../utils/filters';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares

@@ -1,9 +1,9 @@
 import userOperations from 'bcryptjs';
-import { TransactionState, UserType } from '@prisma/client';
+import prisma, { TransactionState, UserType } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
-import { Permission, PrimitiveUser, User } from '../types';
+import { Permission, PrimitiveUser, User, UserSearchQuery, UserWithTeam } from '../types';
 
 export const userInclusions = {
   cartItems: {
@@ -26,6 +26,16 @@ export const formatUser = (user: PrimitiveUser): User => {
   return {
     ...user,
     hasPaid,
+    name: `${user.firstname} ${user.lastname}`,
+  };
+};
+
+export const formatUserWithTeam = (primitiveUser: PrimitiveUser & { team: prisma.Team }): UserWithTeam => {
+  const user = formatUser(primitiveUser);
+
+  return {
+    ...user,
+    team: primitiveUser.team,
   };
 };
 
@@ -36,6 +46,49 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
   });
 
   return formatUser(user);
+};
+
+export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<UserWithTeam[]> => {
+  // Prepare an array that will handle all name requests
+  const nameQueries = [];
+
+  // If the name is specified
+  if (query.name) {
+    // Split the names by space and remove the empty elements
+    const names = query.name.split(' ').filter((name) => name);
+
+    // For each element, create a query that will be used in the OR
+    for (const name of names) {
+      nameQueries.push({ firstname: { startsWith: name } }, { lastname: { startsWith: name } });
+    }
+  }
+
+  const users = await database.user.findMany({
+    where: {
+      ...(nameQueries.length > 0 ? { OR: nameQueries } : {}),
+      username: query.username ? { startsWith: query.username } : undefined,
+      email: query.email ? { startsWith: query.email } : undefined,
+      type: query.type || undefined,
+      permissions: query.permission ? { contains: query.permission } : undefined,
+      place: query.place ? { startsWith: query.place } : undefined,
+
+      // Checks first if scanned exists, and then if it is true of false
+      scannedAt: query.scanned ? (query.scanned === 'true' ? { not: null } : null) : undefined,
+
+      team: {
+        name: query.team ? { startsWith: query.team } : undefined,
+        tournamentId: query.tournament || undefined,
+      },
+    },
+    skip: env.api.itemsPerPage * page,
+    take: env.api.itemsPerPage,
+    include: {
+      ...userInclusions,
+      team: true,
+    },
+  });
+
+  return users.map(formatUserWithTeam);
 };
 
 export const createUser = async (

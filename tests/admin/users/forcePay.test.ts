@@ -6,7 +6,7 @@ import database from '../../../src/services/database';
 import { Error, Permission, User } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import { sandbox } from '../../setup';
-import { generateToken } from '../../../src/utils/user';
+import { generateToken } from '../../../src/utils/users';
 
 describe('POST /admin/users/:userId/force-pay', () => {
   let user: User;
