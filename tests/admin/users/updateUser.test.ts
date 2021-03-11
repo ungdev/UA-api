@@ -9,7 +9,7 @@ import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { forcePay } from '../../../src/operations/carts';
 
-describe.only('POST /admin/users/:userId', () => {
+describe('PUT /admin/users/:userId', () => {
   let user: User;
   let admin: User;
   let adminToken: string;

@@ -751,7 +751,7 @@ paths:
             schema:
               type: object
               properties:
-                replacementUserId:
+                replacingUserId:
                   type: string
                   description: Identifiant de l'utilisateur remplaçant
       responses:
@@ -764,9 +764,9 @@ paths:
                 type: object
                 properties:
                   replacedUser:
-                    $ref: '#/components/schemas/UserWithTeam'
-                  replacementUser:
-                    $ref: '#/components/schemas/UserWithTeam'
+                    $ref: '#/components/schemas/User'
+                  replacingUser:
+                    $ref: '#/components/schemas/User'
         400:
           $ref: '#/components/responses/400Errored'
         401:

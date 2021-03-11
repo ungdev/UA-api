@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
-import { promoteUser } from '../../operations/team';
+import { formatTeam, promoteUser } from '../../operations/team';
 import { fetchUser } from '../../operations/user';
 import { Error } from '../../types';
 import { filterTeam } from '../../utils/filters';
@@ -29,7 +29,7 @@ export default [
 
       const updatedTeam = await promoteUser(team.id, userId);
 
-      return success(response, filterTeam(updatedTeam));
+      return success(response, filterTeam(formatTeam(updatedTeam)));
     } catch (error) {
       return next(error);
     }

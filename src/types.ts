@@ -174,6 +174,7 @@ export const enum Error {
   AlreadyPaid = 'Le joueur possède déjà une place',
   AlreadyErrored = 'Vous ne pouvez pas valider une transaction échouée',
   TeamLocked = "L'équipe est verrouillée",
+  TeamNotLocked = "L'équipe n'est pas verrouillée",
   TeamNotFull = "L'équipe est incomplète",
   TeamFull = "L'équipe est complète",
   AlreadyInTeam = "Vous êtes déjà dans l'équipe",
@@ -181,6 +182,7 @@ export const enum Error {
   NotAskedTeam = "Vous ne demandez pas l'accès à l'équipe",
   CaptainCannotQuit = "Un capitaine ne peut pas se bannir, veuillez dissoudre l'équipe ou nommer un autre chef d'équipe",
   CannotChangeType = 'Vous ne pouvez pas changer de type si vous avez payé',
+  NotSameType = "Les deux utilisateurs n'ont pas le même type",
 
   // 404
   // The server can't find the requested resource
