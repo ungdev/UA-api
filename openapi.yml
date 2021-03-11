@@ -580,11 +580,14 @@ paths:
               type: object
               properties:
                 permissions:
-                  type: string
-                  nullable: true
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Permission'
                 place:
                   type: string
-                  nullable: true
+                  example: A23
+                type:
+                  $ref: '#/components/schemas/Type'
       responses:
         200:
           description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.

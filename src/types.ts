@@ -180,6 +180,7 @@ export const enum Error {
   AlreadyAskedATeam = 'Vous avez déjà demandé de vous inscrire dans une équipe',
   NotAskedTeam = "Vous ne demandez pas l'accès à l'équipe",
   CaptainCannotQuit = "Un capitaine ne peut pas se bannir, veuillez dissoudre l'équipe ou nommer un autre chef d'équipe",
+  CannotChangeType = 'Vous ne pouvez pas changer de type si vous avez payé',
 
   // 404
   // The server can't find the requested resource
