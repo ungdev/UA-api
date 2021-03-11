@@ -10,7 +10,7 @@ import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import env from '../../../src/utils/env';
 
-describe.only('GET /admin/users', () => {
+describe('GET /admin/users', () => {
   let user: User;
   let admin: User;
   let adminToken: string;

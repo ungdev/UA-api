@@ -4,6 +4,8 @@ import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
 import { Permission, PrimitiveUser, User, UserSearchQuery, UserWithTeam } from '../types';
+import { serializePermissions } from '../utils/helpers';
+import { format } from 'morgan';
 
 export const userInclusions = {
   cartItems: {
@@ -127,6 +129,25 @@ export const updateUser = async (userId: string, username: string, newPassword: 
     where: {
       id: userId,
     },
+    include: userInclusions,
+  });
+
+  return formatUser(user);
+};
+
+export const updateAdminUser = async (
+  userId: string,
+  type: UserType,
+  permissions: Permission[],
+  place: string,
+): Promise<User> => {
+  const user = await database.user.update({
+    data: {
+      type,
+      permissions: serializePermissions(permissions),
+      place,
+    },
+    where: { id: userId },
     include: userInclusions,
   });
 
