@@ -1,7 +1,7 @@
 openapi: 3.0.0
 
 info:
-  version: '1.0'
+  version: '1.1'
   title: UTT Arena - API
   description: |-
     API web à destination des services de l'UTT Arena.<br/><br/>
@@ -1199,8 +1199,6 @@ paths:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
-        404:
-          $ref: '#/components/responses/404TeamNotFound'
 
     get:
       summary: Renvoie les informations de l'équipe
@@ -1223,8 +1221,6 @@ paths:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
-        404:
-          $ref: '#/components/responses/404TeamNotFound'
 
     put:
       summary: Modifie les informations de l'équipe
@@ -1257,8 +1253,6 @@ paths:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
-        404:
-          $ref: '#/components/responses/404TeamNotFound'
 
   /teams/current/captain/{userId}:
     put:
@@ -1405,8 +1399,6 @@ paths:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
-        404:
-          $ref: '#/components/responses/404UserNotFound'
 
   /teams/current/lock:
     post:
@@ -1432,8 +1424,6 @@ paths:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
-        404:
-          $ref: '#/components/responses/404TeamNotFound'
 
   /teams/current/users/{userId}:
     delete:
@@ -1486,8 +1476,6 @@ paths:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
-        404:
-          $ref: '#/components/responses/404UserNotFound'
 
   /tickets/{cartItemId}:
     get:
