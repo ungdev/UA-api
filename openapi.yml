@@ -1565,8 +1565,7 @@ paths:
           $ref: '#/components/responses/404UserNotFound'
     put:
       summary: Modifie les informations d'un utilisateur
-      description: Modifie les informations d'un utilisateur.<br/>
-        **L'utilisateur doit être l'utilisateur cible.**
+      description: Modifie les informations d'un utilisateur.
       tags:
         - Users
       security:
@@ -1605,8 +1604,7 @@ paths:
   /users/current/carts:
     get:
       summary: Renvoie la liste des achats de l'utilisateur
-      description: Renvoie la liste des achats de l'utilisateur.<br/>
-        **L'utilisateur doit être l'utilisateur cible.**
+      description: Renvoie la liste des achats de l'utilisateur.
       tags:
         - Users
       security:
@@ -1633,7 +1631,6 @@ paths:
       summary: Crée un panier
       description: Crée un panier et renvoie une URL afin de procéder au paiement.
         Pour chaque accompagnateur, un compte inaccessible est créé et sera lié à l'équipe actuelle de l'utilisateur.<br/>
-        **L'utilisateur doit être l'utilisateur cible.**<br/>
         *La billetterie doit être ouverte.*
         *Le stock d'items restant doit être suffisant pour satisfaire la demande.*
       tags:
