@@ -1062,8 +1062,8 @@ paths:
   /items:
     get:
       summary: Renvoie la liste des items en vente
-      description: Renvoie la liste des items en vente dans la billetterie.
-      *La billetterie doit être ouverte.*
+      description: Renvoie la liste des items en vente dans la billetterie.<br />
+        *La billetterie doit être ouverte.*
       tags:
         - Items
       responses:
