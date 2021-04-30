@@ -8,7 +8,8 @@ describe('POST /contact', () => {
   it('should send an internal server error', async () => {
     sandbox.stub(slackService, 'sendSlackContact').throws('Unexpected error');
     const body = {
-      name: 'John Doe',
+      firstname: 'John',
+      lastname: 'Doe',
       email: 'john.doe@test.com',
       subject: 'Test',
       message: 'Test test',
@@ -20,7 +21,8 @@ describe('POST /contact', () => {
     sandbox.stub(slackService, 'sendSlackContact');
 
     const body = {
-      name: 'John Doe',
+      firstname: 'John',
+      lastname: 'Doe',
       email: 'john.doe@test.com',
       subject: 'Test',
       message: 'Test test',
@@ -30,7 +32,8 @@ describe('POST /contact', () => {
 
   it('should not accept wrong email', async () => {
     const body = {
-      name: 'John Doe',
+      firstname: 'John',
+      lastname: 'Doe',
       email: 'wrong email',
       subject: 'Test',
       message: 'Test test',

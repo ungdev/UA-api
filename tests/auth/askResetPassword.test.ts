@@ -39,13 +39,13 @@ describe('POST /auth/reset-password', () => {
       .expect(400, { error: Error.InvalidBody });
   });
 
-  it('should return a not found because of incorrect email', async () => {
+  it('should return valid answer even if incorrect email', async () => {
     await request(app)
       .post('/auth/reset-password')
       .send({
         email: 'fake@email.fr',
       })
-      .expect(404, { error: Error.UserNotFound });
+      .expect(204);
   });
 
   it('should return an internal server error', async () => {

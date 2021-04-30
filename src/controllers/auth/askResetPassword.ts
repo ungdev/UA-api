@@ -3,8 +3,7 @@ import Joi from 'joi';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { validateBody } from '../../middlewares/validation';
 import { fetchUser, generateResetToken } from '../../operations/user';
-import { Error } from '../../types';
-import { noContent, notFound } from '../../utils/responses';
+import { noContent } from '../../utils/responses';
 import * as validators from '../../utils/validators';
 
 export default [
@@ -23,11 +22,11 @@ export default [
 
       const user = await fetchUser(email, 'email');
 
-      if (!user) {
-        return notFound(response, Error.UserNotFound);
+      // Always return a 204 even if the user doesn't exists to avoid address leakage
+      if (user) {
+        await generateResetToken(user.id);
+        // TODO send email
       }
-
-      await generateResetToken(user.id);
 
       return noContent(response);
     } catch (error) {

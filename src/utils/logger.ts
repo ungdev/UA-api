@@ -19,7 +19,7 @@ const consoleTransport = new transports.Console({
     printf(({ level, message }) => `${moment().format('HH:mm:ss')} ${level}: ${message}`),
   ),
   level: env.log.level,
-  silent: env.test, // Doesn't log if we are in testing environment
+  silent: env.test, // Doesn't log if we are in testing environment, you can temporarly comment it in testing to debug
 });
 
 const loggingTransports: Array<ConsoleTransportInstance> = [consoleTransport];
