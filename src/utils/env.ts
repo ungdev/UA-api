@@ -8,16 +8,17 @@ dotenv.config();
 // The testing must be able to be loaded without any environment variable except the DATABASE
 // We had to use a function to check if we are in testing environment instead of just loading dotenv if we are not
 // The reason is because prisma also loads dotenv and injects the variables
-const loadEnv = (key: string) => {
+// We however allow some variables like database credentials in testing environment
+const loadEnv = (key: string, allowedInTesting = false) => {
   // If we are in test env, do not inject dotenv variables
-  if (process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === 'test' && !allowedInTesting) {
     return;
   }
   // Return the loaded environment key
   return process.env[key];
 };
 
-const loadIntEnv = (key: string) => Number(loadEnv(key));
+const loadIntEnv = (key: string, allowedInTesting = false) => Number(loadEnv(key, allowedInTesting));
 
 // Returns the key only if we are not in production
 // Used when you want to have a default option for only testing and dev environment
@@ -57,12 +58,14 @@ const env = {
     token: loadEnv('SLACK_TOKEN'),
     contactChannel: loadEnv('SLACK_CONTACT_CHANNEL'),
   },
+
+  // Allow variable injection in testing environment for database credentials
   database: {
-    host: loadEnv('DATABASE_HOST') || 'localhost',
-    port: loadIntEnv('DATABASE_PORT') || 3306,
-    username: loadEnv('DATABASE_USERNAME') || notInProduction('test'),
-    password: loadEnv('DATABASE_PASSWORD') || notInProduction('test'),
-    name: loadEnv('DATABASE_NAME') || 'arena',
+    host: loadEnv('DATABASE_HOST', true) || 'localhost',
+    port: loadIntEnv('DATABASE_PORT', true) || 3306,
+    username: loadEnv('DATABASE_USERNAME', true),
+    password: loadEnv('DATABASE_PASSWORD', true),
+    name: loadEnv('DATABASE_NAME', true) || 'arena',
   },
   email: {
     host: loadEnv('EMAIL_HOST') || 'localhost',
