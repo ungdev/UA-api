@@ -8,7 +8,7 @@ import { Error, Team, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 
-describe('POST /teams/:teamId/joinRequests', () => {
+describe('POST /teams/:teamId/join-requests', () => {
   let user: User;
   let token: string;
   let team: Team;
@@ -27,13 +27,13 @@ describe('POST /teams/:teamId/joinRequests', () => {
 
   it('should fail because the team does not exists', async () => {
     await request(app)
-      .post(`/teams/1A2B3C/joinRequests`)
+      .post(`/teams/1A2B3C/join-requests`)
       .set('Authorization', `Bearer ${token}`)
       .expect(404, { error: Error.TeamNotFound });
   });
 
   it('should fail because the token is not provided', async () => {
-    await request(app).post(`/teams/${team.id}/joinRequests`).expect(401, { error: Error.Unauthenticated });
+    await request(app).post(`/teams/${team.id}/join-requests`).expect(401, { error: Error.Unauthenticated });
   });
 
   it('should fail because the user is already in a team', async () => {
@@ -43,7 +43,7 @@ describe('POST /teams/:teamId/joinRequests', () => {
     const localToken = generateToken(localUser);
 
     await request(app)
-      .post(`/teams/${team.id}/joinRequests`)
+      .post(`/teams/${team.id}/join-requests`)
       .set('Authorization', `Bearer ${localToken}`)
       .expect(403, { error: Error.AlreadyInTeam });
   });
@@ -51,7 +51,7 @@ describe('POST /teams/:teamId/joinRequests', () => {
   it('should fail with an internal server error', async () => {
     sandbox.stub(teamOperations, 'askJoinTeam').throws('Unexpected error');
     await request(app)
-      .post(`/teams/${team.id}/joinRequests`)
+      .post(`/teams/${team.id}/join-requests`)
       .set('Authorization', `Bearer ${token}`)
       .expect(500, { error: Error.InternalServerError });
   });
@@ -60,14 +60,14 @@ describe('POST /teams/:teamId/joinRequests', () => {
     const lockedTeam = await createFakeTeam({ members: 5, locked: true });
 
     await request(app)
-      .post(`/teams/${lockedTeam.id}/joinRequests`)
+      .post(`/teams/${lockedTeam.id}/join-requests`)
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.TeamLocked });
   });
 
   it('should succesfully request to join a team', async () => {
     const { body } = await request(app)
-      .post(`/teams/${team.id}/joinRequests`)
+      .post(`/teams/${team.id}/join-requests`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
@@ -79,7 +79,7 @@ describe('POST /teams/:teamId/joinRequests', () => {
 
   it('should fail as we already asked for the same team', async () => {
     await request(app)
-      .post(`/teams/${team.id}/joinRequests`)
+      .post(`/teams/${team.id}/join-requests`)
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.AlreadyAskedATeam });
   });
@@ -88,7 +88,7 @@ describe('POST /teams/:teamId/joinRequests', () => {
     const otherTeam = await createFakeTeam();
 
     await request(app)
-      .post(`/teams/${otherTeam.id}/joinRequests`)
+      .post(`/teams/${otherTeam.id}/join-requests`)
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.AlreadyAskedATeam });
   });

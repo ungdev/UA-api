@@ -9,7 +9,7 @@ import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/user';
 import { fetchUser } from '../../src/operations/user';
 
-describe('DELETE /teams/current/joinRequests/current', () => {
+describe('DELETE /teams/current/join-requests/current', () => {
   let user: User;
   let token: string;
   let team: Team;
@@ -28,20 +28,20 @@ describe('DELETE /teams/current/joinRequests/current', () => {
   });
 
   it('should fail because the token is not provided', async () => {
-    await request(app).delete('/teams/current/joinRequests/current').expect(401, { error: Error.Unauthenticated });
+    await request(app).delete('/teams/current/join-requests/current').expect(401, { error: Error.Unauthenticated });
   });
 
   it('should fail with an internal server error', async () => {
     sandbox.stub(teamOperations, 'deleteTeamRequest').throws('Unexpected error');
     await request(app)
-      .delete('/teams/current/joinRequests/current')
+      .delete('/teams/current/join-requests/current')
       .set('Authorization', `Bearer ${token}`)
       .expect(500, { error: Error.InternalServerError });
   });
 
   it('should succesfully cancel the team joining', async () => {
     await request(app)
-      .delete('/teams/current/joinRequests/current')
+      .delete('/teams/current/join-requests/current')
       .set('Authorization', `Bearer ${token}`)
       .expect(204);
 
@@ -52,7 +52,7 @@ describe('DELETE /teams/current/joinRequests/current', () => {
 
   it('should fail as the user has removed the request', async () => {
     await request(app)
-      .delete('/teams/current/joinRequests/current')
+      .delete('/teams/current/join-requests/current')
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.NotAskedTeam });
   });

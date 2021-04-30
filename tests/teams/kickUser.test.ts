@@ -89,9 +89,10 @@ describe('DELETE /teams/current/users/:userId', () => {
     const lockedTeam = await createFakeTeam({ members: 5, locked: true });
     const lockedCaptain = getCaptain(lockedTeam);
     const lockedToken = generateToken(lockedCaptain);
+    const lockedUserToKick = lockedTeam.players.find((player) => player.id !== lockedCaptain.id);
 
     await request(app)
-      .delete(`/teams/current/users/${userToKick.id}`)
+      .delete(`/teams/current/users/${lockedUserToKick.id}`)
       .set('Authorization', `Bearer ${lockedToken}`)
       .expect(403, { error: Error.TeamLocked });
   });

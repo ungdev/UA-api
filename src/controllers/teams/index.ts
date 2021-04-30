@@ -24,10 +24,10 @@ router.delete('/current/users/current', leaveTeam);
 router.delete('/current/users/:userId', kickUser);
 router.put('/current/captain/:userId', promoteCaptain);
 
-router.post('/:teamId/joinRequests', createTeamRequest);
-router.delete('/current/joinRequests/current', cancelTeamRequest);
-router.delete('/current/joinRequests/:userId', refuseTeamRequest);
-router.post('/current/joinRequests/:userId', acceptRequest);
+router.post('/:teamId/join-requests', createTeamRequest);
+router.delete('/current/join-requests/current', cancelTeamRequest);
+router.delete('/current/join-requests/:userId', refuseTeamRequest);
+router.post('/current/join-requests/:userId', acceptRequest);
 
 router.post('/current/lock', lockTeam);
 

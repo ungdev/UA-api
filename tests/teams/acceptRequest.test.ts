@@ -11,7 +11,7 @@ import { generateToken } from '../../src/utils/user';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
-describe('POST /teams/current/joinRequests/:userId', () => {
+describe('POST /teams/current/join-requests/:userId', () => {
   let user: User;
   let team: Team;
   let captain: User;
@@ -33,7 +33,7 @@ describe('POST /teams/current/joinRequests/:userId', () => {
   });
 
   it('should fail because the token is not provided', async () => {
-    await request(app).post(`/teams/current/joinRequests/${user.id}`).expect(401, { error: Error.Unauthenticated });
+    await request(app).post(`/teams/current/join-requests/${user.id}`).expect(401, { error: Error.Unauthenticated });
   });
 
   it('should fail because the user is a random with no rights', async () => {
@@ -41,7 +41,7 @@ describe('POST /teams/current/joinRequests/:userId', () => {
     const randomUserToken = generateToken(randomUser);
 
     await request(app)
-      .post(`/teams/current/joinRequests/${user.id}`)
+      .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${randomUserToken}`)
       .expect(403, { error: Error.NotInTeam });
   });
@@ -51,7 +51,7 @@ describe('POST /teams/current/joinRequests/:userId', () => {
     const memberToken = generateToken(member);
 
     await request(app)
-      .post(`/teams/current/joinRequests/${user.id}`)
+      .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${memberToken}`)
       .expect(403, { error: Error.NotCaptain });
   });
@@ -62,14 +62,14 @@ describe('POST /teams/current/joinRequests/:userId', () => {
     const otherCaptainToken = generateToken(otherCaptain);
 
     await request(app)
-      .post(`/teams/current/joinRequests/${user.id}`)
+      .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${otherCaptainToken}`)
       .expect(403, { error: Error.NotAskedTeam });
   });
 
   it('should fail as the user does not exists', async () => {
     await request(app)
-      .post(`/teams/current/joinRequests/A12B3C`)
+      .post(`/teams/current/join-requests/A12B3C`)
       .set('Authorization', `Bearer ${token}`)
       .expect(404, { error: Error.UserNotFound });
   });
@@ -77,7 +77,7 @@ describe('POST /teams/current/joinRequests/:userId', () => {
   it('should fail with an internal server error', async () => {
     sandbox.stub(teamOperations, 'joinTeam').throws('Unexpected error');
     await request(app)
-      .post(`/teams/current/joinRequests/${user.id}`)
+      .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(500, { error: Error.InternalServerError });
   });
@@ -88,7 +88,7 @@ describe('POST /teams/current/joinRequests/:userId', () => {
     const lockedToken = generateToken(lockedCaptain);
 
     await request(app)
-      .post(`/teams/current/joinRequests/${user.id}`)
+      .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${lockedToken}`)
       .expect(403, { error: Error.TeamLocked });
   });
@@ -102,7 +102,7 @@ describe('POST /teams/current/joinRequests/:userId', () => {
     await teamOperations.askJoinTeam(fullTeam.id, otherUser.id);
 
     await request(app)
-      .post(`/teams/current/joinRequests/${otherUser.id}`)
+      .post(`/teams/current/join-requests/${otherUser.id}`)
       .set('Authorization', `Bearer ${fullToken}`)
       .expect(403, { error: Error.TeamFull });
   });
@@ -116,14 +116,14 @@ describe('POST /teams/current/joinRequests/:userId', () => {
     await teamOperations.askJoinTeam(fullTeam.id, otherUser.id);
 
     await request(app)
-      .post(`/teams/current/joinRequests/${otherUser.id}`)
+      .post(`/teams/current/join-requests/${otherUser.id}`)
       .set('Authorization', `Bearer ${fullToken}`)
       .expect(200);
   });
 
   it('should succesfully join the team', async () => {
     const { body } = await request(app)
-      .post(`/teams/current/joinRequests/${user.id}`)
+      .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
@@ -138,7 +138,7 @@ describe('POST /teams/current/joinRequests/:userId', () => {
 
   it('should fail because the user has not asked for a team', async () => {
     await request(app)
-      .post(`/teams/current/joinRequests/${user.id}`)
+      .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.NotAskedTeam });
   });
