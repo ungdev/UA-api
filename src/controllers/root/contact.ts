@@ -10,7 +10,8 @@ export default [
   // Middleware
   validateBody(
     Joi.object({
-      name: validators.firstname,
+      firstname: validators.firstname,
+      lastname: validators.lastname,
       email: validators.email,
       subject: Joi.string().required(),
       message: Joi.string().required(),

@@ -44,7 +44,7 @@ mysql -u DATABASE_USER -p arena < seed.sql
 Generate the documentation (redo this command when you update openapi.yml)
 
 ```
-yarn swagger:build
+yarn openapi:build
 ```
 
 Generate the prisma client (redo this command when you update schema.prisma)
@@ -77,6 +77,5 @@ yarn api-check # checks if openapi.yml is correct
 Use `npx prisma generate` to generate your prisma client
 
 ## How to test
-
 
 The tests must be able to run without any environment variables except the database

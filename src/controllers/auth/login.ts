@@ -29,7 +29,7 @@ export default [
       // Fetch the user
       const user = await fetchUser(email, 'email');
 
-      // Chceks if the user exists
+      // Checks if the user exists
       if (!user) {
         return unauthenticated(response, Error.InvalidCredentials);
       }
@@ -45,12 +45,12 @@ export default [
       // Compares the hash from the password given
       const isPasswordValid = await bcrpyt.compare(password, user.password);
 
-      const token = generateToken(user);
-
       // If the password is not valid, rejects the request
       if (!isPasswordValid) {
         return unauthenticated(response, Error.InvalidCredentials);
       }
+
+      const token = generateToken(user);
 
       return success(response, {
         user: filterUser(user),

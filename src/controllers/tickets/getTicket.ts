@@ -27,8 +27,8 @@ export default [
       const { user } = getRequestInfo(response);
       const cart = await fetchCart(ticket.cartId);
 
-      // Check if the cart belongs to the user
-      if (cart.userId !== user.id) return forbidden(response, Error.NotSelf);
+      // Check if the cart has been paid by the user or for him/her
+      if (cart.userId !== user.id && ticket.forUserId !== user.id) return forbidden(response, Error.NotSelf);
 
       // Check that the cart is paid
       if (cart.transactionState !== TransactionState.paid) return forbidden(response, Error.NotPaid);

@@ -7,7 +7,7 @@ import { success } from '../../utils/responses';
 export default [
   // Middlewares
   isShopAllowed,
-  
+
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {

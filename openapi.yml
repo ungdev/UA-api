@@ -676,7 +676,7 @@ paths:
 
       responses:
         200:
-          description: Un tableau de logsf
+          description: Un tableau de logs
           content:
             application/json:
               schema:
