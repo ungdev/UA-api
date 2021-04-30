@@ -1246,8 +1246,6 @@ paths:
       responses:
         204:
           description: L'équipe a bien été détruite
-        400:
-          $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
         403:
@@ -1268,8 +1266,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TeamWithUsers'
-        400:
-          $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
         403:
@@ -1278,7 +1274,8 @@ paths:
     put:
       summary: Modifie les informations de l'équipe
       description: Modifie les informations de l'équipe cible.<br/>
-        **L'utilisateur doit être le chef de l'équipe cible.**
+        **L'utilisateur doit être le chef de l'équipe cible.**<br/>
+        *L'équipe cible ne doit pas être verrouillée.*
       tags:
         - Teams
       security:
@@ -1294,12 +1291,8 @@ paths:
                   type: string
                   description: Nouveau nom de l'équipe
       responses:
-        200:
-          description: L'équipe a bien été modifiée. Ses informations sont renvoyées.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TeamWithUsers'
+        204:
+          description: L'équipe a bien été modifiée.
         400:
           $ref: '#/components/responses/400Errored'
         401:
@@ -1326,12 +1319,8 @@ paths:
             type: string
           required: true
       responses:
-        200:
-          description: Le rôle de chef d'équipe a bien été transféré. Les informations de l'équipe sont renvoyées.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TeamWithUsers'
+        204:
+          description: Le rôle de chef d'équipe a bien été transféré.
         400:
           $ref: '#/components/responses/400Errored'
         401:
@@ -1368,6 +1357,8 @@ paths:
           $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
+        403:
+          $ref: '#/components/responses/403Unauthorized'
         404:
           $ref: '#/components/responses/404TeamNotFound'
 
@@ -1446,8 +1437,6 @@ paths:
       responses:
         204:
           description: La demande a bien été annulée.
-        400:
-          $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
         403:
@@ -1465,12 +1454,8 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        200:
-          description: L'équipe a bien été verrouillée. Ses informations sont renvoyées.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TeamWithUsers'
+        204:
+          description: L'équipe a bien été verrouillée.
         400:
           $ref: '#/components/responses/400Errored'
         401:
@@ -1523,8 +1508,6 @@ paths:
       responses:
         204:
           description: L'utilisateur a bien été retiré de l'équipe.
-        400:
-          $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
         403:
@@ -1534,7 +1517,7 @@ paths:
     get:
       summary: Renvoie le billet associé au cartItem
       description: Renvoie le billet associé au cartItem au format PDF.<br/>
-        **L'utilisateur doit nécessairement avoir payé ce cartItem.**
+        **L'utilisateur doit nécessairement avoir payé ce cartItem ou se l'être fait payer par quelqu'un d'autre.**
       tags:
         - Tickets
       security:

@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { Error } from '../types';
-import logger from '../utils/logger';
 import { forbidden } from '../utils/responses';
 import { getRequestInfo } from '../utils/user';
 import { isAuthenticated } from './authentication';
 
-// Checks if the user is the captain of the team specified in the URL. If not, it will return an error
+// Checks if the user is the captain of his team. If not, it will return an error.
 export const isCaptain = [
   ...isAuthenticated,
   (request: Request, response: Response, next: NextFunction) => {
@@ -15,22 +14,21 @@ export const isCaptain = [
       return forbidden(response, Error.NotInTeam);
     }
 
-    if (user.id === team.captainId) {
-      return next();
+    if (user.id !== team.captainId) {
+      return forbidden(response, Error.NotCaptain);
     }
-    return forbidden(response, Error.NotCaptain);
+
+    return next();
   },
 ];
 
-// Check the user's team. If he's in one, it will return an error.
+// Checks the user's team. If he's in one, it will return an error.
 export const isNotInATeam = [
   ...isAuthenticated,
   (request: Request, response: Response, next: NextFunction) => {
     const { user } = getRequestInfo(response);
 
     if (user.teamId) {
-      logger.debug(`Already in a team`);
-
       return forbidden(response, Error.AlreadyInTeam);
     }
 
@@ -38,7 +36,21 @@ export const isNotInATeam = [
   },
 ];
 
-// Checks the team is locked
+// Checks the user's team. If he's not in one, it will return an error.
+export const isInATeam = [
+  ...isAuthenticated,
+  (request: Request, response: Response, next: NextFunction): void => {
+    const { user } = getRequestInfo(response);
+
+    if (!user.teamId) {
+      return forbidden(response, Error.NotInTeam);
+    }
+
+    return next();
+  },
+];
+
+// Checks if the team is locked. If it is, it will return an error.
 export const isTeamNotLocked = (request: Request, response: Response, next: NextFunction) => {
   const { team } = getRequestInfo(response);
 
@@ -49,17 +61,6 @@ export const isTeamNotLocked = (request: Request, response: Response, next: Next
   if (team.lockedAt) {
     return forbidden(response, Error.TeamLocked);
   }
+
   return next();
 };
-
-export const isInATeam = [
-  ...isAuthenticated,
-  (request: Request, response: Response, next: NextFunction): void => {
-    const { user } = getRequestInfo(response);
-    // Compare user's teamId and teamId of the request
-    if (user.teamId) {
-      return next();
-    }
-    return forbidden(response, Error.NotInTeam);
-  },
-];
