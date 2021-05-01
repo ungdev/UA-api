@@ -1232,6 +1232,8 @@ paths:
           $ref: '#/components/responses/401Unauthenticated'
         409:
           description: Le nom de l'équipe existe déjà
+        410
+          description: Le tournoi est plein
 
   /teams/current:
     delete:
@@ -1464,6 +1466,8 @@ paths:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
+        410
+          description: Le tournoi est plein
 
   /teams/current/users/{userId}:
     delete:

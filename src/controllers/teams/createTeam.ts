@@ -6,7 +6,7 @@ import { createTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
 import { filterTeam } from '../../utils/filters';
-import { conflict, created, forbidden } from '../../utils/responses';
+import { conflict, created, gone } from '../../utils/responses';
 import * as validators from '../../utils/validators';
 
 export default [
@@ -28,7 +28,7 @@ export default [
 
       // If there are more or equal teams than places, return a tournament full
       if (tournament.placesLeft === 0) {
-        return forbidden(response, Error.TournamentFull);
+        return gone(response, Error.TournamentFull);
       }
 
       try {

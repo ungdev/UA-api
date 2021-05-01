@@ -147,6 +147,6 @@ describe('POST /teams', () => {
       .post('/teams')
       .send({ name: 'otherName', tournamentId: teamBody.tournamentId })
       .set('Authorization', `Bearer ${otherToken}`)
-      .expect(403, { error: Error.TournamentFull });
+      .expect(410, { error: Error.TournamentFull });
   });
 });
