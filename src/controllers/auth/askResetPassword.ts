@@ -11,7 +11,7 @@ export default [
   ...isNotAuthenticated,
   validateBody(
     Joi.object({
-      email: validators.email,
+      email: validators.email.required(),
     }),
   ),
 

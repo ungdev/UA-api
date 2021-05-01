@@ -12,7 +12,7 @@ export default [
   validateQuery(
     Joi.object({
       locked: Joi.string().valid('true', 'false').optional(),
-      tournamentId: validators.tournamentId,
+      tournamentId: validators.tournamentId.required(),
     }),
   ),
 

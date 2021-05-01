@@ -14,8 +14,8 @@ export default [
   ...isNotInATeam,
   validateBody(
     Joi.object({
-      name: validators.teamName,
-      tournamentId: validators.tournamentId,
+      name: validators.teamName.required(),
+      tournamentId: validators.tournamentId.required(),
     }),
   ),
 

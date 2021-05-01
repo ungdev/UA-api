@@ -46,7 +46,7 @@ export default [
         .items(
           Joi.object({
             itemId: Joi.string().required(),
-            quantity: validators.quantity,
+            quantity: validators.quantity.required(),
           }),
         )
         .unique((a, b) => a.itemId === b.itemId)

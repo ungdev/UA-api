@@ -12,12 +12,12 @@ export default [
   ...isNotAuthenticated,
   validateBody(
     Joi.object({
-      username: validators.username,
-      firstname: validators.firstname,
-      lastname: validators.lastname,
-      email: validators.email,
-      password: validators.password,
-      type: validators.type,
+      username: validators.username.required(),
+      firstname: validators.firstname.required(),
+      lastname: validators.lastname.required(),
+      email: validators.email.required(),
+      password: validators.password.required(),
+      type: validators.type.required(),
     }),
   ),
 

@@ -16,9 +16,9 @@ export default [
 
   validateBody(
     Joi.object({
-      username: validators.username,
-      password: validators.password,
-      newPassword: validators.password,
+      username: validators.username.required(),
+      password: validators.password.required(),
+      newPassword: validators.password.required(),
     }),
   ),
 

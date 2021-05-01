@@ -15,7 +15,7 @@ export default [
   isTeamNotLocked,
   validateBody(
     Joi.object({
-      name: validators.teamName,
+      name: validators.teamName.required(),
     }),
   ),
 
