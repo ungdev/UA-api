@@ -8,7 +8,7 @@ import database from '../../src/services/database';
 import { sandbox } from '../setup';
 import { createFakeUser } from '../utils';
 
-describe('POST /auth/reset-password', () => {
+describe('POST /auth/reset-password/ask', () => {
   let user: User;
 
   before(async () => {
@@ -24,7 +24,7 @@ describe('POST /auth/reset-password', () => {
   it('should return an error because the login is not allowed', async () => {
     await setLoginAllowed(false);
     await request(app)
-      .post('/auth/reset-password')
+      .post('/auth/reset-password/ask')
       .send({ email: user.email })
       .expect(403, { error: Error.LoginNotAllowed });
     await setLoginAllowed(true);
@@ -32,7 +32,7 @@ describe('POST /auth/reset-password', () => {
 
   it('should return a bad request because of incorrect body', async () => {
     await request(app)
-      .post('/auth/reset-password')
+      .post('/auth/reset-password/ask')
       .send({
         fake: 'fake',
       })
@@ -41,7 +41,7 @@ describe('POST /auth/reset-password', () => {
 
   it('should return valid answer even if incorrect email', async () => {
     await request(app)
-      .post('/auth/reset-password')
+      .post('/auth/reset-password/ask')
       .send({
         email: 'fake@email.fr',
       })
@@ -52,7 +52,7 @@ describe('POST /auth/reset-password', () => {
     sandbox.stub(userOperations, 'fetchUser').throws('Unexpected error');
 
     await request(app)
-      .post('/auth/reset-password')
+      .post('/auth/reset-password/ask')
       .send({
         email: user.email,
       })
@@ -61,7 +61,7 @@ describe('POST /auth/reset-password', () => {
 
   it('should return a valid response', async () => {
     await request(app)
-      .post('/auth/reset-password')
+      .post('/auth/reset-password/ask')
       .send({
         email: user.email,
       })
