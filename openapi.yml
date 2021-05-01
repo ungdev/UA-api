@@ -1570,6 +1570,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Tournament'
+
+  /users:
+    get:
+      summary: Renvoie les informations minimales d'un utilisateur
+      description: Renvoie les informations minimales d'un utilisateur.
+      tags:
+        - Users
+      parameters:
+        - in: query
+          name: search
+          description: Identifiant ou adresse mail de l'utilisateur cible
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: Renvoie les informations minimales de l'utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRestricted'
+        400:
+          $ref: '#/components/responses/400Errored'
+        404:
+          $ref: '#/components/responses/404UserNotFound'
+
   /users/current:
     get:
       summary: Renvoie les informations de utilisateur
