@@ -154,7 +154,8 @@ components:
           type: string
           example: XiHGta
         locked:
-          type: boolean
+          type: string
+          format: date-time
           nullable: true
 
     TeamWithUsers:
@@ -258,24 +259,20 @@ components:
         id:
           type: string
           example: A1E4FD
-        event:
+        method:
           type: string
-          example: create
-        userId:
+          example: POST
+        path:
           type: string
-          example: A1E4FD
-        username:
+          example: /users/admin
+        body:
+          type: object
+          nullable: true
+        createdAt:
           type: string
-          example: Herel
-        targetId:
-          type: string
-          example: A1E4FD
-        targetName:
-          type: string
-          example: UA
-        targetType:
-          type: string
-          example: team
+          format: date-time
+        user:
+          $ref: '#/components/schemas/User'
 
   responses:
     400Errored:
@@ -932,8 +929,10 @@ paths:
           description: L'utilisateur a bien été créé
         400:
           $ref: '#/components/responses/400Errored'
+        409:
+          description: L'email existe déjà
 
-  /auth/reset-password:
+  /auth/reset-password/ask:
     post:
       summary: Envoie un mail permettant de changer son mot de passe
       description: Envoie un mail contenant un token permettant de réinitialiser son mot de passe.<br/>
@@ -1166,7 +1165,6 @@ paths:
           description: Filtre les équipes en fonction de si elles sont verrouillées ou non
           schema:
             type: boolean
-            default: false
       responses:
         200:
           description: Renvoie les informations publiques des équipes du tournoi
@@ -1232,6 +1230,8 @@ paths:
           $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
+        409:
+          description: Le nom de l'équipe existe déjà
 
   /teams/current:
     delete:
@@ -1299,6 +1299,8 @@ paths:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
+        409:
+          description: Le nom de l'équipe existe déjà
 
   /teams/current/captain/{userId}:
     put:
@@ -1692,7 +1694,7 @@ paths:
                             description: Nom de l'accompagnateur
                 supplements:
                   type: array
-                  description: Liste des items (goodies) à acheter
+                  description: Liste des goodies à acheter
                   items:
                     type: object
                     properties:
