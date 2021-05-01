@@ -28,7 +28,7 @@ export default [
       const updatedTeam = await updateTeam(team.id, name);
       return success(response, filterTeam(updatedTeam));
     } catch (error) {
-      // If the email already exists in the database, throw a bad request
+      // If a team with this name already exists for this tournament in the database, throw a bad request
       if (error.code === 'P2002' && error.meta && error.meta.target === 'name_tournamentId_unique')
         return conflict(response, Error.TeamAlreadyExists);
       return next(error);

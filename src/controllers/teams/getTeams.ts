@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { validateQuery } from '../../middlewares/validation';
 import { fetchTeams } from '../../operations/team';
-import { filterTeam } from '../../utils/filters';
+import { filterTeamPublic } from '../../utils/filters';
 import { success } from '../../utils/responses';
 import * as validators from '../../utils/validators';
 
@@ -33,7 +33,7 @@ export default [
 
           return !!team.lockedAt;
         })
-        .map(filterTeam);
+        .map(filterTeamPublic);
 
       return success(response, result);
     } catch (error) {
