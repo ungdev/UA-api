@@ -18,7 +18,6 @@ model Cart {
   user             User             @relation(fields: [userId], references: [id])
   cartItems        CartItem[]
 
-  @@index([userId], name: "carts_ibfk_1")
   @@map("carts")
 }
 
@@ -31,12 +30,9 @@ model CartItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
   cart      Cart     @relation(fields: [cartId], references: [id])
-  user      User     @relation(fields: [forUserId], references: [id])
+  forUser   User     @relation(fields: [forUserId], references: [id])
   item      Item     @relation(fields: [itemId], references: [id])
 
-  @@index([itemId], name: "cartitems_ibfk_1")
-  @@index([cartId], name: "cartitems_ibfk_2")
-  @@index([forUserId], name: "cartitems_ibfk_3")
   @@map("cartitems")
 }
 
@@ -63,24 +59,25 @@ model Setting {
 }
 
 model Team {
-  id           String     @id
+  id           String         @id
   name         String
-  tournamentId String
-  captainId    String     @unique
+  tournamentId TournamentId
+  captainId    String         @unique
   lockedAt     DateTime?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now()) @updatedAt
-  captain      User       @relation(fields: [captainId], references: [id])
-  tournament   Tournament @relation(fields: [tournamentId], references: [id])
-  askingUsers  User[]     @relation("teamAskingUsers")
-  users        User[]     @relation("teamUsers")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now()) @updatedAt
+  captain      User           @relation(fields: [captainId], references: [id])
+  tournament   Tournament     @relation(fields: [tournamentId], references: [id])
+  askingUsers  User[]         @relation("teamAskingUsers")
+  users        User[]         @relation("teamUsers")
 
-  @@index([tournamentId], name: "teams_ibfk_2")
+  @@index([id])
+  @@unique([name, tournamentId])
   @@map("teams")
 }
 
 model Tournament {
-  id                     String  @id
+  id                     TournamentId  @id
   name                   String  @unique
   maxPlayers             Int
   playersPerTeam         Int
@@ -94,6 +91,20 @@ model Tournament {
   @@map("tournaments")
 }
 
+model Log {
+  id               String     @id
+  method           String
+  path             String
+  body             Json?
+  userId           String
+  createdAt        DateTime        @default(now())
+  user             User            @relation(fields: [userId], references: [id])
+
+  // We create an index on the userId as the search most of the time used with a userId
+  @@index([userId])
+  @@map("logs")
+}
+
 model User {
   id            String     @id
   username      String?
@@ -103,8 +114,8 @@ model User {
   password      String?
   type          UserType
   permissions   String?
-  registerToken String?
-  resetToken    String?
+  registerToken String?    @unique
+  resetToken    String?    @unique
   place         String?    @unique
   scannedAt     DateTime?
   discordId     String?    @unique
@@ -116,10 +127,8 @@ model User {
   team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
   cartItems     CartItem[]
   carts         Cart[]
-  Team          Team?
 
-  @@index([askingTeamId], name: "users_ibfk_1")
-  @@index([teamId], name: "users_ibfk_2")
+  @@index([id])
   @@map("users")
 }
 
@@ -133,7 +142,7 @@ enum TransactionState {
 
 enum ItemCategory {
   ticket
-  item
+  supplement
 }
 
 enum UserType {
@@ -141,4 +150,13 @@ enum UserType {
   coach
   visitor
   orga
+}
+
+enum TournamentId {
+  lol
+  valorant
+  csgo
+  ssbu
+  rl
+  tft
 }

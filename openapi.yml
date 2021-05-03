@@ -1,7 +1,7 @@
 openapi: 3.0.0
 
 info:
-  version: '1.0'
+  version: '1.1'
   title: UTT Arena - API
   description: |-
     API web à destination des services de l'UTT Arena.<br/><br/>
@@ -31,12 +31,14 @@ servers:
     description: Serveur de production
 
 tags:
-  - name: Général
+  - name: General
     description: Routes générales
   - name: Admin
     description: Routes d'administration
   - name: Authentication
     description: Routes d'authentification
+  - name: Callbacks
+    description: Routes de callback
   - name: Items
     description: Routes liées aux items
   - name: Teams
@@ -93,7 +95,7 @@ components:
       properties:
         id:
           type: string
-          example: V1StGX
+          example: V1STGX
         type:
           $ref: '#/components/schemas/Type'
         hasPaid:
@@ -131,11 +133,11 @@ components:
               nullable: true
             teamId:
               type: string
-              example: Z5jdHi
+              example: Z5JDHI
               nullable: true
             askingTeamId:
               type: string
-              example: i8yNHk
+              example: I8YNHK
               nullable: true
 
     Team:
@@ -151,7 +153,7 @@ components:
         captainId:
           type: string
           example: XiHGta
-        lockedAt:
+        locked:
           type: string
           format: date-time
           nullable: true
@@ -161,7 +163,11 @@ components:
         - $ref: '#/components/schemas/Team'
         - type: object
           properties:
-            users:
+            players:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+            coaches:
               type: array
               items:
                 $ref: '#/components/schemas/User'
@@ -186,7 +192,7 @@ components:
           example: 8MF1b0
         userId:
           type: string
-          example: V1StGX
+          example: V1STGX
         transactionState:
           type: string
           enum: [pending, paid, canceled, refused, refunded]
@@ -213,7 +219,7 @@ components:
           type: integer
         forUserId:
           type: string
-          example: V1StGX
+          example: V1STGX
 
     CartWithCartItems:
       allOf:
@@ -246,6 +252,27 @@ components:
         image:
           type: string
           nullable: true
+
+    Log:
+      type: object
+      properties:
+        id:
+          type: string
+          example: A1E4FD
+        method:
+          type: string
+          example: POST
+        path:
+          type: string
+          example: /users/admin
+        body:
+          type: object
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/User'
 
   responses:
     400Errored:
@@ -291,13 +318,22 @@ components:
           example:
             error: L'équipe est introuvable
 
+    404CartNotFound:
+      description: Le panier est introuvable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Le panier est introuvable
+
 paths:
   /:
     get:
       summary: Renvoie l'état du serveur
       description: Indique si le serveur fonctionne correctement (connexion HTTP et à la base de données).
       tags:
-        - Général
+        - General
       responses:
         200:
           description: Indique si le serveur fonctionne correctement
@@ -509,17 +545,12 @@ paths:
           schema:
             type: boolean
         - in: query
-          name: pageSize
-          description: "(Pagination) Longueur de la page. Doit être utilisé avec 'pageIndex'"
-          schema:
-            type: integer
-            minimum: 1
-        - in: query
-          name: pageIndex
-          description: "(Pagination) Indice de la page. Doit être utilisé avec 'pageSize'"
+          name: page
+          description: '(Pagination) Indice de la page'
           schema:
             type: integer
             minimum: 0
+          required: true
       responses:
         200:
           description: La liste de tous les utilisateurs filtrés est renvoyée
@@ -614,7 +645,60 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
-  /admin/users/{userId}/forcePay:
+  /admin/logs:
+    get:
+      summary: Récupère les actions effectués par les utilisateurs
+      description: Récupère les actions effectués par les utilisateurs.<br/>
+        **Permission 'admin' requise.**
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+        - in: query
+          name: teamId
+          schema:
+            type: string
+        - in: query
+          name: page
+          description: '(Pagination) Indice de la page'
+          schema:
+            type: integer
+            minimum: 0
+          required: true
+
+      responses:
+        200:
+          description: Un tableau de logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Log'
+                  pageIndex:
+                    type: number
+                    example: 1
+                  maxPages:
+                    type: number
+                    example: 5
+        400:
+          $ref: '#/components/responses/400Errored'
+        401:
+          $ref: '#/components/responses/401Unauthenticated'
+        403:
+          $ref: '#/components/responses/403Unauthorized'
+        404:
+          $ref: '#/components/responses/404UserNotFound'
+
+  /admin/users/{userId}/force-pay:
     post:
       summary: Valide le paiement d'un utilisateur
       description: Valide le paiement d'un utilisateur.<br/>
@@ -713,7 +797,7 @@ paths:
       parameters:
         - in: path
           name: qrcode
-          description: Contenu du QR code présent sur le billet
+          description: Contenu du QR code présent sur le billet chiffré
           schema:
             type: string
           required: true
@@ -754,9 +838,9 @@ paths:
             schema:
               type: object
               properties:
-                username:
+                email:
                   type: string
-                  description: Nom d'utilisateur ou adresse mail de l'utilisateur cible
+                  description: Adresse mail de l'utilisateur cible
                 password:
                   type: string
                   description: Mot de passe de l'utilisateur cible
@@ -778,7 +862,7 @@ paths:
         400:
           $ref: '#/components/responses/400Errored'
 
-  /auth/refreshToken:
+  /auth/refresh-token:
     post:
       summary: Génère un nouveau token d'authentification
       description: Génère un nouveau token d'authentification si le token actuel arrive bientôt à expiration.
@@ -845,8 +929,10 @@ paths:
           description: L'utilisateur a bien été créé
         400:
           $ref: '#/components/responses/400Errored'
+        409:
+          description: L'email existe déjà
 
-  /auth/resetPassword:
+  /auth/reset-password/ask:
     post:
       summary: Envoie un mail permettant de changer son mot de passe
       description: Envoie un mail contenant un token permettant de réinitialiser son mot de passe.<br/>
@@ -869,7 +955,7 @@ paths:
         400:
           $ref: '#/components/responses/400Errored'
 
-  /auth/resetPassword/{token}:
+  /auth/reset-password/{token}:
     post:
       summary: Modifie le mot de passe de l'utilisateur associé au token
       description: Modifie le mot de passe de l'utilisateur associé au token de réinitialisation de mot de passe.<br/>
@@ -953,12 +1039,54 @@ paths:
               example:
                 error: Le token est invalide
 
+  /callbacks/etupay:
+    get:
+      summary: Confirme le paiement d'un panier EtuPay de la part du client
+      description: Confirme le paiement d'un panier EtuPay de la part du client.
+        Le client est redirigé vers cette URL après avoir confirmé la transaction auprès d'EtuPay.
+        Les paramètres étant directement gérés par la bibliothèque EtuPay (@ung/node-etupay), ils ne seront pas détaillés ici.
+      tags:
+        - Callbacks
+      responses:
+        302:
+          description: Succès ou erreur de l'opération. Redirection vers la page correspondante sur le site web de l'UA.
+            En cas de succès, les billets ont été envoyés au client par email.
+        403:
+          description: Une action interdite est survenue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Le joueur possède déjà une place
+        404:
+          $ref: '#/components/responses/404CartNotFound'
+
+    post:
+      summary: Confirme le paiement d'un panier EtuPay de la part de la banque
+      description: Confirme le paiement d'un panier EtuPay de la part de la banque du client.
+        La banque appelle cette URL quelques minutes après le callback client pour confirmer la prise en compte de la transaction.
+        Dans la pratique, cette URL n'a aucune action sur l'API.
+      tags:
+        - Callbacks
+      responses:
+        200:
+          description: Réponse statique
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api:
+                    type: string
+                    example: 'ok'
+
   /contact:
     post:
       summary: Envoie un message à l'équipe de l'UTT Arena
       description: 'Envoie un message sur le slack UNG dans #ua-contact-bot.'
       tags:
-        - Général
+        - General
       requestBody:
         required: true
         content:
@@ -986,7 +1114,8 @@ paths:
   /items:
     get:
       summary: Renvoie la liste des items en vente
-      description: Renvoie la liste des items en vente dans la billetterie.
+      description: Renvoie la liste des items en vente dans la billetterie.<br />
+        *La billetterie doit être ouverte.*
       tags:
         - Items
       responses:
@@ -1004,7 +1133,7 @@ paths:
       summary: Renvoie les paramètres du serveur
       description: Indique si le serveur accepte la connexion "tout public" et si la billetterie est ouverte ou non.
       tags:
-        - Général
+        - General
       responses:
         200:
           description: Renvoie les paramètres du serveur
@@ -1101,8 +1230,12 @@ paths:
           $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
+        409:
+          description: Le nom de l'équipe existe déjà
+        410:
+          description: Le tournoi est plein
 
-  /teams/{teamId}:
+  /teams/current:
     delete:
       summary: Détruit l'équipe
       description: Détruit l'équipe cible.<br/>
@@ -1112,24 +1245,13 @@ paths:
         - Teams
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
       responses:
         204:
           description: L'équipe a bien été détruite
-        400:
-          $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
-        404:
-          $ref: '#/components/responses/404TeamNotFound'
 
     get:
       summary: Renvoie les informations de l'équipe
@@ -1139,13 +1261,6 @@ paths:
         - Teams
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
       responses:
         200:
           description: Renvoie les informations de l'équipe
@@ -1153,30 +1268,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TeamWithUsers'
-        400:
-          $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
-        404:
-          $ref: '#/components/responses/404TeamNotFound'
 
     put:
       summary: Modifie les informations de l'équipe
       description: Modifie les informations de l'équipe cible.<br/>
-        **L'utilisateur doit être le chef de l'équipe cible.**
+        **L'utilisateur doit être le chef de l'équipe cible.**<br/>
+        *L'équipe cible ne doit pas être verrouillée.*
       tags:
         - Teams
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
       requestBody:
         required: true
         content:
@@ -1188,22 +1293,18 @@ paths:
                   type: string
                   description: Nouveau nom de l'équipe
       responses:
-        200:
-          description: L'équipe a bien été modifiée. Ses informations sont renvoyées.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TeamWithUsers'
+        204:
+          description: L'équipe a bien été modifiée.
         400:
           $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
-        404:
-          $ref: '#/components/responses/404TeamNotFound'
+        409:
+          description: Le nom de l'équipe existe déjà
 
-  /teams/{teamId}/captain/{userId}:
+  /teams/current/captain/{userId}:
     put:
       summary: Définit le nouveau chef d'équipe
       description: Transfère son rôle de chef d'équipe.<br/>
@@ -1216,24 +1317,14 @@ paths:
         - BearerAuth: []
       parameters:
         - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
-        - in: path
           name: userId
           description: Identifiant du nouveau chef d'équipe
           schema:
             type: string
           required: true
       responses:
-        200:
-          description: Le rôle de chef d'équipe a bien été transféré. Les informations de l'équipe sont renvoyées.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TeamWithUsers'
+        204:
+          description: Le rôle de chef d'équipe a bien été transféré.
         400:
           $ref: '#/components/responses/400Errored'
         401:
@@ -1243,7 +1334,7 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
-  /teams/{teamId}/joinRequests:
+  /teams/{teamId}/join-requests:
     post:
       summary: Crée une demande pour rejoindre une équipe
       description: Crée une demande pour rejoindre une équipe.<br/>
@@ -1270,14 +1361,16 @@ paths:
           $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
+        403:
+          $ref: '#/components/responses/403Unauthorized'
         404:
           $ref: '#/components/responses/404TeamNotFound'
 
-  /teams/{teamId}/joinRequests/{userId}:
+  /teams/current/join-requests/{userId}:
     delete:
-      summary: Annule la demande d'équipe
-      description: Annule la demande d'équipe de l'utilisateur cible.<br/>
-        **L'utilisateur doit être l'utilisateur cible ou être le chef de l'équipe cible.**<br/>
+      summary: Refuse la demande d'équipe
+      description: Refuse la demande d'équipe de l'utilisateur cible.<br/>
+        **L'utilisateur doit être le chef de l'équipe cible.**<br/>
         *L'équipe ne doit pas être verrouillée.*
         *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*
       tags:
@@ -1286,29 +1379,14 @@ paths:
         - BearerAuth: []
       parameters:
         - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
-        - in: path
           name: userId
           description: Identifiant de l'utilisateur cible
           schema:
             type: string
           required: true
       responses:
-        200:
-          description: La demande a bien été annulée. Les informations de l'équipe et de l'utilisateur sont renvoyées.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  team:
-                    $ref: '#/components/schemas/TeamWithUsers'
-                  user:
-                    $ref: '#/components/schemas/User'
+        204:
+          description: La demande a bien été annulée.
         400:
           $ref: '#/components/responses/400Errored'
         401:
@@ -1329,12 +1407,6 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
         - in: path
           name: userId
           description: Identifiant de l'utilisateur cible
@@ -1357,7 +1429,24 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
-  /teams/{teamId}/lock:
+  /teams/current/join-requests/current:
+    delete:
+      summary: Annule la demande d'équipe
+      description: Annule la demande d'équipe de l'utilisateur cible.<br/>
+        *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*
+      tags:
+        - Teams
+      security:
+        - BearerAuth: []
+      responses:
+        204:
+          description: La demande a bien été annulée.
+        401:
+          $ref: '#/components/responses/401Unauthenticated'
+        403:
+          $ref: '#/components/responses/403Unauthorized'
+
+  /teams/current/lock:
     post:
       summary: Verrouille l'équipe
       description: Verrouille l'équipe cible.<br/>
@@ -1368,34 +1457,23 @@ paths:
         - Teams
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
       responses:
-        200:
-          description: L'équipe a bien été verrouillée. Ses informations sont renvoyées.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TeamWithUsers'
+        204:
+          description: L'équipe a bien été verrouillée.
         400:
           $ref: '#/components/responses/400Errored'
         401:
           $ref: '#/components/responses/401Unauthenticated'
         403:
           $ref: '#/components/responses/403Unauthorized'
-        404:
-          $ref: '#/components/responses/404TeamNotFound'
+        410:
+          description: Le tournoi est plein
 
-  /teams/{teamId}/users/{userId}:
+  /teams/current/users/{userId}:
     delete:
       summary: Retire l'utilisateur de l'équipe
       description: Retire l'utilisateur de l'équipe.<br/>
-        **L'utilisateur doit être l'utilisateur cible ou être le chef de l'équipe cible.**<br/>
+        **L'utilisateur doit être le chef de l'équipe cible.**<br/>
         *L'utilisateur cible doit être dans l'équipe cible.*
         *L'équipe ne doit pas être verrouillée.*
         *Le chef d'équipe ne peut pas quitter l'équipe.*
@@ -1405,29 +1483,14 @@ paths:
         - BearerAuth: []
       parameters:
         - in: path
-          name: teamId
-          description: Identifiant de l'équipe cible
-          schema:
-            type: string
-          required: true
-        - in: path
           name: userId
           description: Identifiant de l'utilisateur cible
           schema:
             type: string
           required: true
       responses:
-        200:
-          description: L'utilisateur a bien été retiré de l'équipe. Les informations de l'équipe et de l'utilisateur sont renvoyées.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  team:
-                    $ref: '#/components/schemas/TeamWithUsers'
-                  user:
-                    $ref: '#/components/schemas/User'
+        204:
+          description: L'utilisateur a bien été retiré de l'équipe.
         400:
           $ref: '#/components/responses/400Errored'
         401:
@@ -1437,11 +1500,30 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
+  /teams/current/users/current:
+    delete:
+      summary: Quitte l'équipe
+      description: Quitte l'équipe.<br/>
+        *L'utilisateur cible doit être dans l'équipe cible.*
+        *L'équipe ne doit pas être verrouillée.*
+        *Le chef d'équipe ne peut pas quitter l'équipe.*
+      tags:
+        - Teams
+      security:
+        - BearerAuth: []
+      responses:
+        204:
+          description: L'utilisateur a bien été retiré de l'équipe.
+        401:
+          $ref: '#/components/responses/401Unauthenticated'
+        403:
+          $ref: '#/components/responses/403Unauthorized'
+
   /tickets/{cartItemId}:
     get:
       summary: Renvoie le billet associé au cartItem
       description: Renvoie le billet associé au cartItem au format PDF.<br/>
-        **L'utilisateur doit nécessairement avoir payé ce cartItem.**
+        **L'utilisateur doit nécessairement avoir payé ce cartItem ou se l'être fait payer par quelqu'un d'autre.**
       tags:
         - Tickets
       security:
@@ -1518,22 +1600,32 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
-  /users/{userId}:
-    put:
-      summary: Modifie les informations d'un utilisateur
-      description: Modifie les informations d'un utilisateur.<br/>
-        **L'utilisateur doit être l'utilisateur cible.**
+  /users/current:
+    get:
+      summary: Renvoie les informations de utilisateur
+      description: Renvoie les informations de utilisateur.
       tags:
         - Users
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: userId
-          description: Identifiant de l'utilisateur cible
-          schema:
-            type: string
-          required: true
+      responses:
+        200:
+          description: Renvoie les informations de utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          $ref: '#/components/responses/400Errored'
+        404:
+          $ref: '#/components/responses/404UserNotFound'
+    put:
+      summary: Modifie les informations d'un utilisateur
+      description: Modifie les informations d'un utilisateur.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -1565,22 +1657,14 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
-  /users/{userId}/carts:
+  /users/current/carts:
     get:
       summary: Renvoie la liste des achats de l'utilisateur
-      description: Renvoie la liste des achats de l'utilisateur.<br/>
-        **L'utilisateur doit être l'utilisateur cible.**
+      description: Renvoie la liste des achats de l'utilisateur.
       tags:
         - Users
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: userId
-          description: Identifiant de l'utilisateur cible
-          schema:
-            type: string
-          required: true
       responses:
         200:
           description: Renvoie la liste des achats de l'utilisateur
@@ -1603,20 +1687,12 @@ paths:
       summary: Crée un panier
       description: Crée un panier et renvoie une URL afin de procéder au paiement.
         Pour chaque accompagnateur, un compte inaccessible est créé et sera lié à l'équipe actuelle de l'utilisateur.<br/>
-        **L'utilisateur doit être l'utilisateur cible.**<br/>
         *La billetterie doit être ouverte.*
         *Le stock d'items restant doit être suffisant pour satisfaire la demande.*
       tags:
         - Users
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: userId
-          description: Identifiant de l'utilisateur cible
-          schema:
-            type: string
-          required: true
       requestBody:
         required: true
         content:
@@ -1633,7 +1709,7 @@ paths:
                       items:
                         type: string
                       example:
-                        - V1StGX
+                        - V1STGX
                     visitors:
                       type: array
                       description: Liste des billets accompagnateurs à acheter
@@ -1646,9 +1722,9 @@ paths:
                           lastname:
                             type: string
                             description: Nom de l'accompagnateur
-                items:
+                supplements:
                   type: array
-                  description: Liste des items (goodies) à acheter
+                  description: Liste des goodies à acheter
                   items:
                     type: object
                     properties:
@@ -1668,6 +1744,11 @@ paths:
                 properties:
                   url:
                     type: string
+                    description: URL vers EtuPay
+                  price:
+                    type: integer
+                    description: Prix du panier en centimes
+
         400:
           $ref: '#/components/responses/400Errored'
         401:

@@ -1,24 +1,13 @@
 import { NextFunction, Request, Response } from 'express';
+import * as Sentry from '@sentry/node';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
-import log from '../utils/log';
+import { UserType } from '@prisma/client';
 import { Error, DecodedToken } from '../types';
-import { badRequest } from '../utils/responses';
-import { getRequestUser } from '../utils/user';
-import { jwtSecret } from '../utils/environment';
+import { forbidden, notFound, unauthenticated } from '../utils/responses';
 import { fetchUser } from '../operations/user';
-
-// Check the user's team. If he's in one, it will return an error.
-export const isNotInATeam = (request: Request, response: Response, next: NextFunction) => {
-  const user = getRequestUser(response);
-
-  if (user.teamId) {
-    log.debug(`${request.path} failed : already in team`);
-
-    return badRequest(response, Error.AlreadyInTeam);
-  }
-
-  return next();
-};
+import env from '../utils/env';
+import logger from '../utils/logger';
+import { fetchTeam } from '../operations/team';
 
 // Fetch user from database if possible
 export const initUserRequest = async (request: Request, response: Response, next: NextFunction) => {
@@ -34,20 +23,45 @@ export const initUserRequest = async (request: Request, response: Response, next
 
   try {
     // Decode the jwt
-    const decodedToken = jwt.verify(token, jwtSecret()) as DecodedToken;
+    const decodedToken = jwt.verify(token, env.jwt.secret) as DecodedToken;
 
     // Fetch the user from the database
-    const databaseUser = await fetchUser(decodedToken.userId);
+    const user = await fetchUser(decodedToken.userId);
+
+    if (!user) {
+      return notFound(response, Error.UserNotFound);
+    }
+
+    // Checks that the account is confirmed
+    if (user.registerToken) {
+      return forbidden(response, Error.EmailNotConfirmed);
+    }
+
+    // It mustn't be a visitor
+    if (user.type === UserType.visitor) {
+      return forbidden(response, Error.LoginAsVisitor);
+    }
+
+    // Set the sentry user to identify the problem in case of 500
+    Sentry.setUser({ id: user.id, username: user.username, email: user.email });
 
     // Store it in `response.locals.user` so that we can use it later
-    response.locals.user = databaseUser;
-  } catch (error: unknown) {
+    response.locals.user = user;
+
+    // If the user has a team, fetch it and put it in the locals
+    if (user.teamId) {
+      const team = await fetchTeam(user.teamId);
+      response.locals.team = team;
+    }
+  } catch (error) {
+    logger.error(error);
+
     // Token has expired
     if (error instanceof TokenExpiredError) {
-      log.debug(`token expired since ${error.expiredAt}`);
-    } else {
-      log.error(`invalid token: ${token}`);
+      return unauthenticated(response, Error.ExpiredToken);
     }
+
+    return unauthenticated(response, Error.InvalidToken);
   }
 
   return next();
