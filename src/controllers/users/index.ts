@@ -1,10 +1,15 @@
 import { Router } from 'express';
+import createCart from './createCart';
+import getCarts from './getCarts';
+import updateUser from './updateUser';
 import getUser from './getUser';
 
-export default (): Router => {
-  const router = Router();
+const router = Router();
 
-  router.get('/', getUser);
+router.get('/current', getUser);
 
-  return router;
-};
+router.put('/current', updateUser);
+router.post('/current/carts', createCart);
+router.get('/current/carts', getCarts);
+
+export default router;

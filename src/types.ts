@@ -1,5 +1,6 @@
-import { Tournament, User, TransactionState } from '@prisma/client';
-
+import prisma, { TransactionState } from '@prisma/client';
+import { ErrorRequestHandler } from 'express';
+import Mail from 'nodemailer/lib/mailer';
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
  * Redémarrer le serveur dans ce cas là
@@ -9,20 +10,8 @@ import { Tournament, User, TransactionState } from '@prisma/client';
 /** General **/
 /*************/
 
-export enum Permission {
-  stream = 'stream',
-  entry = 'entry',
-  anim = 'anim',
-  admin = 'admin',
-}
-
 export interface DecodedToken {
   userId: string;
-}
-
-export interface EmailAttachment {
-  filename: string;
-  content: Buffer;
 }
 
 export interface MailData {
@@ -30,6 +19,11 @@ export interface MailData {
   gunnarCode: string;
   compumsaCode: string;
 }
+
+export type EmailAttachement = Mail.Attachment & {
+  filename: string;
+  content: Buffer;
+};
 
 export interface EmailContent {
   title: string;
@@ -43,17 +37,70 @@ export interface Contact {
   message: string;
 }
 
+export const enum Permission {
+  stream = 'stream',
+  entry = 'entry',
+  anim = 'anim',
+  admin = 'admin',
+}
+
 /************************/
 /** Databse extensions **/
 /************************/
 
-export interface UserWithHasPaid extends User {
-  hasPaid: boolean;
+// We define all the type here, even if we dont extend them to avoid importing @prisma/client in files and mix both types to avoid potential errors
+
+export type Item = prisma.Item & {
+  left?: number;
+};
+
+export type Setting = prisma.Setting;
+
+export type CartItem = prisma.CartItem;
+
+export type DetailedCartItem = CartItem & {
+  item: prisma.Item;
+  forUser: prisma.User;
+};
+
+export type Cart = prisma.Cart;
+
+export type CartWithCartItems = Cart & {
+  cartItems: CartItem[];
+};
+
+export type DetailedCart = Cart & {
+  cartItems: DetailedCartItem[];
+  user: prisma.User;
+};
+
+export interface PrimitiveCartItem {
+  itemId: string;
+  quantity: number;
+  forUserId: string;
 }
 
-export interface TournamentWithLockedTeams extends Tournament {
+export type PrimitiveUser = prisma.User & {
+  cartItems: (CartItem & {
+    cart: Cart;
+  })[];
+};
+
+export type User = PrimitiveUser & {
+  hasPaid: boolean;
+};
+
+export type Tournament = prisma.Tournament & {
   lockedTeamsCount: number;
-}
+  placesLeft: number;
+};
+
+export type Team = prisma.Team & {
+  users: undefined;
+  players: User[];
+  coaches: User[];
+  askingUsers: User[];
+};
 
 /************/
 /** Etupay **/
@@ -66,45 +113,86 @@ export interface EtupayResponse {
   serviceData: string;
 }
 
+export type EtupayError = ErrorRequestHandler & {
+  message: string;
+};
+
 /**********/
 /** Misc **/
 /**********/
+export const enum Error {
+  // More info on https://www.loggly.com/blog/http-status-code-diagram to know where to put an error
 
-export enum Error {
   // 400
-  BadRequest = 'Requête invalide',
-  AlreadyInTeam = 'Vous êtes déjà dans une équipe',
-  LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
-  ShopNotAllowed = 'La billetterie est fermée',
+  // Used when the request contains a bad syntax and makes the request unprocessable
+  InvalidBody = 'Corps de la requête invalide',
+  MalformedBody = 'Corps de la requête malformé',
+  InvalidParameters = 'Paramètres de la requête invalides',
+  InvalidQueryParameters = 'Paramètres de la requête invalides (query)',
+  EmptyBasket = 'Le panier est vide',
 
   // 401
+  // The user credentials were refused or not provided
   Unauthenticated = "Vous n'êtes pas authentifié",
   ExpiredToken = 'Session expirée. Veuillez vous reconnecter',
   InvalidToken = 'Session invalide',
-  InvalidPassword = 'Mot de passe invalide',
-  InvalidForm = 'Formulaire invalide',
+  InvalidCredentials = 'Identifiants invalides',
 
   // 403
-  Unauthorized = "Vous n'avez pas l'autorisation d'accéder à cette ressource",
+  // The server understood the request but refuses to authorize it
   UserAlreadyScanned = "L'utilisateur a déjà scanné son billet",
   NotPaid = "Le billet n'a pas été payé",
+  TeamNotPaid = "Tous les membres de l'équipe n'ont pas payé",
+  LoginNotAllowed = 'Vous ne pouvez pas vous connecter actuellement',
+  ShopNotAllowed = 'La billetterie est fermée',
+  EmailNotConfirmed = "Le compte n'est pas confirmé",
+  NoPermission = "Vous n'avez pas la permission d'accéder à cette ressource",
+  NotCaptain = "Vous devez être le capitaine de l'équipe pour modifier cette ressource",
+  NotSelf = 'Vous ne pouvez pas modifier les information de cette personne',
+  NotInTeam = "Vous n'êtes pas dans l'équipe",
+  LoginAsVisitor = 'Vous ne pouvez pas vous connecter en tant que visiteur',
+  AlreadyAuthenticated = 'Vous êtes déjà identifié',
+  NotPlayerOrCoach = "L'utilisateur n'est pas un joueur ou un coach",
+  AlreadyPaid = 'Le joueur possède déjà une place',
+  AlreadyErrored = 'Vous ne pouvez pas valider une transaction échouée',
+  TeamLocked = "L'équipe est verrouillée",
+  TeamNotFull = "L'équipe est incomplète",
+  TeamFull = "L'équipe est complète",
+  AlreadyInTeam = "Vous êtes déjà dans l'équipe",
+  AlreadyAskedATeam = 'Vous avez déjà demandé de vous inscrire dans une équipe',
+  NotAskedTeam = "Vous ne demandez pas l'accès à l'équipe",
+  CaptainCannotQuit = "Un capitaine ne peut pas se bannir, veuillez dissoudre l'équipe ou nommer un autre chef d'équipe",
 
   // 404
+  // The server can't find the requested resource
   NotFound = 'La ressource est introuvable',
   RouteNotFound = 'La route est introuvable',
   UserNotFound = "L'utilisateur est introuvable",
+  TeamNotFound = "L'équipe est introuvable",
+  CartNotFound = 'Le panier est introuvable',
   OrderNotFound = 'La commande est introuvable',
+  ItemNotFound = "L'objet est introuvable",
+  TournamentNotFound = 'Le tournoi est introuvable',
+  TicketNotFound = 'Le ticket est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
 
-  // 406
-  NotAcceptable = 'Contenu envoyé inacceptable',
+  // 409
+  // Indicates a request conflict with current state of the target resource
+  EmailAlreadyExists = 'Cet email est déjà utilisé',
+  TeamAlreadyExists = "Le nom de l'équipe existe déjà",
+
+  // 410
+  // indicates that access to the target resource is no longer available at the server.
+  TournamentFull = 'Le tournoi est complet',
+  ItemOutOfStock = "L'objet demandé n'est plus en stock",
+
+  // 415
+  UnsupportedMediaType = "Le format de la requête n'est pas supporté",
 
   // 500
-  Unknown = 'Erreur inconnue',
+  // The server encountered an unexpected condition that prevented it from fulfilling the request
+  InternalServerError = 'Erreur inconnue',
 }
-
-// Alias type for Object
-export type ObjectType = Record<string, unknown>;
 
 // Toornament
 /* eslint-disable camelcase */

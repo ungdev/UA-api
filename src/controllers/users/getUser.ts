@@ -1,17 +1,17 @@
 import { Request, Response } from 'express';
-import { User } from '@prisma/client';
+import { isAuthenticated } from '../../middlewares/authentication';
+import { filterUser } from '../../utils/filters';
 import { success } from '../../utils/responses';
-import { fetchUsers } from '../../operations/user';
-import { filterUserRestricted } from '../../utils/filters';
+import { getRequestInfo } from '../../utils/user';
 
 export default [
   // Middlewares
+  ...isAuthenticated,
 
   // Controller
-  async (request: Request, response: Response) => {
-    const users: User[] = await fetchUsers();
-    const result = users.map(filterUserRestricted);
+  (request: Request, response: Response) => {
+    const { user } = getRequestInfo(response);
 
-    return success(response, result);
+    return success(response, filterUser(user));
   },
 ];

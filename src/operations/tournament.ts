@@ -1,35 +1,41 @@
-import { Tournament } from '@prisma/client';
-import { TournamentWithLockedTeams } from '../types';
-import database from '../utils/database';
-import { countTeamsWhere } from './team';
+import prisma, { TournamentId } from '@prisma/client';
+import database from '../services/database';
+import { Tournament } from '../types';
 
-export const fetchTournaments = (): Promise<Tournament[]> => {
-  return database.tournament.findMany();
-};
+export const formatTournament = async (tournament: prisma.Tournament): Promise<Tournament> => {
+  if (!tournament) return null;
 
-export const fetchTournament = (id: string) => {
-  return database.tournament.findOne({ where: { id } });
-};
+  const lockedTeamsCount = await database.team.count({
+    where: {
+      tournamentId: tournament.id,
+      lockedAt: {
+        lte: new Date(),
+      },
+    },
+  });
 
-export const fetchTournamentsWithLockedTeams = async (): Promise<TournamentWithLockedTeams[]> => {
-  // fetch all tournaments
-  const tournaments: Tournament[] = await fetchTournaments();
+  const slots = tournament.maxPlayers / tournament.playersPerTeam;
 
-  // count all locked teams by tournaments
-  const lockedTeamsPerTournaments = await Promise.all(
-    tournaments.map((tournament) => {
-      return countTeamsWhere({
-        tournamentId: tournament.id,
-        lockedAt: {
-          lte: new Date(),
-        },
-      });
-    }),
-  );
+  // Calculate the number of places left. We use the max function to ensure the number is always positive
+  // It is a case that never should happend
+  const placesLeft = Math.max(0, slots - lockedTeamsCount);
 
-  // add count locked teams to tournament object
-  return tournaments.map((tournament, index) => ({
+  return {
     ...tournament,
-    lockedTeamsCount: lockedTeamsPerTournaments[index],
-  }));
+    lockedTeamsCount,
+    placesLeft,
+  };
+};
+
+export const fetchTournament = async (id: TournamentId): Promise<Tournament> => {
+  const tournament = await database.tournament.findUnique({ where: { id } });
+
+  return formatTournament(tournament);
+};
+
+export const fetchTournaments = async (): Promise<Tournament[]> => {
+  // fetch all tournaments
+  const tournaments = await database.tournament.findMany();
+
+  return Promise.all(tournaments.map(formatTournament));
 };

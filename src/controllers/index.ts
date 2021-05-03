@@ -2,34 +2,42 @@ import { Router } from 'express';
 import swagger from 'swagger-ui-express';
 
 import swaggerDocument from '../../openapi.json';
-import status from './status';
-import contact from './contact';
-import settings from './settings';
+import root from './root';
 import users from './users';
 import tournaments from './tournaments';
+import items from './items';
+import teams from './teams';
+import auth from './auth';
+import tickets from './tickets';
+import callbacks from './callbacks';
 
-const routes = (): Router => {
-  const router = Router();
+const router = Router();
 
-  // To match only with root
-  router.get('//', status);
+// Root routes
+router.use(root);
 
-  // Settings route
-  router.get('/settings', settings);
+// Auth routes
+router.use('/auth', auth);
 
-  // Contact route
-  router.post('/contact', contact);
+// Documentation
+router.use('/docs', swagger.serve, swagger.setup(swaggerDocument));
 
-  // Documentation
-  router.use('/docs', swagger.serve, swagger.setup(swaggerDocument));
+// Users route
+router.use('/users', users);
 
-  // Users routes
-  router.use('/users', users());
+// Team routes
+router.use('/teams', teams);
 
-  // Tournaments routes
-  router.use('/tournaments', tournaments());
+// Tournaments routes
+router.use('/tournaments', tournaments);
 
-  return router;
-};
+// Items routes
+router.use('/items', items);
 
-export default routes;
+// Tickets routes
+router.use('/tickets', tickets);
+
+// Callbacks routes
+router.use('/callbacks', callbacks);
+
+export default router;

@@ -29,10 +29,28 @@ Then, connect to your database (MySQL/MariaDB) and enter
 CREATE DATABASE arena CHARACTER SET utf8;
 ```
 
-Create the tables and populate them with
+Create the tables
+
+```
+DATABASE_URL="mysql://user:password@localhost/arena" yarn prisma db push --preview-feature
+```
+
+Populate the tables
 
 ```
 mysql -u DATABASE_USER -p arena < seed.sql
+```
+
+Generate the documentation (redo this command when you update openapi.yml)
+
+```
+yarn openapi:build
+```
+
+Generate the prisma client (redo this command when you update schema.prisma)
+
+```
+yarn prisma generate
 ```
 
 ## Configuration
@@ -60,8 +78,4 @@ Use `npx prisma generate` to generate your prisma client
 
 ## How to test
 
-- Change `DATABASE_NAME` in `.env` with your testing database name
-
-- Seed the database before testing with `mysql -u DATABASE_USER -p DATABASE_NAME < seed.sql` by replacing `DATABASE_USER` and `DATABASE_NAME` with their values
-
-- Run `yarn test`
+The tests must be able to run without any environment variables except the database

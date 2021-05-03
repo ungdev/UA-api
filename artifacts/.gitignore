@@ -1,0 +1,5 @@
+# This folder is used to store artifacts generated during tests
+# It has no vocation to be published
+
+*
+!.gitignore

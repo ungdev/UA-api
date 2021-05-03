@@ -1,3 +1,4 @@
 import { customAlphabet } from 'nanoid';
+import env from './env';
 
-export default customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 6);
+export default customAlphabet(env.nanoid.alphabet, env.nanoid.length);

@@ -20,33 +20,58 @@
     "sourceType": "module"
   },
   "rules": {
-    "prettier/prettier": "error",
+    // General eslint
+    "arrow-body-style": "warn",
+    "eol-last": "off",
+    "guard-for-in": "off",
+    "no-alert": "error",
     "no-async-promise-executor": "off",
+    "no-await-in-loop": "off",
+    "no-console": "error",
+    "no-loop-func": "off",
+    "no-restricted-syntax": "off",
+    "no-shadow": "off", // We use the typescript no shadow. More info on https://github.com/typescript-eslint/typescript-eslint/issues/2471
+    "no-useless-constructor": "off",
+    "object-curly-newline": "off",
+    "prefer-destructuring": "warn",
+    "radix": "off",
+    "require-await": "warn",
+    "spaced-comment": ["warn", "always", { "exceptions": ["*"] }],
+
+    // Typescript
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/ban-types": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/ban-ts-ignore": "off",
-    "@typescript-eslint/ban-ts-comment": "off",
-    "eol-last": "off",
-    "no-console": "error",
-    "no-alert": "error",
-    "object-curly-newline": "off",
+    "@typescript-eslint/no-shadow": "warn",
+
+    // Prettier
+    "prettier/prettier": "warn",
+
+    // Import
     "import/default": "off",
     "import/extensions": "off",
     "import/no-cycle": "off",
-    "radix": "off",
+    "import/order": "warn",
     "import/prefer-default-export": "off",
-    "no-shadow": "off",
-    "no-await-in-loop": "off",
-    "no-useless-constructor": "off",
-    "require-await": "warn",
-    "spaced-comment": ["error", "always", { "exceptions": ["*"] }],
-    "unicorn/no-reduce": "off",
-    "unicorn/filename-case": ["error", { "case": "camelCase" }],
-    "unicorn/consistent-function-scoping": "off",
-    "unicorn/no-fn-reference-in-iterator": "off",
+
+    // Security
+    "security/detect-non-literal-regexp": "off",
     "security/detect-object-injection": "off",
+
+    // Unicorn
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/filename-case": ["error", { "case": "camelCase" }],
+    "unicorn/no-array-callback-reference": "off",
+    "unicorn/no-array-reduce": "off",
+    "unicorn/no-fn-reference-in-iterator": "off",
     "unicorn/no-process-exit": "off",
+    "unicorn/no-reduce": "off",
+    "unicorn/no-null": "off",
+    "unicorn/prefer-set-has": "off",
+    "unicorn/prefer-spread": "warn",
     "unicorn/prevent-abbreviations": [
       "error",
       {
@@ -55,5 +80,15 @@
         }
       }
     ]
-  }
+  },
+
+  // Disable for tests the no unused expressions (doesn't work with chai expects)
+  "overrides": [
+    {
+      "files": "tests/**/*.test.ts",
+      "rules": {
+        "no-unused-expressions": "off"
+      }
+    }
+  ]
 }
