@@ -18,12 +18,10 @@ export const lastname = Joi.string().regex(nameRegex);
 export const email = Joi.string().email();
 export const password = Joi.string().regex(passwordRegex);
 export const discordId = Joi.string();
-export const type = Joi.string().valid(UserType.player, UserType.coach);
-export const place = Joi.string().regex(placeRegex).required();
-export const permission = Joi.string()
-  .valid(Permission.admin, Permission.anim, Permission.entry, Permission.stream)
-  .required();
-export const stringBoolean = Joi.string().valid('true', 'false').required();
+export const type = Joi.string().valid(...Object.keys(UserType));
+export const place = Joi.string().regex(placeRegex);
+export const permission = Joi.string().valid(...Object.keys(Permission));
+export const stringBoolean = Joi.string().valid('true', 'false');
 
 // Team
 export const teamName = Joi.string().regex(nameRegex);

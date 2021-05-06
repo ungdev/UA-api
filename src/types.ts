@@ -37,7 +37,7 @@ export interface Contact {
   message: string;
 }
 
-export const enum Permission {
+export enum Permission {
   stream = 'stream',
   entry = 'entry',
   anim = 'anim',
