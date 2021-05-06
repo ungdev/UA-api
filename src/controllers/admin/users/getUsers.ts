@@ -14,17 +14,17 @@ export default [
   ...hasPermission(Permission.entry, Permission.anim),
   validateQuery(
     Joi.object({
-      username: Joi.string().optional(),
-      name: Joi.string().optional(),
-      email: Joi.string().optional(),
-      place: Joi.string().optional(),
-      type: validators.type.optional(),
-      team: validators.teamName.optional(),
-      tournament: validators.tournamentId.optional(),
-      locked: validators.stringBoolean.optional(),
-      scanned: validators.stringBoolean.optional(),
-      permission: validators.permission.optional(),
-      page: Joi.string().default('0').optional(), // must be a string as it is in query
+      username: Joi.string(),
+      name: Joi.string(),
+      email: Joi.string(),
+      place: Joi.string(),
+      type: validators.type,
+      team: validators.teamName,
+      tournament: validators.tournamentId,
+      locked: validators.stringBoolean,
+      scanned: validators.stringBoolean,
+      permission: validators.permission,
+      page: Joi.string().default('0'), // must be a string as it is in query
     }),
   ),
 

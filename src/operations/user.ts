@@ -3,10 +3,8 @@ import prisma, { TransactionState, UserType } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
-import { Permission, PrimitiveUser, Team, User, UserSearchQuery, UserWithTeam } from '../types';
+import { Permission, PrimitiveUser, User, UserSearchQuery, UserWithTeam } from '../types';
 import { serializePermissions } from '../utils/helpers';
-import { format } from 'morgan';
-import { joinTeam, kickUser, promoteUser } from './team';
 
 export const userInclusions = {
   cartItems: {
