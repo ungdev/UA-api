@@ -62,10 +62,6 @@ const env = {
 
   // Allow variable injection in testing environment for database credentials
   database: {
-    host: loadEnv('DATABASE_HOST', true) || 'localhost',
-    port: loadIntEnv('DATABASE_PORT', true) || 3306,
-    username: loadEnv('DATABASE_USERNAME', true),
-    password: loadEnv('DATABASE_PASSWORD', true),
     name: loadEnv('DATABASE_NAME', true) || 'arena',
   },
   email: {
