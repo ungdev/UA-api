@@ -27,6 +27,9 @@ export default [
       // Check that the user is in the team id
       if (userToPromote.teamId !== team.id) return forbidden(response, Error.NotInTeam);
 
+      // Check if the user is not already a captain
+      if (userToPromote.id === team.captainId) return forbidden(response, Error.AlreadyCaptain);
+
       const updatedTeam = await promoteUser(team.id, userId);
 
       return success(response, filterTeam(formatTeam(updatedTeam)));

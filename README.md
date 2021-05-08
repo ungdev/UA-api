@@ -32,7 +32,7 @@ CREATE DATABASE arena CHARACTER SET utf8;
 Create the tables
 
 ```
-DATABASE_URL="mysql://user:password@localhost/arena" yarn prisma db push --preview-feature
+DATABASE_URL="mysql://user:password@localhost/arena" yarn prisma db push
 ```
 
 Populate the tables
