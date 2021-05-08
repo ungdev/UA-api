@@ -15,8 +15,9 @@ export default [
   validateQuery(
     Joi.object({
       username: Joi.string(),
-      name: Joi.string(),
-      email: Joi.string(),
+      firstname: validators.firstname,
+      lastname: validators.lastname,
+      email: Joi.string(), // Only string because it starts with
       place: Joi.string(),
       type: validators.type,
       team: validators.teamName,

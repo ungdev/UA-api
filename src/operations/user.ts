@@ -27,7 +27,6 @@ export const formatUser = (user: PrimitiveUser): User => {
   return {
     ...user,
     hasPaid,
-    name: `${user.firstname} ${user.lastname}`,
   };
 };
 
@@ -50,23 +49,10 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
 };
 
 export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<UserWithTeam[]> => {
-  // Prepare an array that will handle all name requests
-  const nameQueries = [];
-
-  // If the name is specified
-  if (query.name) {
-    // Split the names by space and remove the empty elements
-    const names = query.name.split(' ').filter((name) => name);
-
-    // For each element, create a query that will be used in the OR
-    for (const name of names) {
-      nameQueries.push({ firstname: { startsWith: name } }, { lastname: { startsWith: name } });
-    }
-  }
-
   const users = await database.user.findMany({
     where: {
-      ...(nameQueries.length > 0 ? { OR: nameQueries } : {}),
+      firstname: query.firstname ? { startsWith: query.firstname } : undefined,
+      lastname: query.lastname ? { startsWith: query.lastname } : undefined,
       username: query.username ? { startsWith: query.username } : undefined,
       email: query.email ? { startsWith: query.email } : undefined,
       type: query.type || undefined,

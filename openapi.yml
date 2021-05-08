@@ -109,7 +109,9 @@ components:
             username:
               type: string
               nullable: true
-            name:
+            firstname:
+              type: string
+            lastname:
               type: string
             email:
               type: string
@@ -477,8 +479,13 @@ paths:
           schema:
             type: string
         - in: query
-          name: name
-          description: Recherche par nom (prénom et/ou nom de famille)
+          name: firstname
+          description: Recherche par prénom
+          schema:
+            type: string
+        - in: query
+          name: lastname
+          description: Recherche par nom
           schema:
             type: string
         - in: query
