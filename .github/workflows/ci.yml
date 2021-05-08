@@ -36,10 +36,6 @@ jobs:
     env:
       # Used for prisma generation
       DATABASE_URL: mysql://test:test@localhost:3306/arena
-
-      # Used for tests
-      DATABASE_USERNAME: test
-      DATABASE_PASSWORD: test
     services:
       mariadb:
         image: mariadb:10
