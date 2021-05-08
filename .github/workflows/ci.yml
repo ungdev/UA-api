@@ -16,7 +16,6 @@ jobs:
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn --frozen-lockfile
       - run: yarn openapi:check
-      - run: yarn openapi:build
       - run: yarn prisma generate
       - run: yarn lint
 
@@ -29,7 +28,6 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn --frozen-lockfile
-      - run: yarn openapi:build
       - run: yarn prisma generate
       - run: yarn build
 
@@ -62,7 +60,6 @@ jobs:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn --frozen-lockfile
-      - run: yarn openapi:build
       - run: yarn prisma generate
       - run: yarn prisma db push
       - run: docker exec -i mariadb mysql -utest -ptest arena < seed.sql

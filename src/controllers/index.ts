@@ -1,7 +1,7 @@
 import { Router } from 'express';
+import yaml from 'yamljs';
 import swagger from 'swagger-ui-express';
 
-import swaggerDocument from '../../openapi.json';
 import root from './root';
 import users from './users';
 import tournaments from './tournaments';
@@ -11,6 +11,8 @@ import auth from './auth';
 import tickets from './tickets';
 import callbacks from './callbacks';
 import admin from './admin';
+
+const swaggerDocument = yaml.load(`${__dirname}/../../openapi.yml`);
 
 const router = Router();
 
