@@ -7,7 +7,7 @@ import * as cartItemOperations from '../../src/operations/cartItem';
 import database from '../../src/services/database';
 import { CartItem, Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { createCart, fetchCarts, updateCart } from '../../src/operations/carts';
 
 describe('POST /users/:userId/carts', () => {

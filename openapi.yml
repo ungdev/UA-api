@@ -402,13 +402,8 @@ paths:
             type: string
           required: true
       responses:
-        200:
+        204:
           description: Le panier a bien été marqué comme étant remboursé.
-            Les informations du panier sont renvoyées.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Cart'
         400:
           $ref: '#/components/responses/400Errored'
         401:
@@ -509,11 +504,6 @@ paths:
           schema:
             type: string
         - in: query
-          name: discordId
-          description: Recherche par identifiant Discord
-          schema:
-            type: string
-        - in: query
           name: type
           description: Filtre les utilisateurs par leur type
           schema:
@@ -535,11 +525,6 @@ paths:
           schema:
             $ref: '#/components/schemas/Permission'
         - in: query
-          name: paid
-          description: Filtre les utilisateurs en fonction de s'ils ont payé ou non
-          schema:
-            type: boolean
-        - in: query
           name: scanned
           description: Filtre les utilisateurs en fonction de s'ils ont été scannés ou non
           schema:
@@ -557,9 +542,20 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UserWithTeam'
+                type: object
+                properties:
+                  itemsPerPage:
+                    type: number
+                  currentPage:
+                    type: number
+                  totalItems:
+                    type: number
+                  totalPages:
+                    type: number
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserWithTeam'
         400:
           $ref: '#/components/responses/400Errored'
         401:
@@ -591,11 +587,14 @@ paths:
               type: object
               properties:
                 permissions:
-                  type: string
-                  nullable: true
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Permission'
                 place:
                   type: string
-                  nullable: true
+                  example: A23
+                type:
+                  $ref: '#/components/schemas/Type'
       responses:
         200:
           description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.
@@ -759,7 +758,7 @@ paths:
             schema:
               type: object
               properties:
-                replacementUserId:
+                replacingUserId:
                   type: string
                   description: Identifiant de l'utilisateur remplaçant
       responses:
@@ -772,9 +771,9 @@ paths:
                 type: object
                 properties:
                   replacedUser:
-                    $ref: '#/components/schemas/UserWithTeam'
-                  replacementUser:
-                    $ref: '#/components/schemas/UserWithTeam'
+                    $ref: '#/components/schemas/User'
+                  replacingUser:
+                    $ref: '#/components/schemas/User'
         400:
           $ref: '#/components/responses/400Errored'
         401:
@@ -784,23 +783,27 @@ paths:
         404:
           $ref: '#/components/responses/404UserNotFound'
 
-  /admin/scan/{qrcode}:
+  /admin/scan/:
     post:
       summary: Scanne le billet d'un utilisateur
       description: Renvoie les informations de l'utilisateur.<br/>
         **Permission 'entry' ou 'admin' requise.**<br/>
         *Le billet ne doit pas avoir été déjà scanné.*
+        *Le billet est passé dans le body et non dans les paramètres car il est chiffré en base64 et peut contenir des slashs*
       tags:
         - Admin
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: qrcode
-          description: Contenu du QR code présent sur le billet chiffré
-          schema:
-            type: string
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                qrcode:
+                  type: string
+                  description: Contenu du QR code présent sur le billet chiffré
       responses:
         200:
           description: Renvoie les informations de l'utilisateur et son équipe

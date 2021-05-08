@@ -1,3 +1,4 @@
+import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { isNotAuthenticated } from '../../middlewares/authentication';
@@ -17,7 +18,7 @@ export default [
       lastname: validators.lastname.required(),
       email: validators.email.required(),
       password: validators.password.required(),
-      type: validators.type.required(),
+      type: Joi.string().valid(UserType.player, UserType.coach).required(),
     }),
   ),
 

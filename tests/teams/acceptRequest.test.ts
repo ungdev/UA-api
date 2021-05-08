@@ -7,7 +7,7 @@ import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 

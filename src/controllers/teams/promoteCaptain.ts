@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
-import { promoteUser } from '../../operations/team';
+import { formatTeam, promoteUser } from '../../operations/team';
 import { fetchUser } from '../../operations/user';
 import { Error } from '../../types';
 import { filterTeam } from '../../utils/filters';
 import { forbidden, notFound, success } from '../../utils/responses';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares
@@ -27,9 +27,12 @@ export default [
       // Check that the user is in the team id
       if (userToPromote.teamId !== team.id) return forbidden(response, Error.NotInTeam);
 
+      // Check if the user is not already a captain
+      if (userToPromote.id === team.captainId) return forbidden(response, Error.AlreadyCaptain);
+
       const updatedTeam = await promoteUser(team.id, userId);
 
-      return success(response, filterTeam(updatedTeam));
+      return success(response, filterTeam(formatTeam(updatedTeam)));
     } catch (error) {
       return next(error);
     }

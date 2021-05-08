@@ -5,7 +5,7 @@ import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
 import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 
 describe('POST /users/current/carts', () => {
   let user: User;

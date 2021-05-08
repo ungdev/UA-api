@@ -1,4 +1,4 @@
-import prisma, { TransactionState } from '@prisma/client';
+import prisma, { TournamentId, TransactionState, UserType } from '@prisma/client';
 import { ErrorRequestHandler } from 'express';
 import Mail from 'nodemailer/lib/mailer';
 /**
@@ -37,7 +37,7 @@ export interface Contact {
   message: string;
 }
 
-export const enum Permission {
+export enum Permission {
   stream = 'stream',
   entry = 'entry',
   anim = 'anim',
@@ -88,6 +88,24 @@ export type PrimitiveUser = prisma.User & {
 
 export type User = PrimitiveUser & {
   hasPaid: boolean;
+};
+
+export type UserWithTeam = User & {
+  team: prisma.Team;
+};
+
+// We need to use here a type instead of an interface as it is used for a casting that wouldn't work on an interface
+export type UserSearchQuery = {
+  username: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  type: UserType;
+  permission: Permission;
+  team: string;
+  tournament: TournamentId;
+  scanned: string;
+  place: string;
 };
 
 export type Tournament = prisma.Tournament & {
@@ -156,12 +174,16 @@ export const enum Error {
   AlreadyPaid = 'Le joueur possède déjà une place',
   AlreadyErrored = 'Vous ne pouvez pas valider une transaction échouée',
   TeamLocked = "L'équipe est verrouillée",
+  TeamNotLocked = "L'équipe n'est pas verrouillée",
   TeamNotFull = "L'équipe est incomplète",
   TeamFull = "L'équipe est complète",
   AlreadyInTeam = "Vous êtes déjà dans l'équipe",
   AlreadyAskedATeam = 'Vous avez déjà demandé de vous inscrire dans une équipe',
+  AlreadyCaptain = 'Vous êtes déjà un capitaine',
   NotAskedTeam = "Vous ne demandez pas l'accès à l'équipe",
   CaptainCannotQuit = "Un capitaine ne peut pas se bannir, veuillez dissoudre l'équipe ou nommer un autre chef d'équipe",
+  CannotChangeType = 'Vous ne pouvez pas changer de type si vous avez payé',
+  NotSameType = "Les deux utilisateurs n'ont pas le même type",
 
   // 404
   // The server can't find the requested resource

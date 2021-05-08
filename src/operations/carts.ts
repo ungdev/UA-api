@@ -1,4 +1,4 @@
-import { TransactionState, UserType } from '@prisma/client';
+import prisma, { TransactionState, UserType } from '@prisma/client';
 
 import database from '../services/database';
 import { Cart, CartWithCartItems, DetailedCart, PrimitiveCartItem } from '../types';
@@ -75,15 +75,21 @@ export const updateCart = (
     },
   });
 
-export const forcePay = (userId: string, userType: UserType) => {
+export const refundCart = (cartId: string): Promise<Cart> =>
+  database.cart.update({
+    data: { transactionState: TransactionState.refunded },
+    where: { id: cartId },
+  });
+
+export const forcePay = (user: prisma.User) => {
   let itemId;
 
-  if (userType === UserType.player) {
+  if (user.type === UserType.player) {
     itemId = 'ticket-player';
-  } else if (userType === UserType.coach) {
+  } else if (user.type === UserType.coach) {
     itemId = 'ticket-coach';
   } else {
-    throw new Error(`Can't pay for ${userType}`);
+    throw new Error(`Can't pay for ${user.type}`);
   }
 
   return database.cart.create({
@@ -92,7 +98,7 @@ export const forcePay = (userId: string, userType: UserType) => {
       transactionState: TransactionState.paid,
       paidAt: new Date(),
       user: {
-        connect: { id: userId },
+        connect: { id: user.id },
       },
       cartItems: {
         create: [
@@ -100,7 +106,7 @@ export const forcePay = (userId: string, userType: UserType) => {
             id: nanoid(),
             itemId,
             quantity: 1,
-            forUserId: userId,
+            forUserId: user.id,
           },
         ],
       },

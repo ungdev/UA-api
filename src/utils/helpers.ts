@@ -3,6 +3,7 @@
 // known as a bug that will be fixed soon
 
 import crypto from 'crypto';
+import { Permission } from '../types';
 import env from './env';
 
 export const encodeToBase64 = (object: object) => {
@@ -62,3 +63,6 @@ export const formatPrice = (cents: number) => {
 export const isPartnerSchool = (email: string) => env.email.partners.some((partner) => email.endsWith(partner));
 
 export const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min) + min);
+
+export const serializePermissions = (permissions: Permission[]) => permissions.join(',');
+export const deserializePermissions = (permissions: string) => permissions.split(',');

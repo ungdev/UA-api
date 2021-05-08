@@ -125,8 +125,10 @@ model User {
   updatedAt     DateTime   @default(now()) @updatedAt
   askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
   team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
+  captainTeam   Team?      // This field is used to make prisma work but should never be used
   cartItems     CartItem[]
   carts         Cart[]
+  logs          Log[]
 
   @@index([id])
   @@map("users")

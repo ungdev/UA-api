@@ -6,7 +6,7 @@ import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeTeam } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
 describe('PUT /teams/current', () => {
