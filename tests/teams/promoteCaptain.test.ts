@@ -10,7 +10,7 @@ import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
-describe.only('PUT /teams/current/captain/:userId', () => {
+describe('PUT /teams/current/captain/:userId', () => {
   let captain: User;
   let team: Team;
   let captainToken: string;
