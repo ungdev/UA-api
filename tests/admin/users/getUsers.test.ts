@@ -74,7 +74,8 @@ describe('GET /admin/users', () => {
 
     expect(responseUser).to.deep.equal({
       id: user.id,
-      name: user.name,
+      firstname: user.firstname,
+      lastname: user.lastname,
       email: user.email,
       permissions: null,
       place: null,
@@ -87,11 +88,23 @@ describe('GET /admin/users', () => {
     });
   });
 
-  describe('Test name field', () => {
-    for (const name of ['firstname', 'lastname', 'firstname lastname', 'first', 'last'])
-      it(`should fetch the user with name ${name}`, async () => {
+  describe('Test firstname field', () => {
+    for (const firstname of ['firstname', 'first'])
+      it(`should fetch the user with name ${firstname}`, async () => {
         const { body } = await request(app)
-          .get(`/admin/users?name=${name}`)
+          .get(`/admin/users?firstname=${firstname}`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .expect(200);
+
+        expect(body.users.length).to.be.equal(1);
+      });
+  });
+
+  describe('Test lastname field', () => {
+    for (const lastname of ['lastname', 'last'])
+      it(`should fetch the user with name ${lastname}`, async () => {
+        const { body } = await request(app)
+          .get(`/admin/users?lastname=${lastname}`)
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -125,7 +138,7 @@ describe('GET /admin/users', () => {
 
   it('should combine multiple filters', async () => {
     const { body } = await request(app)
-      .get(`/admin/users?name=firstname&email=email&username=user`)
+      .get(`/admin/users?firstname=firstname&email=email&username=user`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 

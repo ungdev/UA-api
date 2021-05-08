@@ -88,7 +88,6 @@ export type PrimitiveUser = prisma.User & {
 
 export type User = PrimitiveUser & {
   hasPaid: boolean;
-  name: string;
 };
 
 export type UserWithTeam = User & {
@@ -98,7 +97,8 @@ export type UserWithTeam = User & {
 // We need to use here a type instead of an interface as it is used for a casting that wouldn't work on an interface
 export type UserSearchQuery = {
   username: string;
-  name: string;
+  firstname: string;
+  lastname: string;
   email: string;
   type: UserType;
   permission: Permission;
