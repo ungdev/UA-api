@@ -4,7 +4,8 @@ import { unsupportedMediaType } from '../utils/responses';
 
 /**
  * Checks if the header content-type is added on POST/PUT/PATCH/DELETE methods.
- * Limit the content type header to application/json or nothing.
+ * Limit the content type header to application/json or application/json;charset=UTF-8
+ or nothing.
  * This middleware is used to reduce the attack surface
  */
 export default [
@@ -13,7 +14,12 @@ export default [
     const contentType = request.get('Content-Type');
 
     // Continues if the method can't contain a body, or that the content type is not precised or that is precised to be json
-    if (!bodyMethods.includes(request.method) || !contentType || contentType === 'application/json') {
+    if (
+      !bodyMethods.includes(request.method) ||
+      !contentType ||
+      contentType === 'application/json' ||
+      contentType === 'application/json;charset=UTF-8'
+    ) {
       return next();
     }
 
