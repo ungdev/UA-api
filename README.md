@@ -38,7 +38,7 @@ yarn prisma db push
 Populate the tables
 
 ```
-mysql -u DATABASE_USER -p arena < seed.sql
+mysql -u DATABASE_USER -p arena --protocol tcp < seed.sql
 ```
 
 Generate the documentation (redo this command when you update openapi.yml)
