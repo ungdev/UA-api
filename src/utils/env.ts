@@ -61,7 +61,7 @@ const env = {
   },
   email: {
     host: loadEnv('EMAIL_HOST') || 'localhost',
-    port: loadIntEnv('EMAIL_PORT') || 2525,
+    port: loadIntEnv('EMAIL_PORT') || 2525, // We don't use the normal 25 port because of testing (25 listening is usually denied)
     user: loadEnv('EMAIL_USER'),
     password: loadEnv('EMAIL_PASSWORD'),
     sender: {
@@ -100,6 +100,7 @@ const env = {
   },
   log: {
     level: loadEnv('LOG_LEVEL') || 'silly',
+    enabledInTest: loadEnv('LOG_IN_TEST', true) === 'true',
     sentryDsn: loadEnv('LOG_SENTRY_DSN'),
   },
 };
