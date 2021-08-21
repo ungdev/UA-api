@@ -59,11 +59,6 @@ const env = {
     token: loadEnv('SLACK_TOKEN'),
     contactChannel: loadEnv('SLACK_CONTACT_CHANNEL'),
   },
-
-  // Allow variable injection in testing environment for database credentials
-  database: {
-    name: loadEnv('DATABASE_NAME', true) || 'arena',
-  },
   email: {
     host: loadEnv('EMAIL_HOST') || 'localhost',
     port: loadIntEnv('EMAIL_PORT') || 2525,
