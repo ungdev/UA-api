@@ -8,6 +8,7 @@ RUN chown node:node .
 
 USER node
 
+# Node has the uid 1000
 COPY --chown=node:node package.json yarn.lock schema.prisma ./
 
 RUN yarn --frozen-lockfile
