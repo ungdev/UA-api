@@ -61,6 +61,7 @@ jobs:
       - run: yarn prisma generate
       - run: yarn prisma db push --preview-feature
       - run: docker exec -i mariadb mysql -utest -ptest arena < seed.sql
+      - run: yarn openapi:build
       - run: yarn test:coverage
       - uses: codecov/codecov-action@v1
 
