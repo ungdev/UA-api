@@ -16,6 +16,7 @@ jobs:
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - run: yarn --frozen-lockfile
       - run: yarn openapi:check
+      - run: yarn openapi:build
       - run: yarn prisma generate
       - run: yarn lint
 
@@ -27,6 +28,7 @@ jobs:
         with:
           path: '**/node_modules'
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+      - run: yarn openapi:build
       - run: yarn --frozen-lockfile
       - run: yarn prisma generate
       - run: yarn build
