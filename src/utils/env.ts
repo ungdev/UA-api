@@ -38,6 +38,7 @@ const env = {
   api: {
     port: loadIntEnv('API_PORT') || 3000,
     prefix: loadEnv('API_PREFIX') || '/',
+    itemsPerPage: 50,
   },
   front: {
     website: loadEnv('API_WEBSITE') || 'https://arena.utt.fr',
@@ -58,18 +59,9 @@ const env = {
     token: loadEnv('SLACK_TOKEN'),
     contactChannel: loadEnv('SLACK_CONTACT_CHANNEL'),
   },
-
-  // Allow variable injection in testing environment for database credentials
-  database: {
-    host: loadEnv('DATABASE_HOST', true) || 'localhost',
-    port: loadIntEnv('DATABASE_PORT', true) || 3306,
-    username: loadEnv('DATABASE_USERNAME', true),
-    password: loadEnv('DATABASE_PASSWORD', true),
-    name: loadEnv('DATABASE_NAME', true) || 'arena',
-  },
   email: {
     host: loadEnv('EMAIL_HOST') || 'localhost',
-    port: loadIntEnv('EMAIL_PORT') || 2525,
+    port: loadIntEnv('EMAIL_PORT') || 2525, // We don't use the normal 25 port because of testing (25 listening is usually denied)
     user: loadEnv('EMAIL_USER'),
     password: loadEnv('EMAIL_PASSWORD'),
     sender: {
@@ -108,6 +100,7 @@ const env = {
   },
   log: {
     level: loadEnv('LOG_LEVEL') || 'silly',
+    enabledInTest: loadEnv('LOG_IN_TEST', true) === 'true',
     sentryDsn: loadEnv('LOG_SENTRY_DSN'),
   },
 };

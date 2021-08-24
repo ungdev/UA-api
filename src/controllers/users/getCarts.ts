@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { fetchCarts } from '../../operations/carts';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 import { filterCartWithCartItems } from '../../utils/filters';
 import { success } from '../../utils/responses';
 import { isAuthenticated } from '../../middlewares/authentication';

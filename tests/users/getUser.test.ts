@@ -6,7 +6,7 @@ import * as responses from '../../src/utils/responses';
 import database from '../../src/services/database';
 import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 
 describe('GET /users/current', () => {
   let user: User;

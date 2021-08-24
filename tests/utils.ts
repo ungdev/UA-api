@@ -1,7 +1,7 @@
 import faker from 'faker';
 import prisma, { TournamentId, UserType } from '@prisma/client';
-import { createUser, fetchUser, removeUserRegisterToken } from '../src/operations/user';
-import { User } from '../src/types';
+import { createUser, fetchUser, removeUserRegisterToken, setPermissions } from '../src/operations/user';
+import { Permission, User } from '../src/types';
 import { createTeam, fetchTeam, joinTeam, lockTeam } from '../src/operations/team';
 import { forcePay } from '../src/operations/carts';
 
@@ -14,6 +14,7 @@ export const createFakeUser = async ({
   type = UserType.player,
   confirmed = true,
   paid = false,
+  permission,
 }: {
   username?: string;
   firstname?: string;
@@ -23,6 +24,7 @@ export const createFakeUser = async ({
   type?: UserType;
   confirmed?: boolean;
   paid?: boolean;
+  permission?: Permission;
 } = {}): Promise<User> => {
   const user: prisma.User = await createUser(username, firstname, lastname, email, password, type);
 
@@ -31,7 +33,11 @@ export const createFakeUser = async ({
   }
 
   if (paid) {
-    await forcePay(user.id, user.type);
+    await forcePay(user);
+  }
+
+  if (permission) {
+    await setPermissions(user.id, [permission]);
   }
 
   return fetchUser(user.id);
@@ -42,14 +48,16 @@ export const createFakeTeam = async ({
   tournament = TournamentId.lol,
   paid = false,
   locked = false,
+  name,
 }: {
   members?: number;
   tournament?: TournamentId;
   paid?: boolean;
   locked?: boolean;
+  name?: string;
 } = {}) => {
   const user = await createFakeUser({ paid });
-  const team = await createTeam(faker.internet.userName(), tournament, user.id);
+  const team = await createTeam(name || faker.internet.userName(), tournament, user.id);
 
   if (locked) {
     await lockTeam(team.id);

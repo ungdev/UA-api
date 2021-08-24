@@ -6,7 +6,7 @@ import { fetchCart } from '../../operations/carts';
 import { Error } from '../../types';
 import { generateTicket } from '../../utils/pdf';
 import { forbidden, notFound } from '../../utils/responses';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares

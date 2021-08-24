@@ -7,7 +7,7 @@ import * as tournamentOperations from '../../src/operations/tournament';
 import database from '../../src/services/database';
 import { Error, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 
 describe('POST /teams', () => {
   let user: User;

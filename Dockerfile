@@ -1,17 +1,19 @@
-FROM node:15-alpine
+# The normal version is used to debug easily
+FROM node:15
 
 ENV NODE_ENV=production
-WORKDIR /opt
+WORKDIR /srv/app
 
 RUN chown node:node .
 
 USER node
 
-COPY package.json yarn.lock schema.prisma ./
+# Node has the uid 1000
+COPY --chown=node:node package.json yarn.lock schema.prisma ./
 
 RUN yarn --frozen-lockfile
 
-COPY ./ ./
+COPY --chown=node:node ./ ./
 
 RUN yarn openapi:build
 RUN yarn prisma generate
