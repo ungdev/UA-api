@@ -1,9 +1,10 @@
 import userOperations from 'bcryptjs';
-import { TransactionState, UserType } from '@prisma/client';
+import prisma, { TransactionState, UserType } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
-import { PrimitiveUser, User } from '../types';
+import { Permission, PrimitiveUser, User, UserSearchQuery, UserWithTeam } from '../types';
+import { serializePermissions } from '../utils/helpers';
 
 export const userInclusions = {
   cartItems: {
@@ -29,6 +30,15 @@ export const formatUser = (user: PrimitiveUser): User => {
   };
 };
 
+export const formatUserWithTeam = (primitiveUser: PrimitiveUser & { team: prisma.Team }): UserWithTeam => {
+  const user = formatUser(primitiveUser);
+
+  return {
+    ...user,
+    team: primitiveUser.team,
+  };
+};
+
 export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> => {
   const user = await database.user.findUnique({
     where: { [key]: parameterId },
@@ -36,6 +46,36 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
   });
 
   return formatUser(user);
+};
+
+export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<UserWithTeam[]> => {
+  const users = await database.user.findMany({
+    where: {
+      firstname: query.firstname ? { startsWith: query.firstname } : undefined,
+      lastname: query.lastname ? { startsWith: query.lastname } : undefined,
+      username: query.username ? { startsWith: query.username } : undefined,
+      email: query.email ? { startsWith: query.email } : undefined,
+      type: query.type || undefined,
+      permissions: query.permission ? { contains: query.permission } : undefined,
+      place: query.place ? { startsWith: query.place } : undefined,
+
+      // Checks first if scanned exists, and then if it is true of false
+      scannedAt: query.scanned ? (query.scanned === 'true' ? { not: null } : null) : undefined,
+
+      team: {
+        name: query.team ? { startsWith: query.team } : undefined,
+        tournamentId: query.tournament || undefined,
+      },
+    },
+    skip: env.api.itemsPerPage * page,
+    take: env.api.itemsPerPage,
+    include: {
+      ...userInclusions,
+      team: true,
+    },
+  });
+
+  return users.map(formatUserWithTeam);
 };
 
 export const createUser = async (
@@ -80,6 +120,25 @@ export const updateUser = async (userId: string, username: string, newPassword: 
   return formatUser(user);
 };
 
+export const updateAdminUser = async (
+  userId: string,
+  type: UserType,
+  permissions: Permission[],
+  place: string,
+): Promise<User> => {
+  const user = await database.user.update({
+    data: {
+      type,
+      permissions: serializePermissions(permissions),
+      place,
+    },
+    where: { id: userId },
+    include: userInclusions,
+  });
+
+  return formatUser(user);
+};
+
 export const createVisitor = (firstname: string, lastname: string) =>
   database.user.create({
     data: {
@@ -117,6 +176,26 @@ export const generateResetToken = (userId: string) =>
     },
     where: {
       id: userId,
+    },
+  });
+
+export const scanUser = (userId: string) =>
+  database.user.update({
+    data: {
+      scannedAt: new Date(),
+    },
+    where: {
+      id: userId,
+    },
+  });
+
+export const setPermissions = (userId: string, permissions: Permission[]) =>
+  database.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      permissions: permissions.join(','),
     },
   });
 

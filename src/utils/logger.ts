@@ -6,10 +6,8 @@ import morganMiddleware from 'morgan';
 import { createLogger, format, transports } from 'winston';
 import moment from 'moment';
 import { getIp } from './network';
-import { getRequestInfo } from './user';
+import { getRequestInfo } from './users';
 import env, { warnLogs } from './env';
-
-// We can't require env here or we will have a require loop
 
 // Create console Transport
 const { combine, colorize, printf } = format;
@@ -19,7 +17,7 @@ const consoleTransport = new transports.Console({
     printf(({ level, message }) => `${moment().format('HH:mm:ss')} ${level}: ${message}`),
   ),
   level: env.log.level,
-  silent: env.test, // Doesn't log if we are in testing environment, you can temporarly comment it in testing to debug
+  silent: env.test && !env.log.enabledInTest, // Doesn't log if we are in testing environment and if the logging is disabled
 });
 
 const loggingTransports: Array<ConsoleTransportInstance> = [consoleTransport];

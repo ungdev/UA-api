@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import request from 'supertest';
 import prisma, { UserType } from '@prisma/client';
 import app from '../../src/app';
-import * as userUtils from '../../src/utils/user';
+import * as userUtils from '../../src/utils/users';
 import { Error } from '../../src/types';
 import { setLoginAllowed } from '../../src/operations/settings';
 import database from '../../src/services/database';

@@ -6,7 +6,7 @@ import { changePassword, fetchUser, removeUserResetToken } from '../../operation
 import { Error } from '../../types';
 import { filterUser } from '../../utils/filters';
 import { badRequest, success } from '../../utils/responses';
-import { generateToken } from '../../utils/user';
+import { generateToken } from '../../utils/users';
 import * as validators from '../../utils/validators';
 
 export default [

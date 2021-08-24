@@ -6,7 +6,7 @@ import { conflict, success } from '../../utils/responses';
 import { updateTeam } from '../../operations/team';
 import { filterTeam } from '../../utils/filters';
 import * as validators from '../../utils/validators';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 import { Error } from '../../types';
 
 export default [

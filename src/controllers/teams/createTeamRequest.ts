@@ -4,7 +4,7 @@ import { askJoinTeam, fetchTeam } from '../../operations/team';
 import { Error } from '../../types';
 import { filterUser } from '../../utils/filters';
 import { forbidden, notFound, success } from '../../utils/responses';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares

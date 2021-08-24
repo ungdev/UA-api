@@ -18,7 +18,7 @@ export default [
       !bodyMethods.includes(request.method) ||
       !contentType ||
       contentType === 'application/json' ||
-      contentType === 'application/json;charset=UTF-8'
+      contentType.toLowerCase() === 'application/json;charset=utf-8'
     ) {
       return next();
     }

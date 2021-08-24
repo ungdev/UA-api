@@ -6,7 +6,7 @@ import { isNotAuthenticated } from '../../middlewares/authentication';
 import { validateBody } from '../../middlewares/validation';
 import { filterUser } from '../../utils/filters';
 import { forbidden, success, unauthenticated } from '../../utils/responses';
-import { generateToken } from '../../utils/user';
+import { generateToken } from '../../utils/users';
 import { Error } from '../../types';
 import { fetchUser } from '../../operations/user';
 import * as validators from '../../utils/validators';

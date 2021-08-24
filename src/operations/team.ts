@@ -145,8 +145,8 @@ export const kickUser = (userId: string) =>
     },
   });
 
-export const promoteUser = async (teamId: string, newCaptainId: string) => {
-  const updatedTeam = await database.team.update({
+export const promoteUser = (teamId: string, newCaptainId: string) =>
+  database.team.update({
     data: {
       captain: {
         connect: { id: newCaptainId },
@@ -158,10 +158,7 @@ export const promoteUser = async (teamId: string, newCaptainId: string) => {
     include: teamInclusions,
   });
 
-  return formatTeam(updatedTeam);
-};
-
-export const joinTeam = async (teamId: string, user: User) => {
+export const joinTeam = (teamId: string, user: User) => {
   // For this version of prisma, we need to fetch to check if there was already a askingTeam. It should be solved in the next versions
   // Please correct this if this issue is close and merged https://github.com/prisma/prisma/issues/3069
 
@@ -175,7 +172,7 @@ export const joinTeam = async (teamId: string, user: User) => {
     };
   }
 
-  await database.user.update({
+  return database.user.update({
     data: {
       team: {
         connect: {
@@ -188,6 +185,21 @@ export const joinTeam = async (teamId: string, user: User) => {
       id: user.id,
     },
   });
+};
+
+export const replaceUser = (user: User, targetUser: User, team: Team) => {
+  // Create the first transaction to replace the user
+  const transactions: prisma.PrismaPromise<prisma.User | prisma.Team>[] = [
+    kickUser(user.id),
+    joinTeam(team.id, targetUser),
+  ];
+
+  // If he is the captain, change the captain
+  if (team.captainId === user.id) {
+    transactions.push(promoteUser(team.id, targetUser.id));
+  }
+
+  return database.$transaction(transactions);
 };
 
 export const lockTeam = async (teamId: string) => {
