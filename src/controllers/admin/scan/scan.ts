@@ -36,7 +36,7 @@ export default [
         return badRequest(response, Error.InvalidBody);
       }
 
-      // Retieve the user from the QR Code
+      // Retrieve the user from the QR Code
       const user = await fetchUser(userId);
 
       if (!user) return notFound(response, Error.UserNotFound);

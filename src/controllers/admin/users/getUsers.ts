@@ -34,7 +34,7 @@ export default [
     try {
       const userSearch = request.query as UserSearchQuery;
 
-      // Get the page fromt the params. Default to zero and put it in max to ensure there is no negative numbers
+      // Get the page from the params. Default to zero and put it in max to ensure there is no negative numbers
       const page = Math.max(Number.parseInt(request.params.page) || 0, 0);
 
       const users = await fetchUsers(userSearch, page);
