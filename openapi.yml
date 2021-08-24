@@ -92,10 +92,13 @@ components:
 
     UserRestricted:
       type: object
+      description: Utilisateur informations personnelles. ⚠ Un visiteur ne peut pas être affiché car il n'a pas de username ⚠
       properties:
         id:
           type: string
           example: V1STGX
+        username:
+          type: string
         type:
           $ref: '#/components/schemas/Type'
         hasPaid:
@@ -157,6 +160,20 @@ components:
           type: string
           format: date-time
           nullable: true
+
+    TeamWithUsersRestricted:
+      allOf:
+        - $ref: '#/components/schemas/Team'
+        - type: object
+          properties:
+            players:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserRestricted'
+            coaches:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserRestricted'
 
     TeamWithUsers:
       allOf:
@@ -1564,19 +1581,24 @@ paths:
 
   /tournaments:
     get:
-      summary: Renvoie les informations des tournois
-      description: Renvoie les informations des tournois.
+      summary: Renvoie les informations des tournois, des teams et des joueurs.
+      description: Renvoie les informations des tournois, des teams et des joueurs.
       tags:
         - Tournaments
       responses:
         200:
-          description: Renvoie les informations sur les tournois
+          description: Renvoie les informations des tournois, des teams et des joueurs.
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Tournament'
+                  allOf:
+                    - $ref: '#/components/schemas/Tournament'
+                    - type: object
+                      properties:
+                        teams:
+                          $ref: '#/components/schemas/TeamWithUsersRestricted'
 
   /users:
     get:
