@@ -41,12 +41,6 @@ Populate the tables
 mysql -u DATABASE_USER -p arena --protocol tcp < seed.sql
 ```
 
-Generate the documentation (redo this command when you update openapi.yml)
-
-```
-yarn openapi:build
-```
-
 Generate the prisma client (redo this command when you update schema.prisma)
 
 ```

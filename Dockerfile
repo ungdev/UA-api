@@ -15,7 +15,6 @@ RUN yarn --frozen-lockfile
 
 COPY --chown=node:node ./ ./
 
-RUN yarn openapi:build
 RUN yarn prisma generate
 RUN yarn build
 
