@@ -82,7 +82,7 @@
     "postinstall": "husky install",
     "dev": "ts-node-dev --no-notify --exit-child src/server.ts",
     "build": "tsc",
-    "start": "node build/src/server.js",
+    "start": "node build/server.js",
     "lint": "eslint src/ tests/ --ext .ts",
     "lint:fix": "eslint --fix src/ tests/ --ext .ts",
     "openapi:check": "swagger-cli validate openapi.yml",
