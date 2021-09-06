@@ -1,6 +1,7 @@
 import prisma, { TournamentId } from '@prisma/client';
 import database from '../services/database';
 import { Tournament } from '../types';
+import { fetchTeams } from './team';
 
 export const formatTournament = async (tournament: prisma.Tournament): Promise<Tournament> => {
   if (!tournament) return null;
@@ -20,10 +21,14 @@ export const formatTournament = async (tournament: prisma.Tournament): Promise<T
   // It is a case that never should happend
   const placesLeft = Math.max(0, slots - lockedTeamsCount);
 
+  const teams = await fetchTeams(tournament.id);
+
   return {
     ...tournament,
     lockedTeamsCount,
+    teams,
     placesLeft,
+
   };
 };
 

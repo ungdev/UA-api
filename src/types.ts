@@ -111,6 +111,7 @@ export type UserSearchQuery = {
 export type Tournament = prisma.Tournament & {
   lockedTeamsCount: number;
   placesLeft: number;
+  teams: Team[];
 };
 
 export type Team = prisma.Team & {
