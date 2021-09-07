@@ -74,3 +74,15 @@ Use `npx prisma generate` to generate your prisma client
 ## How to test
 
 The tests must be able to run without any environment variables except the database
+
+# Documentation
+
+We build the documentation with Sphinx based on markdown. If you want to compile the documentation on your local PC, you will need to have `Python 3` and then type the following commands:
+
+```
+cd docs
+pip3 install -r requirements.txt
+make html
+```
+
+It will create a `build` folder where the doc is located
