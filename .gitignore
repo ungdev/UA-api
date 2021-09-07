@@ -19,3 +19,5 @@ yarn-error.log
 /local
 
 openapi.json
+
+/docs/build
