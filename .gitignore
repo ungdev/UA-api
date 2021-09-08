@@ -12,6 +12,7 @@ yarn-error.log
 # misc
 .DS_Store
 .env
+/dbml
 
 # IDE Configs
 /.idea
