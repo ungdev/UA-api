@@ -24,7 +24,7 @@
 
 - [References de l'API](https://arena.dev.uttnetgroup.fr/api/docs/)
 
-- [Diagramme de la DB](https://dbdiagram.io/d/5e7888844495b02c3b88a0b4)
+- [References de la DB](https://dbdocs.io/arena/dev)
 
 ## Par où commencer ?
 
