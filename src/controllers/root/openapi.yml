@@ -1,0 +1,67 @@
+/:
+  get:
+    summary: Renvoie l'état du serveur
+    description: Indique si le serveur fonctionne correctement (connexion HTTP et à la base de données).
+    tags:
+      - General
+    responses:
+      200:
+        description: Indique si le serveur fonctionne correctement
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                http:
+                  type: boolean
+                database:
+                  type: boolean
+
+/contact:
+  post:
+    summary: Envoie un message à l'équipe de l'UTT Arena
+    description: 'Envoie un message sur le slack UNG dans #ua-contact-bot.'
+    tags:
+      - General
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              firstname:
+                type: string
+              lastname:
+                type: string
+              email:
+                type: string
+                format: email
+              subject:
+                type: string
+              message:
+                type: string
+    responses:
+      204:
+        description: Le message a bien été envoyé
+      400:
+        $ref: '#/components/responses/400Errored'
+
+/settings:
+  get:
+    summary: Renvoie les paramètres du serveur
+    description: Indique si le serveur accepte la connexion "tout public" et si la billetterie est ouverte ou non.
+    tags:
+      - General
+    responses:
+      200:
+        description: Renvoie les paramètres du serveur
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: boolean
+                shop:
+                  type: boolean

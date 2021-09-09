@@ -1,0 +1,182 @@
+/users:
+  get:
+    summary: Renvoie les informations minimales d'un utilisateur
+    description: Renvoie les informations minimales d'un utilisateur.
+    tags:
+      - Users
+    parameters:
+      - in: query
+        name: search
+        description: Identifiant ou adresse mail de l'utilisateur cible
+        schema:
+          type: string
+        required: true
+    responses:
+      200:
+        description: Renvoie les informations minimales de l'utilisateur
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRestricted'
+      400:
+        $ref: '#/components/responses/400Errored'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/users/current:
+  get:
+    summary: Renvoie les informations de utilisateur
+    description: Renvoie les informations de utilisateur.
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Renvoie les informations de utilisateur
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      400:
+        $ref: '#/components/responses/400Errored'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+  put:
+    summary: Modifie les informations d'un utilisateur
+    description: Modifie les informations d'un utilisateur.
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+                nullable: true
+              newPassword:
+                type: string
+                nullable: true
+    responses:
+      200:
+        description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/users/current/carts:
+  get:
+    summary: Renvoie la liste des achats de l'utilisateur
+    description: Renvoie la liste des achats de l'utilisateur.
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Renvoie la liste des achats de l'utilisateur
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CartWithCartItems'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+  post:
+    summary: Crée un panier
+    description: Crée un panier et renvoie une URL afin de procéder au paiement.
+      Pour chaque accompagnateur, un compte inaccessible est créé et sera lié à l'équipe actuelle de l'utilisateur.<br/>
+      *La billetterie doit être ouverte.*
+      *Le stock d'items restant doit être suffisant pour satisfaire la demande.*
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              tickets:
+                type: object
+                properties:
+                  userIds:
+                    type: array
+                    description: Liste des identifiants des utilisateurs pour qui acheter les billets
+                    items:
+                      type: string
+                    example:
+                      - V1STGX
+                  visitors:
+                    type: array
+                    description: Liste des billets accompagnateurs à acheter
+                    items:
+                      type: object
+                      properties:
+                        firstname:
+                          type: string
+                          description: Prénom de l'accompagnateur
+                        lastname:
+                          type: string
+                          description: Nom de l'accompagnateur
+              supplements:
+                type: array
+                description: Liste des goodies à acheter
+                items:
+                  type: object
+                  properties:
+                    itemId:
+                      type: integer
+                      description: Identifiant de l'item à acheter
+                    quantity:
+                      type: integer
+                      description: Quantité à acheter
+    responses:
+      201:
+        description: Le panier a bien été créé. L'URL permettant de procéder au paiement est renvoyée.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  description: URL vers EtuPay
+                price:
+                  type: integer
+                  description: Prix du panier en centimes
+
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'

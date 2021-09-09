@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import yaml from 'yamljs';
 import swagger from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 
 import root from './root';
 import users from './users';
@@ -12,7 +12,18 @@ import tickets from './tickets';
 import callbacks from './callbacks';
 import admin from './admin';
 
-const swaggerDocument = yaml.load(`${__dirname}/../../openapi.yml`);
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'UA Api',
+      version: '1.0.0',
+    },
+  },
+  apis: [`${__dirname}/**/*.yml`],
+};
+
+const swaggerDocument = swaggerJsdoc(options);
 
 const router = Router();
 

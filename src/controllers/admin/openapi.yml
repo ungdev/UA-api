@@ -1,0 +1,478 @@
+/admin/auth/login/{userId}:
+  post:
+    summary: Authentifie en tant qu'un autre utilisateur
+    description: Permet de s'authentifier en tant que n'importe quel utilisateur.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        description: Identifiant de l'utilisateur cible
+        schema:
+          type: string
+        required: true
+    responses:
+      200:
+        description: L'authentification a réussi.
+          Les informations de l'utilisateur et le token d'authentification sont renvoyés.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+                token:
+                  type: string
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/admin/carts/{cartId}/refund:
+  post:
+    summary: Marque le panier comme étant remboursé
+    description: Marque le panier comme étant remboursé.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: cartId
+        description: Identifiant du panier à marquer comme étant remboursé
+        schema:
+          type: string
+        required: true
+    responses:
+      204:
+        description: Le panier a bien été marqué comme étant remboursé.
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        description: Aucun panier n'est associé à cet identifiant
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Aucun panier n'est associé à cet identifiant
+
+/admin/emails:
+  post:
+    summary: Envoie un mail d'information
+    description: |-
+      Envoie un mail d'information à tous les joueurs, coachs et accompagnateurs en fonction des filtres sélectionnés.
+      Envoie également une copie à arena@utt.fr.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              locked:
+                type: boolean
+                description: Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non
+              tournamentId:
+                type: integer
+                description: |-
+                  Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.
+                  Le champ 'locked' doit être non nul.
+                nullable: true
+              subject:
+                type: string
+                description: Sujet du mail
+              content:
+                type: string
+                description: Contenu du mail
+    responses:
+      204:
+        description: Le mail a été envoyé avec succès
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+/admin/users:
+  get:
+    summary: Renvoie la liste des utilisateurs et leur équipe
+    description: Les champs de recherche renvoient l'utilisateur s'il contient la chaîne de caractères recherchée.
+      Les filtres et les champs de recherche sont appliqués entre eux avec un opérateur ET.<br/>
+      **Permission 'anim', 'entry' ou 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: query
+        name: username
+        description: Recherche par nom d'utilisateur
+        schema:
+          type: string
+      - in: query
+        name: firstname
+        description: Recherche par prénom
+        schema:
+          type: string
+      - in: query
+        name: lastname
+        description: Recherche par nom
+        schema:
+          type: string
+      - in: query
+        name: email
+        description: Recherche par adresse email
+        schema:
+          type: string
+      - in: query
+        name: team
+        description: Recherche par nom d'équipe
+        schema:
+          type: string
+      - in: query
+        name: place
+        description: Recherche par place
+        schema:
+          type: string
+      - in: query
+        name: type
+        description: Filtre les utilisateurs par leur type
+        schema:
+          $ref: '#/components/schemas/Type'
+      - in: query
+        name: tournament
+        description: Filtre les utilisateurs en fonction de l'identifiant de leur tournoi
+        schema:
+          type: integer
+          minimum: 0
+      - in: query
+        name: locked
+        description: Filtre les utilisateurs en fonction de s'ils sont dans une équipe verrouillée ou non
+        schema:
+          type: boolean
+      - in: query
+        name: permission
+        description: Filtre les utilisateurs en fonction de leurs permissions
+        schema:
+          $ref: '#/components/schemas/Permission'
+      - in: query
+        name: scanned
+        description: Filtre les utilisateurs en fonction de s'ils ont été scannés ou non
+        schema:
+          type: boolean
+      - in: query
+        name: page
+        description: '(Pagination) Indice de la page'
+        schema:
+          type: integer
+          minimum: 0
+        required: true
+    responses:
+      200:
+        description: La liste de tous les utilisateurs filtrés est renvoyée
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                itemsPerPage:
+                  type: number
+                currentPage:
+                  type: number
+                totalItems:
+                  type: number
+                totalPages:
+                  type: number
+                users:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/UserWithTeam'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+/admin/users/{userId}:
+  put:
+    summary: Modifie les informations d'un utilisateur
+    description: Modifie les informations d'un utilisateur.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        description: Identifiant de l'utilisateur à modifier
+        schema:
+          type: string
+        required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              permissions:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+              place:
+                type: string
+                example: A23
+              type:
+                $ref: '#/components/schemas/Type'
+    responses:
+      200:
+        description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/admin/users/{userId}/carts:
+  get:
+    summary: Renvoie les paniers de l'utilisateur
+    description: Renvoie les paniers de l'utilisateur.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        schema:
+          type: string
+        required: true
+    responses:
+      200:
+        description: Renvoie les paniers de l'utilisateur
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CartWithCartItems'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/admin/logs:
+  get:
+    summary: Récupère les actions effectués par les utilisateurs
+    description: Récupère les actions effectués par les utilisateurs.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: query
+        name: userId
+        schema:
+          type: string
+      - in: query
+        name: teamId
+        schema:
+          type: string
+      - in: query
+        name: page
+        description: '(Pagination) Indice de la page'
+        schema:
+          type: integer
+          minimum: 0
+        required: true
+
+    responses:
+      200:
+        description: Un tableau de logs
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logs:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Log'
+                pageIndex:
+                  type: number
+                  example: 1
+                maxPages:
+                  type: number
+                  example: 5
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/admin/users/{userId}/force-pay:
+  post:
+    summary: Valide le paiement d'un utilisateur
+    description: Valide le paiement d'un utilisateur.<br/>
+      **Permission 'entry' ou 'admin' requise.**<br/>
+      *L'utilisateur cible ne doit pas avoir déjà payé sa place.*
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        description: Identifiant de l'utilisateur cible
+        schema:
+          type: string
+        required: true
+    responses:
+      200:
+        description: L'utilisateur est bien marqué comme ayant payé sa place.
+          Les informations de l'utilisateur sont renvoyées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/admin/users/{userId}/replace:
+  post:
+    summary: Remplace un utilisateur par un autre dans une équipe
+    description: Remplace un utilisateur (utilisateur remplacé) par un autre (utilisateur remplaçant).<br/>
+      **Permission 'admin' requise.**<br/>
+      *L'utilisateur remplacé doit être dans une équipe.*
+      *Les deux utilisateurs doivent avoir le même type.*
+      *L'équipe doit être verrouillée.*
+      *Le nouvel utilisateur doit avoir payé sa place.*
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        description: Identifiant de l'utilisateur remplacé
+        schema:
+          type: string
+        required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              replacingUserId:
+                type: string
+                description: Identifiant de l'utilisateur remplaçant
+    responses:
+      200:
+        description: L'utilisateur remplaçant a bien pris la place de l'utilisateur remplaçé.
+          Les informations des deux utilisateurs et de leur équipe sont renvoyées.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                replacedUser:
+                  $ref: '#/components/schemas/User'
+                replacingUser:
+                  $ref: '#/components/schemas/User'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/admin/scan/:
+  post:
+    summary: Scanne le billet d'un utilisateur
+    description: Renvoie les informations de l'utilisateur.<br/>
+      **Permission 'entry' ou 'admin' requise.**<br/>
+      *Le billet ne doit pas avoir été déjà scanné.*
+      *Le billet est passé dans le body et non dans les paramètres car il est chiffré en base64 et peut contenir des slashs*
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              qrcode:
+                type: string
+                description: Contenu du QR code présent sur le billet chiffré
+    responses:
+      200:
+        description: Renvoie les informations de l'utilisateur et son équipe
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserWithTeam'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        description: Aucun utilisateur n'est associé à ce QR code
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Aucun utilisateur n'est associé à ce QR code
