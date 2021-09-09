@@ -20,7 +20,7 @@ const options = {
       version: '1.0.0',
     },
   },
-  apis: [`${__dirname}/**/*.yml`],
+  apis: [`${__dirname}/**/openapi.yml`],
 };
 
 const swaggerDocument = swaggerJsdoc(options);
