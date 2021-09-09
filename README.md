@@ -24,6 +24,12 @@ cd UA-api
 
 # Install all the dependencies
 yarn
+
+# Copy the file .env.example to .env
+
+cp .env.example .env
+
+# Then, edit the variable DATABASE_URL in the file .env
 ```
 
 Then, connect to your database (MySQL/MariaDB) and enter
@@ -52,11 +58,7 @@ yarn prisma generate
 
 ## Configuration
 
-Copy the file .env.example to .env and then edit it with your values :
-
-```
-cp .env.example .env
-```
+Edit the file .env with your values
 
 ## Commands
 
