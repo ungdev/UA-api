@@ -1,0 +1,341 @@
+info:
+  description: |-
+    API web à destination des services de l'UTT Arena.<br/><br/>
+    **Définitions :**<br/>
+    - Le terme "paramètre" désigne un champ qui peut se trouver dans les champs `param`, `query` ou `body` de la requête<br/>
+    - Le terme "utilisateur" désigne l''utilisateur originaire de la requête<br/>
+    - Les termes "utilisateur cible" ou "équipe cible" désignent respectivement l''utilisateur ou l''équipe identifiée par le paramètre `userId` ou `teamId`<br/>
+    - Une erreur 403 sera renvoyée si une condition en **gras** n'est pas respectée<br/>
+    - Une erreur 400 sera renvoyée si une condition en *italique* n'est pas respectée ou si un paramètre n''est pas dans un format valide<br/>
+    <br/>
+    **Remarques :**<br/>
+    - Pour toutes les routes nécessitant un token d''authentification, la connexion doit être autorisée (sauf pour les utilisateurs organisateurs)
+  contact:
+    name: UTT Arena
+    url: https://arena.utt.fr
+    email: arena@utt.fr
+  license:
+    name: Licence MIT
+    url: https://github.com/ungdev/UA-api/blob/master/LICENSE
+
+servers:
+  - url: http://127.0.0.1:3000
+    description: Serveur local
+  - url: https://arena.dev.uttnetgroup.fr/api
+    description: Serveur de pré-production
+  - url: https://arena.utt.fr/api
+    description: Serveur de production
+
+tags:
+  - name: General
+    description: Routes générales
+  - name: Admin
+    description: Routes d'administration
+  - name: Authentication
+    description: Routes d'authentification
+  - name: Callbacks
+    description: Routes de callback
+  - name: Items
+    description: Routes liées aux items
+  - name: Teams
+    description: Routes liées aux équipes
+  - name: Tickets
+    description: Routes liées aux billets
+  - name: Tournaments
+    description: Routes liées aux tournois
+  - name: Users
+    description: Routes liées aux utilisateurs
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+    Type:
+      type: string
+      enum: [player, coach, visitor, orga]
+
+    Permission:
+      type: string
+      enum: [stream, entry, anim, admin]
+
+    Tournament:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        shortName:
+          type: string
+        maxPlayers:
+          type: integer
+          example: 80
+        playersPerTeam:
+          type: integer
+          example: 5
+        lockedTeamsCount:
+          type: integer
+
+    UserRestricted:
+      type: object
+      description: Utilisateur informations personnelles. ⚠ Un visiteur ne peut pas être affiché car il n'a pas de username ⚠
+      properties:
+        id:
+          type: string
+          example: V1STGX
+        username:
+          type: string
+        type:
+          $ref: '#/components/schemas/Type'
+        hasPaid:
+          type: boolean
+
+    User:
+      allOf:
+        - $ref: '#/components/schemas/UserRestricted'
+        - type: object
+          properties:
+            username:
+              type: string
+              nullable: true
+            firstname:
+              type: string
+            lastname:
+              type: string
+            email:
+              type: string
+              format: email
+              nullable: true
+            permissions:
+              type: string
+              nullable: true
+            place:
+              type: string
+              nullable: true
+              example: X000
+            scanned:
+              type: string
+              format: date-time
+              nullable: true
+            discordId:
+              type: string
+              nullable: true
+            teamId:
+              type: string
+              example: Z5JDHI
+              nullable: true
+            askingTeamId:
+              type: string
+              example: I8YNHK
+              nullable: true
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+          example: Z5jdHi
+        name:
+          type: string
+        tournamentId:
+          type: integer
+        captainId:
+          type: string
+          example: XiHGta
+        locked:
+          type: string
+          format: date-time
+          nullable: true
+
+    TeamWithUsersRestricted:
+      allOf:
+        - $ref: '#/components/schemas/Team'
+        - type: object
+          properties:
+            players:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserRestricted'
+            coaches:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserRestricted'
+
+    TeamWithUsers:
+      allOf:
+        - $ref: '#/components/schemas/Team'
+        - type: object
+          properties:
+            players:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+            coaches:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+            askingUsers:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+
+    UserWithTeam:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            team:
+              $ref: '#/components/schemas/Team'
+
+    Cart:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 8MF1b0
+        userId:
+          type: string
+          example: V1STGX
+        transactionState:
+          type: string
+          enum: [pending, paid, canceled, refused, refunded]
+        transactionId:
+          type: integer
+          nullable: true
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: wS6p0t
+        quantity:
+          type: integer
+        cartId:
+          type: string
+          example: 8MF1b0
+        itemId:
+          type: integer
+        forUserId:
+          type: string
+          example: V1STGX
+
+    CartWithCartItems:
+      allOf:
+        - $ref: '#/components/schemas/Cart'
+        - type: object
+          properties:
+            cartItems:
+              type: array
+              items:
+                $ref: '#/components/schemas/CartItem'
+
+    Item:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+          enum: [ticket, item]
+        attribute:
+          type: string
+          nullable: true
+        price:
+          type: integer
+        infos:
+          type: string
+          nullable: true
+        image:
+          type: string
+          nullable: true
+
+    Log:
+      type: object
+      properties:
+        id:
+          type: string
+          example: A1E4FD
+        method:
+          type: string
+          example: POST
+        path:
+          type: string
+          example: /users/admin
+        body:
+          type: object
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/User'
+
+  responses:
+    400Errored:
+      description: Requête erronée
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    401Unauthenticated:
+      description: Vous n'êtes pas authentifié
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Vous n'êtes pas authentifié
+
+    403Unauthorized:
+      description: Vous n'avez pas la permission
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Vous n'avez pas la permission
+
+    404UserNotFound:
+      description: L'utilisateur est introuvable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: L'utilisateur est introuvable
+
+    404TeamNotFound:
+      description: L'équipe est introuvable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: L'équipe est introuvable
+
+    404CartNotFound:
+      description: Le panier est introuvable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Le panier est introuvable
