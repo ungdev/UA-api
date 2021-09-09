@@ -2,6 +2,8 @@
 
 ```{toctree}
 :glob:
+getting_started.md
+links_and_ressources.md
 *
 ```
 
