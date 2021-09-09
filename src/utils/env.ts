@@ -53,7 +53,7 @@ const env = {
   },
   jwt: {
     secret: loadEnv('JWT_SECRET') || notInProduction('LongRandomKey'),
-    expires: loadEnv('NANOID_ALPHABET') || '1y',
+    expires: loadEnv('JWT_EXPIRES') || '1y',
   },
   slack: {
     token: loadEnv('SLACK_TOKEN'),
