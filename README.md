@@ -6,6 +6,8 @@
 
 API web à destination des services de l'UTT Arena
 
+Avant toute chose, prenez connaissance de [la documentation](https://ua-api.readthedocs.io)
+
 ## Requirements
 
 - [Node.js](https://nodejs.org/)
