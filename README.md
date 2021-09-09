@@ -6,7 +6,7 @@
 
 API web à destination des services de l'UTT Arena
 
-Avant toute chose, prenez connaissance de [la documentation](https://ua-api.readthedocs.io)
+**Avant toute chose**, prenez connaissance de [la documentation](https://ua-api.readthedocs.io).
 
 ## Requirements
 
