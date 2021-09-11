@@ -3,7 +3,7 @@ import { TournamentId, UserType } from '@prisma/client';
 import { Permission } from '../types';
 
 // Matches with LoL EUW summoner name
-const usernameRegex = /^[0-9\p{L} _.]{3,16}$/u;
+const usernameRegex = /^[0-9\p{L} _]{3,16}$/u;
 const nameRegex = /^[\p{L} _'-]{3,100}/u;
 const passwordRegex = /^.{6,100}$/;
 const placeRegex = /^[A-Z]\d{1,3}$/;

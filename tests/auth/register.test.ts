@@ -80,4 +80,11 @@ describe('POST /auth/register', () => {
       .send({ ...userData, type: 'wrong type' })
       .expect(400, { error: Error.InvalidBody });
   });
+
+  it('should not accept dot in username', async () => {
+    await request(app)
+      .post('/auth/register')
+      .send({ ...userData, username: 'to.to' })
+      .expect(400, { error: Error.InvalidBody });
+  });
 });
