@@ -1,32 +1,4 @@
-# Liens et ressources
-
-## Liens utiles
-
-- [Trello](https://trello.com/invite/b/Vtw8jBAM/71849f8f4335e8d152fbd3fda3ebea6e/dev)
-
-- [Drive Dev UA19](https://drive.google.com/drive/folders/1mAACBEc7nzpRaHnrV2JAnOd6xQv0450x?usp=sharing) (lecture uniquement)
-
-- [Drive Dev UA20](https://drive.google.com/drive/folders/1Htm-rXwDeEUZRa3dFO1fR3KzfMskGhkR?usp=sharing) (lecture uniquement)
-
-- Drive Dev UA21 --> demander le lien sur Slack
-
-- [Front](https://arena.utt.fr/)
-
-- [Front préproduction](https://arena.dev.uttnetgroup.fr/)
-
-- [Github front](https://github.com/ungdev/UA-front)
-
-- [Github API](https://github.com/ungdev/UA-api)
-
-- [Github front bouffe](https://github.com/ungdev/UA-bouffe-front)
-
-- [Github api bouffe](https://github.com/ungdev/UA-bouffe-api)
-
-- [References de l'API](https://arena.dev.uttnetgroup.fr/api/docs/)
-
-- [References de la DB](https://dbdocs.io/arena/dev)
-
-## Par où commencer ?
+# Pour commencer
 
 Salut aux nouveaux qui viennent de rejoindre le dev !
 Vous êtes nombreux, aussi, vous allez avoir besoin d’autonomie pour progresser parce que je vais pas pouvoir tenir 10 personnes par la main. Je vais donc vous donner des ressources à consulter en fonction de votre niveau et en fonction de votre objectif (parce que vous n’avez pas besoin des mêmes connaissances sur le front et sur l’API).
@@ -56,6 +28,14 @@ Voici donc les langages / framework / autres à connaître / maîtriser pour êt
 
 - Avancez un peu sur [ce site](https://developer.mozilla.org/fr/docs/Web/JavaScript) pour apprendre le Javascript selon votre niveau
 
+- Notions à maitriser :
+
+  - Conditions, ternaire, boucles
+
+  - Syntaxe des fonctions fléchées
+
+  - Chaînes de caractère, tableaux, objets (pas d'héritage)
+
 ### JSON
 
 - Tout bête, comprenez seulement comment sont organisées les données dans un JSON
@@ -66,9 +46,9 @@ Voici donc les langages / framework / autres à connaître / maîtriser pour êt
 
 - Comprendre le principe général
 
-- HTML : div, h1, a, ul, li
+- HTML : `div`, `h1`, `a`, `ul`, `li`
 
-- Css : position, display, color, font-size, font-weight, background-color, margin, padding, border
+- Css : `position`, `display`, `color`, `font-size`, `font-weight`, `background-color`, `margin`, `padding`, `border`
 
 - N’allez pas jusqu’au bout de [ce cours](https://openclassrooms.com/fr/courses/1603881-apprenez-a-creer-votre-site-web-avec-html5-et-css3), arrêtez quand les mots clés ci-dessus vous évoquent quelque chose
   Si vous trouver le temps de faire le cours en entier, vous avez MM01 dans la poche.
@@ -92,6 +72,12 @@ Voici donc les langages / framework / autres à connaître / maîtriser pour êt
 - Pour les plus deter, [ce sera pas perdu](https://nextjs.org/learn/basics/create-nextjs-app?utm_source=next-site&utm_medium=homepage-cta&utm_campaign=next-website)
 
 ## Pour l’API :
+
+### Node.JS
+
+- Sur [ce site](https://developer.mozilla.org/fr/docs/Web/JavaScript), comprenez les principes de la programmation asynchrone
+
+- Sachez utiliser les promesses, `async` et `await`
 
 ### Typescript
 
