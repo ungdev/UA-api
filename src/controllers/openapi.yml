@@ -97,6 +97,7 @@ components:
           type: string
         type:
           $ref: '#/components/schemas/Type'
+          nullable: true
         hasPaid:
           type: boolean
 

@@ -80,5 +80,6 @@ describe('DELETE /teams/current', () => {
 
     const updatedCaptain = await fetchUser(captain.id);
     expect(updatedCaptain.teamId).to.be.null;
+    expect(updatedCaptain.type).to.be.null;
   });
 });

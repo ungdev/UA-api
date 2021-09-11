@@ -57,7 +57,7 @@ export const createFakeTeam = async ({
   name?: string;
 } = {}) => {
   const user = await createFakeUser({ paid });
-  const team = await createTeam(name || faker.internet.userName(), tournament, user.id);
+  const team = await createTeam(name || faker.internet.userName(), tournament, user.id, UserType.player);
 
   if (locked) {
     await lockTeam(team.id);
@@ -66,7 +66,7 @@ export const createFakeTeam = async ({
   // Create new members (minus 1 because the captain is already created)
   for (let index = 0; index < members - 1; index += 1) {
     const partner = await createFakeUser({ paid });
-    await joinTeam(team.id, partner);
+    await joinTeam(team.id, partner, UserType.player);
   }
 
   return fetchTeam(team.id);

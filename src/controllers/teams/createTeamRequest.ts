@@ -1,5 +1,8 @@
+import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
+import Joi from 'joi';
 import { isNotInATeam } from '../../middlewares/team';
+import { validateBody } from '../../middlewares/validation';
 import { askJoinTeam, fetchTeam } from '../../operations/team';
 import { Error } from '../../types';
 import { filterUser } from '../../utils/filters';
@@ -9,6 +12,11 @@ import { getRequestInfo } from '../../utils/users';
 export default [
   // Middlewares
   ...isNotInATeam,
+  validateBody(
+    Joi.object({
+      userType: Joi.string().valid(UserType.player, UserType.coach).required(),
+    }),
+  ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
@@ -26,7 +34,7 @@ export default [
       // Check if the user is already asking for a team
       if (user.askingTeamId) return forbidden(response, Error.AlreadyAskedATeam);
 
-      const updatedUser = await askJoinTeam(team.id, user.id);
+      const updatedUser = await askJoinTeam(team.id, user.id, request.body.userType);
 
       return success(response, filterUser(updatedUser));
     } catch (error) {

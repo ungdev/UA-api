@@ -56,7 +56,7 @@ export default [
         return forbidden(response, Error.NotPaid);
       }
 
-      await replaceUser(user, targetUser, team);
+      await replaceUser(user, targetUser, team, user.type);
 
       const updatedUser = await fetchUser(request.params.userId);
       const updatedTargetUser = await fetchUser(request.body.replacingUserId);

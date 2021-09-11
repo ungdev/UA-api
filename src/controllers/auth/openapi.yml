@@ -69,9 +69,6 @@
               password:
                 type: string
                 minLength: 6
-              type:
-                type: string
-                enum: [player, coach]
               discordId:
                 type: string
     responses:

@@ -1,4 +1,3 @@
-import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { isNotAuthenticated } from '../../middlewares/authentication';
@@ -18,17 +17,16 @@ export default [
       lastname: validators.lastname.required(),
       email: validators.email.required(),
       password: validators.password.required(),
-      type: Joi.string().valid(UserType.player, UserType.coach).required(),
     }),
   ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
-    const { username, firstname, lastname, email, password, type } = request.body;
+    const { username, firstname, lastname, email, password } = request.body;
 
     // Tries to create a user
     try {
-      await createUser(username, firstname, lastname, email, password, type);
+      await createUser(username, firstname, lastname, email, password);
     } catch (error) {
       // If the email already exists in the database, throw a bad request
       if (error.code === 'P2002' && error.meta && error.meta.target === 'email_unique')

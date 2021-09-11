@@ -48,7 +48,6 @@
               $ref: '#/components/schemas/Error'
             example:
               error: Aucun tournoi n'est associé à cet identifiant
-
   post:
     summary: Crée une équipe
     description: Crée une équipe.<br/>
@@ -70,6 +69,10 @@
               tournamentId:
                 description: Identifiant du tournoi
                 type: integer
+              captainType:
+                description: Le type d'utilisateur du capitaine d'équipe
+                type: string
+                enum: [player, coach]
     responses:
       201:
         description: L'équipe a bien été créée. Ses informations sont retournées.
@@ -200,6 +203,13 @@
         description: Identifiant de l'équipe cible
         schema:
           type: string
+        required: true
+      - in: query
+        name: userType
+        description: Type d'utilisateur
+        schema:
+          type: string
+          enum: [player, coach]
         required: true
     responses:
       200:

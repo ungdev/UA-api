@@ -1,4 +1,4 @@
-import prisma, { TournamentId } from '@prisma/client';
+import prisma, { TournamentId, UserType } from '@prisma/client';
 import database from '../services/database';
 import { PrimitiveUser, Team, User } from '../types';
 import nanoid from '../utils/nanoid';
@@ -45,7 +45,12 @@ export const fetchTeams = async (tournamentId: TournamentId): Promise<Team[]> =>
   return teams.map(formatTeam);
 };
 
-export const createTeam = async (name: string, tournamentId: TournamentId, captainId: string): Promise<Team> => {
+export const createTeam = async (
+  name: string,
+  tournamentId: TournamentId,
+  captainId: string,
+  captainType: UserType,
+): Promise<Team> => {
   // Update the user to create a transaction update (update the user AND create the team)
   await database.user.update({
     data: {
@@ -54,13 +59,16 @@ export const createTeam = async (name: string, tournamentId: TournamentId, capta
           id: nanoid(),
           name,
           captain: {
-            connect: { id: captainId },
+            connect: {
+              id: captainId,
+            },
           },
           tournament: {
             connect: { id: tournamentId },
           },
         },
       },
+      type: captainType,
     },
 
     where: {
@@ -92,14 +100,20 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
   return formatTeam(team);
 };
 
-export const deleteTeam = (teamId: string) =>
-  database.team.delete({
-    where: {
-      id: teamId,
+export const deleteTeam = async (teamId: string) => {
+  await database.user.updateMany({
+    where: { teamId },
+    data: {
+      type: null,
+      teamId: null,
     },
   });
+  return database.team.delete({
+    where: { id: teamId },
+  });
+};
 
-export const askJoinTeam = async (teamId: string, userId: string) => {
+export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
   const updatedUser = await database.user.update({
     data: {
       askingTeam: {
@@ -107,6 +121,7 @@ export const askJoinTeam = async (teamId: string, userId: string) => {
           id: teamId,
         },
       },
+      type: userType,
     },
     where: {
       id: userId,
@@ -125,6 +140,7 @@ export const deleteTeamRequest = (userId: string) =>
       askingTeam: {
         disconnect: true,
       },
+      type: null,
     },
     where: {
       id: userId,
@@ -139,6 +155,7 @@ export const kickUser = (userId: string) =>
       team: {
         disconnect: true,
       },
+      type: null,
     },
     where: {
       id: userId,
@@ -158,40 +175,29 @@ export const promoteUser = (teamId: string, newCaptainId: string) =>
     include: teamInclusions,
   });
 
-export const joinTeam = (teamId: string, user: User) => {
-  // For this version of prisma, we need to fetch to check if there was already a askingTeam. It should be solved in the next versions
-  // Please correct this if this issue is close and merged https://github.com/prisma/prisma/issues/3069
-
-  let updateAskingTeamId = {};
-
-  if (user.askingTeamId) {
-    updateAskingTeamId = {
-      askingTeam: {
-        disconnect: true,
-      },
-    };
-  }
-
-  return database.user.update({
+export const joinTeam = (teamId: string, user: User, userType?: UserType) =>
+  database.user.update({
     data: {
       team: {
         connect: {
           id: teamId,
         },
       },
-      ...updateAskingTeamId,
+      askingTeam: {
+        disconnect: true,
+      },
+      type: userType ?? undefined,
     },
     where: {
       id: user.id,
     },
   });
-};
 
-export const replaceUser = (user: User, targetUser: User, team: Team) => {
+export const replaceUser = (user: User, targetUser: User, team: Team, userType: UserType) => {
   // Create the first transaction to replace the user
   const transactions: prisma.PrismaPromise<prisma.User | prisma.Team>[] = [
     kickUser(user.id),
-    joinTeam(team.id, targetUser),
+    joinTeam(team.id, targetUser, userType),
   ];
 
   // If he is the captain, change the captain
