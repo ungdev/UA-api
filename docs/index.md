@@ -30,6 +30,7 @@ Bienvenue sur le Wiki de l'UTT Arena. Le but est d'expliquer les choix effectué
 
 ```{toctree}
 :caption: Général
+:maxdepth: 2
 :glob:
 doc_general/getting_started
 doc_general/deadlines
@@ -38,12 +39,14 @@ doc_general/*
 
 ```{toctree}
 :caption: Front
+:maxdepth: 2
 :glob:
 doc_front/*
 ```
 
 ```{toctree}
 :caption: API
+:maxdepth: 2
 :glob:
 doc_api/*
 ```
