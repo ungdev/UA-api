@@ -20,7 +20,7 @@ describe('POST /teams', () => {
   const teamBody = {
     name: 'ZeBest',
     tournamentId: 'lol',
-    captainType: UserType.player,
+    userType: UserType.player,
   };
 
   before(async () => {
@@ -95,7 +95,7 @@ describe('POST /teams', () => {
       .post('/teams')
       .send({
         ...teamBody,
-        captainType: UserType.player,
+        userType: UserType.player,
       })
       .set('Authorization', `Bearer ${token}`)
       .expect(201);
@@ -115,7 +115,7 @@ describe('POST /teams', () => {
       .send({
         ...teamBody,
         name: 'GeoCoaching',
-        captainType: UserType.coach,
+        userType: UserType.coach,
       })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(201);
@@ -151,7 +151,7 @@ describe('POST /teams', () => {
     expect(body.tournamentId).to.be.equal('csgo');
     expect(body.captainId).to.be.equal(newUser.id);
     const remoteUser = await userOperations.fetchUser(body.captainId);
-    expect(remoteUser.type).to.be.equal(teamBody.captainType);
+    expect(remoteUser.type).to.be.equal(teamBody.userType);
 
     // Check if the object was filtered
     expect(body.updatedAt).to.be.undefined;
@@ -174,12 +174,12 @@ describe('POST /teams', () => {
 
     await request(app)
       .post('/teams')
-      .send({ name: 'otherName', tournamentId: teamBody.tournamentId, captainType: teamBody.captainType })
+      .send({ name: 'otherName', tournamentId: teamBody.tournamentId, userType: teamBody.userType })
       .set('Authorization', `Bearer ${otherToken}`)
       .expect(410, { error: Error.TournamentFull });
   });
 
-  it('shall deny orga captain type', async () => {
+  it('should deny orga captain type', async () => {
     const newUser = await createFakeUser();
     const newToken = generateToken(newUser);
 
@@ -187,13 +187,13 @@ describe('POST /teams', () => {
       .post('/teams')
       .send({
         ...teamBody,
-        captainType: UserType.orga,
+        userType: UserType.orga,
       })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(400, { error: Error.InvalidBody });
   });
 
-  it("shall error if captain hasn't chosen a type", async () => {
+  it("should fail if captain hasn't chosen a type", async () => {
     const newUser = await createFakeUser();
     const newToken = generateToken(newUser);
 

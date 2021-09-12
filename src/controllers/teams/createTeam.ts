@@ -17,14 +17,14 @@ export default [
     Joi.object({
       name: validators.teamName.required(),
       tournamentId: validators.tournamentId.required(),
-      captainType: Joi.string().valid(UserType.player, UserType.coach).required(),
+      userType: Joi.string().valid(UserType.player, UserType.coach).required(),
     }),
   ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { name, tournamentId, captainType } = request.body;
+      const { name, tournamentId, userType } = request.body;
 
       const tournament = await fetchTournament(tournamentId);
 
@@ -34,7 +34,7 @@ export default [
       }
 
       try {
-        const team = await createTeam(name, tournamentId, response.locals.user.id, captainType);
+        const team = await createTeam(name, tournamentId, response.locals.user.id, userType);
         return created(response, filterTeam(team));
       } catch (error) {
         // If the email already exists in the database, throw a bad request

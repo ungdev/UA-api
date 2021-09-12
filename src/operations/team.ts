@@ -49,7 +49,7 @@ export const createTeam = async (
   name: string,
   tournamentId: TournamentId,
   captainId: string,
-  captainType: UserType,
+  userType: UserType,
 ): Promise<Team> => {
   // Update the user to create a transaction update (update the user AND create the team)
   await database.user.update({
@@ -68,7 +68,7 @@ export const createTeam = async (
           },
         },
       },
-      type: captainType,
+      type: userType,
     },
 
     where: {
@@ -100,18 +100,18 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
   return formatTeam(team);
 };
 
-export const deleteTeam = async (teamId: string) => {
-  await database.user.updateMany({
-    where: { teamId },
-    data: {
-      type: null,
-      teamId: null,
-    },
-  });
-  return database.team.delete({
-    where: { id: teamId },
-  });
-};
+export const deleteTeam = (teamId: string) =>
+  database.$transaction([
+    database.user.updateMany({
+      where: { teamId },
+      data: {
+        type: null,
+      },
+    }),
+    database.team.delete({
+      where: { id: teamId },
+    }),
+  ]);
 
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
   const updatedUser = await database.user.update({
@@ -175,7 +175,7 @@ export const promoteUser = (teamId: string, newCaptainId: string) =>
     include: teamInclusions,
   });
 
-export const joinTeam = (teamId: string, user: User, userType?: UserType) =>
+export const joinTeam = (teamId: string, user: User, newUserType?: UserType) =>
   database.user.update({
     data: {
       team: {
@@ -186,18 +186,18 @@ export const joinTeam = (teamId: string, user: User, userType?: UserType) =>
       askingTeam: {
         disconnect: true,
       },
-      type: userType ?? undefined,
+      type: newUserType,
     },
     where: {
       id: user.id,
     },
   });
 
-export const replaceUser = (user: User, targetUser: User, team: Team, userType: UserType) => {
+export const replaceUser = (user: User, targetUser: User, team: Team) => {
   // Create the first transaction to replace the user
   const transactions: prisma.PrismaPromise<prisma.User | prisma.Team>[] = [
     kickUser(user.id),
-    joinTeam(team.id, targetUser, userType),
+    joinTeam(team.id, targetUser, user.type),
   ];
 
   // If he is the captain, change the captain

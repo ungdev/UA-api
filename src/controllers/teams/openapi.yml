@@ -69,8 +69,8 @@
               tournamentId:
                 description: Identifiant du tournoi
                 type: integer
-              captainType:
-                description: Le type d'utilisateur du capitaine d'équipe
+              userType:
+                description: Type d'utilisateur
                 type: string
                 enum: [player, coach]
     responses:
@@ -204,13 +204,17 @@
         schema:
           type: string
         required: true
-      - in: query
-        name: userType
-        description: Type d'utilisateur
-        schema:
-          type: string
-          enum: [player, coach]
-        required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userType:
+                description: Type d'utilisateur
+                type: string
+                enum: [player, coach]
     responses:
       200:
         description: La demande a bien été envoyée. Les informations de l'utilisateur sont renvoyées.
