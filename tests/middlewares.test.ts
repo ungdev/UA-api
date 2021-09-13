@@ -72,7 +72,7 @@ describe('Test middlewares', () => {
     });
 
     // This case should never happen. (Authenticated as a not confirmed user (has to login before))
-    it('should tell the user does not exists', async () => {
+    it('should tell the user is not confirmed', async () => {
       const user = await createFakeUser({ confirmed: false });
       const token = generateToken(user);
 

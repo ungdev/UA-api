@@ -45,7 +45,7 @@ describe('POST /auth/login', () => {
       .expect(400, { error: Error.InvalidBody });
   });
 
-  it('should return an error as incorrect credentials', async () => {
+  it('should return an error as incorrect credentials (wrong password)', async () => {
     await request(app)
       .post('/auth/login')
       .send({
@@ -55,7 +55,7 @@ describe('POST /auth/login', () => {
       .expect(401, { error: Error.InvalidCredentials });
   });
 
-  it('should return an error as incorrect credentials', async () => {
+  it('should return an error as incorrect credentials (wrong email)', async () => {
     await request(app)
       .post('/auth/login')
       .send({
