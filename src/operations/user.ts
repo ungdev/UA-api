@@ -48,6 +48,15 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
   return formatUser(user);
 };
 
+export const fetchUserByUsername = async (parameterId: string, key = 'username'): Promise<User> => {
+  const user = await database.user.findUnique({
+    where: { [key]: parameterId },
+    include: userInclusions,
+  });
+
+  return formatUser(user);
+};
+
 export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<UserWithTeam[]> => {
   const users = await database.user.findMany({
     where: {
