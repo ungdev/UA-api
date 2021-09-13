@@ -116,7 +116,7 @@ model User {
   lastname      String
   email         String?    @unique
   password      String?
-  type          UserType
+  type          UserType?
   permissions   String?
   registerToken String?    @unique
   resetToken    String?    @unique

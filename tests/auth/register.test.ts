@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import database from '../../src/services/database';
 import * as userOperations from '../../src/operations/user';
@@ -20,7 +21,6 @@ describe('POST /auth/register', () => {
     lastname: 'Doe',
     email: 'john.doe@test.com',
     password: 'jesuisthomas',
-    type: 'player',
   };
 
   it('should get an error as the login is not allowed', async () => {
@@ -29,16 +29,6 @@ describe('POST /auth/register', () => {
     await request(app).post('/auth/register').send(userData).expect(403, { error: Error.LoginNotAllowed });
 
     await setLoginAllowed(true);
-  });
-
-  it('should be able to register as orga', async () => {
-    await request(app)
-      .post('/auth/register')
-      .send({
-        ...userData,
-        type: 'orga',
-      })
-      .expect(400, { error: Error.InvalidBody });
   });
 
   it('should throw an internal server error', async () => {
@@ -56,6 +46,16 @@ describe('POST /auth/register', () => {
     expect(newUser.registerToken).to.have.lengthOf(6);
   });
 
+  it('should not create users with types', async () => {
+    await request(app)
+      .post('/auth/register')
+      .send({
+        ...userData,
+        type: UserType.visitor,
+      })
+      .expect(400, { error: Error.InvalidBody });
+  });
+
   it('should not create a duplicate user', async () => {
     await request(app).post('/auth/register').send(userData).expect(409, { error: Error.EmailAlreadyExists });
   });
@@ -71,13 +71,6 @@ describe('POST /auth/register', () => {
     await request(app)
       .post('/auth/register')
       .send({ ...userData, email: 'wrong email' })
-      .expect(400, { error: Error.InvalidBody });
-  });
-
-  it('should not accept wrong type', async () => {
-    await request(app)
-      .post('/auth/register')
-      .send({ ...userData, type: 'wrong type' })
       .expect(400, { error: Error.InvalidBody });
   });
 

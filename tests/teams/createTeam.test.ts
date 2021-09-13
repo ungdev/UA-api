@@ -4,10 +4,12 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import * as tournamentOperations from '../../src/operations/tournament';
+import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
 import { Error, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
+import { UserType } from '.prisma/client';
 
 describe('POST /teams', () => {
   let user: User;
@@ -18,6 +20,7 @@ describe('POST /teams', () => {
   const teamBody = {
     name: 'ZeBest',
     tournamentId: 'lol',
+    userType: UserType.player,
   };
 
   before(async () => {
@@ -64,7 +67,7 @@ describe('POST /teams', () => {
   it("should fail because the tournament doesn't exists", async () => {
     await request(app)
       .post('/teams')
-      .send({ name: teamBody.name, tournamentId: 'factorio' })
+      .send({ ...teamBody, tournamentId: 'factorio' })
       .set('Authorization', `Bearer ${token}`)
       .expect(400, { error: Error.InvalidBody });
   });
@@ -87,16 +90,40 @@ describe('POST /teams', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should succesfully create a team', async () => {
+  it('should successfully create a team (as a player)', async () => {
     const response = await request(app)
       .post('/teams')
-      .send(teamBody)
+      .send({
+        ...teamBody,
+        userType: UserType.player,
+      })
       .set('Authorization', `Bearer ${token}`)
       .expect(201);
-
     expect(response.body.name).to.be.equal(teamBody.name);
     expect(response.body.tournamentId).to.be.equal(teamBody.tournamentId);
     expect(response.body.captainId).to.be.equal(user.id);
+    const remoteUser = await userOperations.fetchUser(response.body.captainId);
+    expect(remoteUser.type).to.be.equal(UserType.player);
+  });
+
+  it('should successfully create a team (as a coach)', async () => {
+    const newUser = await createFakeUser();
+    const newToken = generateToken(newUser);
+
+    const response = await request(app)
+      .post('/teams')
+      .send({
+        ...teamBody,
+        name: 'GeoCoaching',
+        userType: UserType.coach,
+      })
+      .set('Authorization', `Bearer ${newToken}`)
+      .expect(201);
+    expect(response.body.name).to.be.equal('GeoCoaching');
+    expect(response.body.tournamentId).to.be.equal(teamBody.tournamentId);
+    expect(response.body.captainId).to.be.equal(newUser.id);
+    const remoteUser = await userOperations.fetchUser(response.body.captainId);
+    expect(remoteUser.type).to.be.equal(UserType.coach);
   });
 
   it('fail to create a team as it already exists in the tournament', async () => {
@@ -116,13 +143,15 @@ describe('POST /teams', () => {
 
     const { body } = await request(app)
       .post('/teams')
-      .send({ name: teamBody.name, tournamentId: 'csgo' })
+      .send({ ...teamBody, tournamentId: 'csgo' })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(201);
 
     expect(body.name).to.be.equal(teamBody.name);
     expect(body.tournamentId).to.be.equal('csgo');
     expect(body.captainId).to.be.equal(newUser.id);
+    const remoteUser = await userOperations.fetchUser(body.captainId);
+    expect(remoteUser.type).to.be.equal(teamBody.userType);
 
     // Check if the object was filtered
     expect(body.updatedAt).to.be.undefined;
@@ -145,8 +174,36 @@ describe('POST /teams', () => {
 
     await request(app)
       .post('/teams')
-      .send({ name: 'otherName', tournamentId: teamBody.tournamentId })
+      .send({ name: 'otherName', tournamentId: teamBody.tournamentId, userType: teamBody.userType })
       .set('Authorization', `Bearer ${otherToken}`)
       .expect(410, { error: Error.TournamentFull });
+  });
+
+  it('should deny orga captain type', async () => {
+    const newUser = await createFakeUser();
+    const newToken = generateToken(newUser);
+
+    await request(app)
+      .post('/teams')
+      .send({
+        ...teamBody,
+        userType: UserType.orga,
+      })
+      .set('Authorization', `Bearer ${newToken}`)
+      .expect(400, { error: Error.InvalidBody });
+  });
+
+  it("should fail if captain hasn't chosen a type", async () => {
+    const newUser = await createFakeUser();
+    const newToken = generateToken(newUser);
+
+    await request(app)
+      .post('/teams')
+      .send({
+        name: teamBody.name,
+        tournamentId: teamBody.tournamentId,
+      })
+      .set('Authorization', `Bearer ${newToken}`)
+      .expect(400, { error: Error.InvalidBody });
   });
 });

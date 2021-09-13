@@ -138,9 +138,11 @@ describe('POST /admin/users/:userId/replace', () => {
 
     expect(body.replacedUser.id).to.be.equal(user.id);
     expect(body.replacedUser.teamId).to.be.null;
+    expect(body.replacedUser.type).to.be.null;
 
     expect(body.replacingUser.id).to.be.equal(targetUser.id);
     expect(body.replacingUser.teamId).to.be.equal(team.id);
+    expect(body.replacingUser.type).to.be.equal(user.type);
 
     expect(updatedTeam.captainId).to.be.equal(body.replacingUser.id);
   });
