@@ -1,9 +1,10 @@
 import prisma, { TournamentId } from '@prisma/client';
 import database from '../services/database';
 import { Tournament } from '../types';
+import { filterTeamPublic } from '../utils/filters';
 import { fetchTeams } from './team';
 
-export const formatTournament = async (tournament: prisma.Tournament): Promise<Tournament> => {
+export const formatTournament = async (tournament: prisma.Tournament) => {
   if (!tournament) return null;
 
   const lockedTeamsCount = await database.team.count({
@@ -26,19 +27,18 @@ export const formatTournament = async (tournament: prisma.Tournament): Promise<T
   return {
     ...tournament,
     lockedTeamsCount,
-    teams,
+    teams: teams.map(filterTeamPublic),
     placesLeft,
-
   };
 };
 
-export const fetchTournament = async (id: TournamentId): Promise<Tournament> => {
+export const fetchTournament = async (id: TournamentId) => {
   const tournament = await database.tournament.findUnique({ where: { id } });
 
   return formatTournament(tournament);
 };
 
-export const fetchTournaments = async (): Promise<Tournament[]> => {
+export const fetchTournaments = async () => {
   // fetch all tournaments
   const tournaments = await database.tournament.findMany();
 

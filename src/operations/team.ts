@@ -28,13 +28,13 @@ export const formatTeam = (team: prisma.Team & { users: PrimitiveUser[]; askingU
   };
 };
 
-export const fetchTeam = async (id: string): Promise<Team> => {
+export const fetchTeam = async (id: string) => {
   const team = await database.team.findUnique({ where: { id }, include: teamInclusions });
 
   return formatTeam(team);
 };
 
-export const fetchTeams = async (tournamentId: TournamentId): Promise<Team[]> => {
+export const fetchTeams = async (tournamentId: TournamentId) => {
   const teams = await database.team.findMany({
     where: {
       tournamentId,
