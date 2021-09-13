@@ -84,7 +84,7 @@ export const createUser = async (
   lastname: string,
   email: string,
   password: string,
-  type: UserType,
+  type?: UserType,
 ) => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
   const hashedPassword = await userOperations.hash(password, salt);
