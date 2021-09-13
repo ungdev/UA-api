@@ -14,8 +14,8 @@ export default [
   validateBody(
     Joi.object({
       type: validators.type,
-      permissions: Joi.array().required().items(validators.permission.optional()),
-      place: validators.place.required(),
+      permissions: Joi.array().optional().items(validators.permission.optional()),
+      place: validators.place.optional(),
     }),
   ),
 

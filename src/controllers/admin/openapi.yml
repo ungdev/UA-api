@@ -215,7 +215,7 @@
         $ref: '#/components/responses/403Unauthorized'
 
 /admin/users/{userId}:
-  put:
+  patch:
     summary: Modifie les informations d'un utilisateur
     description: Modifie les informations d'un utilisateur.<br/>
       **Permission 'admin' requise.**
@@ -241,11 +241,14 @@
                 type: array
                 items:
                   $ref: '#/components/schemas/Permission'
+                nullable: true
               place:
                 type: string
                 example: A23
+                nullable: true
               type:
                 $ref: '#/components/schemas/Type'
+                nullable: true
     responses:
       200:
         description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.
