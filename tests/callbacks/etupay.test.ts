@@ -1,3 +1,6 @@
+/* eslint-disable mocha/max-top-level-suites */
+// Disable eslint mocha/max-top-level-suites because the etupay.ts contains two controllers
+
 import crypto from 'crypto';
 import request from 'supertest';
 import app from '../../src/app';

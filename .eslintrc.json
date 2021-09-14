@@ -14,7 +14,7 @@
     "plugin:security/recommended"
   ],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "prettier", "unicorn", "security"],
+  "plugins": ["@typescript-eslint", "prettier", "unicorn", "security", "mocha"],
   "parserOptions": {
     "ecmaVersion": 2018,
     "sourceType": "module"
@@ -88,8 +88,17 @@
   "overrides": [
     {
       "files": "tests/**/*.test.ts",
+      "extends": "plugin:mocha/recommended",
       "rules": {
-        "no-unused-expressions": "off"
+        // We don't care now about mocha context.
+        // See more on https://github.com/lo1tuma/eslint-plugin-mocha/blob/master/docs/rules/no-mocha-arrows.md
+        "mocha/no-mocha-arrows": "off",
+        "no-unused-expressions": "off",
+        "mocha/no-setup-in-describe": "off",
+
+        // Setup inclusive and exclusive tests to error to avoid the CI to be skipped
+        "mocha/no-exclusive-tests": "error",
+        "mocha/no-skipped-tests": "error"
       }
     }
   ]
