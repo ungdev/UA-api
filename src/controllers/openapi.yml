@@ -149,7 +149,8 @@ components:
         name:
           type: string
         tournamentId:
-          type: integer
+          type: string
+          example: lol-pro
         captainId:
           type: string
           example: XiHGta
