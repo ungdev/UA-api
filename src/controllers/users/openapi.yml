@@ -1,4 +1,4 @@
-/users:
+/users/search?query:
   get:
     summary: Renvoie les informations minimales d'un utilisateur
     description: Renvoie les informations minimales d'un utilisateur.
