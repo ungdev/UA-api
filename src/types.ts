@@ -119,7 +119,7 @@ export type Tournament = prisma.Tournament & {
   lockedTeamsCount: number;
   placesLeft: number;
   teams: Team[];
-}
+};
 
 /************/
 /** Etupay **/

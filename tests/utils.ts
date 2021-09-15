@@ -4,6 +4,7 @@ import { createUser, fetchUser, removeUserRegisterToken, setPermissions } from '
 import { Permission, User } from '../src/types';
 import { createTeam, fetchTeam, joinTeam, lockTeam } from '../src/operations/team';
 import { forcePay } from '../src/operations/carts';
+import logger from '../src/utils/logger';
 
 export const createFakeUser = async ({
   username = faker.internet.userName(),
@@ -27,6 +28,7 @@ export const createFakeUser = async ({
   permission?: Permission;
 } = {}): Promise<User> => {
   const user: prisma.User = await createUser(username, firstname, lastname, email, password, type);
+  logger.verbose(`Created user ${user.username}`);
 
   if (confirmed) {
     await removeUserRegisterToken(user.id);
@@ -58,6 +60,7 @@ export const createFakeTeam = async ({
 } = {}) => {
   const user = await createFakeUser({ paid });
   const team = await createTeam(name || faker.internet.userName(), tournament, user.id, UserType.player);
+  logger.verbose(`Created team ${team.name}`);
 
   if (locked) {
     await lockTeam(team.id);

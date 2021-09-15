@@ -92,7 +92,6 @@ describe('PATCH /admin/users/:userId', () => {
     expect(body.place).to.be.equal(updatedUser.place);
   });
 
-
   it('should work if body is incomplete', async () => {
     const { body } = await request(app)
       .patch(`/admin/users/${user.id}`)

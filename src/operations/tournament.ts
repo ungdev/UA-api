@@ -1,7 +1,5 @@
 import prisma, { TournamentId } from '@prisma/client';
 import database from '../services/database';
-import { Tournament } from '../types';
-import { filterTeamPublic } from '../utils/filters';
 import { fetchTeams } from './team';
 
 export const formatTournament = async (tournament: prisma.Tournament) => {
@@ -27,7 +25,7 @@ export const formatTournament = async (tournament: prisma.Tournament) => {
   return {
     ...tournament,
     lockedTeamsCount,
-    teams: teams.map(filterTeamPublic),
+    teams,
     placesLeft,
   };
 };
