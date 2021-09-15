@@ -13,7 +13,7 @@ export default [
   ...hasPermission(Permission.admin),
   validateBody(
     Joi.object({
-      type: validators.type,
+      type: validators.type.optional(),
       permissions: Joi.array().optional().items(validators.permission.optional()),
       place: validators.place.optional(),
     }),

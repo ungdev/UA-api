@@ -38,16 +38,6 @@ describe('PATCH /admin/users/:userId', () => {
     await database.user.deleteMany();
   });
 
-  it('should work if body is incomplete', () =>
-    request(app)
-      .patch(`/admin/users/${user.id}`)
-      .send({
-        type: 'player',
-        permissions: [],
-      })
-      .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200));
-
   it('should error as the user is not authenticated', () =>
     request(app).patch(`/admin/users/${user.id}`).send(validBody).expect(401, { error: Error.Unauthenticated }));
 
@@ -100,6 +90,20 @@ describe('PATCH /admin/users/:userId', () => {
 
     expect(body.type).to.be.equal(updatedUser.type);
     expect(body.place).to.be.equal(updatedUser.place);
+  });
+
+
+  it('should work if body is incomplete', async () => {
+    const { body } = await request(app)
+      .patch(`/admin/users/${user.id}`)
+      .send({
+        type: 'player',
+        permissions: [],
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.place).to.be.equal(validBody.place);
   });
 
   it('should fail as the user has already paid and wants to change its type', async () => {
