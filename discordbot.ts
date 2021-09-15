@@ -1,80 +1,69 @@
 import discord from 'discord.js';
-import config from './botconfig.json';
 import { TournamentId } from '.prisma/client';
 import { fetchTournaments, fetchTournament } from './src/operations/tournament';
 import { fetchTeams } from './src/operations/team';
+import env from './src/utils/env';
 
 const bot = new discord.Client();
-const serverid = '885899085452816384';
 
-function createChannel(cname: string, ctype: ChannelType, gameId: TournamentId) {
-  const server = bot.guilds.cache.get(serverid);
-  server.channels
-    .create(cname, {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      type: ctype as any,
-    })
-    .then(async (channel) => {
-      const catID = (await fetchTournament(gameId)).id;
-      await channel.setParent(catID);
-      Promise.all([
-        channel.createOverwrite(channel.guild.roles.everyone, {
-          VIEW_CHANNEL: false,
-        }),
-        channel.createOverwrite(
-          channel.guild.roles.cache.find((r) => r.name === cname),
-          {
-            VIEW_CHANNEL: true,
-          },
-        ),
-      ]);
-    });
+async function createChannel(channelName: string, channelType: ChannelType, tournamentId: TournamentId) {
+  const server = bot.guilds.cache.get(env.discord.server);
+  const channel = await server.channels.create(channelName, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type: channelType as any,
+  });
+
+  const categoryId = (await fetchTournament(tournamentId)).discordCategoryId;
+  await channel.setParent(categoryId);
+  Promise.all([
+    channel.createOverwrite(channel.guild.roles.everyone, {
+      VIEW_CHANNEL: false,
+    }),
+    channel.createOverwrite(
+      channel.guild.roles.cache.find((r) => r.name === channelName),
+      {
+        VIEW_CHANNEL: true,
+      },
+    ),
+  ]);
 }
 
-function createRole(tname: string) {
-  const server = bot.guilds.cache.get(serverid);
+function createRole(teamName: string) {
+  const server = bot.guilds.cache.get(env.discord.server);
   server.roles.create({
     data: {
-      name: tname,
+      name: teamName,
       color: 'FFEBAB',
     },
   });
 }
 
-export function setupTeam(team: string, gameId: TournamentId) {
+export function setupTeam(team: string, tournamentId: TournamentId) {
   Promise.all([
     createRole(team),
-    createChannel(team, ('text' as unknown) as ChannelType, gameId),
-    createChannel(team, ('voice' as unknown) as ChannelType, gameId),
+    createChannel(team, ('text' as unknown) as ChannelType, tournamentId),
+    createChannel(team, ('voice' as unknown) as ChannelType, tournamentId),
   ]);
 }
 
-bot.on('ready', async () => {
-  const server = bot.guilds.cache.get(serverid);
+export async function syncRoles() {
+  const server = bot.guilds.cache.get(env.discord.server);
+
   for (const game of await fetchTournaments()) {
-    const gamerole = server.roles.cache.find((role) => role.id === game.discordRoleId);
+    const tournamentRole = server.roles.cache.find((role) => role.id === game.discordRoleId);
+
     for (const team of await fetchTeams(game.id)) {
       if (team.lockedAt !== null) {
-        const teamrole = server.roles.cache.find((role) => role.name === team.name);
+        const teamRole = server.roles.cache.find((role) => role.name === team.name);
+
         for (const player of team.players) {
-          // Do thing
-          // fetch player on the discord server
-          const member = server.members.fetch(player.discordId);
-          // test if the player has roles
-          // if not, give the roles to the player
-          (await member).roles.add(gamerole);
-          (await member).roles.add(teamrole);
+          const member = await server.members.fetch(player.discordId);
+          member.roles.add(tournamentRole);
+          member.roles.add(teamRole);
         }
       }
     }
   }
-});
-
-export function syncRoles() {
-  // Get locked teams
-  // Loop all locked teams and loop all players in the teams
-  // Test if player doesn't have roles
-  // Give the player the team role and the game role
 }
 
-bot.login(config.token);
+bot.login(env.discord.token);

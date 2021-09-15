@@ -103,9 +103,7 @@ model Tournament {
   teams                  Team[]
 
   discordRoleId          String?
-  discordStaffRoleId     String?
-  discordVocalCategoryId String?
-  discordTextCategoryId  String?
+  discordCategoryId      String?
 
   @@map("tournaments")
 }
