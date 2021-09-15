@@ -9,7 +9,7 @@ import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { forcePay } from '../../../src/operations/carts';
 
-describe('PUT /admin/users/:userId', () => {
+describe('PATCH /admin/users/:userId', () => {
   let user: User;
   let admin: User;
   let adminToken: string;
@@ -39,11 +39,11 @@ describe('PUT /admin/users/:userId', () => {
   });
 
   it('should error as the user is not authenticated', () =>
-    request(app).put(`/admin/users/${user.id}`).send(validBody).expect(401, { error: Error.Unauthenticated }));
+    request(app).patch(`/admin/users/${user.id}`).send(validBody).expect(401, { error: Error.Unauthenticated }));
 
   it('should error as the body is invalid', () =>
     request(app)
-      .put(`/admin/users/${user.id}`)
+      .patch(`/admin/users/${user.id}`)
       .send({ ...validBody, permissions: ['bonjour'] })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(400, { error: Error.InvalidBody }));
@@ -51,7 +51,7 @@ describe('PUT /admin/users/:userId', () => {
   it('should error as the user is not an administrator', () => {
     const userToken = generateToken(user);
     return request(app)
-      .put(`/admin/users/${user.id}`)
+      .patch(`/admin/users/${user.id}`)
       .set('Authorization', `Bearer ${userToken}`)
       .send(validBody)
       .expect(403, { error: Error.NoPermission });
@@ -59,7 +59,7 @@ describe('PUT /admin/users/:userId', () => {
 
   it('should error as the user is not found', () =>
     request(app)
-      .put('/admin/users/A12B3C')
+      .patch('/admin/users/A12B3C')
       .set('Authorization', `Bearer ${adminToken}`)
       .send(validBody)
       .expect(404, { error: Error.UserNotFound }));
@@ -70,7 +70,7 @@ describe('PUT /admin/users/:userId', () => {
 
     // Request to login
     await request(app)
-      .put(`/admin/users/${user.id}`)
+      .patch(`/admin/users/${user.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send(validBody)
       .expect(500, { error: Error.InternalServerError });
@@ -78,7 +78,7 @@ describe('PUT /admin/users/:userId', () => {
 
   it('should update the user', async () => {
     const { body } = await request(app)
-      .put(`/admin/users/${user.id}`)
+      .patch(`/admin/users/${user.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send(validBody)
       .expect(200);
@@ -92,10 +92,24 @@ describe('PUT /admin/users/:userId', () => {
     expect(body.place).to.be.equal(updatedUser.place);
   });
 
+
+  it('should work if body is incomplete', async () => {
+    const { body } = await request(app)
+      .patch(`/admin/users/${user.id}`)
+      .send({
+        type: 'player',
+        permissions: [],
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.place).to.be.equal(validBody.place);
+  });
+
   it('should fail as the user has already paid and wants to change its type', async () => {
     await forcePay(user);
     await request(app)
-      .put(`/admin/users/${user.id}`)
+      .patch(`/admin/users/${user.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ ...validBody, type: 'coach' })
       .expect(403, { error: Error.CannotChangeType });
