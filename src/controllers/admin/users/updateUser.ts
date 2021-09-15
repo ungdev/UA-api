@@ -13,9 +13,9 @@ export default [
   ...hasPermission(Permission.admin),
   validateBody(
     Joi.object({
-      type: validators.type,
-      permissions: Joi.array().required().items(validators.permission.optional()),
-      place: validators.place.required(),
+      type: validators.type.optional(),
+      permissions: Joi.array().optional().items(validators.permission.optional()),
+      place: validators.place.optional(),
     }),
   ),
 
