@@ -85,6 +85,7 @@
   "scripts": {
     "postinstall": "husky install",
     "dev": "ts-node-dev --no-notify --exit-child src/server.ts",
+    "fake": "ts-node tests/fake.ts",
     "build": "tsc",
     "postbuild": "cpy '**/*.yml' ../build --cwd=src/ --parents",
     "start": "node build/server.js",

@@ -68,6 +68,7 @@ yarn build     # builds the typescript to javascript
 yarn start     # start production server
 yarn lint      # checks if the code is correct
 yarn lint-fix  # try to fix lint errors and warnings
+yarn fake      # populate the database with fake data
 ```
 
 ## Prisma config
