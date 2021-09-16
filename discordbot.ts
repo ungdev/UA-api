@@ -70,4 +70,8 @@ export async function syncRoles() {
   }
 }
 
+export async function clearRoles(playerId: String) {
+  // Clear roles of player
+}
+
 bot.login(env.discord.token);
