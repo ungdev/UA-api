@@ -6,7 +6,11 @@ import env from './src/utils/env';
 
 const bot = new discord.Client();
 
-async function createChannel(channelName: string, channelType: ChannelType, tournamentId: TournamentId) {
+async function createChannel(
+  channelName: string,
+  channelType: ChannelType | keyof typeof ChannelType,
+  tournamentId: TournamentId,
+) {
   const server = bot.guilds.cache.get(env.discord.server);
   const channel = await server.channels.create(channelName, {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,8 +45,8 @@ function createRole(teamName: string) {
 export function setupTeam(team: string, tournamentId: TournamentId) {
   Promise.all([
     createRole(team),
-    createChannel(team, ('text' as unknown) as ChannelType, tournamentId),
-    createChannel(team, ('voice' as unknown) as ChannelType, tournamentId),
+    createChannel(team, 'text', tournamentId),
+    createChannel(team, 'voice', tournamentId),
   ]);
 }
 
