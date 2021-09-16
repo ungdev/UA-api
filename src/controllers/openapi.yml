@@ -72,7 +72,8 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          example: lol-pro
         name:
           type: string
         shortName:

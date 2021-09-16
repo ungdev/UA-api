@@ -13,6 +13,8 @@ import { createFakeTeam, createFakeUser } from './utils';
     throw new Error("Can't execute this command in production");
   }
 
+  const defaultPassword = 'uttarena';
+
   // Delete the data to make the command idempotent
   await database.cartItem.deleteMany();
   await database.cart.deleteMany();
@@ -27,42 +29,56 @@ import { createFakeTeam, createFakeUser } from './utils';
     tournaments.map(async (tournament) => {
       // Create a fake team of 0 member, 1 member, 2...
       for (let players = 0; players <= tournament.playersPerTeam; players += 1) {
-        await createFakeTeam({ members: players, locked: false, tournament: tournament.id });
+        await createFakeTeam({
+          members: players,
+          locked: false,
+          tournament: tournament.id,
+          userPassword: defaultPassword,
+        });
       }
 
       // Create a locked team
-      await createFakeTeam({ members: tournament.playersPerTeam, locked: true, tournament: tournament.id });
+      await createFakeTeam({
+        members: tournament.playersPerTeam,
+        locked: true,
+        tournament: tournament.id,
+        userPassword: defaultPassword,
+      });
 
       // Create a team with coaches
-      const teamWithCoaches = await createFakeTeam({ members: tournament.playersPerTeam, tournament: tournament.id });
-      const coach = await createFakeUser({ type: UserType.coach });
+      const teamWithCoaches = await createFakeTeam({
+        members: tournament.playersPerTeam,
+        tournament: tournament.id,
+        userPassword: defaultPassword,
+      });
+      const coach = await createFakeUser({ type: UserType.coach, password: defaultPassword });
       await joinTeam(teamWithCoaches.id, coach);
     }),
   );
 
   // Create 10 users without team and 30 orgas
   for (let standAloneUser = 0; standAloneUser < 10; standAloneUser += 1) {
-    await createFakeUser({ type: null });
+    await createFakeUser({ type: null, password: defaultPassword });
   }
 
   // Add fake users (with sufficient length to be allowed in the database)
   await createFakeUser({
     username: 'ua_admin',
-    password: 'ua_admin',
+    password: defaultPassword,
     email: 'admin@ua.fr',
     type: UserType.orga,
     permission: Permission.admin,
   });
   await createFakeUser({
     username: 'ua_entry',
-    password: 'ua_entry',
+    password: defaultPassword,
     email: 'entry@ua.fr',
     type: UserType.orga,
     permission: Permission.entry,
   });
   await createFakeUser({
     username: 'ua_anim',
-    password: 'ua_anim',
+    password: defaultPassword,
     email: 'anim@ua.fr',
     type: UserType.orga,
     permission: Permission.anim,

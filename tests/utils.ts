@@ -51,14 +51,16 @@ export const createFakeTeam = async ({
   paid = false,
   locked = false,
   name,
+  userPassword,
 }: {
   members?: number;
   tournament?: TournamentId;
   paid?: boolean;
   locked?: boolean;
   name?: string;
+  userPassword?: string;
 } = {}) => {
-  const user = await createFakeUser({ paid });
+  const user = await createFakeUser({ paid, password: userPassword || faker.internet.password() });
   const team = await createTeam(name || faker.internet.userName(), tournament, user.id, UserType.player);
   logger.verbose(`Created team ${team.name}`);
 
