@@ -68,7 +68,8 @@
                 type: string
               tournamentId:
                 description: Identifiant du tournoi
-                type: integer
+                type: string
+                example: lol-pro
               userType:
                 description: Type d'utilisateur
                 type: string

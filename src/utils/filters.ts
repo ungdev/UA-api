@@ -1,7 +1,7 @@
 import { pick } from 'lodash';
 import { CartItem, CartWithCartItems, Item, Team, Tournament, User, UserWithTeam } from '../types';
 
-export const filterUserRestricted = (user: User) => pick(user, ['id', 'type']);
+export const filterUserRestricted = (user: User) => pick(user, ['id', 'username', 'type', 'hasPaid']);
 
 export const filterUser = (user: User) =>
   pick(user, [
@@ -59,12 +59,30 @@ export const filterTeam = (team: Team) => {
   };
 };
 
-export const filterTeamPublic = (team: Team) => {
+export const filterTeamRestricted = (team: Team) => {
   const filteredTeam = pick(team, ['id', 'name', 'tournamentId', 'captainId', 'lockedAt']);
 
   return {
     ...filteredTeam,
-    players: team.players.map(filterUser),
-    coaches: team.coaches.map(filterUser),
+    players: team.players.map(filterUserRestricted),
+    coaches: team.coaches.map(filterUserRestricted),
+  };
+};
+
+export const filterTournamentRestricted = (tournament: Tournament) => {
+  const filteredTournament = pick(
+    tournament,
+    'id',
+    'name',
+    'shortName',
+    'maxPlayers',
+    'playersPerTeam',
+    'lockedTeamsCount',
+    'placesLeft',
+  );
+
+  return {
+    ...filteredTournament,
+    teams: tournament.teams.map(filterTeamRestricted),
   };
 };

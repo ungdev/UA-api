@@ -92,7 +92,8 @@
                 type: boolean
                 description: Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non
               tournamentId:
-                type: integer
+                type: string
+                example: lol-pro
                 description: |-
                   Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.
                   Le champ 'locked' doit être non nul.

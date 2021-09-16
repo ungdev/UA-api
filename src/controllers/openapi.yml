@@ -72,7 +72,8 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          example: lol-pro
         name:
           type: string
         shortName:
@@ -85,6 +86,9 @@ components:
           example: 5
         lockedTeamsCount:
           type: integer
+        placesLeft:
+          type: integer
+          example: 5
 
     UserRestricted:
       type: object
@@ -149,7 +153,8 @@ components:
         name:
           type: string
         tournamentId:
-          type: integer
+          type: string
+          example: lol-pro
         captainId:
           type: string
           example: XiHGta
