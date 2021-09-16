@@ -1,11 +1,18 @@
 import { UserType } from '.prisma/client';
 import { joinTeam } from '../src/operations/team';
 import { fetchTournaments } from '../src/operations/tournament';
+import * as settings from '../src/operations/settings';
 import database from '../src/services/database';
 import { Permission } from '../src/types';
+import env from '../src/utils/env';
 import { createFakeTeam, createFakeUser } from './utils';
 
 (async () => {
+  // Reject the usage in production
+  if (env.production) {
+    throw new Error("Can't execute this command in production");
+  }
+
   // Delete the data to make the command idempotent
   await database.cartItem.deleteMany();
   await database.cart.deleteMany();
@@ -36,10 +43,34 @@ import { createFakeTeam, createFakeUser } from './utils';
   // Create 10 users without team and 30 orgas
   for (let standAloneUser = 0; standAloneUser < 10; standAloneUser += 1) {
     await createFakeUser({ type: null });
-    await createFakeUser({ type: UserType.orga, permission: Permission.admin });
-    await createFakeUser({ type: UserType.orga, permission: Permission.entry });
-    await createFakeUser({ type: UserType.orga, permission: Permission.anim });
   }
+
+  // Add fake users (with sufficient length to be allowed in the database)
+  await createFakeUser({
+    username: 'ua_admin',
+    password: 'ua_admin',
+    email: 'admin@ua.fr',
+    type: UserType.orga,
+    permission: Permission.admin,
+  });
+  await createFakeUser({
+    username: 'ua_entry',
+    password: 'ua_entry',
+    email: 'entry@ua.fr',
+    type: UserType.orga,
+    permission: Permission.entry,
+  });
+  await createFakeUser({
+    username: 'ua_anim',
+    password: 'ua_anim',
+    email: 'anim@ua.fr',
+    type: UserType.orga,
+    permission: Permission.anim,
+  });
+
+  // Set login and shop to allowed
+  await settings.setLoginAllowed(true);
+  await settings.setShopAllowed(true);
 
   await database.$disconnect();
 })();

@@ -85,6 +85,9 @@ components:
           example: 5
         lockedTeamsCount:
           type: integer
+        placesLeft:
+          type: integer
+          example: 5
 
     UserRestricted:
       type: object
