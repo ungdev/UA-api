@@ -6,6 +6,7 @@ import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
 import { filterTeam } from '../../utils/filters';
 import { getRequestInfo } from '../../utils/users';
+import { syncRoles } from '../../../discordbot';
 
 export default [
   // Middlewares
@@ -34,6 +35,8 @@ export default [
       }
 
       const lockedTeam = await lockTeam(team.id);
+
+      syncRoles();
 
       return success(response, filterTeam(lockedTeam));
     } catch (error) {
