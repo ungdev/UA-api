@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import Joi, { ValidationError } from 'joi';
+import Joi from 'joi';
 import bcrpyt from 'bcryptjs';
 import { UserType } from '@prisma/client';
 import { isNotAuthenticated } from '../../middlewares/authentication';
@@ -10,8 +10,6 @@ import { generateToken } from '../../utils/users';
 import { Error } from '../../types';
 import { fetchUser } from '../../operations/user';
 import * as validators from '../../utils/validators';
-import { ValidationResult } from 'joi/lib';
-import { isUndefined } from 'lodash';
 
 export default [
   // Middlewares
