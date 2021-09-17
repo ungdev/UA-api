@@ -111,6 +111,21 @@ describe('POST /auth/login', () => {
     authorizationToken = response.body.token;
   });
 
+  it('should validate the login even with a username', async () => {
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        email: user.username,
+        password,
+      })
+      .expect(200);
+
+    expect(response.body.user).to.be.an('object');
+    expect(response.body.token).to.be.a('string');
+
+    authorizationToken = response.body.token;
+  });
+
   it('should return a bad request because we are already authenticated', async () => {
     await request(app)
       .post('/auth/login')

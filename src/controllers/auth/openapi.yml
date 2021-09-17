@@ -15,7 +15,7 @@
             properties:
               email:
                 type: string
-                description: Adresse mail de l'utilisateur cible
+                description: Adresse mail ou username de l'utilisateur cible
               password:
                 type: string
                 description: Mot de passe de l'utilisateur cible

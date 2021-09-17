@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import Joi from 'joi';
+import Joi, { ValidationError } from 'joi';
 import bcrpyt from 'bcryptjs';
 import { UserType } from '@prisma/client';
 import { isNotAuthenticated } from '../../middlewares/authentication';
@@ -10,13 +10,15 @@ import { generateToken } from '../../utils/users';
 import { Error } from '../../types';
 import { fetchUser } from '../../operations/user';
 import * as validators from '../../utils/validators';
+import { ValidationResult } from 'joi/lib';
+import { isUndefined } from 'lodash';
 
 export default [
   // Middlewares
   ...isNotAuthenticated,
   validateBody(
     Joi.object({
-      email: validators.email.required(),
+      email: Joi.string().required(),
       password: validators.password.required(),
     }),
   ),
@@ -26,8 +28,17 @@ export default [
     try {
       const { email, password } = request.body;
 
-      // Fetch the user
-      const user = await fetchUser(email, 'email');
+      // Fetch the user depending on the email or the username
+      let field;
+      if(validators.email.validate(email).error){
+        field = 'email';
+      }else if(validators.username.validate(password).error){
+        field = 'username';
+      }else{
+        return unauthenticated(response, Error.InvalidCredentials);
+      }
+
+      const user = await fetchUser(email, field);
 
       // Checks if the user exists
       if (!user) {
