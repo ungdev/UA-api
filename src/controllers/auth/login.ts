@@ -30,9 +30,9 @@ export default [
 
       // Fetch the user depending on the email or the username
       let field;
-      if(validators.email.validate(email).error){
+      if(!validators.email.validate(email).error){
         field = 'email';
-      }else if(validators.username.validate(password).error){
+      }else if(!validators.username.validate(password).error){
         field = 'username';
       }else{
         return unauthenticated(response, Error.InvalidCredentials);
