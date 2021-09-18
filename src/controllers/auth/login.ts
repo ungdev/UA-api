@@ -5,7 +5,7 @@ import { UserType } from '@prisma/client';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { validateBody } from '../../middlewares/validation';
 import { filterUser } from '../../utils/filters';
-import { forbidden, success, unauthenticated, conflict } from '../../utils/responses';
+import { forbidden, success, unauthenticated } from '../../utils/responses';
 import { generateToken } from '../../utils/users';
 import { Error } from '../../types';
 import { fetchUser } from '../../operations/user';
@@ -28,11 +28,11 @@ export default [
 
       // Fetch the user depending on the email or the username
       let field;
-      if(!validators.email.validate(login).error){
+      if (!validators.email.validate(login).error) {
         field = 'email';
-      }else if(!validators.username.validate(login).error){
+      } else if (!validators.username.validate(login).error) {
         field = 'username';
-      }else{
+      } else {
         return unauthenticated(response, Error.InvalidCredentials);
       }
 
