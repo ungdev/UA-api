@@ -83,7 +83,7 @@ describe('POST /auth/reset-password/:uuid', () => {
     const response = await request(app)
       .post('/auth/login')
       .send({
-        email: user.email,
+        login: user.email,
         password: 'validPassword',
       })
       .expect(200);
