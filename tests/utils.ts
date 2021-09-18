@@ -6,8 +6,21 @@ import { createTeam, fetchTeam, joinTeam, lockTeam } from '../src/operations/tea
 import { forcePay } from '../src/operations/carts';
 import logger from '../src/utils/logger';
 
+/**
+ * Generate a fake username without dots, as it is prohibited in the validators
+ */
+export const generateFakerUsername = () => {
+  let username: string;
+
+  do {
+    username = faker.internet.userName();
+  } while (username.includes('.'));
+
+  return username;
+};
+
 export const createFakeUser = async ({
-  username = faker.internet.userName(),
+  username = generateFakerUsername(),
   firstname = faker.name.firstName(),
   lastname = faker.name.lastName(),
   email = faker.internet.email(),
