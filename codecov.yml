@@ -4,3 +4,6 @@ coverage:
   range: '90...95'
   status:
     patch: off # Disable codecov patches because only the global project coverage matters
+    project:
+      default:
+        target: 95%
