@@ -46,11 +46,11 @@ const createEtupayPayload = (etupayBody: object) => {
   });
 };
 
-describe('POST /callbacks/etupay', () => {
-  it('should return a valid answer', () => request(app).post('/callbacks/etupay').expect(200, { api: 'ok' }));
+describe('POST /etupay/callback', () => {
+  it('should return a valid answer', () => request(app).post('/etupay/callback').expect(200, { api: 'ok' }));
 });
 
-describe('GET /callbacks/etupay', () => {
+describe('GET /etupay/callback', () => {
   let cart: Cart;
   let paidPayload: string;
   let refusedPayload: string;
@@ -93,10 +93,10 @@ describe('GET /callbacks/etupay', () => {
   });
 
   it('should fail because the payload is missing', () =>
-    request(app).get('/callbacks/etupay').expect(400, { error: Error.InvalidQueryParameters }));
+    request(app).get('/etupay/callback').expect(400, { error: Error.InvalidQueryParameters }));
 
   it('should fail because the payload is invalid', () =>
-    request(app).get('/callbacks/etupay?payload=invalidPayload').expect(400, { error: Error.InvalidQueryParameters }));
+    request(app).get('/etupay/callback?payload=invalidPayload').expect(400, { error: Error.InvalidQueryParameters }));
 
   it("should fail because the cart wasn't found", async () => {
     // Update the cart id to make him not found
@@ -107,7 +107,7 @@ describe('GET /callbacks/etupay', () => {
       where: { id: cart.id },
     });
 
-    await request(app).get(`/callbacks/etupay?payload=${paidPayload}`).expect(404, { error: Error.CartNotFound });
+    await request(app).get(`/etupay/callback?payload=${paidPayload}`).expect(404, { error: Error.CartNotFound });
 
     // Reupdate the cart to make him having the previous id
     await database.cart.update({
@@ -118,30 +118,25 @@ describe('GET /callbacks/etupay', () => {
 
   it('should return an internal server error', async () => {
     sandbox.stub(cartOperations, 'fetchCart').throws('Unexpected error');
-    await request(app)
-      .get(`/callbacks/etupay?payload=${paidPayload}`)
-      .expect(500, { error: Error.InternalServerError });
+    await request(app).get(`/etupay/callback?payload=${paidPayload}`).expect(500, { error: Error.InternalServerError });
   });
 
   it('should redirect to the error URL as the payment was rejected', () =>
-    request(app)
-      .get(`/callbacks/etupay?payload=${refusedPayload}`)
-      .expect(302)
-      .expect('Location', env.etupay.errorUrl));
+    request(app).get(`/etupay/callback?payload=${refusedPayload}`).expect(302).expect('Location', env.etupay.errorUrl));
 
   it('should reject as the payment is already errored', () =>
-    request(app).get(`/callbacks/etupay?payload=${refusedPayload}`).expect(403, { error: Error.AlreadyErrored }));
+    request(app).get(`/etupay/callback?payload=${refusedPayload}`).expect(403, { error: Error.AlreadyErrored }));
 
   it('should successfully redirect to the success url', () => {
     // The function send email has been tested by a test unit. We skip it to not having to setup a fake SMTP server
     sandbox.stub(emailOperations, 'sendEmail').resolves();
 
     return request(app)
-      .get(`/callbacks/etupay?payload=${paidPayload}`)
+      .get(`/etupay/callback?payload=${paidPayload}`)
       .expect(302)
       .expect('Location', env.etupay.successUrl);
   });
 
   it('should fail as the cart is already paid', () =>
-    request(app).get(`/callbacks/etupay?payload=${paidPayload}`).expect(403, { error: Error.AlreadyPaid }));
+    request(app).get(`/etupay/callback?payload=${paidPayload}`).expect(403, { error: Error.AlreadyPaid }));
 });

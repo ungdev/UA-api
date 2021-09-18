@@ -1,0 +1,36 @@
+/discord/oauth:
+  get:
+    summary: Redirection depuis Discord
+    description: Discord renvoie l'utilisateur sur cette page à la fin de l'opération d'authentification.
+      Redirige toujours vers /dashboard/account/oauth, quel que soit le résultat de l'oauth
+    tags:
+      - Discord
+    parameters:
+      - in: query
+        name: code
+        description: authorization_code
+        schema:
+          type: string
+        required: true
+    responses:
+      302:
+        description: L'utilisateur est redirigé sur /dashboard/account?action=oauth&code={oauthCode}
+
+/discord/connect:
+  get:
+    summary: Intégration discord
+    description: Génère un lien oauth discord pour lier son compte
+    tags:
+      - Discord
+    responses:
+      200:
+        description: Lien Oauth généré
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                link:
+                  type: string
+                  description: Lien oauth discord de l'utilisateur
+                  example: https://discord.com/api/v9/oauth2/authorize?client_id=01234567890134&response_type=code&redirect_uri=https%3A%2F%2Farena.utt.fr%2Fapi%2Fdiscord%2Foauth&scope=identify&state=2d19a2f32e01b2f

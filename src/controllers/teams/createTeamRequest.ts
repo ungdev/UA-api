@@ -1,6 +1,7 @@
 import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
+import { hasLinkedDiscordAccount } from '../../middlewares/oauth';
 import { isNotInATeam } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import { askJoinTeam, fetchTeam } from '../../operations/team';
@@ -12,6 +13,7 @@ import { getRequestInfo } from '../../utils/users';
 export default [
   // Middlewares
   ...isNotInATeam,
+  hasLinkedDiscordAccount,
   validateBody(
     Joi.object({
       userType: Joi.string().valid(UserType.player, UserType.coach).required(),

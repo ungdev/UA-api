@@ -8,6 +8,7 @@ import { Error, Team, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { UserType } from '.prisma/client';
+import { updateAdminUser } from '../../src/operations/user';
 
 describe('POST /teams/:teamId/join-requests', () => {
   let user: User;
@@ -44,7 +45,6 @@ describe('POST /teams/:teamId/join-requests', () => {
   it('should fail because the user is already in a team', async () => {
     const otherTeam = await createFakeTeam();
     const [localUser] = otherTeam.players;
-
     const localToken = generateToken(localUser);
 
     await request(app)
@@ -128,5 +128,14 @@ describe('POST /teams/:teamId/join-requests', () => {
       .send({ userType: UserType.player })
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.AlreadyAskedATeam });
+  });
+
+  it('should fail because the user has no linked discord account', async () => {
+    await updateAdminUser(user.id, { discordId: null });
+    return request(app)
+      .post(`/teams/${team.id}/join-requests`)
+      .send({ userType: UserType.player })
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403, { error: Error.NoDiscordAccountLinked });
   });
 });

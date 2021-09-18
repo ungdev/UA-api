@@ -1,11 +1,11 @@
-/callbacks/etupay:
+/etupay/callback:
   get:
     summary: Confirme le paiement d'un panier EtuPay de la part du client
     description: Confirme le paiement d'un panier EtuPay de la part du client.
       Le client est redirigé vers cette URL après avoir confirmé la transaction auprès d'EtuPay.
       Les paramètres étant directement gérés par la bibliothèque EtuPay (@ung/node-etupay), ils ne seront pas détaillés ici.
     tags:
-      - Callbacks
+      - Etupay
     responses:
       302:
         description: Succès ou erreur de l'opération. Redirection vers la page correspondante sur le site web de l'UA.
@@ -27,7 +27,7 @@
       La banque appelle cette URL quelques minutes après le callback client pour confirmer la prise en compte de la transaction.
       Dans la pratique, cette URL n'a aucune action sur l'API.
     tags:
-      - Callbacks
+      - Etupay
     responses:
       200:
         description: Réponse statique

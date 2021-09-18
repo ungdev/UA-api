@@ -7,7 +7,7 @@ import { Cart, Error, Permission, User } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
-import { encryptQrCode } from '../../../src/utils/helpers';
+import { encrypt } from '../../../src/utils/helpers';
 import { forcePay } from '../../../src/operations/carts';
 
 describe('POST /admin/scan/:qrcode', () => {
@@ -25,7 +25,7 @@ describe('POST /admin/scan/:qrcode', () => {
 
     cart = await forcePay(user);
 
-    validBody.qrcode = encryptQrCode(user.id).toString('base64');
+    validBody.qrcode = encrypt(user.id).toString('base64');
   });
 
   after(async () => {
@@ -82,7 +82,7 @@ describe('POST /admin/scan/:qrcode', () => {
   });
 
   it('should error as the user was not found', async () => {
-    const notFoundEncrypted = encryptQrCode('A12B3C').toString('base64');
+    const notFoundEncrypted = encrypt('A12B3C').toString('base64');
 
     await request(app)
       .post('/admin/scan')

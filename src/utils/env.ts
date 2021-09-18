@@ -41,7 +41,7 @@ const env = {
     itemsPerPage: 50,
   },
   front: {
-    website: loadEnv('API_WEBSITE') || 'https://arena.utt.fr',
+    website: loadEnv('ARENA_WEBSITE') || 'https://arena.utt.fr',
   },
   bcrypt: {
     rounds: loadIntEnv('API_BCRYPT_ROUNDS') || 10,
@@ -81,13 +81,13 @@ const env = {
     successUrl: loadEnv('ETUPAY_SUCCESS_URL') || 'https://arena.utt.fr/dashboard/payment?type=success',
     errorUrl: loadEnv('ETUPAY_ERROR_URL') || 'https://arena.utt.fr/dashboard/payment?type=error',
   },
-  qrcode: {
+  crypto: {
     // random 128 bits key generated if not in production
-    key: loadEnv('QRCODE_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
+    key: loadEnv('CRYPTO_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
 
     // The initial vector is global and not local to not having to store it in the QR Codes.
     // As we encrypt unique ids, it doesn't matter to have a static initial vector
-    initialVector: loadEnv('QRCODE_IV') || notInProduction(crypto.randomBytes(16).toString('base64')),
+    initialVector: loadEnv('CRYPTO_IV') || notInProduction(crypto.randomBytes(16).toString('base64')),
   },
   toornament: {
     clientId: loadEnv('TOORNAMENT_CLIENT_ID'),
@@ -95,8 +95,14 @@ const env = {
     key: loadEnv('TOORNAMENT_KEY'),
   },
   discord: {
+    client: loadEnv('DISCORD_CLIENT'),
     token: loadEnv('DISCORD_TOKEN'),
     server: loadEnv('DISCORD_SERVER'),
+    oauthUrl: loadEnv('DISCORD_OAUTH_URL') || 'https://discord.com/api/v9/oauth2',
+    apiTimeout: Number.parseInt(loadEnv('DISCORD_API_TIMEOUT')) || 5000,
+    get oauthCallback() {
+      return `${env.front.website}${env.api.prefix}discord/oauth`;
+    },
   },
   log: {
     level: loadEnv('LOG_LEVEL') || 'silly',

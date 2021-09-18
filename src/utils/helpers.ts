@@ -22,10 +22,10 @@ export const decodeFromBase64 = (string: string) => {
  * A 128 bits encryption is largly enough for our usages
  * @param userId userId to be encrypted
  */
-export const encryptQrCode = (userId: string) => {
+export const encrypt = (userId: string) => {
   // Transform the key and the initial vector from base64 to binary
-  const key = Buffer.from(env.qrcode.key, 'base64');
-  const initialVector = Buffer.from(env.qrcode.initialVector, 'base64');
+  const key = Buffer.from(env.crypto.key, 'base64');
+  const initialVector = Buffer.from(env.crypto.initialVector, 'base64');
 
   const cipher = crypto.createCipheriv('aes-128-cbc', key, initialVector);
 
@@ -37,10 +37,10 @@ export const encryptQrCode = (userId: string) => {
  *
  * @param binary Binary encrypted.
  */
-export const decryptQrCode = (encrypted: Buffer) => {
+export const decrypt = (encrypted: Buffer) => {
   // Transform the key and the initial vector from base64 to binary
-  const key = Buffer.from(env.qrcode.key, 'base64');
-  const initialVector = Buffer.from(env.qrcode.initialVector, 'base64');
+  const key = Buffer.from(env.crypto.key, 'base64');
+  const initialVector = Buffer.from(env.crypto.initialVector, 'base64');
 
   // Create a decipher
   const decipher = crypto.createDecipheriv('aes-128-cbc', key, initialVector);
@@ -64,5 +64,5 @@ export const isPartnerSchool = (email: string) => env.email.partners.some((partn
 
 export const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min) + min);
 
-export const serializePermissions = (permissions: Permission[]) => permissions.join(',');
-export const deserializePermissions = (permissions: string) => permissions.split(',');
+export const serializePermissions = (permissions: Permission[]) => permissions?.join(',');
+export const deserializePermissions = (permissions: string) => permissions?.split(',');

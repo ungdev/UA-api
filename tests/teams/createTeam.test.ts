@@ -36,12 +36,11 @@ describe('POST /teams', () => {
     await database.team.deleteMany();
     await database.user.deleteMany();
 
-    await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lol' } });
+    return database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lol' } });
   });
 
-  it('should fail because the token is not provided', async () => {
-    await request(app).post('/teams').expect(401, { error: Error.Unauthenticated });
-  });
+  it('should fail because the token is not provided', () =>
+    request(app).post('/teams').expect(401, { error: Error.Unauthenticated }));
 
   it('should fail because the user is already in a team', async () => {
     const team = await createFakeTeam();
@@ -49,41 +48,39 @@ describe('POST /teams', () => {
 
     const localToken = generateToken(localUser);
 
-    await request(app)
+    return request(app)
       .post('/teams')
       .send(teamBody)
       .set('Authorization', `Bearer ${localToken}`)
       .expect(403, { error: Error.AlreadyInTeam });
   });
 
-  it('should fail because the body is incorrect', async () => {
-    await request(app)
+  it('should fail because the body is incorrect', () =>
+    request(app)
       .post('/teams')
       .send({ name: teamBody.name })
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: Error.InvalidBody });
-  });
+      .expect(400, { error: Error.InvalidBody }));
 
-  it("should fail because the tournament doesn't exists", async () => {
-    await request(app)
+  it("should fail because the tournament doesn't exists", () =>
+    request(app)
       .post('/teams')
       .send({ ...teamBody, tournamentId: 'factorio' })
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: Error.InvalidBody });
-  });
+      .expect(400, { error: Error.InvalidBody }));
 
-  it('should fail with an internal server error (test nested check)', async () => {
+  it('should fail with an internal server error (test nested check)', () => {
     sandbox.stub(teamOperations, 'createTeam').throws('Unexpected error');
-    await request(app)
+    return request(app)
       .post('/teams')
       .send(teamBody)
       .set('Authorization', `Bearer ${token}`)
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should fail with an internal server error (test base catch)', async () => {
+  it('should fail with an internal server error (test base catch)', () => {
     sandbox.stub(tournamentOperations, 'fetchTournament').throws('Unexpected error');
-    await request(app)
+    return request(app)
       .post('/teams')
       .send(teamBody)
       .set('Authorization', `Bearer ${token}`)
@@ -130,7 +127,7 @@ describe('POST /teams', () => {
     const newUser = await createFakeUser();
     const newToken = generateToken(newUser);
 
-    await request(app)
+    return request(app)
       .post('/teams')
       .send(teamBody)
       .set('Authorization', `Bearer ${newToken}`)
@@ -172,7 +169,7 @@ describe('POST /teams', () => {
       },
     });
 
-    await request(app)
+    return request(app)
       .post('/teams')
       .send({ name: 'otherName', tournamentId: teamBody.tournamentId, userType: teamBody.userType })
       .set('Authorization', `Bearer ${otherToken}`)
@@ -183,7 +180,7 @@ describe('POST /teams', () => {
     const newUser = await createFakeUser();
     const newToken = generateToken(newUser);
 
-    await request(app)
+    return request(app)
       .post('/teams')
       .send({
         ...teamBody,
@@ -197,7 +194,7 @@ describe('POST /teams', () => {
     const newUser = await createFakeUser();
     const newToken = generateToken(newUser);
 
-    await request(app)
+    return request(app)
       .post('/teams')
       .send({
         name: teamBody.name,
@@ -205,5 +202,21 @@ describe('POST /teams', () => {
       })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(400, { error: Error.InvalidBody });
+  });
+
+  it('should fail because user has no linked discord account', async () => {
+    const newUser = await createFakeUser();
+    const newToken = generateToken(newUser);
+    await userOperations.updateAdminUser(newUser.id, { discordId: null });
+
+    return request(app)
+      .post('/teams')
+      .send({
+        ...teamBody,
+        name: 'NoDiscordAccount',
+        tournamentId: 'rl',
+      })
+      .set('Authorization', `Bearer ${newToken}`)
+      .expect(403, { error: Error.NoDiscordAccountLinked });
   });
 });

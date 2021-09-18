@@ -84,6 +84,7 @@ export const createUser = async (
   lastname: string,
   email: string,
   password: string,
+  discordId?: string,
   type?: UserType,
 ) => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
@@ -96,6 +97,7 @@ export const createUser = async (
       lastname,
       email,
       type,
+      discordId,
       password: hashedPassword,
       registerToken: nanoid(),
     },
@@ -122,15 +124,19 @@ export const updateUser = async (userId: string, username: string, newPassword: 
 
 export const updateAdminUser = async (
   userId: string,
-  type: UserType,
-  permissions: Permission[],
-  place: string,
+  updates: {
+    type?: UserType;
+    permissions?: Permission[];
+    place?: string;
+    discordId?: string;
+  },
 ): Promise<User> => {
   const user = await database.user.update({
     data: {
-      type,
-      permissions: serializePermissions(permissions),
-      place,
+      type: updates.type,
+      permissions: serializePermissions(updates.permissions),
+      place: updates.place,
+      discordId: updates.discordId,
     },
     where: { id: userId },
     include: userInclusions,

@@ -33,8 +33,10 @@ tags:
     description: Routes d'administration
   - name: Authentication
     description: Routes d'authentification
-  - name: Callbacks
-    description: Routes de callback
+  - name: Etupay
+    description: Routes de callback pour Etupay
+  - name: Discord
+    description: Routes pour associer son compte discord à son compte UA
   - name: Items
     description: Routes liées aux items
   - name: Teams

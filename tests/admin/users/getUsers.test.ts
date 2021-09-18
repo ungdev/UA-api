@@ -81,7 +81,7 @@ describe('GET /admin/users', () => {
       place: null,
       teamId: null,
       askingTeamId: null,
-      discordId: null,
+      discordId: user.discordId,
       type: user.type,
       username: user.username,
       hasPaid: false,
