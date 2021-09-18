@@ -12,6 +12,7 @@ import Mail from 'nodemailer/lib/mailer';
 
 export enum ActionFeedback {
   DISCORD_OAUTH = 'oauth',
+  VALIDATE = 'validate',
 }
 
 export enum DiscordFeedbackCode {
@@ -28,21 +29,10 @@ export interface DecodedToken {
   userId: string;
 }
 
-export interface MailData {
-  username: string;
-  gunnarCode: string;
-  compumsaCode: string;
-}
-
 export type EmailAttachement = Mail.Attachment & {
   filename: string;
   content: Buffer;
 };
-
-export interface EmailContent {
-  title: string;
-  html: string;
-}
 
 export interface Contact {
   name: string;
