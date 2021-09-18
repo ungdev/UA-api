@@ -27,7 +27,7 @@ describe('POST /auth/login', () => {
     await request(app)
       .post('/auth/login')
       .send({
-        email: user.email,
+        login: user.email,
         password,
       })
       .expect(403, { error: Error.LoginNotAllowed });
@@ -40,7 +40,7 @@ describe('POST /auth/login', () => {
     await request(app)
       .post('/auth/login')
       .send({
-        email: user.email,
+        login: user.email,
       })
       .expect(400, { error: Error.InvalidBody });
   });
@@ -49,7 +49,7 @@ describe('POST /auth/login', () => {
     await request(app)
       .post('/auth/login')
       .send({
-        email: user.email,
+        login: user.email,
         password: 'wrongpassword',
       })
       .expect(401, { error: Error.InvalidCredentials });
@@ -59,7 +59,17 @@ describe('POST /auth/login', () => {
     await request(app)
       .post('/auth/login')
       .send({
-        email: 'wrong@email.fr',
+        login: 'wrong@email.fr',
+        password: user.password,
+      })
+      .expect(401, { error: Error.InvalidCredentials });
+  });
+
+  it('should return an error as incorrect credentials (neither username nor email)', async () => {
+    await request(app)
+      .post('/auth/login')
+      .send({
+        login: 'email.fr',
         password: user.password,
       })
       .expect(401, { error: Error.InvalidCredentials });
@@ -74,7 +84,7 @@ describe('POST /auth/login', () => {
     await request(app)
       .post('/auth/login')
       .send({
-        email: visitorEmail,
+        login: visitorEmail,
         password: visitorPassword,
       })
       .expect(403, { error: Error.LoginAsVisitor });
@@ -90,7 +100,7 @@ describe('POST /auth/login', () => {
     await request(app)
       .post('/auth/login')
       .send({
-        email: user.email,
+        login: user.email,
         password,
       })
       .expect(500, { error: Error.InternalServerError });
@@ -100,7 +110,22 @@ describe('POST /auth/login', () => {
     const response = await request(app)
       .post('/auth/login')
       .send({
-        email: user.email,
+        login: user.email,
+        password,
+      })
+      .expect(200);
+
+    expect(response.body.user).to.be.an('object');
+    expect(response.body.token).to.be.a('string');
+
+    authorizationToken = response.body.token;
+  });
+
+  it('should validate the login even with a username', async () => {
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        login: user.username,
         password,
       })
       .expect(200);
@@ -116,7 +141,7 @@ describe('POST /auth/login', () => {
       .post('/auth/login')
       .set('Authorization', `Bearer ${authorizationToken}`)
       .send({
-        email: user.email,
+        login: user.email,
         password,
       })
       .expect(403, { error: Error.AlreadyAuthenticated });

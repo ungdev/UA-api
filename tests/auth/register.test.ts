@@ -56,8 +56,18 @@ describe('POST /auth/register', () => {
       .expect(400, { error: Error.InvalidBody });
   });
 
-  it('should not create a duplicate user', async () => {
-    await request(app).post('/auth/register').send(userData).expect(409, { error: Error.EmailAlreadyExists });
+  it('should not create a duplicate user if email is the same', async () => {
+    await request(app)
+      .post('/auth/register')
+      .send({ ...userData, username: 'toto2' })
+      .expect(409, { error: Error.EmailAlreadyExists });
+  });
+
+  it('should not create a duplicate user if username is the same', async () => {
+    await request(app)
+      .post('/auth/register')
+      .send({ ...userData, email: 'john.doe2@test.com' })
+      .expect(409, { error: Error.UsernameAlreadyExists });
   });
 
   it('should not create a user with incomplete body', async () => {

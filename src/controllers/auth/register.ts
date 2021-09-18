@@ -32,6 +32,10 @@ export default [
       if (error.code === 'P2002' && error.meta && error.meta.target === 'email_unique')
         return conflict(response, Error.EmailAlreadyExists);
 
+      // If the username already exists in the database, throw a bad request
+      if (error.code === 'P2002' && error.meta && error.meta.target === 'username_unique')
+        return conflict(response, Error.UsernameAlreadyExists);
+
       // Otherwise, forward the error to the central error handling
       return next(error);
     }
