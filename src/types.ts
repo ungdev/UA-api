@@ -202,7 +202,7 @@ export const enum Error {
   // 409
   // Indicates a request conflict with current state of the target resource
   EmailAlreadyExists = 'Cet email est déjà utilisé',
-  UsernameAlreadyExists = 'Cet username est déjà utilisé',
+  UsernameAlreadyExists = "Ce nom d'utilisateur est déjà utilisé",
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
 
   // 410

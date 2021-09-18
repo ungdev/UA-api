@@ -73,7 +73,9 @@ export const createFakeTeam = async ({
   name?: string;
   userPassword?: string;
 } = {}) => {
-  const user = await createFakeUser({ paid, password: userPassword || faker.internet.password() });
+  const password = userPassword || faker.internet.password();
+
+  const user = await createFakeUser({ paid, password });
   const team = await createTeam(name || faker.internet.userName(), tournament, user.id, UserType.player);
   logger.verbose(`Created team ${team.name}`);
 
@@ -83,7 +85,7 @@ export const createFakeTeam = async ({
 
   // Create new members (minus 1 because the captain is already created)
   for (let index = 0; index < members - 1; index += 1) {
-    const partner = await createFakeUser({ paid });
+    const partner = await createFakeUser({ paid, password });
     await joinTeam(team.id, partner, UserType.player);
   }
 

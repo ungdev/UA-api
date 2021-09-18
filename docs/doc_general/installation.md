@@ -112,7 +112,7 @@ Depuis le terminal Ubuntu, dans le dossier du projet "UA API" que vous avez obte
 - `cp .env.example .env`. Ensuite, modifiez la variable `DATABASE_URL` dans le `.env` avec la valeur `mysql://root:@localhost/arena`
 - `yarn prisma generate` _(Cela va générer des fichiers)_
 - `yarn prisma db push`
-- `yarn fake` Commande optionnelle pour générer des faux users et fausses équipes
+- `yarn fake` Commande optionnelle pour générer des faux users et fausses équipes.
 
 Si tout ce passe bien, vous devriez avoir un retour avec marqué, entre autres, `Your database is now in sync with your schema`.
 _Si prisma n'arrive pas à se connecter à la base de données (ERR: P1001), [assurez vous d'utiliser WSL 1](#méthode-rapide)._
