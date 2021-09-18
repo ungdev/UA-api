@@ -65,6 +65,16 @@ describe('POST /auth/login', () => {
       .expect(401, { error: Error.InvalidCredentials });
   });
 
+  it('should return an error as incorrect credentials (neither username nor email)', async () => {
+    await request(app)
+      .post('/auth/login')
+      .send({
+        login: 'email.fr',
+        password: user.password,
+      })
+      .expect(401, { error: Error.InvalidCredentials });
+  });
+
   // This case should never happen
   it('should error because the user is a visitor', async () => {
     const visitorEmail = 'bonjour@lol.fr';
