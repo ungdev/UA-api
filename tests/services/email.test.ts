@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { createFakeUser } from '../utils';
 import { PrimitiveCartItem } from '../../src/types';
 import { createCart, updateCart } from '../../src/operations/carts';
-import { generatePayementHtml, sendEmail } from '../../src/services/email';
+import { Mail, sendEmail } from '../../src/services/email';
 import { randomInt } from '../../src/utils/helpers';
 import { fetchItems } from '../../src/operations/item';
 import env from '../../src/utils/env';
@@ -63,9 +63,14 @@ describe('Tests the email utils', () => {
 
     server.listen(env.email.port);
 
-    await sendEmail('bonjour@lol.fr', "je kiffe l'ua", '<html>hello world !</html>', [
-      { filename: 'random.dat', content: Buffer.from([255]) },
-    ]);
+    await sendEmail(
+      {
+        to: 'bonjour@lol.fr',
+        subject: "je kiffe l'ua",
+        html: '<html>hello world !</html>',
+      },
+      [{ filename: 'random.dat', content: Buffer.from([255]) }],
+    );
 
     server.close();
   });
@@ -96,8 +101,8 @@ describe('Tests the email utils', () => {
 
     const detailedCart = await updateCart(createdCart.id, 123, TransactionState.paid);
 
-    const html = generatePayementHtml(detailedCart);
+    const ticketsEmail = await Mail.generateTicketsEmail(detailedCart);
 
-    fs.writeFileSync('artifacts/payment.html', html);
+    fs.writeFileSync('artifacts/payment.html', ticketsEmail.html);
   });
 });

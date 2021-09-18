@@ -13,6 +13,7 @@ import Mail from 'nodemailer/lib/mailer';
 export enum ActionFeedback {
   DISCORD_OAUTH = 'oauth',
   VALIDATE = 'validate',
+  PASSWORD_RESET = 'pwd-reset',
 }
 
 export enum DiscordFeedbackCode {

@@ -48,7 +48,7 @@ export declare interface Mail {
       /** Button text */
       name: string;
       /** Button link */
-      location: `http${'s' | ''}://${string}`;
+      location: string;
       /** Button color. Matches UA colors by default */
       color?: `#${string}`;
     }[];
@@ -115,104 +115,109 @@ export const sendEmail = async (mail: MailContent, attachments?: EmailAttachemen
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Mail {
-  export const sendTickets = async (cart: DetailedCart) => {
+  export const generateTicketsEmail = async (cart: DetailedCart) => {
     const cartTickets = cart.cartItems.filter((cartItem) => cartItem.item.category === ItemCategory.ticket);
-    const [content, tickets] = await Promise.all([
-      formatEmail({
-        title: {
-          topic: 'Bienvenue',
-          banner: 'Informations importantes',
-          short: `Salut ${cart.user.firstname},`,
-          highlight: "Bienvenue à l'UTT Arena&nbsp;🔥&nbsp;!",
+    return formatEmail({
+      title: {
+        topic: 'Bienvenue',
+        banner: 'Informations importantes',
+        short: `Salut ${cart.user.firstname},`,
+        highlight: "Bienvenue à l'UTT Arena&nbsp;🔥&nbsp;!",
+      },
+      reason:
+        "Vous avez reçu cet email car vous êtes inscrit à l'UTT Arena. Si ce n'est pas le cas, contactez-nous et changez le mot de passe de votre boîte mail.",
+      receiver: cart.user.email,
+      fields: [
+        {
+          name: 'Tournoi',
+          description: [
+            'Voilà les dernières informations importantes nécessaires au bon déroulement de la compétition 😁',
+            '• Il est nécessaire que <strong>tous les joueurs</strong> de <strong>toutes les équipes</strong> soient présents sur notre Discord',
+            "• Ce vendredi à 21h aura lieu une cérémonie d'ouverture sur notre stream où on vous donnera tous les détails de cette édition un peu spéciale et où on répondra à toutes vos questions 😁",
+            '• Tous les tournois débutent samedi à 10h, il faudra donc être présent <strong>à partir de 9h30 </strong>pour un check-in de toutes les équipes et joueurs',
+            "• N'hésitez à contacter un membre du staff sur Discord si vous avez une question ou que vous rencontrez un quelconque problème 😉",
+          ],
+          buttons: [
+            {
+              name: 'Rejoindre le serveur Discord',
+              location: 'https://discord.gg/WhxZwKU',
+            },
+          ],
         },
-        reason:
-          "Vous avez reçu cet email car vous êtes inscrit à l'UTT Arena. Si ce n'est pas le cas, contactez-nous et changez le mot de passe de votre boîte mail.",
-        receiver: cart.user.email,
-        fields: [
-          {
-            name: 'Tournoi',
-            description: [
-              'Voilà les dernières informations importantes nécessaires au bon déroulement de la compétition 😁',
-              '• Il est nécessaire que <strong>tous les joueurs</strong> de <strong>toutes les équipes</strong> soient présents sur notre Discord',
-              "• Ce vendredi à 21h aura lieu une cérémonie d'ouverture sur notre stream où on vous donnera tous les détails de cette édition un peu spéciale et où on répondra à toutes vos questions 😁",
-              '• Tous les tournois débutent samedi à 10h, il faudra donc être présent <strong>à partir de 9h30 </strong>pour un check-in de toutes les équipes et joueurs',
-              "• N'hésitez à contacter un membre du staff sur Discord si vous avez une question ou que vous rencontrez un quelconque problème 😉",
-            ],
-            buttons: [
-              {
-                name: 'Rejoindre le serveur Discord',
-                location: 'https://discord.gg/WhxZwKU',
-              },
-            ],
-          },
-          {
-            name: 'Billet',
-            description: 'Tu trouveras ton <strong>billet personnalisé</strong> en pièce jointe de ce mail&nbsp;!',
-          },
-          {
-            name: 'Confirmation de commande',
-            description: 'On te confirme aussi ta commande (et tu as bon goût&nbsp;!)',
-            tables: [
-              {
-                name: 'Tickets',
-                headers: [
+        {
+          name: 'Billet',
+          description: 'Tu trouveras ton <strong>billet personnalisé</strong> en pièce jointe de ce mail&nbsp;!',
+        },
+        {
+          name: 'Confirmation de commande',
+          description: 'On te confirme aussi ta commande (et tu as bon goût&nbsp;!)',
+          tables: [
+            {
+              name: 'Tickets',
+              headers: [
+                {
+                  name: 'Nom',
+                },
+                {
+                  name: 'Type',
+                },
+                {
+                  name: 'Prix',
+                },
+              ],
+              items: cartTickets.map((ticket) => ({
+                values: [
                   {
-                    name: 'Nom',
+                    name: `${ticket.forUser.firstname} ${ticket.forUser.lastname}`,
                   },
                   {
-                    name: 'Type',
+                    name: ticket.item.name,
                   },
                   {
-                    name: 'Prix',
+                    name: formatPrice(ticket.item.price),
                   },
                 ],
-                items: cartTickets.map((ticket) => ({
+              })),
+            },
+            {
+              name: 'Suppléments',
+              headers: [
+                {
+                  name: 'Nom',
+                },
+                {
+                  name: 'Quantité',
+                },
+                {
+                  name: 'Prix',
+                },
+              ],
+              items: cart.cartItems
+                .filter((cartItem) => cartItem.item.category === ItemCategory.supplement)
+                .map((item) => ({
                   values: [
                     {
-                      name: `${ticket.forUser.firstname} ${ticket.forUser.lastname}`,
+                      name: item.item.name,
                     },
                     {
-                      name: ticket.item.name,
+                      name: `${item.quantity}`,
                     },
                     {
-                      name: formatPrice(ticket.item.price),
+                      name: formatPrice(item.item.price),
                     },
                   ],
                 })),
-              },
-              {
-                name: 'Suppléments',
-                headers: [
-                  {
-                    name: 'Nom',
-                  },
-                  {
-                    name: 'Quantité',
-                  },
-                  {
-                    name: 'Prix',
-                  },
-                ],
-                items: cart.cartItems
-                  .filter((cartItem) => cartItem.item.category === ItemCategory.supplement)
-                  .map((item) => ({
-                    values: [
-                      {
-                        name: item.item.name,
-                      },
-                      {
-                        name: `${item.quantity}`,
-                      },
-                      {
-                        name: formatPrice(item.item.price),
-                      },
-                    ],
-                  })),
-              },
-            ],
-          },
-        ],
-      }),
+            },
+          ],
+        },
+      ],
+    });
+  };
+
+  export const sendTickets = async (cart: DetailedCart) => {
+    const cartTickets = cart.cartItems.filter((cartItem) => cartItem.item.category === ItemCategory.ticket);
+    const [content, tickets] = await Promise.all([
+      generateTicketsEmail(cart),
       Promise.all(cartTickets.map(generateTicket)),
     ]);
     return sendEmail(content, tickets);
@@ -238,7 +243,7 @@ export namespace Mail {
             buttons: [
               {
                 name: 'Confirme ton adresse email',
-                location: `https://arena.utt.fr/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}`,
+                location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}` as const,
               },
             ],
           },
@@ -258,11 +263,40 @@ export namespace Mail {
             buttons: [
               {
                 name: 'FAQ',
-                location: 'https://arena.utt.fr/faq',
+                location: `${env.front.website}/faq`,
               },
               {
                 name: 'Rejoindre le serveur Discord',
                 location: 'https://discord.gg/WhxZwKU',
+              },
+            ],
+          },
+        ],
+      }),
+    );
+
+  export const sendPasswordReset = async (user: User) =>
+    sendEmail(
+      await formatEmail({
+        receiver: user.email,
+        reason:
+          "Vous avez reçu ce mail car vous avez demandé à réinitialiser votre mot de passe. Si ce n'est pas le cas, ignorez ce message.",
+        title: {
+          topic: 'Réinitialisation de votre mot de passe',
+          banner: 'Réinitialisation du mot de passe',
+          short: `Salut ${user.firstname},`,
+          highlight: 'Tu es sur le point de réinitialiser ton mot de passe',
+        },
+        fields: [
+          {
+            name: 'Code de vérification',
+            description:
+              "On doit s'assurer que tu es bien à l'origine de cette demande. Tu peux finaliser la procédure en cliquant sur le bouton ci-dessous.",
+            buttons: [
+              {
+                name: 'Réinitialise ton mot de passe',
+                location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}` as const,
+                color: '#dc143c',
               },
             ],
           },
