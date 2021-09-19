@@ -10,153 +10,190 @@
     <meta content="telephone=no" name="format-detection" />
     <title>UTT Arena {{year}} - {{title.topic}}</title>
     <style type="text/css">
-        html,
-        body {
-            width: 100%;
-            font-family: arial, 'helvetica neue', helvetica, sans-serif;
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-            padding: 0;
-            margin: 0;
-            background-color: #f6f6f6;
-        }
+      html,
+      body {
+          width: 100%;
+          font-family: Verdana, Geneva, Tahoma, sans-serif;
+          -webkit-text-size-adjust: 100%;
+          -ms-text-size-adjust: 100%;
+          padding: 0;
+          margin: 0;
+          background-color: #f6f6f6;
+      }
 
-        .wrapper {
-            background-color: #ffffff;
-            max-width: 600px;
-            width: 100vw;
-            margin: auto;
-        }
+      .wrapper {
+          background-color: #ffffff;
+          max-width: 600px;
+          width: 100vw;
+          margin: auto;
+      }
 
-        .wrapper > * {
-            padding: 20px;
-        }
+      .wrapper > * {
+          padding: 20px;
+      }
 
-        .header {
-            min-height: 180px;
-            background-color: #202020;
-            box-sizing: border-box;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            align-items: center;
-        }
+      .header {
+          min-height: 180px;
+          background-color: #202020;
+          box-sizing: border-box;
+          display: flex;
+          justify-content: center;
+          gap: 15px;
+          align-items: center;
+      }
 
-        .header img {
-            display: block;
-            border: 0;
-            outline: none;
-            text-decoration: none;
-            -ms-interpolation-mode: bicubic;
-        }
+      .header img {
+          display: block;
+          border: 0;
+          outline: none;
+          text-decoration: none;
+          -ms-interpolation-mode: bicubic;
+      }
 
-        .header span {
-            color: #fff;
-            font-size: 22px;
-        }
+      .header span {
+          color: #fff;
+          font-size: 22px;
+      }
 
-        .content {
-            color: #333;
-            -webkit-text-size-adjust: none;
-            -ms-text-size-adjust: none;
-            position: relative;
-        }
+      .content {
+          color: #333;
+          -webkit-text-size-adjust: none;
+          -ms-text-size-adjust: none;
+          position: relative;
+      }
 
-        .content > div {
-            line-height: 21px;
-            font-size: 14px;
-            text-align: center;
-        }
+      .content > div {
+          line-height: 21px;
+          font-size: 14px;
+          text-align: center;
+      }
 
-        .content:not(:last-child)::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%) translateY(50%);
-            width: 90%;
-            border-bottom: 4px dotted #fbb464;
-        }
+      .content:not(:last-child)::after {
+          content: "";
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%) translateY(50%);
+          width: 90%;
+          border-bottom: 4px dotted #fbb464;
+      }
 
-        .content > .highlight {
-            line-height: 36px;
-            font-size: 30px;
-            font-style: normal;
-            font-weight: normal;
-        }
+      .content > .highlight {
+          line-height: 36px;
+          font-size: 30px;
+          font-style: normal;
+          font-weight: normal;
+      }
 
-        .content > .title {
-            line-height: 29px;
-            font-size: 24px;
-            text-align: initial;
-            color: #006492;
-            margin-bottom: 10px;
-        }
+      .content > .title {
+          line-height: 29px;
+          font-size: 24px;
+          text-align: initial;
+          color: #006492;
+          margin-bottom: 10px;
+      }
 
-        .content > .title ~ * {
-            text-align: initial;
-        }
+      .content > .title ~ * {
+          text-align: initial;
+      }
 
-        .footer {
-            color: #696969;
-            line-height: 18px;
-            -webkit-text-size-adjust: none;
-            -ms-text-size-adjust: none;
-            font-size: 12px;
-            text-align: center;
-        }
+      .footer {
+          color: #696969;
+          line-height: 18px;
+          -webkit-text-size-adjust: none;
+          -ms-text-size-adjust: none;
+          font-size: 12px;
+          text-align: center;
+      }
 
-        .footer > .social-icons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-evenly;
-            padding-block: 10px;
-            gap: 10px;
-        }
+      .footer > .social-icons {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-evenly;
+          padding-block: 10px;
+          gap: 10px;
+      }
 
-        .footer > .social-icons * {
-            font-size: 14px;
-            -webkit-text-size-adjust: none;
-            -ms-text-size-adjust: none;
-            border: none !important;
-            flex-shrink: 0;
-        }
+      .footer > .social-icons * {
+          font-size: 14px;
+          -webkit-text-size-adjust: none;
+          -ms-text-size-adjust: none;
+          border: none !important;
+          flex-shrink: 0;
+      }
 
-        .footer img {
-            -ms-interpolation-mode: bicubic;
-            display: block;
-        }
+      .footer img {
+          -ms-interpolation-mode: bicubic;
+          display: block;
+      }
 
-        a {
-            text-decoration: none !important;
-            border-bottom: 1px solid !important;
-            color: #f1737f !important;
-        }
+      a {
+          text-decoration: none !important;
+          border-bottom: 1px solid !important;
+          color: #f1737f !important;
+      }
 
-        .disabled {
-            display: none;
-        }
+      .disabled {
+          display: none;
+      }
 
-        .actions {
-            display: flex;
-            flex-flow: row wrap;
-            gap: 10px;
-            align-items: center;
-            margin-top: 10px;
-        }
+      .actions {
+          display: flex;
+          flex-flow: row wrap;
+          gap: 10px;
+          align-items: center;
+          margin-top: 10px;
+      }
 
-        .actions > .button {
-            display: block;
-            color: #fff !important;
-            background-color: #f1737f !important;
-            border: none !important;
-            border-radius: 2px;
-            padding: 3px 6px 2px;
-        }
+      .actions > .button {
+          display: block;
+          color: #fff !important;
+          background-color: #f1737f !important;
+          border: none !important;
+          border-radius: 2px;
+          padding: 3px 6px 2px;
+      }
 
-        .reason {
-            padding-block: 10px;
-        }
+      .reason {
+        padding-block: 10px;
+      }
+
+      .receiver {
+        padding: 25px 0 0;
+      }
+
+      table {
+        width: 100%;
+        background-color: #f6f6f6;
+        outline: none;
+        border-collapse: collapse;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      thead {
+        background-color: #333;
+        color: #fff;
+        font-weight: bold;
+      }
+
+      td {
+        padding: 5px;
+      }
+
+      td:not(:first-child) {
+        text-align: center;
+      }
+
+      tr:nth-child(2n) {
+        background-color: #e8e8e8;
+      }
+
+      .tables > div {
+        font-size: 18px;
+        color: #006492;
+        margin-block: 8px;
+      }
     </style>
 </head>
 
@@ -173,7 +210,7 @@
         {{#fields}}
         <div class="content">
             <div class="title">{{name}}</div>
-            <div>{{& description}}</div>
+            <div>{{description}}</div>
             <div class="actions {{^buttons}}disabled{{/buttons}}">
                 {{#buttons}}
                 <a class="button" target="_blank" href="{{location}}"{{#color}}style="background:{{color}}"{{/color}}>{{name}}</a>

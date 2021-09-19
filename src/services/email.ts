@@ -1,6 +1,6 @@
 import { ItemCategory } from '@prisma/client';
 import { readFile } from 'fs/promises';
-import { render } from 'mustache';
+import { render, escape } from 'mustache';
 import nodemailer from 'nodemailer';
 import { ActionFeedback, DetailedCart, EmailAttachement, User } from '../types';
 import env from '../utils/env';
@@ -41,7 +41,12 @@ export declare interface Mail {
   fields?: {
     /** Name of the field, used as a field title */
     name: string;
-    /** The content of this field. This field is NOT escaped (ie. tags are not escaped) */
+    /** The content of this field. Like anywhere else in the mail,
+     * use  - \n to go to a new line
+     *      - *text* to render bold 'text'
+     *      - _text_ to render 'text' in italics
+     *      - &nbsp; to a render a non breakable space
+     */
     description: string | string[];
     /** A list of buttons (can be omitted) which will be appended at the end of the section */
     buttons?: {
@@ -76,10 +81,22 @@ export const formatEmail = async (content: Mail) => {
   return <MailContent>{
     to: content.receiver,
     subject: `${content.title.topic} - UTT Arena ${year}`,
-    html: render(template, {
-      ...content,
-      year,
-    }),
+    html: render(
+      template,
+      {
+        ...content,
+        year,
+      },
+      undefined,
+      {
+        escape: (text: string) =>
+          escape(text)
+            .replace(/&amp;nbsp;/gi, '&nbsp;')
+            .replace(/\n/gi, '<br>')
+            .replace(/_([^<>_]+)_/gi, '<i>$1</i>')
+            .replace(/\*([^*<>]+)\*/gi, '<strong>$1</strong>'),
+      },
+    ),
   };
 };
 
@@ -115,7 +132,7 @@ export const sendEmail = async (mail: MailContent, attachments?: EmailAttachemen
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Mail {
-  export const generateTicketsEmail = async (cart: DetailedCart) => {
+  export const generateTicketsEmail = (cart: DetailedCart) => {
     const cartTickets = cart.cartItems.filter((cartItem) => cartItem.item.category === ItemCategory.ticket);
     return formatEmail({
       title: {
@@ -131,12 +148,12 @@ export namespace Mail {
         {
           name: 'Tournoi',
           description: [
-            'Voilà les dernières informations importantes nécessaires au bon déroulement de la compétition 😁',
-            '• Il est nécessaire que <strong>tous les joueurs</strong> de <strong>toutes les équipes</strong> soient présents sur notre Discord',
+            'Voilà les dernières informations importantes nécessaires au bon déroulement de la compétition&nbsp;:',
+            '• Il est nécessaire que *tous les joueurs* de *toutes les équipes* soient présents sur notre Discord',
             "• Ce vendredi à 21h aura lieu une cérémonie d'ouverture sur notre stream où on vous donnera tous les détails de cette édition un peu spéciale et où on répondra à toutes vos questions 😁",
-            '• Tous les tournois débutent samedi à 10h, il faudra donc être présent <strong>à partir de 9h30 </strong>pour un check-in de toutes les équipes et joueurs',
+            '• Tous les tournois débutent samedi à 10h, il faudra donc être présent *à partir de 9h30* pour un check-in de toutes les équipes et joueurs',
             "• N'hésitez à contacter un membre du staff sur Discord si vous avez une question ou que vous rencontrez un quelconque problème 😉",
-          ],
+          ].join('\n'),
           buttons: [
             {
               name: 'Rejoindre le serveur Discord',
@@ -146,11 +163,11 @@ export namespace Mail {
         },
         {
           name: 'Billet',
-          description: 'Tu trouveras ton <strong>billet personnalisé</strong> en pièce jointe de ce mail&nbsp;!',
+          description: 'Tu trouveras ton *billet personnalisé* en pièce jointe de ce mail&nbsp;!',
         },
         {
           name: 'Confirmation de commande',
-          description: 'On te confirme aussi ta commande (et tu as bon goût&nbsp;!)',
+          description: 'On te confirme aussi ta commande _(et tu as bon goût&nbsp;!)_',
           tables: [
             {
               name: 'Tickets',
@@ -214,6 +231,83 @@ export namespace Mail {
     });
   };
 
+  export const generateValidationEmail = (user: Omit<User, 'hasPaid' | 'cartItems'>) =>
+    formatEmail({
+      receiver: user.email,
+      reason:
+        "Vous avez reçu ce mail car vous avez envoyé une demande de création de compte à l'UTT Arena. Si ce n'est pas vous, ignorez ce message ou contactez nous.",
+      title: {
+        topic: 'Code de validation',
+        banner: '',
+        short: `Salut ${user.firstname},`,
+        highlight: "Bienvenue à l'UTT Arena&nbsp;!",
+      },
+      fields: [
+        {
+          name: 'Avant de commencer...',
+          description:
+            "On sait bien que c'est pénible mais on doit vérifier que ton adresse email fonctionne bien (sinon tu ne pourras pas recevoir tes billets&nbsp;!).",
+          buttons: [
+            {
+              name: 'Confirme ton adresse email',
+              location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}` as const,
+            },
+          ],
+        },
+        {
+          name: 'Discord',
+          description:
+            "On utilise Discord pendant l'évènement, et tu auras besoin de lier ton compte discord avec ton compte UTT Arena pour pouvoir créer ou rejoindre une équipe. On te donnera plus de détails là-dessus à ce moment-là 😉",
+        },
+        {
+          name: 'Tournoi Super Smash Bros Ultimate',
+          description:
+            "Si tu as choisi de t'inscrire à ce tournoi et que tu choisis de venir avec ta propre console, tu peux bénéficier d'une réduction sur ton billet 😉 _(offre limitée à un certain nombre de places)_",
+        },
+        {
+          name: 'Des questions ?',
+          description: "On t'invite à lire la faq ou à poser tes questions directement sur discord.",
+          buttons: [
+            {
+              name: 'FAQ',
+              location: `${env.front.website}/faq`,
+            },
+            {
+              name: 'Rejoindre le serveur Discord',
+              location: 'https://discord.gg/WhxZwKU',
+            },
+          ],
+        },
+      ],
+    });
+
+  export const generatePasswordResetEmail = (user: User) =>
+    formatEmail({
+      receiver: user.email,
+      reason:
+        "Vous avez reçu ce mail car vous avez demandé à réinitialiser votre mot de passe. Si ce n'est pas le cas, ignorez ce message.",
+      title: {
+        topic: 'Réinitialisation de votre mot de passe',
+        banner: 'Réinitialisation du mot de passe',
+        short: `Salut ${user.firstname},`,
+        highlight: 'Tu es sur le point de réinitialiser ton mot de passe',
+      },
+      fields: [
+        {
+          name: 'Code de vérification',
+          description:
+            "On doit s'assurer que tu es bien à l'origine de cette demande. Tu peux finaliser la procédure en cliquant sur le bouton ci-dessous.",
+          buttons: [
+            {
+              name: 'Réinitialise ton mot de passe',
+              location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}` as const,
+              color: '#dc143c',
+            },
+          ],
+        },
+      ],
+    });
+
   export const sendTickets = async (cart: DetailedCart) => {
     const cartTickets = cart.cartItems.filter((cartItem) => cartItem.item.category === ItemCategory.ticket);
     const [content, tickets] = await Promise.all([
@@ -224,83 +318,7 @@ export namespace Mail {
   };
 
   export const sendValidationCode = async (user: Omit<User, 'hasPaid' | 'cartItems'>) =>
-    sendEmail(
-      await formatEmail({
-        receiver: user.email,
-        reason:
-          "Vous avez reçu ce mail car vous avez envoyé une demande de création de compte à l'UTT Arena. Si ce n'est pas vous, ignorez ce message ou contactez nous.",
-        title: {
-          topic: 'Code de validation',
-          banner: '',
-          short: `Salut ${user.firstname},`,
-          highlight: "Bienvenue à l'UTT Arena&nbsp;!",
-        },
-        fields: [
-          {
-            name: 'Avant de commencer...',
-            description:
-              "On sait bien que c'est pénible mais on doit vérifier que ton adresse email fonctionne bien (sinon tu ne pourra pas recevoir tes billets&nbsp;!).",
-            buttons: [
-              {
-                name: 'Confirme ton adresse email',
-                location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}` as const,
-              },
-            ],
-          },
-          {
-            name: 'Discord',
-            description:
-              "On utilise Discord pendant l'évènement, mais tu auras besoin de lier ton compte discord avec ton compte UTT Arena pour pouvoir créer ou rejoindre une équipe. Tu auras des détails là dessus à ce moment là 😉",
-          },
-          {
-            name: 'Tournoi Super Smash Bros Ultimate',
-            description:
-              "Si tu as choisi de t'inscrire à ce tournoi et que tu choisis de venir avec ta propre console, tu peux bénéficier d'une réduction sur ton billet 😉 (offre limitée à un certain nombre de places)",
-          },
-          {
-            name: 'Des questions ?',
-            description: "On t'invite à lire la faq ou à poser tes questions directement sur discord.",
-            buttons: [
-              {
-                name: 'FAQ',
-                location: `${env.front.website}/faq`,
-              },
-              {
-                name: 'Rejoindre le serveur Discord',
-                location: 'https://discord.gg/WhxZwKU',
-              },
-            ],
-          },
-        ],
-      }),
-    );
+    sendEmail(await generateValidationEmail(user));
 
-  export const sendPasswordReset = async (user: User) =>
-    sendEmail(
-      await formatEmail({
-        receiver: user.email,
-        reason:
-          "Vous avez reçu ce mail car vous avez demandé à réinitialiser votre mot de passe. Si ce n'est pas le cas, ignorez ce message.",
-        title: {
-          topic: 'Réinitialisation de votre mot de passe',
-          banner: 'Réinitialisation du mot de passe',
-          short: `Salut ${user.firstname},`,
-          highlight: 'Tu es sur le point de réinitialiser ton mot de passe',
-        },
-        fields: [
-          {
-            name: 'Code de vérification',
-            description:
-              "On doit s'assurer que tu es bien à l'origine de cette demande. Tu peux finaliser la procédure en cliquant sur le bouton ci-dessous.",
-            buttons: [
-              {
-                name: 'Réinitialise ton mot de passe',
-                location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}` as const,
-                color: '#dc143c',
-              },
-            ],
-          },
-        ],
-      }),
-    );
+  export const sendPasswordReset = async (user: User) => sendEmail(await generatePasswordResetEmail(user));
 }

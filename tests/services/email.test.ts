@@ -10,6 +10,7 @@ import { randomInt } from '../../src/utils/helpers';
 import { fetchItems } from '../../src/operations/item';
 import env from '../../src/utils/env';
 import database from '../../src/services/database';
+import { generateResetToken } from '../../src/operations/user';
 
 describe('Tests the email utils', () => {
   after(async () => {
@@ -104,5 +105,26 @@ describe('Tests the email utils', () => {
     const ticketsEmail = await Mail.generateTicketsEmail(detailedCart);
 
     fs.writeFileSync('artifacts/payment.html', ticketsEmail.html);
+  });
+
+  it(`should generate an account validation template`, async () => {
+    const user = await createFakeUser({ confirmed: false });
+
+    const validationEmail = await Mail.generateValidationEmail(user);
+
+    fs.writeFileSync('artifacts/validation.html', validationEmail.html);
+  });
+
+  it(`should generate a password reset template`, async () => {
+    let user = await createFakeUser();
+    user = {
+      ...(await generateResetToken(user.id)),
+      cartItems: [],
+      hasPaid: false,
+    };
+
+    const passwordResetEmail = await Mail.generatePasswordResetEmail(user);
+
+    fs.writeFileSync('artifacts/pwd-reset.html', passwordResetEmail.html);
   });
 });
