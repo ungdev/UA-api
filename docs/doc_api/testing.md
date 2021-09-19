@@ -11,6 +11,6 @@ De plus, tous les tests doivent pouvoir fonctionner avec les variables d'environ
 
 Dans le cas où le contrôleur possède une fonctionnalité difficile à tester, on simulera dans le test d'intégration la fonction responsable, et on testera individuellement cette fonction.
 
-Par exemple, dans `tests/callbacks/etupay.test.ts`, on simulera la fonction `sendEmail` car cette fonction est testé à un autre niveau et qu'elle est difficile à manupuler.
+Par exemple, dans `tests/etupay/callback.test.ts`, on simulera la fonction `sendEmail` car cette fonction est testé à un autre niveau et qu'elle est difficile à manupuler.
 
 Afin de vérifier que le code est bien testé, on utilisera des outils de coverage avec `nyc` pour le dépôt local et `codecov` pour le dépôt distant.

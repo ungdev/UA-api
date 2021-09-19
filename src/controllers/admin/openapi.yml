@@ -250,6 +250,10 @@
               type:
                 $ref: '#/components/schemas/Type'
                 nullable: true
+              discordId:
+                type: string
+                example: '1420070400000'
+                nullable: true
     responses:
       200:
         description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.

@@ -10,6 +10,20 @@ import Mail from 'nodemailer/lib/mailer';
 /** General **/
 /*************/
 
+export enum ActionFeedback {
+  DISCORD_OAUTH = 'oauth',
+}
+
+export enum DiscordFeedbackCode {
+  LINKED_NEW = 0,
+  LINKED_UPDATED = 1,
+  NOT_MODIFIED = 2,
+  ERR_ALREADY_LINKED = 3,
+  ERR_OAUTH_DENIED = 4,
+  ERR_BAD_REQUEST = 5,
+  ERR_UNKNOWN = 6,
+}
+
 export interface DecodedToken {
   userId: string;
 }
@@ -156,6 +170,7 @@ export const enum Error {
   ExpiredToken = 'Session expirée. Veuillez vous reconnecter',
   InvalidToken = 'Session invalide',
   InvalidCredentials = 'Identifiants invalides',
+  NoDiscordAccountLinked = 'Vous devez lier votre compte discord pour créer ou rejoindre une équipe',
 
   // 403
   // The server understood the request but refuses to authorize it

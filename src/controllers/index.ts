@@ -9,7 +9,8 @@ import items from './items';
 import teams from './teams';
 import auth from './auth';
 import tickets from './tickets';
-import callbacks from './callbacks';
+import etupay from './etupay';
+import discord from './discord';
 import admin from './admin';
 
 const options = {
@@ -51,8 +52,11 @@ router.use('/items', items);
 // Tickets routes
 router.use('/tickets', tickets);
 
-// Callbacks routes
-router.use('/callbacks', callbacks);
+// Etupay routes
+router.use('/etupay', etupay);
+
+// Discord routes
+router.use('/discord', discord);
 
 // Admin routes
 router.use('/admin', admin);

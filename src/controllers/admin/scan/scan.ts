@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error } from '../../../types';
 import { badRequest, forbidden, noContent, notFound } from '../../../utils/responses';
-import { decryptQrCode } from '../../../utils/helpers';
+import { decrypt } from '../../../utils/helpers';
 import logger from '../../../utils/logger';
 import { fetchUser, scanUser } from '../../../operations/user';
 import { validateBody } from '../../../middlewares/validation';
@@ -30,7 +30,7 @@ export default [
         const decodedQrcode = Buffer.from(qrcode, 'base64');
 
         // Tries to decrypt the qrcode
-        userId = decryptQrCode(decodedQrcode);
+        userId = decrypt(decodedQrcode);
       } catch (error) {
         logger.error(error);
         return badRequest(response, Error.InvalidBody);
