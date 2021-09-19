@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/node';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { validateBody } from '../../middlewares/validation';
 import { createUser } from '../../operations/user';
-import { Mail } from '../../services/email';
+import { MailFactory } from '../../services/email';
 import { Error } from '../../types';
 import { conflict, created } from '../../utils/responses';
 import * as validators from '../../utils/validators';
@@ -33,7 +33,7 @@ export default [
 
       // Send registration token by mail
       // Don't send sync when it is not needed
-      Mail.sendValidationCode(registeredUser).catch((error) => {
+      MailFactory.sendValidationCode(registeredUser).catch((error) => {
         Sentry.captureException(error);
         logger.warn(error);
       });

@@ -3,7 +3,7 @@ import Joi from 'joi';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { validateBody } from '../../middlewares/validation';
 import { fetchUser, generateResetToken } from '../../operations/user';
-import { Mail } from '../../services/email';
+import { MailFactory } from '../../services/email';
 import { noContent } from '../../utils/responses';
 import * as validators from '../../utils/validators';
 
@@ -26,7 +26,7 @@ export default [
       // Always return a 204 even if the user doesn't exists to avoid address leakage
       if (user) {
         await generateResetToken(user.id);
-        Mail.sendPasswordReset(user);
+        MailFactory.sendPasswordReset(user);
       }
 
       return noContent(response);

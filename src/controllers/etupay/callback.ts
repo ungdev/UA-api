@@ -1,7 +1,7 @@
 import { TransactionState } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import { fetchCart, updateCart } from '../../operations/carts';
-import { Mail } from '../../services/email';
+import { MailFactory } from '../../services/email';
 import * as etupay from '../../services/etupay';
 import { Error, EtupayError, EtupayResponse } from '../../types';
 import env from '../../utils/env';
@@ -55,7 +55,7 @@ export const clientCallback = [
       }
 
       // Send the tickets to the user
-      await Mail.sendTickets(updatedCart);
+      await MailFactory.sendTickets(updatedCart);
 
       return response.redirect(env.etupay.successUrl);
     } catch (error) {

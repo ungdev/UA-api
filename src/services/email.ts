@@ -7,78 +7,12 @@ import env from '../utils/env';
 import { formatPrice } from '../utils/helpers';
 import logger from '../utils/logger';
 import { generateTicket } from '../utils/pdf';
-
-export declare interface Mail {
-  /** The email address to send this email to (written in the footer, before the {@link reason}) */
-  receiver: string;
-  /** The reason why this mail was sent to the user. */
-  reason: string;
-  title: {
-    /**
-     * The title of the mail (in the html `title` tag).
-     * This is also the subject of the mail.
-     * Don't include 'UTT Arena {year}' as it is appended automatically
-     * when generating the mail.
-     */
-    topic: string;
-    /** The title displayed in the banner, next to the logo */
-    banner: string;
-    /**
-     * The title (or part of title) displayed at the beginning of the content box,
-     * in a small/regular font size
-     */
-    short: string;
-    /**
-     * The title (or part of title) displayed right after {@link title#short},
-     * in a pretty big font size
-     */
-    highlight: string;
-  };
-  /**
-   * The fields contained in your mail. If this property is omitted (or if the list is empty),
-   * a default error field will be displayed instead.
-   */
-  fields?: {
-    /** Name of the field, used as a field title */
-    name: string;
-    /** The content of this field. Like anywhere else in the mail,
-     * use  - \n to go to a new line
-     *      - *text* to render bold 'text'
-     *      - _text_ to render 'text' in italics
-     *      - &nbsp; to a render a non breakable space
-     */
-    description: string | string[];
-    /** A list of buttons (can be omitted) which will be appended at the end of the section */
-    buttons?: {
-      /** Button text */
-      name: string;
-      /** Button link */
-      location: string;
-      /** Button color. Matches UA colors by default */
-      color?: `#${string}`;
-    }[];
-    tables?: {
-      name: string;
-      headers: { name: string }[];
-      items: {
-        values: {
-          name: string;
-        }[];
-      }[];
-    }[];
-  }[];
-}
-
-export declare interface MailContent {
-  to: string;
-  subject: string;
-  html: string;
-}
+import type { Mail, SerializedMail, Component } from './emailContent';
 
 export const formatEmail = async (content: Mail) => {
   const template = await readFile('assets/email/template.html', 'utf8');
   const year = new Date().getFullYear();
-  return <MailContent>{
+  return <SerializedMail>{
     to: content.receiver,
     subject: `${content.title.topic} - UTT Arena ${year}`,
     html: render(
@@ -89,12 +23,53 @@ export const formatEmail = async (content: Mail) => {
       },
       undefined,
       {
-        escape: (text: string) =>
-          escape(text)
-            .replace(/&amp;nbsp;/gi, '&nbsp;')
-            .replace(/\n/gi, '<br>')
-            .replace(/_([^<>_]+)_/gi, '<i>$1</i>')
-            .replace(/\*([^*<>]+)\*/gi, '<strong>$1</strong>'),
+        escape: (text: Component): string => {
+          const factory = (item: Component, raw = true): string => {
+            if (typeof item === 'string') {
+              const escaped = escape(item)
+                .replace(/&amp;nbsp;/gi, '&nbsp;')
+                .replace(/\n/gi, '<br>')
+                .replace(/_([^<>_]+)_/gi, '<i>$1</i>')
+                .replace(/\*([^*<>]+)\*/gi, '<strong>$1</strong>');
+              if (raw) return escaped;
+              return `<span>${escaped}</span>`;
+            }
+            if (raw && Array.isArray(item)) return item.map((element: Component) => factory(element, false)).join('');
+            if (Array.isArray(item) && typeof item[0] === 'string')
+              return `<ul>${(<Array<string>>item).map((listItem) => `<li>${factory(listItem)}</li>`).join('')}</ul>`;
+            if (typeof item === 'object' && 'items' in item) {
+              const properties = Object.keys(item.items[0] ?? {});
+              if (properties.length === 0) return '';
+              const head = `<thead><tr>${properties
+                .map((propertyName) => `<td>${factory(item.items[0][propertyName])}</td>`)
+                .join('')}</tr></thead>`;
+              const body = `<tbody>${item.items
+                .slice(1)
+                .map(
+                  (row) =>
+                    `<tr>${properties.map((propertyName) => `<td>${factory(row[propertyName])}</td>`).join('')}</tr>`,
+                )
+                .join('')}</tbody>`;
+              return `${item.name ? `<div class="table name">${item.name}</div>` : ''}<table>${head}${body}</table>`;
+            }
+            if (typeof item === 'object' && 'location' in item)
+              return `<div class="actions"><a class="button" target="_blank" href="${factory(item.location)}"${
+                item.color ? ` style="background:${item.color}"` : ''
+              }>${item.name}</a></div>`;
+            if (Array.isArray(item) && typeof item[0] !== 'string') {
+              return `<div class="actions">${(<Component.Button[]>item)
+                .map(
+                  (button) =>
+                    `<a class="button" target="_blank" href="${factory(button.location)}"${
+                      button.color ? ` style="background:${button.color}"` : ''
+                    }>${button.name}</a>`,
+                )
+                .join('')}</div>`;
+            }
+            return '';
+          };
+          return factory(text);
+        },
       },
     ),
   };
@@ -116,7 +91,7 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendEmail = async (mail: MailContent, attachments?: EmailAttachement[]) => {
+export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttachement[]) => {
   const from = `${env.email.sender.name} <${env.email.sender.address}>`;
 
   await transporter.sendMail({
@@ -131,7 +106,7 @@ export const sendEmail = async (mail: MailContent, attachments?: EmailAttachemen
 };
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace Mail {
+export namespace MailFactory {
   export const generateTicketsEmail = (cart: DetailedCart) => {
     const cartTickets = cart.cartItems.filter((cartItem) => cartItem.item.category === ItemCategory.ticket);
     return formatEmail({
@@ -144,17 +119,17 @@ export namespace Mail {
       reason:
         "Vous avez reçu cet email car vous êtes inscrit à l'UTT Arena. Si ce n'est pas le cas, contactez-nous et changez le mot de passe de votre boîte mail.",
       receiver: cart.user.email,
-      fields: [
+      sections: [
         {
-          name: 'Tournoi',
-          description: [
+          title: 'Tournoi',
+          components: [
             'Voilà les dernières informations importantes nécessaires au bon déroulement de la compétition&nbsp;:',
-            '• Il est nécessaire que *tous les joueurs* de *toutes les équipes* soient présents sur notre Discord',
-            "• Ce vendredi à 21h aura lieu une cérémonie d'ouverture sur notre stream où on vous donnera tous les détails de cette édition un peu spéciale et où on répondra à toutes vos questions 😁",
-            '• Tous les tournois débutent samedi à 10h, il faudra donc être présent *à partir de 9h30* pour un check-in de toutes les équipes et joueurs',
-            "• N'hésitez à contacter un membre du staff sur Discord si vous avez une question ou que vous rencontrez un quelconque problème 😉",
-          ].join('\n'),
-          buttons: [
+            [
+              'Il est nécessaire que *tous les joueurs* de *toutes les équipes* soient présents sur notre Discord',
+              "Ce vendredi à 21h aura lieu une cérémonie d'ouverture sur notre stream où on vous donnera tous les détails de cette édition un peu spéciale et où on répondra à toutes vos questions 😁",
+              'Tous les tournois débutent samedi à 10h, il faudra donc être présent *à partir de 9h30* pour un check-in de toutes les équipes et joueurs',
+              "N'hésitez à contacter un membre du staff sur Discord si vous avez une question ou que vous rencontrez un quelconque problème 😉",
+            ],
             {
               name: 'Rejoindre le serveur Discord',
               location: 'https://discord.gg/WhxZwKU',
@@ -162,68 +137,44 @@ export namespace Mail {
           ],
         },
         {
-          name: 'Billet',
-          description: 'Tu trouveras ton *billet personnalisé* en pièce jointe de ce mail&nbsp;!',
+          title: 'Billet',
+          components: 'Tu trouveras ton *billet personnalisé* en pièce jointe de ce mail&nbsp;!',
         },
         {
-          name: 'Confirmation de commande',
-          description: 'On te confirme aussi ta commande _(et tu as bon goût&nbsp;!)_',
-          tables: [
+          title: 'Confirmation de commande',
+          components: [
+            'On te confirme aussi ta commande _(et tu as bon goût&nbsp;!)_',
             {
               name: 'Tickets',
-              headers: [
+              items: [
                 {
                   name: 'Nom',
+                  type: 'Type',
+                  price: 'Prix',
                 },
-                {
-                  name: 'Type',
-                },
-                {
-                  name: 'Prix',
-                },
+                ...cartTickets.map((ticket) => ({
+                  name: `${ticket.forUser.firstname} ${ticket.forUser.lastname}`,
+                  type: ticket.item.name,
+                  price: formatPrice(ticket.item.price),
+                })),
               ],
-              items: cartTickets.map((ticket) => ({
-                values: [
-                  {
-                    name: `${ticket.forUser.firstname} ${ticket.forUser.lastname}`,
-                  },
-                  {
-                    name: ticket.item.name,
-                  },
-                  {
-                    name: formatPrice(ticket.item.price),
-                  },
-                ],
-              })),
             },
             {
               name: 'Suppléments',
-              headers: [
+              items: [
                 {
                   name: 'Nom',
+                  amount: 'Quantité',
+                  price: 'Prix',
                 },
-                {
-                  name: 'Quantité',
-                },
-                {
-                  name: 'Prix',
-                },
+                ...cart.cartItems
+                  .filter((cartItem) => cartItem.item.category === ItemCategory.supplement)
+                  .map((item) => ({
+                    name: item.item.name,
+                    amount: `${item.quantity}`,
+                    price: formatPrice(item.item.price),
+                  })),
               ],
-              items: cart.cartItems
-                .filter((cartItem) => cartItem.item.category === ItemCategory.supplement)
-                .map((item) => ({
-                  values: [
-                    {
-                      name: item.item.name,
-                    },
-                    {
-                      name: `${item.quantity}`,
-                    },
-                    {
-                      name: formatPrice(item.item.price),
-                    },
-                  ],
-                })),
             },
           ],
         },
@@ -242,12 +193,11 @@ export namespace Mail {
         short: `Salut ${user.firstname},`,
         highlight: "Bienvenue à l'UTT Arena&nbsp;!",
       },
-      fields: [
+      sections: [
         {
-          name: 'Avant de commencer...',
-          description:
+          title: 'Avant de commencer...',
+          components: [
             "On sait bien que c'est pénible mais on doit vérifier que ton adresse email fonctionne bien (sinon tu ne pourras pas recevoir tes billets&nbsp;!).",
-          buttons: [
             {
               name: 'Confirme ton adresse email',
               location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}` as const,
@@ -255,27 +205,29 @@ export namespace Mail {
           ],
         },
         {
-          name: 'Discord',
-          description:
+          title: 'Discord',
+          components:
             "On utilise Discord pendant l'évènement, et tu auras besoin de lier ton compte discord avec ton compte UTT Arena pour pouvoir créer ou rejoindre une équipe. On te donnera plus de détails là-dessus à ce moment-là 😉",
         },
         {
-          name: 'Tournoi Super Smash Bros Ultimate',
-          description:
+          title: 'Tournoi Super Smash Bros Ultimate',
+          components:
             "Si tu as choisi de t'inscrire à ce tournoi et que tu choisis de venir avec ta propre console, tu peux bénéficier d'une réduction sur ton billet 😉 _(offre limitée à un certain nombre de places)_",
         },
         {
-          name: 'Des questions ?',
-          description: "On t'invite à lire la faq ou à poser tes questions directement sur discord.",
-          buttons: [
-            {
-              name: 'FAQ',
-              location: `${env.front.website}/faq`,
-            },
-            {
-              name: 'Rejoindre le serveur Discord',
-              location: 'https://discord.gg/WhxZwKU',
-            },
+          title: 'Des questions ?',
+          components: [
+            "On t'invite à lire la faq ou à poser tes questions directement sur discord.",
+            [
+              {
+                name: 'FAQ',
+                location: `${env.front.website}/faq`,
+              },
+              {
+                name: 'Rejoindre le serveur Discord',
+                location: 'https://discord.gg/WhxZwKU',
+              },
+            ],
           ],
         },
       ],
@@ -292,12 +244,11 @@ export namespace Mail {
         short: `Salut ${user.firstname},`,
         highlight: 'Tu es sur le point de réinitialiser ton mot de passe',
       },
-      fields: [
+      sections: [
         {
-          name: 'Code de vérification',
-          description:
+          title: 'Code de vérification',
+          components: [
             "On doit s'assurer que tu es bien à l'origine de cette demande. Tu peux finaliser la procédure en cliquant sur le bouton ci-dessous.",
-          buttons: [
             {
               name: 'Réinitialise ton mot de passe',
               location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}` as const,
