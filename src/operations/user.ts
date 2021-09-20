@@ -5,6 +5,7 @@ import nanoid from '../utils/nanoid';
 import env from '../utils/env';
 import { Permission, PrimitiveUser, User, UserSearchQuery, UserWithTeam } from '../types';
 import { serializePermissions } from '../utils/helpers';
+import * as validators from '../utils/validators';
 
 export const userInclusions = {
   cartItems: {
@@ -51,6 +52,30 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
 export const fetchUserByUsername = async (parameterId: string, key = 'username'): Promise<User> => {
   const user = await database.user.findUnique({
     where: { [key]: parameterId },
+    include: userInclusions,
+  });
+
+  return formatUser(user);
+};
+
+export const fetchUserByEmail = async (parameterId: string, key = 'email'): Promise<User> => {
+  const user = await database.user.findUnique({
+    where: { [key]: parameterId },
+    include: userInclusions,
+  });
+  return formatUser(user);
+};
+
+export const fetchQueryUser = async (query: string): Promise<User> => {
+  let field;
+  if (!validators.email.validate(query).error) {
+    field = 'email';
+  }
+  else if (!validators.username.validate(query).error) {
+    field = 'username';
+  }
+  const user = await database.user.findUnique({
+    where: { [field]: query },
     include: userInclusions,
   });
 

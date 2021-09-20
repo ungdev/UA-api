@@ -3,11 +3,11 @@ import createCart from './createCart';
 import getCarts from './getCarts';
 import updateUser from './updateUser';
 import getUser from './getUser';
-import getUsers from './getUsers';
+import searchUser from './searchUser';
 
 const router = Router();
 
-router.get('/', getUsers);
+router.get('/search', searchUser);
 router.get('/current', getUser);
 
 router.put('/current', updateUser);

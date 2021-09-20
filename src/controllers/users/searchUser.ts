@@ -1,27 +1,31 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { validateQuery } from '../../middlewares/validation';
-import { fetchUserByUsername } from '../../operations/user';
+import { fetchQueryUser } from '../../operations/user';
 import { filterUserRestricted } from '../../utils/filters';
-import { success } from '../../utils/responses';
+import { badRequest, success } from '../../utils/responses';
+import { Error } from '../../types'
 import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
   validateQuery(
     Joi.object({
-      userId: validators.username.required(),
+      query: Joi.string().required(),
     }),
   ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { userId } = request.query as { userId: string };
-      const user = await fetchUserByUsername(userId);
-      const result = filterUserRestricted(user);
 
-      return success(response, result);
+      const { query } = request.query as { query: string };
+      const user = await fetchQueryUser(query);
+      if (!user) {
+        return badRequest(response, Error.InvalidQueryParameters)
+      }
+      return success(response, filterUserRestricted(user));
+
     } catch (error) {
       return next(error);
     }
