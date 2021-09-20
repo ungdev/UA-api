@@ -29,7 +29,9 @@ describe('GET /teams', () => {
   });
 
   it('should not accept bad query parameters', async () => {
-    await request(app).get('/teams?tournamentId=lolPro&locked=mdr').expect(400, { error: Error.InvalidQueryParameters });
+    await request(app)
+      .get('/teams?tournamentId=lolPro&locked=mdr')
+      .expect(400, { error: Error.InvalidQueryParameters });
   });
 
   it('should return not accept unknown tournament', async () => {
