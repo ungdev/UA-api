@@ -9,300 +9,292 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito&display=swap" />
     <title>UTT Arena {{& year}} - {{& title.topic}}</title>
-    <style type="text/css">
-      html,
-      body {
-        width: 100%;
-        font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
-        -webkit-text-size-adjust: 100%;
-        -ms-text-size-adjust: 100%;
-        padding: 0;
-        margin: 0;
-        background-color: #f6f6f6;
-      }
-
-      .title {
-        font-family: Montserrat;
-      }
-
-      .wrapper {
-        background-color: #ffffff;
-        max-width: 600px;
-        width: 100vw;
-        margin: auto;
-      }
-
-      .wrapper > * {
-        padding: 20px;
-      }
-
-      .header {
-        min-height: 180px;
-        background-color: #202020;
-        box-sizing: border-box;
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        align-items: center;
-      }
-
-      .header img {
-        display: block;
-        border: 0;
-        outline: none;
-        text-decoration: none;
-        -ms-interpolation-mode: bicubic;
-      }
-
-      .header span {
-        color: #fff;
-        font-size: 22px;
-      }
-
-      .content {
-        color: #202020;
-        -webkit-text-size-adjust: none;
-        -ms-text-size-adjust: none;
-        position: relative;
-      }
-
-      .header + .content * {
-        line-height: 21px;
-        font-size: 14px;
-        text-align: center !important;
-      }
-
-      .content:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%) translateY(50%);
-        width: 90%;
-        border-bottom: 4px dotted #fbb464;
-      }
-
-      .content > .highlight {
-        line-height: 36px !important;
-        font-size: 30px !important;
-        font-style: normal;
-        font-weight: normal;
-        color: #202020 !important;
-        margin: 0 !important;
-      }
-
-      .content > .title {
-        line-height: 29px;
-        font-size: 24px;
-        text-align: initial;
-        color: #006492;
-        margin-bottom: 10px;
-      }
-
-      .content > .title ~ * {
-        text-align: initial;
-      }
-
-      .footer {
-        color: #696969;
-        line-height: 18px;
-        -webkit-text-size-adjust: none;
-        -ms-text-size-adjust: none;
-        font-size: 12px;
-        text-align: center;
-      }
-
-      .footer > .social-icons {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-evenly;
-        padding-block: 10px;
-        gap: 10px;
-      }
-
-      .footer > .social-icons * {
-        font-size: 14px;
-        -webkit-text-size-adjust: none;
-        -ms-text-size-adjust: none;
-        border: none !important;
-        flex-shrink: 0;
-      }
-
-      .footer img {
-        -ms-interpolation-mode: bicubic;
-        display: block;
-      }
-
-      a {
-        text-decoration: none !important;
-        border-bottom: 1px solid !important;
-        color: #f1737f !important;
-      }
-
-      .disabled {
-        display: none;
-      }
-
-      .actions {
-        display: flex;
-        flex-flow: row wrap;
-        gap: 10px;
-        align-items: center;
-        margin-top: 10px;
-      }
-
-      .actions > .button {
-        display: block;
-        color: #fff !important;
-        background-color: #f1737f !important;
-        border: none !important;
-        border-radius: 2px;
-        padding: 3px 6px 2px;
-      }
-
-      .reason {
-        padding-block: 10px;
-      }
-
-      .receiver {
-        padding: 25px 0 0;
-      }
-
-      .table.name {
-        font-size: 18px;
-        color: #006492;
-        margin-block: 8px;
-      }
-
-      table {
-        width: 100%;
-        background-color: #f6f6f6;
-        outline: none;
-        border-collapse: collapse;
-        border-radius: 4px;
-        overflow: hidden;
-      }
-
-      thead {
-        background-color: #333;
-        color: #fff;
-        font-weight: bold;
-      }
-
-      td {
-        padding: 5px;
-      }
-
-      td:not(:first-child) {
-        text-align: center;
-      }
-
-      tr:nth-child(2n) {
-        background-color: #e8e8e8;
-      }
-
-      ul {
-        list-style: none;
-        padding-left: 2.5ch;
-        margin-left: 0;
-      }
-
-      ul li {
-        position: relative;
-      }
-
-      ul li::before {
-        content: '';
-        position: absolute;
-        width: 5px;
-        height: 5px;
-        background: #f1737f;
-        top: 0.5em;
-        left: -1.5ch;
-        border-radius: 50%;
-      }
-    </style>
   </head>
 
-  <body>
-    <div class="wrapper">
-      <div class="header">
-        <img src="https://arena.utt.fr/logo.png" alt="Logo UTT Arena" title="Logo UTT Arena" width="140" />
-        <span class="title">{{title.banner}}</span>
+  <body
+    style="
+      width: 100%;
+      font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      padding: 0;
+      margin: 0;
+      background-color: #f6f6f6;
+    "
+  >
+    <div style="background-color: #ffffff; max-width: 600px; width: 100vw; margin: auto">
+      <div
+        style="
+          padding: 20px;
+          min-height: 180px;
+          background-color: #202020;
+          box-sizing: border-box;
+          display: flex;
+          justify-content: center;
+          gap: 15px;
+          align-items: center;
+        "
+      >
+        <img
+          src="https://arena.utt.fr/logo.png"
+          alt="Logo UTT Arena"
+          title="Logo UTT Arena"
+          width="140"
+          style="
+            display: block;
+            width: 140px;
+            border: 0;
+            outline: none;
+            text-decoration: none;
+            -ms-interpolation-mode: bicubic;
+          "
+        />
+        <span style="font-family: Montserrat; color: #fff; font-size: 22px">{{title.banner}}</span>
       </div>
-      <div class="content">
-        <div>{{title.short}}</div>
-        <div class="highlight title">{{title.highlight}}</div>
+      <div
+        style="
+          padding: 20px;
+          color: #202020;
+          -webkit-text-size-adjust: none;
+          -ms-text-size-adjust: none;
+          position: relative;
+        "
+      >
+        <div style="line-height: 21px; font-size: 14px; text-align: center">{{title.short}}</div>
+        <div
+          style="
+            text-align: center;
+            line-height: 36px;
+            font-size: 30px;
+            font-style: normal;
+            font-weight: normal;
+            font-family: Montserrat;
+            color: #202020;
+            margin: 0;
+          "
+        >
+          {{title.highlight}}
+        </div>
+        <div
+          style="
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(50%);
+            width: 90%;
+            border-bottom: 4px dotted #fbb464;
+          "
+        ></div>
       </div>
       {{#sections}}
-      <div class="content">
-        <div class="title">{{title}}</div>
+      <div
+        style="
+          padding: 20px;
+          color: #202020;
+          -webkit-text-size-adjust: none;
+          -ms-text-size-adjust: none;
+          position: relative;
+        "
+      >
+        <div
+          style="
+            font-family: Montserrat;
+            line-height: 29px;
+            font-size: 24px;
+            text-align: initial;
+            color: #006492;
+            margin-bottom: 10px;
+          "
+        >
+          {{title}}
+        </div>
         {{components}}
+        <div
+          style="
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(50%);
+            width: 90%;
+            border-bottom: 4px dotted #fbb464;
+          "
+        ></div>
       </div>
       {{/sections}} {{^sections}}
-      <div class="content">
-        <div class="title">Oups!</div>
+      <div
+        style="
+          padding: 20px;
+          color: #202020;
+          -webkit-text-size-adjust: none;
+          -ms-text-size-adjust: none;
+          position: relative;
+        "
+      >
+        <div
+          style="
+            font-family: Montserrat;
+            line-height: 29px;
+            font-size: 24px;
+            text-align: initial;
+            color: #006492;
+            margin-bottom: 10px;
+          "
+        >
+          Oups!
+        </div>
         <div>Le contenu du mail n'a pas été chargé !</div>
-        <div>Merci de <a href="mailto:arena@utt.fr">contacter les admins de l'UA</a> pour résoudre ce problème.</div>
+        <div>
+          Merci de
+          <a
+            href="mailto:arena@utt.fr"
+            style="text-decoration: none !important; border-bottom: 1px solid !important; color: #f1737f !important"
+            >contacter les admins de l'UA</a
+          >
+          pour résoudre ce problème.
+        </div>
       </div>
       {{/sections}}
-      <div class="footer">
+      <div
+        style="
+          padding: 20px;
+          color: #696969;
+          line-height: 18px;
+          -webkit-text-size-adjust: none;
+          -ms-text-size-adjust: none;
+          font-size: 12px;
+          text-align: center;
+        "
+      >
         <div>Suivez-nous sur les réseaux sociaux pour suivre les infos en temps réel pendant l'événement&nbsp;!</div>
-        <div class="social-icons">
-          <a target="_blank" href="https://www.facebook.com/UTTArena">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-evenly; padding-block: 10px; gap: 10px">
+          <a
+            target="_blank"
+            href="https://www.facebook.com/UTTArena"
+            style="
+              font-size: 14px;
+              -webkit-text-size-adjust: none;
+              -ms-text-size-adjust: none;
+              border: none !important;
+              flex-shrink: 0;
+            "
+          >
             <img
               title="Facebook"
               src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj4KPHN2ZyBoZWlnaHQ9IjEwMCUiIHN0eWxlPSJmaWxsLXJ1bGU6ZXZlbm9kZDtjbGlwLXJ1bGU6ZXZlbm9kZDtzdHJva2UtbGluZWpvaW46cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MjsiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHdpZHRoPSIxMDAlIiB4bWw6c3BhY2U9InByZXNlcnZlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnNlcmlmPSJodHRwOi8vd3d3LnNlcmlmLmNvbS8iIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4KICAgIDxnPgogICAgICAgIDxwYXRoIGQ9Ik01MTIsMjU2YzAsLTE0MS4zODUgLTExNC42MTUsLTI1NiAtMjU2LC0yNTZjLTE0MS4zODUsMCAtMjU2LDExNC42MTUgLTI1NiwyNTZjMCwxMjcuNzc3IDkzLjYxNiwyMzMuNjg1IDIxNiwyNTIuODlsMCwtMTc4Ljg5bC02NSwwbDAsLTc0bDY1LDBsMCwtNTYuNGMwLC02NC4xNiAzOC4yMTksLTk5LjYgOTYuNjk1LC05OS42YzI4LjAwOSwwIDU3LjMwNSw1IDU3LjMwNSw1bDAsNjNsLTMyLjI4MSwwYy0zMS44MDEsMCAtNDEuNzE5LDE5LjczMyAtNDEuNzE5LDM5Ljk3OGwwLDQ4LjAyMmw3MSwwbC0xMS4zNSw3NGwtNTkuNjUsMGwwLDE3OC44OWMxMjIuMzg1LC0xOS4yMDUgMjE2LC0xMjUuMTEzIDIxNiwtMjUyLjg5WiIgc3R5bGU9ImZpbGw6IzE4NzdmMjtmaWxsLXJ1bGU6bm9uemVybzsiLz4KICAgICAgICA8cGF0aCBkPSJNMzU1LjY1LDMzMGwxMS4zNSwtNzRsLTcxLDBsMCwtNDguMDIyYzAsLTIwLjI0NSA5LjkxNywtMzkuOTc4IDQxLjcxOSwtMzkuOTc4bDMyLjI4MSwwbDAsLTYzYzAsMCAtMjkuMjk3LC01IC01Ny4zMDUsLTVjLTU4LjQ3NiwwIC05Ni42OTUsMzUuNDQgLTk2LjY5NSw5OS42bDAsNTYuNGwtNjUsMGwwLDc0bDY1LDBsMCwxNzguODljMTMuMDMzLDIuMDQ1IDI2LjM5MiwzLjExIDQwLDMuMTFjMTMuNjA4LDAgMjYuOTY2LC0xLjA2NSA0MCwtMy4xMWwwLC0xNzguODlsNTkuNjUsMFoiIHN0eWxlPSJmaWxsOiNmZmY7ZmlsbC1ydWxlOm5vbnplcm87Ii8+CiAgICA8L2c+Cjwvc3ZnPg=="
               alt="Fb"
               width="32"
+              style="-ms-interpolation-mode: bicubic; display: block"
             />
           </a>
-          <a target="_blank" href="https://twitter.com/UTTArena">
+          <a
+            target="_blank"
+            href="https://twitter.com/UTTArena"
+            style="
+              font-size: 14px;
+              -webkit-text-size-adjust: none;
+              -ms-text-size-adjust: none;
+              border: none !important;
+              flex-shrink: 0;
+            "
+          >
             <img
               title="Twitter"
               src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGhlaWdodD0iMTAwJSIgc3R5bGU9ImZpbGwtcnVsZTpldmVub2RkO2NsaXAtcnVsZTpldmVub2RkO3N0cm9rZS1saW5lam9pbjpyb3VuZDtzdHJva2UtbWl0ZXJsaW1pdDoyOyIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiIgd2lkdGg9IjEwMCUiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6c2VyaWY9Imh0dHA6Ly93d3cuc2VyaWYuY29tLyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxyZWN0IGhlaWdodD0iNDAwIiBzdHlsZT0iZmlsbDpub25lOyIgd2lkdGg9IjQwMCIgeD0iNTYiIHk9IjU2Ii8+PHBhdGggZD0iTTE2MS4wMTQsNDY0LjAxM2MxOTMuMjA4LDAgMjk4Ljg4NSwtMTYwLjA3MSAyOTguODg1LC0yOTguODg1YzAsLTQuNTQ2IDAsLTkuMDcyIC0wLjMwNywtMTMuNTc4YzIwLjU1OCwtMTQuODcxIDM4LjMwNSwtMzMuMjgyIDUyLjQwOCwtNTQuMzc0Yy0xOS4xNzEsOC40OTUgLTM5LjUxLDE0LjA2NSAtNjAuMzM0LDE2LjUyN2MyMS45MjQsLTEzLjEyNCAzOC4zNDMsLTMzLjc4MiA0Ni4xODIsLTU4LjEwMmMtMjAuNjE5LDEyLjIzNSAtNDMuMTgsMjAuODU5IC02Ni43MDMsMjUuNDk4Yy0xOS44NjIsLTIxLjEyMSAtNDcuNjAyLC0zMy4xMTIgLTc2LjU5MywtMzMuMTEyYy01Ny42ODIsMCAtMTA1LjE0NSw0Ny40NjQgLTEwNS4xNDUsMTA1LjE0NGMwLDguMDAyIDAuOTE0LDE1Ljk3OSAyLjcyMiwyMy43NzNjLTg0LjQxOCwtNC4yMzEgLTE2My4xOCwtNDQuMTYxIC0yMTYuNDk0LC0xMDkuNzUyYy0yNy43MjQsNDcuNzI2IC0xMy4zNzksMTA5LjU3NiAzMi41MjIsMTQwLjIyNmMtMTYuNzE1LC0wLjQ5NSAtMzMuMDcxLC01LjAwNSAtNDcuNjc3LC0xMy4xNDhsMCwxLjMzMWMwLjAxNCw0OS44MTQgMzUuNDQ3LDkzLjExMSA4NC4yNzUsMTAyLjk3NGMtMTUuNDY0LDQuMjE3IC0zMS42OTMsNC44MzMgLTQ3LjQzMSwxLjgwMmMxMy43MjcsNDIuNjg1IDUzLjMxMSw3Mi4xMDggOTguMTQsNzIuOTVjLTM3LjE5LDI5LjIyNyAtODMuMTU3LDQ1LjEwMyAtMTMwLjQ1OCw0NS4wNTZjLTguMzU4LC0wLjAxNiAtMTYuNzA4LC0wLjUyMiAtMjUuMDA2LC0xLjUxNmM0OC4wMzQsMzAuODI1IDEwMy45NCw0Ny4xOCAxNjEuMDE0LDQ3LjEwNCIgc3R5bGU9ImZpbGw6IzFkYTFmMjtmaWxsLXJ1bGU6bm9uemVybzsiLz48L3N2Zz4="
               alt="Tw"
               width="32"
+              style="-ms-interpolation-mode: bicubic; display: block"
             />
           </a>
-          <a target="_blank" href="https://www.instagram.com/uttarena/">
+          <a
+            target="_blank"
+            href="https://www.instagram.com/uttarena/"
+            style="
+              font-size: 14px;
+              -webkit-text-size-adjust: none;
+              -ms-text-size-adjust: none;
+              border: none !important;
+              flex-shrink: 0;
+            "
+          >
             <img
               title="Instagram"
               src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaWQ9IkxheWVyXzEiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDEwMDAgMTAwMDsiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDEwMDAgMTAwMCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDp1cmwoI1NWR0lEXzFfKTt9Cgkuc3Qxe2ZpbGw6I0ZGRkZGRjt9Cjwvc3R5bGU+PGxpbmVhckdyYWRpZW50IGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiBpZD0iU1ZHSURfMV8iIHgxPSIxNDYuNDQ2NSIgeDI9Ijg1My41NTM1IiB5MT0iODUzLjU1MzUiIHkyPSIxNDYuNDQ2NSI+PHN0b3Agb2Zmc2V0PSIwIiBzdHlsZT0ic3RvcC1jb2xvcjojRkZENTIxIi8+PHN0b3Agb2Zmc2V0PSI1LjUxMDQ4MWUtMDIiIHN0eWxlPSJzdG9wLWNvbG9yOiNGRkQwMjAiLz48c3RvcCBvZmZzZXQ9IjAuMTI0MSIgc3R5bGU9InN0b3AtY29sb3I6I0ZFQzAxRSIvPjxzdG9wIG9mZnNldD0iMC4yMDA0IiBzdHlsZT0ic3RvcC1jb2xvcjojRkNBNzFCIi8+PHN0b3Agb2Zmc2V0PSIwLjI4MjEiIHN0eWxlPSJzdG9wLWNvbG9yOiNGQTgzMTYiLz48c3RvcCBvZmZzZXQ9IjAuMzY4MSIgc3R5bGU9InN0b3AtY29sb3I6I0Y4NTUxMCIvPjxzdG9wIG9mZnNldD0iMC40NTYzIiBzdHlsZT0ic3RvcC1jb2xvcjojRjUxRTA5Ii8+PHN0b3Agb2Zmc2V0PSIwLjUiIHN0eWxlPSJzdG9wLWNvbG9yOiNGMzAwMDUiLz48c3RvcCBvZmZzZXQ9IjAuNTAzNSIgc3R5bGU9InN0b3AtY29sb3I6I0YyMDAwNyIvPjxzdG9wIG9mZnNldD0iMC41OTY2IiBzdHlsZT0ic3RvcC1jb2xvcjojRTEwMDNCIi8+PHN0b3Agb2Zmc2V0PSIwLjY4NzkiIHN0eWxlPSJzdG9wLWNvbG9yOiNEMzAwNjciLz48c3RvcCBvZmZzZXQ9IjAuNzc1NyIgc3R5bGU9InN0b3AtY29sb3I6I0M3MDA4OCIvPjxzdG9wIG9mZnNldD0iMC44NTg5IiBzdHlsZT0ic3RvcC1jb2xvcjojQkYwMEEwIi8+PHN0b3Agb2Zmc2V0PSIwLjkzNTciIHN0eWxlPSJzdG9wLWNvbG9yOiNCQjAwQUYiLz48c3RvcCBvZmZzZXQ9IjEiIHN0eWxlPSJzdG9wLWNvbG9yOiNCOTAwQjQiLz48L2xpbmVhckdyYWRpZW50PjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01MDAsMTAwMEw1MDAsMTAwMEMyMjMuOSwxMDAwLDAsNzc2LjEsMCw1MDB2MEMwLDIyMy45LDIyMy45LDAsNTAwLDBoMGMyNzYuMSwwLDUwMCwyMjMuOSw1MDAsNTAwdjAgIEMxMDAwLDc3Ni4xLDc3Ni4xLDEwMDAsNTAwLDEwMDB6Ii8+PGc+PHBhdGggY2xhc3M9InN0MSIgZD0iTTUwMCwyMjAuMmM5MS4xLDAsMTAxLjksMC4zLDEzNy45LDJjMzMuMywxLjUsNTEuNCw3LjEsNjMuNCwxMS44YzE1LjksNi4yLDI3LjMsMTMuNiwzOS4yLDI1LjUgICBjMTEuOSwxMS45LDE5LjMsMjMuMywyNS41LDM5LjJjNC43LDEyLDEwLjIsMzAuMSwxMS44LDYzLjRjMS42LDM2LDIsNDYuOCwyLDEzNy45cy0wLjMsMTAxLjktMiwxMzcuOSAgIGMtMS41LDMzLjMtNy4xLDUxLjQtMTEuOCw2My40Yy02LjIsMTUuOS0xMy42LDI3LjMtMjUuNSwzOS4yYy0xMS45LDExLjktMjMuMywxOS4zLTM5LjIsMjUuNWMtMTIsNC43LTMwLjEsMTAuMi02My40LDExLjggICBjLTM2LDEuNi00Ni44LDItMTM3LjksMnMtMTAxLjktMC4zLTEzNy45LTJjLTMzLjMtMS41LTUxLjQtNy4xLTYzLjQtMTEuOGMtMTUuOS02LjItMjcuMy0xMy42LTM5LjItMjUuNSAgIGMtMTEuOS0xMS45LTE5LjMtMjMuMy0yNS41LTM5LjJjLTQuNy0xMi0xMC4yLTMwLjEtMTEuOC02My40Yy0xLjYtMzYtMi00Ni44LTItMTM3LjlzMC4zLTEwMS45LDItMTM3LjkgICBjMS41LTMzLjMsNy4xLTUxLjQsMTEuOC02My40YzYuMi0xNS45LDEzLjYtMjcuMywyNS41LTM5LjJjMTEuOS0xMS45LDIzLjMtMTkuMywzOS4yLTI1LjVjMTItNC43LDMwLjEtMTAuMiw2My40LTExLjggICBDMzk4LjEsMjIwLjUsNDA4LjksMjIwLjIsNTAwLDIyMC4yIE01MDAsMTU4LjdjLTkyLjcsMC0xMDQuMywwLjQtMTQwLjcsMi4xYy0zNi4zLDEuNy02MS4xLDcuNC04Mi45LDE1LjkgICBDMjU0LDE4NS4zLDIzNC45LDE5NywyMTYsMjE2Yy0xOSwxOS0zMC42LDM4LTM5LjQsNjAuNWMtOC40LDIxLjctMTQuMiw0Ni41LTE1LjksODIuOWMtMS43LDM2LjQtMi4xLDQ4LTIuMSwxNDAuNyAgIGMwLDkyLjcsMC40LDEwNC4zLDIuMSwxNDAuN2MxLjcsMzYuMyw3LjQsNjEuMSwxNS45LDgyLjlDMTg1LjMsNzQ2LDE5Nyw3NjUuMSwyMTYsNzg0YzE5LDE5LDM4LDMwLjYsNjAuNSwzOS40ICAgYzIxLjcsOC40LDQ2LjUsMTQuMiw4Mi45LDE1LjljMzYuNCwxLjcsNDgsMi4xLDE0MC43LDIuMXMxMDQuMy0wLjQsMTQwLjctMi4xYzM2LjMtMS43LDYxLjEtNy40LDgyLjktMTUuOSAgIEM3NDYsODE0LjcsNzY1LjEsODAzLDc4NCw3ODRjMTktMTksMzAuNi0zOCwzOS40LTYwLjVjOC40LTIxLjcsMTQuMi00Ni41LDE1LjktODIuOWMxLjctMzYuNCwyLjEtNDgsMi4xLTE0MC43ICAgcy0wLjQtMTA0LjMtMi4xLTE0MC43Yy0xLjctMzYuMy03LjQtNjEuMS0xNS45LTgyLjlDODE0LjcsMjU0LDgwMywyMzQuOSw3ODQsMjE2Yy0xOS0xOS0zOC0zMC42LTYwLjUtMzkuNCAgIGMtMjEuNy04LjQtNDYuNS0xNC4yLTgyLjktMTUuOUM2MDQuMywxNTkuMSw1OTIuNywxNTguNyw1MDAsMTU4LjdMNTAwLDE1OC43eiIvPjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik01MDAsMzI0LjdjLTk2LjgsMC0xNzUuMyw3OC41LTE3NS4zLDE3NS4zUzQwMy4yLDY3NS4zLDUwMCw2NzUuM1M2NzUuMyw1OTYuOCw2NzUuMyw1MDAgICBTNTk2LjgsMzI0LjcsNTAwLDMyNC43eiBNNTAwLDYxMy44Yy02Mi44LDAtMTEzLjgtNTAuOS0xMTMuOC0xMTMuOFM0MzcuMiwzODYuMiw1MDAsMzg2LjJjNjIuOCwwLDExMy44LDUwLjksMTEzLjgsMTEzLjggICBTNTYyLjgsNjEzLjgsNTAwLDYxMy44eiIvPjxjaXJjbGUgY2xhc3M9InN0MSIgY3g9IjY4Mi4yIiBjeT0iMzE3LjgiIHI9IjQxIi8+PC9nPjwvc3ZnPg=="
               alt="Inst"
               width="32"
+              style="-ms-interpolation-mode: bicubic; display: block"
             />
           </a>
-          <a target="_blank" href="https://www.youtube.com/user/UTTNetGroup/">
+          <a
+            target="_blank"
+            href="https://www.youtube.com/user/UTTNetGroup/"
+            style="
+              font-size: 14px;
+              -webkit-text-size-adjust: none;
+              -ms-text-size-adjust: none;
+              border: none !important;
+              flex-shrink: 0;
+            "
+          >
             <img
               title="Youtube"
               src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaWQ9IkxheWVyXzEiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDEwMDAgMTAwMDsiIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDEwMDAgMTAwMCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PHN0eWxlIHR5cGU9InRleHQvY3NzIj4KCS5zdDB7ZmlsbDojRkYwMDAwO30KCS5zdDF7ZmlsbDojRkZGRkZGO30KPC9zdHlsZT48dGl0bGUvPjxnPjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01MDAsMTAwMEw1MDAsMTAwMEMyMjMuOSwxMDAwLDAsNzc2LjEsMCw1MDB2MEMwLDIyMy45LDIyMy45LDAsNTAwLDBoMGMyNzYuMSwwLDUwMCwyMjMuOSw1MDAsNTAwdjAgICBDMTAwMCw3NzYuMSw3NzYuMSwxMDAwLDUwMCwxMDAweiIvPjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik04MTguMiwzMzkuMWMtNy42LTI4LjgtMzAuMS01MS40LTU4LjctNTkuMWMtNTEuOC0xNC0yNTkuNC0xNC0yNTkuNC0xNHMtMjA3LjcsMC0yNTkuNCwxNCAgIGMtMjguNiw3LjctNTEuMSwzMC4zLTU4LjcsNTkuMUMxNjgsMzkxLjIsMTY4LDUwMCwxNjgsNTAwczAsMTA4LjgsMTMuOSwxNjAuOWM3LjYsMjguOCwzMC4xLDUxLjQsNTguNyw1OS4xICAgYzUxLjgsMTQsMjU5LjQsMTQsMjU5LjQsMTRzMjA3LjcsMCwyNTkuNC0xNGMyOC42LTcuNyw1MS4xLTMwLjMsNTguNy01OS4xQzgzMiw2MDguOCw4MzIsNTAwLDgzMiw1MDBTODMyLDM5MS4yLDgxOC4yLDMzOS4xeiAgICBNNDMyLjEsNTk4LjdWNDAxLjNMNjA1LjYsNTAwTDQzMi4xLDU5OC43eiIvPjwvZz48L3N2Zz4="
               alt="Yt"
               width="32"
+              style="-ms-interpolation-mode: bicubic; display: block"
             />
           </a>
-          <a target="_blank" href="https://www.twitch.tv/uttarena">
+          <a
+            target="_blank"
+            href="https://www.twitch.tv/uttarena"
+            style="
+              font-size: 14px;
+              -webkit-text-size-adjust: none;
+              -ms-text-size-adjust: none;
+              border: none !important;
+              flex-shrink: 0;
+            "
+          >
             <img
               title="Twitch"
               src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGhlaWdodD0iNTEycHgiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTI7IiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEycHgiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxnIGlkPSJfeDMzXzQzLXR3aXRjaCI+PGc+PHBvbHlnb24gcG9pbnRzPSI2Ny4xNzUsMjYuMDAxIDM2LjI2OSwxMDQuOTYxIDM2LjI2OSw0MjcuNjggMTQ2LjEzNSw0MjcuNjggMTQ2LjEzNSw0ODUuOTk5ICAgICAyMDcuOTQ4LDQ4NS45OTkgMjY2LjI2OSw0MjcuNjggMzU1LjU5OCw0MjcuNjggNDc1LjczMSwzMDcuNTQ0IDQ3NS43MzEsMjYuMDAxICAgIiBzdHlsZT0iZmlsbDojNjQ0MUE1OyIvPjxwb2x5Z29uIHBvaW50cz0iNDM0LjU1OCwyODYuOTA1IDM2NS44NjYsMzU1LjU5OCAyNTYuMDAxLDM1NS41OTggMTk3LjY3OSw0MTMuOTE3IDE5Ny42NzksMzU1LjU5OCAgICAgMTA0Ljk2LDM1NS41OTggMTA0Ljk2LDY3LjE3NiA0MzQuNTU4LDY3LjE3NiAgICIgc3R5bGU9ImZpbGw6I0ZGRkZGRjsiLz48cmVjdCBoZWlnaHQ9IjEyMC4wMyIgc3R5bGU9ImZpbGw6IzY0NDFBNTsiIHdpZHRoPSI0MS4xNzQiIHg9IjMyNC42OTIiIHk9IjE0Ni4xMzQiLz48cmVjdCBoZWlnaHQ9IjEyMC4wMyIgc3R5bGU9ImZpbGw6IzY0NDFBNTsiIHdpZHRoPSI0MS4xNzciIHg9IjIxNC44MjQiIHk9IjE0Ni4xMzQiLz48L2c+PC9nPjxnIGlkPSJMYXllcl8xIi8+PC9zdmc+"
               alt="Ttv"
               width="32"
+              style="-ms-interpolation-mode: bicubic; display: block"
             />
           </a>
-          <a target="_blank" href="https://discord.gg/WhxZwKU">
+          <a
+            target="_blank"
+            href="https://discord.gg/WhxZwKU"
+            style="
+              font-size: 14px;
+              -webkit-text-size-adjust: none;
+              -ms-text-size-adjust: none;
+              border: none !important;
+              flex-shrink: 0;
+            "
+          >
             <img
               title="Discord"
               src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgZGF0YS1uYW1lPSJMYXllciAxIiBpZD0iTGF5ZXJfMSIgdmlld0JveD0iMCAwIDEyOCAxMjgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMwNjJiMzE7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZS8+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNOTYuNTUsMTRhOS45Miw5LjkyLDAsMCwxLDEwLDkuODlWMTEwbC0xMC40NS05LjEyTDkwLjE5LDk1LjUsODQsODkuNzlsMi41OCw4Ljg4SDMxLjQ1YTkuOTIsOS45MiwwLDAsMS0xMC05Ljg5VjIzLjg5YTkuOTIsOS45MiwwLDAsMSwxMC05Ljg5SDk2LjU1bTAtNi41SDMxLjQ1QTE2LjQ0LDE2LjQ0LDAsMCwwLDE1LDIzLjg5djY0LjlhMTYuNDQsMTYuNDQsMCwwLDAsMTYuNDYsMTYuMzlIOTEuMTNsLjU1LjUxLjA2LjA1LjA2LDAsMTAuNDUsOS4xMkwxMTMsMTI0LjNWMjMuODlBMTYuNDQsMTYuNDQsMCwwLDAsOTYuNTUsNy41WiIvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTc0LjMsNzMuMTFDNzUuNzYsNzQuOTQsNzcuNTEsNzcsNzcuNTEsNzdjMTAuNzQtLjM0LDE0Ljg3LTcuMywxNC44Ny03LjNhNjMuNjksNjMuNjksMCwwLDAtNy0yOCwyNC4yMywyNC4yMywwLDAsMC0xMy42NS01bC0uNjguNzdjOC4yNiwyLjUsMTIuMSw2LjEsMTIuMSw2LjFhNDAsNDAsMCwwLDAtMTQuNjItNC42MSw0MS42MSw0MS42MSwwLDAsMC05LjgxLjEsNC44NCw0Ljg0LDAsMCwwLS44My4xLDM2Ljg0LDM2Ljg0LDAsMCwwLTExLDNDNDUuMDUsNDMsNDQsNDMuNTUsNDQsNDMuNTVzNC0zLjc5LDEyLjc4LTYuMjlsLS40OS0uNThhMjQuMjMsMjQuMjMsMCwwLDAtMTMuNjUsNSw2My42OSw2My42OSwwLDAsMC03LDI4czQuMDgsNywxNC44Miw3LjNjMCwwLDEuOC0yLjE2LDMuMjYtNC02LjE3LTEuODItOC41LTUuNjYtOC41LTUuNjZzLjQ5LjM0LDEuMzYuODJhLjY3LjY3LDAsMCwwLC4xOS4xNGMuMTUuMS4yOS4xNC40NC4yNGEyOC42NCwyOC42NCwwLDAsMCwzLjU1LDEuNjMsNDEuMTYsNDEuMTYsMCwwLDAsNy4xNCwyLjA2LDM0LjQ1LDM0LjQ1LDAsMCwwLDEyLjU4LDAsMzIuMjgsMzIuMjgsMCwwLDAsNy0yLjA2LDI3LjkzLDI3LjkzLDAsMCwwLDUuNTktMi44M1M4MC42Nyw3MS4zNCw3NC4zLDczLjExWm0tMTgtNi42OWMtMi43LDAtNC45Mi0yLjQ3LTQuOTItNS40OWE0Ljk1LDQuOTUsMCwxLDEsOS44MywwQTUuMjEsNS4yMSwwLDAsMSw1Ni4yOCw2Ni40M1ptMTcuNTksMEM3MS4xOCw2Ni40Myw2OSw2NCw2OSw2MC45NGE0Ljk1LDQuOTUsMCwxLDEsNC45Miw1LjQ5WiIvPjwvc3ZnPg=="
               alt="Drd"
               width="32"
+              style="-ms-interpolation-mode: bicubic; display: block"
             />
           </a>
         </div>
         {{#receiver}}
-        <div class="receiver">Ce mail a été envoyé à {{receiver}}</div>
+        <div style="padding: 25px 0 0">Ce mail a été envoyé à {{receiver}}</div>
         {{/receiver}}
-        <div class="reason">{{reason}}</div>
-        <div>© {{& year}} <a target="_blank" href="https://ung.utt.fr/">UTT Net Group</a></div>
+        <div style="padding-block: 10px">{{reason}}</div>
+        <div>
+          © {{& year}}
+          <a
+            target="_blank"
+            href="https://ung.utt.fr/"
+            style="text-decoration: none !important; border-bottom: 1px solid !important; color: #f1737f !important"
+            >UTT Net Group</a
+          >
+        </div>
         <div>12 rue Marie Curie, 10000 Troyes</div>
       </div>
     </div>

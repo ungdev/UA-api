@@ -36,33 +36,64 @@ export const formatEmail = async (content: Mail) => {
             }
             if (raw && Array.isArray(item)) return item.map((element: Component) => factory(element, false)).join('');
             if (Array.isArray(item) && typeof item[0] === 'string')
-              return `<ul>${(<Array<string>>item).map((listItem) => `<li>${factory(listItem)}</li>`).join('')}</ul>`;
+              return `<ul style="list-style:none;padding-left:2.5ch;margin-left:0;">${(<Array<string>>item)
+                .map(
+                  (listItem) =>
+                    `<li style="position:relative;"><div style="position:absolute;width:5px;height:5px;background:#f1737f;top:0.5em;left:-1.5ch;border-radius:50%;"></div>${factory(
+                      listItem,
+                    )}</li>`,
+                )
+                .join('')}</ul>`;
             if (typeof item === 'object' && 'items' in item) {
               const properties = Object.keys(item.items[0] ?? {});
               if (properties.length === 0) return '';
-              const head = `<thead><tr>${properties
-                .map((propertyName) => `<td>${factory(item.items[0][propertyName])}</td>`)
+              const head = `<thead style="background-color:#333;color:#fff;font-weight:bold;"><tr>${properties
+                .map(
+                  (propertyName, index) =>
+                    `<td style="padding:5px;text-align:${index === 0 ? 'initial' : 'center'};">${factory(
+                      item.items[0][propertyName],
+                    )}</td>`,
+                )
                 .join('')}</tr></thead>`;
               const body = `<tbody>${item.items
                 .slice(1)
                 .map(
-                  (row) =>
-                    `<tr>${properties.map((propertyName) => `<td>${factory(row[propertyName])}</td>`).join('')}</tr>`,
+                  (row, rowIndex) =>
+                    `<tr style="background-color:${rowIndex % 2 ? 'initial' : '#e8e8e8'};">${properties
+                      .map(
+                        (propertyName, index) =>
+                          `<td style="padding:5px;text-align:${index === 0 ? 'initial' : 'center'};">${factory(
+                            row[propertyName],
+                          )}</td>`,
+                      )
+                      .join('')}</tr>`,
                 )
                 .join('')}</tbody>`;
-              return `${item.name ? `<div class="table name">${item.name}</div>` : ''}<table>${head}${body}</table>`;
+              return `${
+                item.name ? `<div style="font-size:18px;color:#006492;margin-block:8px;">${item.name}</div>` : ''
+              }<table style="width:100%;background-color:#f6f6f6;outline:none;border-collapse:collapse;border-radius:4px;overflow:hidden;">${head}${body}</table>`;
             }
             if (typeof item === 'object' && 'location' in item)
-              return `<div class="actions"><a class="button" target="_blank" href="${factory(item.location)}"${
-                item.color ? ` style="background:${item.color}"` : ''
-              }>${item.name}</a></div>`;
+              return `<div style="display:flex;flex-flow:row wrap;gap:10px;align-items:center;margin-top:10px"><a target="_blank" href="${factory(
+                item.location,
+              )}" style="display:block;color:#fff;background-color:${
+                item.color ? item.color : '#f1737f'
+              };border:none;border-radius:2px;padding:3px 6px 2px;text-decoration:none !important;">${
+                item.name
+              }</a></div>`;
             if (Array.isArray(item) && typeof item[0] !== 'string') {
-              return `<div class="actions">${(<Component.Button[]>item)
+              return `<div style="display:flex;flex-flow:row wrap;gap:10px;align-items:center;margin-top:10px">${(<
+                Component.Button[]
+              >item)
                 .map(
                   (button) =>
-                    `<a class="button" target="_blank" href="${factory(button.location)}"${
-                      button.color ? ` style="background:${button.color}"` : ''
-                    }>${button.name}</a>`,
+                    `<a target="_blank" href="${factory(
+                      button.location,
+                    )}" style="display:block;color:#fff;background-color:${
+                      button.color ? button.color : '#f1737f'
+                    };border:none;border-radius:2px;padding:3px 6px 2px;text-decoration:none !important;">${
+                      button.name
+                    }</a>`,
                 )
                 .join('')}</div>`;
             }
