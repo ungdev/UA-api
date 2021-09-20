@@ -3,6 +3,7 @@ import { TournamentId } from '.prisma/client';
 import { fetchTournaments, fetchTournament } from './src/operations/tournament';
 import { fetchTeams } from './src/operations/team';
 import env from './src/utils/env';
+import { server } from 'sinon';
 
 const bot = new discord.Client();
 
@@ -53,10 +54,10 @@ export function setupTeam(team: string, tournamentId: TournamentId) {
 export async function syncRoles() {
   const server = bot.guilds.cache.get(env.discord.server);
 
-  for (const game of await fetchTournaments()) {
-    const tournamentRole = server.roles.cache.find((role) => role.id === game.discordRoleId);
+  for (const tournament of await fetchTournaments()) {
+    const tournamentRole = server.roles.cache.find((role) => role.id === tournament.discordRoleId);
 
-    for (const team of await fetchTeams(game.id)) {
+    for (const team of await fetchTeams(tournament.id)) {
       if (team.lockedAt !== null) {
         const teamRole = server.roles.cache.find((role) => role.name === team.name);
 
@@ -70,8 +71,9 @@ export async function syncRoles() {
   }
 }
 
-export async function clearRoles(playerId: String) {
-  // Clear roles of player
+export async function clearRoles(playerId: string) {
+  const member = await bot.guilds.cache.get(env.discord.server).members.fetch(playerId);
+  member.roles.remove(member.roles.cache);
 }
 
 bot.login(env.discord.token);
