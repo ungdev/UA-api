@@ -22,19 +22,19 @@ describe.only('GET /users/search', () => {
     await database.user.deleteMany();
   });
 
-  //it('should fail with an internal server error', async () => {
-  //  sandbox.stub(responses, 'success').throws('Unexpected error');
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(responses, 'success').throws('Unexpected error');
 
-  //  await request(app).get('/users/search?query=rinkichi').expect(500, { error: Error.InternalServerError });
-  //});
+    await request(app).get('/users/search?query=rinkichi').expect(500, { error: Error.InternalServerError });
+  });
 
   it('should not accept empty query parameters', async () => {
     await request(app).get('/users/search?query=').expect(400, { error: Error.InvalidQueryParameters });
   });
 
-  // it('should not accept bad query parameters', async () => {
-  // await request(app).get('/users/search?query=').expect(400, { error: Error.InvalidQueryParameters });
-  //});
+  it('should not accept bad query parameters', async () => {
+    await request(app).get('/users/search?query=').expect(400, { error: Error.InvalidQueryParameters });
+  });
 
   it('should return not accept unknown user', async () => {
     await request(app).get('/users/search?query=mdr').expect(400, { error: Error.InvalidQueryParameters });
