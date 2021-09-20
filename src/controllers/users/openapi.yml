@@ -1,4 +1,4 @@
-/users/search?query:
+/users/search:
   get:
     summary: Renvoie les informations minimales d'un utilisateur
     description: Renvoie les informations minimales d'un utilisateur.
@@ -39,9 +39,8 @@
             schema:
               $ref: '#/components/schemas/User'
       400:
+        description: Destiné lorsque l'utilsateur est inexistant ou la requete est mauvaise
         $ref: '#/components/responses/400Errored'
-      404:
-        $ref: '#/components/responses/404UserNotFound'
   put:
     summary: Modifie les informations d'un utilisateur
     description: Modifie les informations d'un utilisateur.

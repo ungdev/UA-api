@@ -49,23 +49,6 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
   return formatUser(user);
 };
 
-export const fetchUserByUsername = async (parameterId: string, key = 'username'): Promise<User> => {
-  const user = await database.user.findUnique({
-    where: { [key]: parameterId },
-    include: userInclusions,
-  });
-
-  return formatUser(user);
-};
-
-export const fetchUserByEmail = async (parameterId: string, key = 'email'): Promise<User> => {
-  const user = await database.user.findUnique({
-    where: { [key]: parameterId },
-    include: userInclusions,
-  });
-  return formatUser(user);
-};
-
 export const fetchQueryUser = async (query: string): Promise<User> => {
   let field;
   if (!validators.email.validate(query).error) {
