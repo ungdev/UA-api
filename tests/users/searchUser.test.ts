@@ -4,15 +4,12 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as responses from '../../src/utils/responses';
 import database from '../../src/services/database';
-import { Error, User } from '../../src/types';
+import { Error } from '../../src/types';
 import { createFakeUser } from '../utils';
 
 describe('GET /users/search', () => {
-  let user: User;
-
-
   before(async () => {
-    user = await createFakeUser({
+    await createFakeUser({
       username: 'rinkichi',
       email: 'ragequit@ez.com',
     });

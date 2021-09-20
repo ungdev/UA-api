@@ -4,8 +4,7 @@ import { validateQuery } from '../../middlewares/validation';
 import { fetchQueryUser } from '../../operations/user';
 import { filterUserRestricted } from '../../utils/filters';
 import { badRequest, success } from '../../utils/responses';
-import { Error } from '../../types'
-import * as validators from '../../utils/validators';
+import { Error } from '../../types';
 
 export default [
   // Middlewares
@@ -18,14 +17,12 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-
       const { query } = request.query as { query: string };
       const user = await fetchQueryUser(query);
       if (!user) {
-        return badRequest(response, Error.InvalidQueryParameters)
+        return badRequest(response, Error.InvalidQueryParameters);
       }
       return success(response, filterUserRestricted(user));
-
     } catch (error) {
       return next(error);
     }

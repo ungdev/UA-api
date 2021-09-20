@@ -70,8 +70,7 @@ export const fetchQueryUser = async (query: string): Promise<User> => {
   let field;
   if (!validators.email.validate(query).error) {
     field = 'email';
-  }
-  else if (!validators.username.validate(query).error) {
+  } else if (!validators.username.validate(query).error) {
     field = 'username';
   }
   const user = await database.user.findUnique({
