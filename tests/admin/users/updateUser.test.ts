@@ -105,7 +105,7 @@ describe('PATCH /admin/users/:userId', () => {
     expect(body.place).to.be.equal(validBody.place);
   });
 
-  it('should work be able to update discordId only', async () => {
+  it('should be able to update discordId only', async () => {
     const { body } = await request(app)
       .patch(`/admin/users/${user.id}`)
       .send({
@@ -114,7 +114,19 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.place).to.be.equal(validBody.place);
+    expect(body.discordId).to.be.equal('627536251278278');
+  });
+
+  it('should be able to update customMessage only', async () => {
+    const { body } = await request(app)
+      .patch(`/admin/users/${user.id}`)
+      .send({
+        customMessage: 'Autorisation parentale',
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.customMessage).to.be.equal('Autorisation parentale');
   });
 
   it('should fail as the user has already paid and wants to change its type', async () => {

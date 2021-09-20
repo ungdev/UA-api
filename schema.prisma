@@ -121,6 +121,7 @@ model User {
   registerToken String?    @unique
   resetToken    String?    @unique
   place         String?    @unique
+  customMessage String?
   scannedAt     DateTime?
   discordId     String?    @unique
   teamId        String?

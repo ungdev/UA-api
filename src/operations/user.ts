@@ -129,6 +129,7 @@ export const updateAdminUser = async (
     permissions?: Permission[];
     place?: string;
     discordId?: string;
+    customMessage?: string;
   },
 ): Promise<User> => {
   const user = await database.user.update({
@@ -137,6 +138,7 @@ export const updateAdminUser = async (
       permissions: serializePermissions(updates.permissions),
       place: updates.place,
       discordId: updates.discordId,
+      customMessage: updates.customMessage,
     },
     where: { id: userId },
     include: userInclusions,
