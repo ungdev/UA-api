@@ -7,7 +7,7 @@ import database from '../../src/services/database';
 import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
 
-describe.only('GET /users/search', () => {
+describe('GET /users/search', () => {
   let user: User;
 
 
