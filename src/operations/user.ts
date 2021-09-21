@@ -49,7 +49,7 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
   return formatUser(user);
 };
 
-export const fetchQueryUser = async (query: string): Promise<User> => {
+export const fetchQueryUser = (query: string): Promise<User> => {
   let field;
   if (!validators.email.validate(query).error) {
     field = 'email';
@@ -57,7 +57,7 @@ export const fetchQueryUser = async (query: string): Promise<User> => {
   if (!validators.username.validate(query).error) {
     field = 'username';
   }
-  return await fetchUser(query, field);
+  return fetchUser(query, field);
 };
 
 export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<UserWithTeam[]> => {
