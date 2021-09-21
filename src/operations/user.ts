@@ -53,11 +53,11 @@ export const fetchQueryUser = async (query: string): Promise<User> => {
   let field;
   if (!validators.email.validate(query).error) {
     field = 'email';
-  } 
+  }
   if (!validators.username.validate(query).error) {
     field = 'username';
   }
-  return fetchUser(query, field)
+  return await fetchUser(query, field);
 };
 
 export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<UserWithTeam[]> => {

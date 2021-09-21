@@ -17,11 +17,11 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRestricted'
+              $ref: "#/components/schemas/UserRestricted"
       400:
-        $ref: '#/components/responses/400Errored'
+        $ref: "#/components/responses/400Errored"
       404:
-        $ref: '#/components/responses/404UserNotFound'
+        $ref: "#/components/responses/404UserNotFound"
 
 /users/current:
   get:
@@ -37,10 +37,10 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
       400:
         description: Destiné lorsque l'utilsateur est inexistant ou la requete est mauvaise
-        $ref: '#/components/responses/400Errored'
+        $ref: "#/components/responses/400Errored"
   put:
     summary: Modifie les informations d'un utilisateur
     description: Modifie les informations d'un utilisateur.
@@ -69,15 +69,15 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
       400:
-        $ref: '#/components/responses/400Errored'
+        $ref: "#/components/responses/400Errored"
       401:
-        $ref: '#/components/responses/401Unauthenticated'
+        $ref: "#/components/responses/401Unauthenticated"
       403:
-        $ref: '#/components/responses/403Unauthorized'
+        $ref: "#/components/responses/403Unauthorized"
       404:
-        $ref: '#/components/responses/404UserNotFound'
+        $ref: "#/components/responses/404UserNotFound"
 
 /users/current/carts:
   get:
@@ -95,15 +95,15 @@
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/CartWithCartItems'
+                $ref: "#/components/schemas/CartWithCartItems"
       400:
-        $ref: '#/components/responses/400Errored'
+        $ref: "#/components/responses/400Errored"
       401:
-        $ref: '#/components/responses/401Unauthenticated'
+        $ref: "#/components/responses/401Unauthenticated"
       403:
-        $ref: '#/components/responses/403Unauthorized'
+        $ref: "#/components/responses/403Unauthorized"
       404:
-        $ref: '#/components/responses/404UserNotFound'
+        $ref: "#/components/responses/404UserNotFound"
 
   post:
     summary: Crée un panier
@@ -172,10 +172,10 @@
                   description: Prix du panier en centimes
 
       400:
-        $ref: '#/components/responses/400Errored'
+        $ref: "#/components/responses/400Errored"
       401:
-        $ref: '#/components/responses/401Unauthenticated'
+        $ref: "#/components/responses/401Unauthenticated"
       403:
-        $ref: '#/components/responses/403Unauthorized'
+        $ref: "#/components/responses/403Unauthorized"
       404:
-        $ref: '#/components/responses/404UserNotFound'
+        $ref: "#/components/responses/404UserNotFound"
