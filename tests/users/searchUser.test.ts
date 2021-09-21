@@ -34,7 +34,7 @@ describe('GET /users/search', () => {
   });
 
   it('should return not accept unknown user', async () => {
-    await request(app).get('/users/search?query=mdr').expect(400, { error: Error.UserNotFound });
+    await request(app).get('/users/search?query=mdr').expect(404, { error: Error.UserNotFound });
   });
 
   it('should return the user with his username', async () => {

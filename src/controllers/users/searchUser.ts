@@ -3,7 +3,7 @@ import Joi from 'joi';
 import { validateQuery } from '../../middlewares/validation';
 import { fetchQueryUser } from '../../operations/user';
 import { filterUserRestricted } from '../../utils/filters';
-import { badRequest, success } from '../../utils/responses';
+import { notFound, success } from '../../utils/responses';
 import { Error } from '../../types';
 
 export default [
@@ -20,7 +20,7 @@ export default [
       const { query } = request.query as { query: string };
       const user = await fetchQueryUser(query);
       if (!user) {
-        return badRequest(response, Error.UserNotFound);
+        return notFound(response, Error.UserNotFound);
       }
       return success(response, filterUserRestricted(user));
     } catch (error) {
