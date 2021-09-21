@@ -32,25 +32,20 @@ export const formatEmail = async (content: Mail) => {
                 .replace(/_([^<>_]+)_/gi, '<i>$1</i>')
                 .replace(/\*([^*<>]+)\*/gi, '<strong>$1</strong>');
               if (raw) return escaped;
-              return `<span>${escaped}</span>`;
+              return `<tr><td style="color:#202020;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;position:relative">${escaped}</td></tr>`;
             }
             if (raw && Array.isArray(item)) return item.map((element: Component) => factory(element, false)).join('');
             if (Array.isArray(item) && typeof item[0] === 'string')
-              return `<ul style="list-style:none;padding-left:2.5ch;margin-left:0;">${(<Array<string>>item)
-                .map(
-                  (listItem) =>
-                    `<li style="position:relative;"><div style="position:absolute;width:5px;height:5px;background:#f1737f;top:0.5em;left:-1.5ch;border-radius:50%;"></div>${factory(
-                      listItem,
-                    )}</li>`,
-                )
-                .join('')}</ul>`;
+              return `<tr><td><ul>${(<Array<string>>item)
+                .map((listItem) => `<li>${factory(listItem)}</li>`)
+                .join('')}</ul></td></tr>`;
             if (typeof item === 'object' && 'items' in item) {
               const properties = Object.keys(item.items[0] ?? {});
               if (properties.length === 0) return '';
-              const head = `<thead style="background-color:#333;color:#fff;font-weight:bold;"><tr>${properties
+              const head = `<thead style="background-color:#333;color:#fff"><tr>${properties
                 .map(
                   (propertyName, index) =>
-                    `<td style="padding:5px;text-align:${index === 0 ? 'initial' : 'center'};">${factory(
+                    `<td style="padding:5px${index === 0 ? '' : ';text-align:center'}">${factory(
                       item.items[0][propertyName],
                     )}</td>`,
                 )
@@ -59,10 +54,10 @@ export const formatEmail = async (content: Mail) => {
                 .slice(1)
                 .map(
                   (row, rowIndex) =>
-                    `<tr style="background-color:${rowIndex % 2 ? 'initial' : '#e8e8e8'};">${properties
+                    `<tr${rowIndex % 2 ? '' : ' style="background-color:#e8e8e8"'}>${properties
                       .map(
                         (propertyName, index) =>
-                          `<td style="padding:5px;text-align:${index === 0 ? 'initial' : 'center'};">${factory(
+                          `<td style="padding:5px${index === 0 ? '' : ';text-align:center'}">${factory(
                             row[propertyName],
                           )}</td>`,
                       )
@@ -70,32 +65,28 @@ export const formatEmail = async (content: Mail) => {
                 )
                 .join('')}</tbody>`;
               return `${
-                item.name ? `<div style="font-size:18px;color:#006492;margin-block:8px;">${item.name}</div>` : ''
-              }<table style="width:100%;background-color:#f6f6f6;outline:none;border-collapse:collapse;border-radius:4px;overflow:hidden;">${head}${body}</table>`;
+                item.name ? `<tr><td style="font-size:18px;color:#006492;padding:8px 0">${item.name}</td></tr>` : ''
+              }<tr><td><table style="width:100%;background-color:#f6f6f6;border-collapse:collapse;border-radius:4px;overflow:hidden">${head}${body}</table></td></tr>`;
             }
             if (typeof item === 'object' && 'location' in item)
-              return `<div style="display:flex;flex-flow:row wrap;gap:10px;align-items:center;margin-top:10px"><a target="_blank" href="${factory(
+              return `<tr><td><table style="border-collapse:collapse"><tbody><tr><td style="padding:5px"><a target="_blank" href="${factory(
                 item.location,
               )}" style="display:block;color:#fff;background-color:${
                 item.color ? item.color : '#f1737f'
-              };border:none;border-radius:2px;padding:3px 6px 2px;text-decoration:none !important;">${
+              };border:none;border-radius:2px;padding:3px 6px 2px;text-decoration:none">${
                 item.name
-              }</a></div>`;
+              }</a></td></tr></tbody></table></td></tr>`;
             if (Array.isArray(item) && typeof item[0] !== 'string') {
-              return `<div style="display:flex;flex-flow:row wrap;gap:10px;align-items:center;margin-top:10px">${(<
-                Component.Button[]
-              >item)
+              return `<tr><td><table style="border-collapse:collapse"><tbody><tr>${(<Component.Button[]>item)
                 .map(
                   (button) =>
-                    `<a target="_blank" href="${factory(
+                    `<td style="padding:5px"><a target="_blank" href="${factory(
                       button.location,
                     )}" style="display:block;color:#fff;background-color:${
                       button.color ? button.color : '#f1737f'
-                    };border:none;border-radius:2px;padding:3px 6px 2px;text-decoration:none !important;">${
-                      button.name
-                    }</a>`,
+                    };border:none;border-radius:2px;padding:3px 6px 2px;text-decoration:none">${button.name}</a></td>`,
                 )
-                .join('')}</div>`;
+                .join('')}</tr></tbody></table></td></tr>`;
             }
             return '';
           };
@@ -169,7 +160,7 @@ export namespace MailFactory {
         },
         {
           title: 'Billet',
-          components: 'Tu trouveras ton *billet personnalisé* en pièce jointe de ce mail&nbsp;!',
+          components: ['Tu trouveras ton *billet personnalisé* en pièce jointe de ce mail&nbsp;!'],
         },
         {
           title: 'Confirmation de commande',
@@ -179,9 +170,9 @@ export namespace MailFactory {
               name: 'Tickets',
               items: [
                 {
-                  name: 'Nom',
-                  type: 'Type',
-                  price: 'Prix',
+                  name: '*Nom*',
+                  type: '*Type*',
+                  price: '*Prix*',
                 },
                 ...cartTickets.map((ticket) => ({
                   name: `${ticket.forUser.firstname} ${ticket.forUser.lastname}`,
@@ -194,9 +185,9 @@ export namespace MailFactory {
               name: 'Suppléments',
               items: [
                 {
-                  name: 'Nom',
-                  amount: 'Quantité',
-                  price: 'Prix',
+                  name: '*Nom*',
+                  amount: '*Quantité*',
+                  price: '*Prix*',
                 },
                 ...cart.cartItems
                   .filter((cartItem) => cartItem.item.category === ItemCategory.supplement)
@@ -220,7 +211,7 @@ export namespace MailFactory {
         "Vous avez reçu ce mail car vous avez envoyé une demande de création de compte à l'UTT Arena. Si ce n'est pas vous, ignorez ce message ou contactez nous.",
       title: {
         topic: 'Code de validation',
-        banner: '',
+        banner: 'Création du compte',
         short: `Salut ${user.firstname},`,
         highlight: "Bienvenue à l'UTT Arena&nbsp;!",
       },
@@ -237,13 +228,15 @@ export namespace MailFactory {
         },
         {
           title: 'Discord',
-          components:
+          components: [
             "On utilise Discord pendant l'évènement, et tu auras besoin de lier ton compte discord avec ton compte UTT Arena pour pouvoir créer ou rejoindre une équipe. On te donnera plus de détails là-dessus à ce moment-là 😉",
+          ],
         },
         {
           title: 'Tournoi Super Smash Bros Ultimate',
-          components:
+          components: [
             "Si tu as choisi de t'inscrire à ce tournoi et que tu choisis de venir avec ta propre console, tu peux bénéficier d'une réduction sur ton billet 😉 _(offre limitée à un certain nombre de places)_",
+          ],
         },
         {
           title: 'Des questions ?',

@@ -1,10 +1,4 @@
-export declare type Component =
-  | string
-  | string[]
-  | Component.Button
-  | Component.Button[]
-  | Component.Table
-  | Component.Table[];
+export declare type Component = string | string[] | Component.Button | Component.Button[] | Component.Table;
 
 export declare namespace Component {
   interface Button {
@@ -54,7 +48,7 @@ export declare interface Mail {
    */
   sections?: {
     title: string;
-    components: Exclude<Component, Array<Component>> | Component[];
+    components: Component[];
   }[];
 }
 
