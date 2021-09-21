@@ -7,7 +7,7 @@ import database from '../../src/services/database';
 import { Error } from '../../src/types';
 import { createFakeUser } from '../utils';
 
-describe('GET /users/search', () => {
+describe.only('GET /users/search', () => {
   before(async () => {
     await createFakeUser({
       username: 'rinkichi',
@@ -30,11 +30,11 @@ describe('GET /users/search', () => {
   });
 
   it('should not accept bad query parameters', async () => {
-    await request(app).get('/users/search?query=').expect(400, { error: Error.InvalidQueryParameters });
+    await request(app).get('/users/search?find=').expect(400, { error: Error.InvalidQueryParameters });
   });
 
   it('should return not accept unknown user', async () => {
-    await request(app).get('/users/search?query=mdr').expect(400, { error: Error.InvalidQueryParameters });
+    await request(app).get('/users/search?query=mdr').expect(400, { error: Error.UserNotFound });
   });
 
   it('should return the user with his username', async () => {

@@ -20,7 +20,7 @@ export default [
       const { query } = request.query as { query: string };
       const user = await fetchQueryUser(query);
       if (!user) {
-        return badRequest(response, Error.InvalidQueryParameters);
+        return badRequest(response, Error.UserNotFound);
       }
       return success(response, filterUserRestricted(user));
     } catch (error) {

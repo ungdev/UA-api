@@ -53,15 +53,11 @@ export const fetchQueryUser = async (query: string): Promise<User> => {
   let field;
   if (!validators.email.validate(query).error) {
     field = 'email';
-  } else if (!validators.username.validate(query).error) {
+  } 
+  if (!validators.username.validate(query).error) {
     field = 'username';
   }
-  const user = await database.user.findUnique({
-    where: { [field]: query },
-    include: userInclusions,
-  });
-
-  return formatUser(user);
+  return fetchUser(query, field)
 };
 
 export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<UserWithTeam[]> => {
