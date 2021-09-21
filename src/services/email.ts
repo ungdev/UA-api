@@ -26,20 +26,28 @@ export const formatEmail = async (content: Mail) => {
         escape: (text: Component): string => {
           const factory = (item: Component, raw = true): string => {
             if (typeof item === 'string') {
+              // The item is a string. We escape it
               const escaped = escape(item)
                 .replace(/&amp;nbsp;/gi, '&nbsp;')
                 .replace(/\n/gi, '<br>')
                 .replace(/_([^<>_]+)_/gi, '<i>$1</i>')
                 .replace(/\*([^*<>]+)\*/gi, '<strong>$1</strong>');
+              // If raw is true, it means this function is called directly from mustache
+              // we return escaped text
               if (raw) return escaped;
-              return `<tr><td style="color:#202020;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;position:relative">${escaped}</td></tr>`;
+              // Otherwise, the item is a component (string) and we wrap it in a table row
+              return `<tr><td style="color:#202020;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;position:relative;font-family:Nunito">${escaped}</td></tr>`;
             }
-            if (raw && Array.isArray(item)) return item.map((element: Component) => factory(element, false)).join('');
+            if (raw && Array.isArray(item))
+              // The item is a components object of the Section. We parse its content
+              return item.map((element: Component) => factory(element, false)).join('');
             if (Array.isArray(item) && typeof item[0] === 'string')
+              // The item is a list of string. We render it as a list
               return `<tr><td><ul>${(<Array<string>>item)
-                .map((listItem) => `<li>${factory(listItem)}</li>`)
+                .map((listItem) => `<li style="font-family:Nunito">${factory(listItem)}</li>`)
                 .join('')}</ul></td></tr>`;
             if (typeof item === 'object' && 'items' in item) {
+              // The item is a table. We render it as a table
               const properties = Object.keys(item.items[0] ?? {});
               if (properties.length === 0) return '';
               const head = `<thead style="background-color:#333;color:#fff"><tr>${properties
@@ -66,25 +74,29 @@ export const formatEmail = async (content: Mail) => {
                 .join('')}</tbody>`;
               return `${
                 item.name ? `<tr><td style="font-size:18px;color:#006492;padding:8px 0">${item.name}</td></tr>` : ''
-              }<tr><td><table style="width:100%;background-color:#f6f6f6;border-collapse:collapse;border-radius:4px;overflow:hidden">${head}${body}</table></td></tr>`;
+              }<tr><td><table style="width:100%;background-color:#f6f6f6;border-collapse:collapse;border-radius:4px;overflow:hidden;font-family:Nunito">${head}${body}</table></td></tr>`;
             }
             if (typeof item === 'object' && 'location' in item)
-              return `<tr><td><table style="border-collapse:collapse"><tbody><tr><td style="padding:5px"><a target="_blank" href="${factory(
-                item.location,
-              )}" style="display:block;color:#fff;background-color:${
+              // The item is a single button
+              return `<tr><td><table style="border:none;border-collapse:collapse"><tbody><tr><td style="background-color:${
                 item.color ? item.color : '#f1737f'
-              };border:none;border-radius:2px;padding:3px 6px 2px;text-decoration:none">${
+              };border-radius:2px;padding:3px 6px 2px"><a target="_blank" href="${factory(
+                item.location,
+              )}" style="border:none;text-decoration:none;color:#fff;user-select:none;font-family:Nunito">${
                 item.name
               }</a></td></tr></tbody></table></td></tr>`;
             if (Array.isArray(item) && typeof item[0] !== 'string') {
-              return `<tr><td><table style="border-collapse:collapse"><tbody><tr>${(<Component.Button[]>item)
+              // The item is a list of buttons
+              return `<tr><td><table style="border:none;border-spacing:5px"><tbody><tr>${(<Component.Button[]>item)
                 .map(
                   (button) =>
-                    `<td style="padding:5px"><a target="_blank" href="${factory(
-                      button.location,
-                    )}" style="display:block;color:#fff;background-color:${
+                    `<td><table style="border:none;border-collapse:collapse"><tbody><tr><td style="background-color:${
                       button.color ? button.color : '#f1737f'
-                    };border:none;border-radius:2px;padding:3px 6px 2px;text-decoration:none">${button.name}</a></td>`,
+                    };border-radius:2px;padding:3px 6px 2px"><a target="_blank" href="${factory(
+                      button.location,
+                    )}" style="border:none;text-decoration:none;color:#fff;user-select:none;font-family:Nunito">${
+                      button.name
+                    }</a></td></tr></tbody></table></td>`,
                 )
                 .join('')}</tr></tbody></table></td></tr>`;
             }

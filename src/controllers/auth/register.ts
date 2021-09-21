@@ -33,6 +33,8 @@ export default [
 
       // Send registration token by mail
       // Don't send sync when it is not needed
+      // If the mail is not sent, the error will be reported through Sentry
+      // and staff may resend it manually
       MailFactory.sendValidationCode(registeredUser).catch((error) => {
         Sentry.captureException(error);
         logger.warn(error);
