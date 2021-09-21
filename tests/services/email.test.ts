@@ -5,7 +5,12 @@ import { expect } from 'chai';
 import { createFakeUser } from '../utils';
 import { PrimitiveCartItem } from '../../src/types';
 import { createCart, updateCart } from '../../src/operations/carts';
-import { MailFactory, sendEmail } from '../../src/services/email';
+import {
+  sendEmail,
+  generateTicketsEmail,
+  generatePasswordResetEmail,
+  generateValidationEmail,
+} from '../../src/services/email';
 import { randomInt } from '../../src/utils/helpers';
 import { fetchItems } from '../../src/operations/item';
 import env from '../../src/utils/env';
@@ -102,7 +107,7 @@ describe('Tests the email utils', () => {
 
     const detailedCart = await updateCart(createdCart.id, 123, TransactionState.paid);
 
-    const ticketsEmail = await MailFactory.generateTicketsEmail(detailedCart);
+    const ticketsEmail = await generateTicketsEmail(detailedCart);
 
     fs.writeFileSync('artifacts/payment.html', ticketsEmail.html);
   });
@@ -110,7 +115,7 @@ describe('Tests the email utils', () => {
   it(`should generate an account validation template`, async () => {
     const user = await createFakeUser({ confirmed: false });
 
-    const validationEmail = await MailFactory.generateValidationEmail(user);
+    const validationEmail = await generateValidationEmail(user);
 
     fs.writeFileSync('artifacts/validation.html', validationEmail.html);
   });
@@ -123,7 +128,7 @@ describe('Tests the email utils', () => {
       hasPaid: false,
     };
 
-    const passwordResetEmail = await MailFactory.generatePasswordResetEmail(user);
+    const passwordResetEmail = await generatePasswordResetEmail(user);
 
     fs.writeFileSync('artifacts/pwd-reset.html', passwordResetEmail.html);
   });

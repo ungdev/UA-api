@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/node';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { validateBody } from '../../middlewares/validation';
 import { createUser } from '../../operations/user';
-import { MailFactory } from '../../services/email';
+import { sendValidationCode } from '../../services/email';
 import { Error } from '../../types';
 import { conflict, created } from '../../utils/responses';
 import * as validators from '../../utils/validators';
@@ -35,7 +35,7 @@ export default [
       // Don't send sync when it is not needed
       // If the mail is not sent, the error will be reported through Sentry
       // and staff may resend it manually
-      MailFactory.sendValidationCode(registeredUser).catch((error) => {
+      sendValidationCode(registeredUser).catch((error) => {
         Sentry.captureException(error);
         logger.warn(error);
       });
