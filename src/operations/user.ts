@@ -78,28 +78,30 @@ export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<
   return users.map(formatUserWithTeam);
 };
 
-export const createUser = async (
-  username: string,
-  firstname: string,
-  lastname: string,
-  email: string,
-  password: string,
-  discordId?: string,
-  type?: UserType,
-) => {
+export const createUser = async (user: {
+  username: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  password: string;
+  discordId?: string;
+  type?: UserType;
+  customMessage?: string;
+}) => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
-  const hashedPassword = await userOperations.hash(password, salt);
+  const hashedPassword = await userOperations.hash(user.password, salt);
   return database.user.create({
     data: {
       id: nanoid(),
-      username,
-      firstname,
-      lastname,
-      email,
-      type,
-      discordId,
+      username: user.username,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      type: user.type,
+      discordId: user.discordId,
       password: hashedPassword,
       registerToken: nanoid(),
+      customMessage: user.customMessage,
     },
   });
 };

@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error } from '../../../types';
-import { badRequest, forbidden, noContent, notFound, success } from '../../../utils/responses';
+import { badRequest, forbidden, notFound, success } from '../../../utils/responses';
 import { decrypt } from '../../../utils/helpers';
 import logger from '../../../utils/logger';
 import { fetchUser, scanUser } from '../../../operations/user';

@@ -21,7 +21,6 @@ describe('POST /admin/scan/:qrcode', () => {
 
   before(async () => {
     user = await createFakeUser();
-    user = await userOperations.updateAdminUser(user.id, { customMessage: "Controler l'autorisation parentale" });
     admin = await createFakeUser({ permission: Permission.entry });
     adminToken = generateToken(admin);
 
@@ -105,13 +104,14 @@ describe('POST /admin/scan/:qrcode', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should scan the ticket and return the custom message', async () => {
+  it('should scan the ticket and return the updated user', async () => {
     const userData = await request(app)
       .post('/admin/scan')
       .send(validBody)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
-    return expect(userData.body.customMessage).to.be.equal(user.customMessage);
+    expect(userData.body.customMessage).to.be.equal(user.customMessage);
+    return expect(userData.body.scannedAt).not.to.be.equal(null);
   });
 
   it('should error as the ticket is already scanned', () =>
