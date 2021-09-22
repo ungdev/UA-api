@@ -27,11 +27,12 @@ export default [
 
       // Always return a 204 even if the user doesn't exists to avoid address leakage
       if (user) {
-        await generateResetToken(user.id);
+        // Use the updated user holding reset token
+        const userWithToken = await generateResetToken(user.id);
         // Don't wait for mail to be sent as it could take time
         // We suppose here that is will pass. If it is not the case, error is
         // reported through Sentry and staff may resend the email manually
-        sendPasswordReset(user).catch((error) => {
+        sendPasswordReset(userWithToken).catch((error) => {
           logger.error(error);
           Sentry.captureException(error);
         });
