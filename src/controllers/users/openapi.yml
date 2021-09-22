@@ -4,6 +4,8 @@
     description: Renvoie les informations minimales d'un utilisateur.
     tags:
       - Users
+    security:
+      - BearerAuth: []
     parameters:
       - in: query
         name: search

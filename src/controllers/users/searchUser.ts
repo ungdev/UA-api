@@ -5,6 +5,7 @@ import { fetchQueryUser } from '../../operations/user';
 import { filterUserRestricted } from '../../utils/filters';
 import { notFound, success } from '../../utils/responses';
 import { Error } from '../../types';
+import { isAuthenticated } from '../../middlewares/authentication';
 
 export default [
   // Middlewares
@@ -13,6 +14,7 @@ export default [
       query: Joi.string().required(),
     }),
   ),
+  ...isAuthenticated,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
