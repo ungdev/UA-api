@@ -5,12 +5,13 @@ import { expect } from 'chai';
 import { createFakeUser } from '../utils';
 import { PrimitiveCartItem } from '../../src/types';
 import { createCart, updateCart } from '../../src/operations/carts';
+import { sendEmail } from '../../src/services/email';
+import { inflate } from '../../src/services/email/components';
 import {
-  sendEmail,
   generateTicketsEmail,
   generatePasswordResetEmail,
   generateValidationEmail,
-} from '../../src/services/email';
+} from '../../src/services/email/serializer';
 import { randomInt } from '../../src/utils/helpers';
 import { fetchItems } from '../../src/operations/item';
 import env from '../../src/utils/env';
@@ -131,5 +132,30 @@ describe('Tests the email utils', () => {
     const passwordResetEmail = await generatePasswordResetEmail(user);
 
     fs.writeFileSync('artifacts/pwd-reset.html', passwordResetEmail.html);
+  });
+
+  describe('Test mail serialization', () => {
+    it('should not generate table when dataset is empty', () => {
+      expect(
+        inflate({
+          items: [],
+        }),
+      ).to.be.equal('');
+    });
+
+    it('should not generate table name when undefined', () => {
+      expect(
+        inflate({
+          items: [
+            {
+              test: 'This is a test',
+            },
+          ],
+        }),
+      ).to.be.match(/^<tr><td></);
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    it('should throw an error if component is invalid', () => expect(() => inflate(<any>{})).to.throw());
   });
 });

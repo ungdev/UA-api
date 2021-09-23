@@ -1,5 +1,5 @@
 import { escape } from 'mustache';
-import type { Component } from '../services/mail';
+import type { Component } from './types';
 
 /**
  * Escapes text before inserting it into a mail.
@@ -22,7 +22,9 @@ const inflateButton = (item: Component.Button) =>
     item.color ? item.color : '#f1737f'
   };border-radius:2px;padding:3px 6px 2px"><a target="_blank" href="${escapeText(
     item.location,
-  )}" style="border:none;text-decoration:none;color:#fff;user-select:none;font-family:Nunito">${item.name}</a></td>`;
+  )}" style="border:none;text-decoration:none;color:#fff;user-select:none;font-family:Nunito,Verdana,Geneva,Tahoma,sans-serif">${
+    item.name
+  }</a></td>`;
 
 const inflateButtonWrapper = (item: Component.Button | Component.Button[]) =>
   `<tr><td><table style="border:none;border-spacing:5px"><tbody><tr>${
@@ -34,7 +36,7 @@ const inflateTable = (item: Component.Table) => {
   if (properties.length === 0) return '';
   return `${
     item.name ? `<tr><td style="font-size:18px;color:#006492;padding:8px 0">${item.name}</td></tr>` : ''
-  }<tr><td><table style="width:100%;background-color:#f6f6f6;border-collapse:collapse;border-radius:4px;overflow:hidden;font-family:Nunito"><thead style="background-color:#333;color:#fff"><tr>${properties
+  }<tr><td><table style="width:100%;background-color:#f6f6f6;border-collapse:collapse;border-radius:4px;overflow:hidden;font-family:Nunito,Verdana,Geneva,Tahoma,sans-serif"><thead style="background-color:#333;color:#fff"><tr>${properties
     .map(
       (propertyName, index) =>
         `<td style="padding:5px${index === 0 ? '' : ';text-align:center'}">${escapeText(
@@ -57,11 +59,11 @@ const inflateTable = (item: Component.Table) => {
 
 const inflateList = (item: string[]) =>
   `<tr><td><ul>${item
-    .map((listItem) => `<li style="font-family:Nunito">${escapeText(listItem)}</li>`)
+    .map((listItem) => `<li style="font-family:Nunito,Verdana,Geneva,Tahoma,sans-serif">${escapeText(listItem)}</li>`)
     .join('')}</ul></td></tr>`;
 
 const inflateText = (item: string) =>
-  `<tr><td style="color:#202020;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;position:relative;font-family:Nunito">${escapeText(
+  `<tr><td style="color:#202020;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;position:relative;font-family:Nunito,Verdana,Geneva,Tahoma,sans-serif">${escapeText(
     item,
   )}</td></tr>`;
 

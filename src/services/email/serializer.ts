@@ -1,14 +1,11 @@
 import { User, ItemCategory } from '@prisma/client';
 import { readFile } from 'fs/promises';
 import { render } from 'mustache';
-import nodemailer from 'nodemailer';
-import { ActionFeedback, DetailedCart, EmailAttachement } from '../types';
-import { escapeText, inflate } from '../utils/email';
-import env from '../utils/env';
-import { formatPrice } from '../utils/helpers';
-import logger from '../utils/logger';
-import { generateTicket } from '../utils/pdf';
-import type { Mail, SerializedMail, Component } from './mail';
+import { ActionFeedback, DetailedCart } from '../../types';
+import { escapeText, inflate } from './components';
+import env from '../../utils/env';
+import { formatPrice } from '../../utils/helpers';
+import type { Mail, SerializedMail, Component } from '.';
 
 /**
  * Applied {@link Mail} content in the template
@@ -36,36 +33,6 @@ const serialize = async (content: Mail) => {
       },
     ),
   };
-};
-
-export const transporter = nodemailer.createTransport({
-  host: env.email.host,
-  port: env.email.port,
-  auth: {
-    user: env.email.user,
-    pass: env.email.password,
-  },
-  pool: true,
-  secure: false,
-  maxConnections: 1,
-  tls: {
-    // Rejects TLS errors only if we are not in test environment. (Rejects due to self signed certificate)
-    rejectUnauthorized: !env.test,
-  },
-});
-
-export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttachement[]) => {
-  const from = `${env.email.sender.name} <${env.email.sender.address}>`;
-
-  await transporter.sendMail({
-    from,
-    to: mail.to,
-    subject: mail.subject,
-    html: mail.html,
-    attachments,
-  });
-
-  logger.info(`Email sent to ${mail.to}`);
 };
 
 export const generateTicketsEmail = (cart: DetailedCart) =>
@@ -161,7 +128,7 @@ export const generateValidationEmail = (user: User) =>
           "On sait bien que c'est pénible mais on doit vérifier que ton adresse email fonctionne bien (sinon tu ne pourras pas recevoir tes billets&nbsp;!).",
           {
             name: 'Confirme ton adresse email',
-            location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}` as const,
+            location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}`,
           },
         ],
       },
@@ -214,50 +181,10 @@ export const generatePasswordResetEmail = (user: User) =>
           "On doit s'assurer que tu es bien à l'origine de cette demande. Tu peux finaliser la procédure en cliquant sur le bouton ci-dessous.",
           {
             name: 'Réinitialise ton mot de passe',
-            location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}` as const,
+            location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}`,
             color: '#dc143c',
           },
         ],
       },
     ],
   });
-
-/**
- * Sends an email to the user, containing information about the event,
- * a list of all items bought on the store and his tickets.
- * @param cart the cart of the user
- * @returns when the mail has been sent
- * @throws an error if the mail declared above (corresponding to this
- * request) is invalid ie. contains an object which is not a {@link Component}
- */
-export const sendTickets = async (cart: DetailedCart) => {
-  const cartTickets = cart.cartItems.filter((cartItem) => cartItem.item.category === ItemCategory.ticket);
-  const [content, tickets] = await Promise.all([
-    generateTicketsEmail(cart),
-    Promise.all(cartTickets.map(generateTicket)),
-  ]);
-  return sendEmail(content, tickets);
-};
-
-/**
- * Sends an email to the user with his account validation code.
- * This code (given to the user as a link) is required before logging in
- * @param user the user to send the mail to
- * @returns when the mail was GENERATED. We don't wait for the mail to be sent
- * as it may take time (for several reasons, including mail processing and network
- * delays) and we don't want the current request to timeout
- * @throws an error if the mail declared above (corresponding to this
- * request) is invalid ie. contains an object which is not a {@link Component}
- */
-export const sendValidationCode = async (user: User) => sendEmail(await generateValidationEmail(user));
-
-/**
- * Sends an email to the user with a password reset link.
- * @param user the user to send the mail to
- * @returns when the mail was GENERATED. We don't wait for the mail to be sent
- * as it may take time (for several reasons, including mail processing and network
- * delays) and we don't want the current request to timeout
- * @throws an error if the mail declared above (corresponding to this
- * request) is invalid ie. contains an object which is not a {@link Component}
- */
-export const sendPasswordReset = async (user: User) => sendEmail(await generatePasswordResetEmail(user));

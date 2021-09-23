@@ -11,7 +11,17 @@ export declare namespace Component {
   }
 
   interface Table {
+    /** Name of the table. Displayed BEFORE the table */
     name?: string;
+    /**
+     * List of ALL rows contained in the table.
+     * The first element of thie array will be used for column creation:
+     * All keys of this object will be attached to a column, named by the
+     * item value corresponding to the (column) key
+     * All other object will match one single row and fill the columns depending
+     * on their keys.
+     * This means that all columns must be defined in the first object
+     */
     items: Array<{ [key: string]: string }>;
   }
 }
