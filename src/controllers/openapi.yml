@@ -205,6 +205,22 @@ components:
             team:
               $ref: '#/components/schemas/Team'
 
+    UserWithMessage:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            customMessage:
+              type: string
+
+    UserWithTeamAndMessage:
+      allOf:
+        - $ref: '#/components/schemas/UserWithTeam'
+        - type: object
+          properties:
+            customMessage:
+              type: string
+
     Cart:
       type: object
       properties:

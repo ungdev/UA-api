@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { TransactionState } from '@prisma/client';
+import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
@@ -103,8 +104,15 @@ describe('POST /admin/scan/:qrcode', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should scan the ticket', () =>
-    request(app).post('/admin/scan').send(validBody).set('Authorization', `Bearer ${adminToken}`).expect(204));
+  it('should scan the ticket and return the updated user', async () => {
+    const userData = await request(app)
+      .post('/admin/scan')
+      .send(validBody)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    expect(userData.body.customMessage).to.be.equal(user.customMessage);
+    return expect(userData.body.scannedAt).not.to.be.equal(null);
+  });
 
   it('should error as the ticket is already scanned', () =>
     request(app)

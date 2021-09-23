@@ -30,6 +30,7 @@ export const createFakeUser = async ({
   paid = false,
   discordId = `${Math.floor(Date.now() * (1 + Math.random()))}`,
   permission,
+  customMessage,
 }: {
   username?: string;
   firstname?: string;
@@ -41,8 +42,18 @@ export const createFakeUser = async ({
   paid?: boolean;
   discordId?: string;
   permission?: Permission;
+  customMessage?: string;
 } = {}): Promise<User> => {
-  const user: prisma.User = await createUser(username, firstname, lastname, email, password, discordId, type);
+  const user: prisma.User = await createUser({
+    username,
+    firstname,
+    lastname,
+    email,
+    password,
+    discordId,
+    type,
+    customMessage,
+  });
   logger.verbose(`Created user ${user.username}`);
 
   if (confirmed) {

@@ -43,7 +43,10 @@ export default [
         currentPage: page,
         totalItems: 0,
         totalPages: 0,
-        users: users.map(filterUserWithTeam),
+        users: users.map((user) => ({
+          ...filterUserWithTeam(user),
+          customMessage: user.customMessage,
+        })),
       });
     } catch (error) {
       return next(error);

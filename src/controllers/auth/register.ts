@@ -17,16 +17,16 @@ export default [
       lastname: validators.lastname.required(),
       email: validators.email.required(),
       password: validators.password.required(),
+      customMessage: Joi.string().optional(),
     }),
   ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
-    const { username, firstname, lastname, email, password } = request.body;
-
+    const { username, firstname, lastname, email, password, customMessage } = request.body;
     // Tries to create a user
     try {
-      await createUser(username, firstname, lastname, email, password);
+      await createUser({ username, firstname, lastname, email, password, customMessage });
     } catch (error) {
       // If the email already exists in the database, throw a bad request
       if (error.code === 'P2002' && error.meta && error.meta.target === 'email_unique')

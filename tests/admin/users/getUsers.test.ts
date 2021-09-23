@@ -62,7 +62,7 @@ describe('GET /admin/users', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('shoud fetch one user', async () => {
+  it('should fetch one user', async () => {
     const { body } = await request(app).get(`/admin/users`).set('Authorization', `Bearer ${adminToken}`).expect(200);
 
     expect(body.itemsPerPage).to.be.equal(env.api.itemsPerPage);
@@ -85,6 +85,7 @@ describe('GET /admin/users', () => {
       type: user.type,
       username: user.username,
       hasPaid: false,
+      customMessage: null,
     });
   });
 
@@ -246,7 +247,7 @@ describe('GET /admin/users', () => {
       expect(body.users.length).to.be.equal(1);
     });
 
-    it('should return two non scanned user (including the admin', async () => {
+    it('should return two non scanned user (including the admin)', async () => {
       await database.user.update({ data: { scannedAt: null }, where: { id: user.id } });
       const { body } = await request(app)
         .get(`/admin/users?scanned=false`)
