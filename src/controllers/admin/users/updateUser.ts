@@ -17,6 +17,7 @@ export default [
       permissions: Joi.array().optional().items(validators.permission.optional()),
       place: validators.place.optional(),
       discordId: validators.discordId.optional(),
+      customMessage: Joi.string().optional(),
     }),
   ),
 
@@ -30,7 +31,7 @@ export default [
         return notFound(response, Error.UserNotFound);
       }
 
-      const { type, place, permissions, discordId } = request.body;
+      const { type, place, permissions, discordId, customMessage } = request.body;
 
       // Check that the user type hasn't changed if the user is paid
       if (user.hasPaid && user.type !== type) {
@@ -42,9 +43,10 @@ export default [
         permissions,
         place,
         discordId,
+        customMessage,
       });
 
-      return success(response, filterUser(updatedUser));
+      return success(response, { ...filterUser(updatedUser), customMessage: updatedUser.customMessage });
     } catch (error) {
       return next(error);
     }

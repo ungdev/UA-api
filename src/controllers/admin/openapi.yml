@@ -207,7 +207,7 @@
                 users:
                   type: array
                   items:
-                    $ref: '#/components/schemas/UserWithTeam'
+                    $ref: '#/components/schemas/UserWithTeamAndMessage'
       400:
         $ref: '#/components/responses/400Errored'
       401:
@@ -260,7 +260,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserWithMessage'
       400:
         $ref: '#/components/responses/400Errored'
       401:
@@ -469,7 +469,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserWithTeam'
+              $ref: '#/components/schemas/UserWithTeamAndMessage'
       400:
         $ref: '#/components/responses/400Errored'
       401:
