@@ -13,7 +13,8 @@ export const validateBody = (schema: ObjectSchema) => (
 
   if (error) {
     logger.debug(error.message);
-    return badRequest(response, Error.InvalidBody);
+    response.status(400).json({ error: error.message });
+    return null;
   }
 
   request.body = value;

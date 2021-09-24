@@ -161,6 +161,21 @@ export const enum Error {
   InvalidParameters = 'Paramètres de la requête invalides',
   InvalidQueryParameters = 'Paramètres de la requête invalides (query)',
   EmptyBasket = 'Le panier est vide',
+  InvalidUsername = "Nom d'utilisateur invalide",
+  InvalidFirstName = 'Prénom invalide',
+  InvalidLastName = 'Nom de famille invalide',
+  InvalidEmail = 'Email invalide',
+  InvalidPassword = 'Mot de passe invalide',
+  InvalidDiscordid = 'Identifiant Discord invalide',
+  InvalidUserType = 'UserType invalide',
+  InvalidPlace = 'n°de place invalide',
+  stringBooleanError = "Ce n'est pas du texte",
+
+  InvalidTeamName = "Nom d'équipe invalide !",
+  InvalidTournamentId = "Ce tournoi n'existe pas",
+
+  InvalidQRCode = 'Le QR code est invalide',
+  NoQRCode = "Le QR code n'existe pas",
 
   // 401
   // The user credentials were refused or not provided

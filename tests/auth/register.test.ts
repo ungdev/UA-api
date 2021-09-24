@@ -54,7 +54,7 @@ describe('POST /auth/register', () => {
         ...userData,
         type: UserType.attendant,
       })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: '"type" is not allowed' });
   });
 
   it('should not create a duplicate user if email is the same', async () => {
@@ -75,20 +75,20 @@ describe('POST /auth/register', () => {
     await request(app)
       .post('/auth/register')
       .send({ firstname: userData.firstname, email: userData.email })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidUsername });
   });
 
   it('should not accept wrong email', async () => {
     await request(app)
       .post('/auth/register')
       .send({ ...userData, email: 'wrong email' })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidEmail });
   });
 
   it('should not accept dot in username', async () => {
     await request(app)
       .post('/auth/register')
       .send({ ...userData, username: 'to.to' })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidUsername });
   });
 });

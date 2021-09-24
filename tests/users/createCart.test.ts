@@ -152,25 +152,26 @@ describe('POST /users/current/carts', () => {
     await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: 'Les tickets sont invalides' });
   });
-
   describe('dynamic tests failures on body', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const badBodies: any[] = [
-      { tickets: { userIds: [], attendant: {} } },
-      { supplements: [] },
-      { tickets: { userIds: [], supplements: [] } },
-      { tickets: { attendant: {}, supplements: [] } },
+      {
+        body: { tickets: { userIds: [], visitors: [] } },
+      },
+      { body: { supplements: [] } },
+      { body: { tickets: { userIds: [], supplements: [] } } },
+      { body: { tickets: { visitors: [], supplements: [] } } },
     ];
 
-    for (const [index, badBody] of badBodies.entries()) {
+    for (const [index, body] of badBodies.entries()) {
       it(`should not accept this bad body (${index + 1}/${badBodies.length})`, async () => {
         await request(app)
           .post(`/users/current/carts`)
           .set('Authorization', `Bearer ${token}`)
-          .send(badBody)
-          .expect(400, { error: Error.InvalidBody });
+          .send(body)
+          .expect(400, { error: 'Les tickets sont invalides' });
       });
     }
   });
@@ -205,7 +206,7 @@ describe('POST /users/current/carts', () => {
             tickets: { userIds: [] },
             supplements: [{ itemId: 'ethernet-7', quantity }],
           })
-          .expect(400, { error: Error.InvalidBody });
+          .expect(400, { error: Error.EmptyBasket });
       });
     }
   });
@@ -229,7 +230,7 @@ describe('POST /users/current/carts', () => {
         tickets: { userIds: [user.id, user.id] },
         supplements: [],
       })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: 'Les tickets sont invalides' });
   });
 
   it('should fail because a supplement is listed twice', async () => {
@@ -249,7 +250,7 @@ describe('POST /users/current/carts', () => {
           },
         ],
       })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: '"supplements[1]" contains a duplicate value' });
   });
 
   it('should fail as the user does not exists', async () => {

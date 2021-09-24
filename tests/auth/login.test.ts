@@ -42,7 +42,7 @@ describe('POST /auth/login', () => {
       .send({
         login: user.email,
       })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidPassword });
   });
 
   it('should return an error as incorrect credentials (wrong password)', async () => {

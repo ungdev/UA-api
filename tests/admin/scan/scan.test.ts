@@ -53,14 +53,14 @@ describe('POST /admin/scan/:qrcode', () => {
     request(app)
       .post('/admin/scan')
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(400, { error: Error.InvalidBody }));
+      .expect(400, { error: Error.NoQRCode }));
 
   it('should error as the encryption is invalid', () =>
     request(app)
       .post('/admin/scan')
       .send({ qrcode: 'bonjour' })
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(400, { error: Error.InvalidBody }));
+      .expect(400, { error: Error.InvalidQRCode }));
 
   it('should error as the user has not paid', async () => {
     // Change the cart to refunded

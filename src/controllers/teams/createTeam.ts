@@ -6,7 +6,7 @@ import { noSpectator } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import { createTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
-import { Error } from '../../types';
+import { Error as Error_ } from '../../types';
 import { filterTeam } from '../../utils/filters';
 import { conflict, created, gone } from '../../utils/responses';
 import * as validators from '../../utils/validators';
@@ -19,7 +19,10 @@ export default [
     Joi.object({
       name: validators.teamName.required(),
       tournamentId: validators.tournamentId.required(),
-      userType: Joi.string().valid(UserType.player, UserType.coach).required(),
+      userType: Joi.string()
+        .valid(UserType.player, UserType.coach)
+        .required()
+        .error(new Error("Le type d'utilisateur n'est pas mentionné")),
     }),
   ),
 
@@ -32,7 +35,7 @@ export default [
 
       // If there are more or equal teams than places, return a tournament full
       if (tournament.placesLeft === 0) {
-        return gone(response, Error.TournamentFull);
+        return gone(response, Error_.TournamentFull);
       }
 
       try {
@@ -41,7 +44,7 @@ export default [
       } catch (error) {
         // If the email already exists in the database, throw a bad request
         if (error.code === 'P2002' && error.meta && error.meta.target === 'name_tournamentId_unique')
-          return conflict(response, Error.TeamAlreadyExists);
+          return conflict(response, Error_.TeamAlreadyExists);
 
         return next(error);
       }

@@ -7,7 +7,7 @@ import { validateBody } from '../../middlewares/validation';
 import { createCart, dropStale } from '../../operations/carts';
 import { fetchUserItems } from '../../operations/item';
 import { createAttendant, deleteUser, fetchUser, formatUser } from '../../operations/user';
-import { Cart, Error, PrimitiveCartItem } from '../../types';
+import { Cart, Error as Error_, PrimitiveCartItem } from '../../types';
 import { encodeToBase64, isPartnerSchool, removeAccents } from '../../utils/helpers';
 import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
@@ -40,7 +40,9 @@ export default [
         // Paying no ticket with this cart is possible, just provide an empty array
         userIds: Joi.array().items(validators.id.optional()).unique().required(),
         attendant: Joi.object({ firstname: validators.firstname, lastname: validators.lastname }).optional(),
-      }).required(),
+      })
+        .required()
+        .error(new Error('Les tickets sont invalides')),
       supplements: Joi.array()
         .items(
           Joi.object({
@@ -73,19 +75,20 @@ export default [
         const ticketUser = await fetchUser(userId);
 
         if (!ticketUser) {
-          return notFound(response, Error.UserNotFound);
+          return notFound(response, Error_.UserNotFound);
         }
 
         // Checks if the user has already paid
         if (ticketUser.hasPaid) {
-          return forbidden(response, Error.AlreadyPaid);
+          return forbidden(response, Error_.AlreadyPaid);
         }
 
         // Checks whether the user can have an attendant because he is an adult
-        if (user.age !== UserAge.child && body.tickets.attendant) return forbidden(response, Error.AttendantNotAllowed);
+        if (user.age !== UserAge.child && body.tickets.attendant)
+          return forbidden(response, Error_.AttendantNotAllowed);
 
         // Checks whether a child has already registered an attendant
-        if (user.attendantId && body.tickets.attendant) return forbidden(response, Error.AttendantAlreadyRegistered);
+        if (user.attendantId && body.tickets.attendant) return forbidden(response, Error_.AttendantAlreadyRegistered);
 
         // Defines the ticket id to be either a player or a coach
         let itemId;
@@ -97,7 +100,7 @@ export default [
             itemId = `ticket-${ticketUser.type}`;
             break;
           default:
-            return forbidden(response, Error.NotPlayerOrCoachOrSpectator);
+            return forbidden(response, Error_.NotPlayerOrCoachOrSpectator);
         }
 
         // Adds the item to the basket
@@ -111,7 +114,7 @@ export default [
       // Manage the supplement part. For now, the user can only buy supplements for himself
       for (const supplement of body.supplements) {
         if (!items.some((item) => item.id === supplement.itemId && item.category === ItemCategory.supplement)) {
-          return notFound(response, Error.ItemNotFound);
+          return notFound(response, Error_.ItemNotFound);
         }
 
         if (supplement.itemId === `discount-switch-ssbu`) {
@@ -131,11 +134,11 @@ export default [
           });
 
           if (itemsDiscountSSBU.length > 0) {
-            return forbidden(response, Error.AlreadyAppliedDiscountSSBU);
+            return forbidden(response, Error_.AlreadyAppliedDiscountSSBU);
           }
 
           if (user.type !== UserType.player) {
-            return forbidden(response, Error.NotPlayerDiscountSSBU);
+            return forbidden(response, Error_.NotPlayerDiscountSSBU);
           }
         }
 
@@ -150,7 +153,7 @@ export default [
       // Checks if the basket is empty and there is no visitors
       // This check is used before the visitors because the visitors write in database
       if (cartItems.length === 0 && !body.tickets.attendant) {
-        return badRequest(response, Error.EmptyBasket);
+        return badRequest(response, Error_.EmptyBasket);
       }
 
       // Calculate if each cart item is available
@@ -179,7 +182,7 @@ export default [
 
         // If the user has ordered at least one team and the items left are less than in stock, throw an error
         if (cartItemsCount > 0 && item.left < cartItemsCount) {
-          return gone(response, Error.ItemOutOfStock);
+          return gone(response, Error_.ItemOutOfStock);
         }
       }
 
@@ -246,7 +249,7 @@ export default [
       }
 
       if (basket.getPrice() < 0) {
-        return forbidden(response, Error.BasketCannotBeNegative);
+        return forbidden(response, Error_.BasketCannotBeNegative);
       }
 
       // Returns a answer with the etupay url
