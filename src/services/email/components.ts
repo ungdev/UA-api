@@ -1,6 +1,24 @@
 import { escape } from 'mustache';
 import type { Component } from './types';
 
+export const style = {
+  text: {
+    color: '#202020',
+    font: 'Nunito,Roboto,Arial,sans-serif',
+  },
+  title: {
+    color: '#006492',
+    font: 'Montserrat,Roboto,Arial,sans-serif',
+  },
+  button: {
+    background: '#f1737f',
+    font: '#fff',
+  },
+  sep: {
+    color: '#fbb464',
+  },
+};
+
 /**
  * Escapes text before inserting it into a mail.
  * Turns  *text* into bold text,
@@ -19,12 +37,12 @@ export const escapeText = (text: string) =>
 
 const inflateButton = (item: Component.Button) =>
   `<td style="background-color:${
-    item.color ? item.color : '#f1737f'
+    item.color ? item.color : style.button.background
   };border-radius:2px;padding:3px 6px 2px"><a target="_blank" href="${escapeText(
     item.location,
-  )}" style="border:none;text-decoration:none;color:#fff;user-select:none;font-family:Nunito,Verdana,Geneva,Tahoma,sans-serif">${
-    item.name
-  }</a></td>`;
+  )}" style="border:none;text-decoration:none;color:${style.button.font};user-select:none;font-family:${
+    style.text.font
+  }">${item.name}</a></td>`;
 
 const inflateButtonWrapper = (item: Component.Button | Component.Button[]) =>
   `<tr><td><table style="border:none;border-spacing:5px"><tbody><tr>${
@@ -35,8 +53,12 @@ const inflateTable = (item: Component.Table) => {
   const properties = Object.keys(item.items[0] ?? {});
   if (properties.length === 0) return '';
   return `${
-    item.name ? `<tr><td style="font-size:18px;color:#006492;padding:8px 0">${item.name}</td></tr>` : ''
-  }<tr><td><table style="width:100%;background-color:#f6f6f6;border-collapse:collapse;border-radius:4px;overflow:hidden;font-family:Nunito,Verdana,Geneva,Tahoma,sans-serif"><thead style="background-color:#333;color:#fff"><tr>${properties
+    item.name
+      ? `<tr><td style="font-size:18px;color:${style.title.color};font-family:${style.title.font};padding:8px 0">${item.name}</td></tr>`
+      : ''
+  }<tr><td><table style="width:100%;background-color:#f6f6f6;border-collapse:collapse;border-radius:4px;overflow:hidden;font-family:${
+    style.text.font
+  }"><thead style="background-color:${style.text.color};color:${style.button.font}"><tr>${properties
     .map(
       (propertyName, index) =>
         `<td style="padding:5px${index === 0 ? '' : ';text-align:center'}">${escapeText(
@@ -59,13 +81,15 @@ const inflateTable = (item: Component.Table) => {
 
 const inflateList = (item: string[]) =>
   `<tr><td><ul>${item
-    .map((listItem) => `<li style="font-family:Nunito,Verdana,Geneva,Tahoma,sans-serif">${escapeText(listItem)}</li>`)
+    .map((listItem) => `<li style="font-family:${style.text.font}">${escapeText(listItem)}</li>`)
     .join('')}</ul></td></tr>`;
 
 const inflateText = (item: string) =>
-  `<tr><td style="color:#202020;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;position:relative;font-family:Nunito,Verdana,Geneva,Tahoma,sans-serif">${escapeText(
-    item,
-  )}</td></tr>`;
+  `<tr><td style="color:${
+    style.text.color
+  };-webkit-text-size-adjust:none;-ms-text-size-adjust:none;position:relative;font-family:${
+    style.text.font
+  }">${escapeText(item)}</td></tr>`;
 
 /**
  * Turns a {@link Component} into its html form
@@ -81,5 +105,6 @@ export const inflate = (content: Component): string => {
   }
   if ('location' in content) return inflateButtonWrapper(content);
   if ('items' in content) return inflateTable(content);
+
   throw new Error('Cannot inflate unrecognized component');
 };

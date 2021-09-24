@@ -14,7 +14,7 @@
   <body
     style="
       width: 100%;
-      font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
+      font-family: {{& style.text.font}};
       -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
       padding: 0;
@@ -36,7 +36,7 @@
               "
             >
               <tbody>
-                <tr style="background-color: #202020">
+                <tr style="background-color: {{& style.text.color}}">
                   <td style="text-align: right">
                     <img
                       src="https://arena.utt.fr/logo.png"
@@ -56,8 +56,8 @@
                   <td>
                     <span
                       style="
-                        font-family: Montserrat, sans-serif;
-                        color: #fff;
+                        font-family: {{& style.title.font}};
+                        color: {{& style.button.font}};
                         font-size: 22px;
                         padding: 20px;
                         text-align: center;
@@ -68,7 +68,7 @@
                   </td>
                 </tr>
                 <tr
-                  style="color: #202020; -webkit-text-size-adjust: none; -ms-text-size-adjust: none; position: relative"
+                  style="color: {{& style.text.color}}; -webkit-text-size-adjust: none; -ms-text-size-adjust: none; position: relative"
                 >
                   <td colspan="2">
                     <table style="width: 100%; border-spacing: 20px">
@@ -80,7 +80,7 @@
                                 <tr>
                                   <td
                                     style="
-                                      font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
+                                      font-family: {{& style.text.font}};
                                       line-height: 21px;
                                       font-size: 14px;
                                       text-align: center;
@@ -96,8 +96,8 @@
                                       line-height: 36px;
                                       font-size: 30px;
                                       font-style: normal;
-                                      font-family: Montserrat, sans-serif;
-                                      color: #202020;
+                                      font-family: {{& style.title.font}};
+                                      color: {{& style.text.color}};
                                     "
                                   >
                                     {{title.highlight}}
@@ -108,7 +108,7 @@
                           </td>
                         </tr>
                         <tr>
-                          <td style="border-bottom: 4px dotted #fbb464"></td>
+                          <td style="border-bottom: 4px dotted {{& style.sep.color}}"></td>
                         </tr>
                         {{#sections}}
                         <tr>
@@ -118,10 +118,10 @@
                                 <tr>
                                   <td
                                     style="
-                                      font-family: Montserrat, sans-serif;
+                                      font-family: {{& style.title.font}};
                                       line-height: 29px;
                                       font-size: 24px;
-                                      color: #006492;
+                                      color: {{& style.title.color}};
                                       padding-bottom: 10px;
                                     "
                                   >
@@ -134,7 +134,7 @@
                           </td>
                         </tr>
                         <tr>
-                          <td style="border-bottom: 4px dotted #fbb464"></td>
+                          <td style="border-bottom: 4px dotted {{& style.sep.color}}"></td>
                         </tr>
                         {{/sections}} {{^sections}}
                         <tr>
@@ -144,10 +144,10 @@
                                 <tr>
                                   <td
                                     style="
-                                      font-family: Montserrat, sans-serif;
+                                      font-family: {{& style.title.font}};
                                       line-height: 29px;
                                       font-size: 24px;
-                                      color: #006492;
+                                      color: {{& style.title.color}};
                                       padding-bottom: 10px;
                                     "
                                   >
@@ -156,29 +156,29 @@
                                 </tr>
                                 <tr
                                   style="
-                                    color: #202020;
+                                    color: {{& style.text.color}};
                                     -webkit-text-size-adjust: none;
                                     -ms-text-size-adjust: none;
                                     position: relative;
-                                    font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
+                                    font-family: {{& style.text.font}};
                                   "
                                 >
                                   <td>Le contenu du mail n'a pas été chargé !</td>
                                 </tr>
                                 <tr
                                   style="
-                                    color: #202020;
+                                    color: {{& style.text.color}};
                                     -webkit-text-size-adjust: none;
                                     -ms-text-size-adjust: none;
                                     position: relative;
-                                    font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
+                                    font-family: {{& style.text.font}};
                                   "
                                 >
                                   <td>
                                     Merci de
                                     <a
                                       href="mailto:arena@utt.fr"
-                                      style="text-decoration: none; border-bottom: 1px solid; color: #f1737f"
+                                      style="text-decoration: none; border-bottom: 1px solid; color: {{& style.button.background}}"
                                       >contacter les admins de l'UA</a
                                     >
                                     pour résoudre ce problème.
@@ -189,7 +189,7 @@
                           </td>
                         </tr>
                         <tr>
-                          <td style="border-bottom: 4px dotted #fbb464"></td>
+                          <td style="border-bottom: 4px dotted {{& style.sep.color}}"></td>
                         </tr>
                         {{/sections}}
                       </tbody>
@@ -211,7 +211,7 @@
                               text-align: center;
                               -webkit-text-size-adjust: none;
                               -ms-text-size-adjust: none;
-                              font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
+                              font-family: {{& style.text.font}};
                             "
                           >
                             Suivez-nous sur les réseaux sociaux pour suivre les infos en temps réel pendant
@@ -358,7 +358,7 @@
                               text-align: center;
                               -webkit-text-size-adjust: none;
                               -ms-text-size-adjust: none;
-                              font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
+                              font-family: {{& style.text.font}};
                             "
                           >
                             Ce mail a été envoyé à {{receiver}}
@@ -376,7 +376,7 @@
                               text-align: center;
                               -webkit-text-size-adjust: none;
                               -ms-text-size-adjust: none;
-                              font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
+                              font-family: {{& style.text.font}};
                             "
                           >
                             {{reason}}
@@ -392,14 +392,14 @@
                               text-align: center;
                               -webkit-text-size-adjust: none;
                               -ms-text-size-adjust: none;
-                              font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
+                              font-family: {{& style.text.font}};
                             "
                           >
                             © {{& year}}
                             <a
                               target="_blank"
                               href="https://ung.utt.fr/"
-                              style="text-decoration: none; border-bottom: 1px solid; color: #f1737f"
+                              style="text-decoration: none; border-bottom: 1px solid; color: {{& style.button.background}}"
                               >UTT Net Group</a
                             >
                           </td>
@@ -414,7 +414,7 @@
                               text-align: center;
                               -webkit-text-size-adjust: none;
                               -ms-text-size-adjust: none;
-                              font-family: Nunito, Verdana, Geneva, Tahoma, sans-serif;
+                              font-family: {{& style.text.font}};
                             "
                           >
                             12 rue Marie Curie, 10000 Troyes

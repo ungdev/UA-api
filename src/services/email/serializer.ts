@@ -2,7 +2,7 @@ import { User, ItemCategory } from '@prisma/client';
 import { readFile } from 'fs/promises';
 import { render } from 'mustache';
 import { ActionFeedback, DetailedCart } from '../../types';
-import { escapeText, inflate } from './components';
+import { escapeText, inflate, style } from './components';
 import env from '../../utils/env';
 import { formatPrice } from '../../utils/helpers';
 import type { Mail, SerializedMail, Component } from '.';
@@ -22,6 +22,7 @@ const serialize = async (content: Mail) => {
       {
         ...content,
         year,
+        style,
       },
       undefined,
       {
