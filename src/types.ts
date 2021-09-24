@@ -187,6 +187,7 @@ export const enum Error {
   InvalidToken = 'Session invalide',
   InvalidCredentials = 'Identifiants invalides',
   NoDiscordAccountLinked = 'Vous devez lier votre compte discord pour créer ou rejoindre une équipe',
+  NoToken = "Aucun token n'a été donné",
 
   // 403
   // The server understood the request but refuses to authorize it
