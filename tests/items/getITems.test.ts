@@ -24,7 +24,7 @@ describe('GET /items', () => {
     captainToken = generateToken(captain);
 
     // This user shouldn't have the ssbu discount
-    otherTeam = await createFakeTeam({ tournament: 'lol' });
+    otherTeam = await createFakeTeam({ tournament: 'lolCompetitive' });
     otherCaptain = getCaptain(otherTeam);
     otherCaptainToken = generateToken(otherCaptain);
   });
