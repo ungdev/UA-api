@@ -44,13 +44,15 @@ describe('GET /items', () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').expect(200);
 
-    expect(response.body).to.have.lengthOf(items.length);
+    // without the "discount-switch-ssbu" item
+    expect(response.body).to.have.lengthOf(items.length - 1);
   });
 
   it('should return 200 with an array of items with the "discount-switch-ssbu" item', async () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${captainToken}`).expect(200);
 
+    // with the "discount-switch-ssbu" item
     expect(response.body).to.have.lengthOf(items.length);
   });
 
@@ -58,6 +60,7 @@ describe('GET /items', () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${otherCaptainToken}`).expect(200);
 
+    // without the "discount-switch-ssbu" item
     expect(response.body).to.have.lengthOf(items.length - 1);
   });
 });
