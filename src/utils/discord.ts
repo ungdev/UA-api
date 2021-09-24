@@ -1,39 +1,37 @@
 import discord from 'discord.js';
 import { TournamentId } from '.prisma/client';
-import { fetchTournaments, fetchTournament } from './src/operations/tournament';
-import { fetchTeams } from './src/operations/team';
-import env from './src/utils/env';
-import { server } from 'sinon';
+import { fetchTournaments, fetchTournament } from '../operations/tournament';
+import { fetchTeams } from '../operations/team';
+import env from './env';
 
+// Create bot as a discord client
 const bot = new discord.Client();
 
-async function createChannel(
-  channelName: string,
-  channelType: ChannelType | keyof typeof ChannelType,
-  tournamentId: TournamentId,
-) {
+async function createChannel(channelName: string, channelType: 'voice' | 'text', tournamentId: TournamentId) {
+  // Get channel and create channels in it
   const server = bot.guilds.cache.get(env.discord.server);
   const channel = await server.channels.create(channelName, {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    type: channelType as any,
+    type: channelType,
   });
 
   const categoryId = (await fetchTournament(tournamentId)).discordCategoryId;
   await channel.setParent(categoryId);
-  Promise.all([
-    channel.createOverwrite(channel.guild.roles.everyone, {
-      VIEW_CHANNEL: false,
-    }),
-    channel.createOverwrite(
-      channel.guild.roles.cache.find((r) => r.name === channelName),
-      {
-        VIEW_CHANNEL: true,
-      },
-    ),
-  ]);
+
+  // Configure channel's permissions
+  await channel.createOverwrite(channel.guild.roles.everyone, {
+    VIEW_CHANNEL: false,
+  });
+
+  await channel.createOverwrite(
+    channel.guild.roles.cache.find((r) => r.name === channelName),
+    {
+      VIEW_CHANNEL: true,
+    },
+  );
 }
 
 function createRole(teamName: string) {
+  // Get the server and create a role in it
   const server = bot.guilds.cache.get(env.discord.server);
   server.roles.create({
     data: {
@@ -52,6 +50,7 @@ export function setupTeam(team: string, tournamentId: TournamentId) {
 }
 
 export async function syncRoles() {
+  // Get the server, loop all tournaments, loop all teams in tournaments and loop all player in teams to give them the role
   const server = bot.guilds.cache.get(env.discord.server);
 
   for (const tournament of await fetchTournaments()) {
@@ -63,8 +62,10 @@ export async function syncRoles() {
 
         for (const player of team.players) {
           const member = await server.members.fetch(player.discordId);
-          member.roles.add(tournamentRole);
-          member.roles.add(teamRole);
+          if (member) {
+            member.roles.add(tournamentRole);
+            member.roles.add(teamRole);
+          }
         }
       }
     }
@@ -72,8 +73,10 @@ export async function syncRoles() {
 }
 
 export async function clearRoles(playerId: string) {
+  // Get the member and remove roles
   const member = await bot.guilds.cache.get(env.discord.server).members.fetch(playerId);
   member.roles.remove(member.roles.cache);
 }
 
+// Login the bot
 bot.login(env.discord.token);

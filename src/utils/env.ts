@@ -101,6 +101,7 @@ const env = {
     server: loadEnv('DISCORD_SERVER'),
     oauthUrl: loadEnv('DISCORD_OAUTH_URL') || 'https://discord.com/api/v9/oauth2',
     apiTimeout: Number.parseInt(loadEnv('DISCORD_API_TIMEOUT')) || 5000,
+    syncKey: loadEnv('SYNC_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
     get oauthCallback() {
       return `${env.front.website}${env.api.prefix}discord/oauth`;
     },

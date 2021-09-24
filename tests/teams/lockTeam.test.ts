@@ -3,6 +3,7 @@ import request from 'supertest';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
+import * as discordFunctions from '../../src/utils/discord';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeTeam } from '../utils';
@@ -90,6 +91,14 @@ describe('POST /teams/current/lock', () => {
       .post('/teams/current/lock')
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(403, { error: Error.TeamLocked });
+  });
+
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(discordFunctions, 'setupTeam').throws('Unexpected error');
+    await request(app)
+      .post('/teams/current/lock')
+      .set('Authorization', `Bearer ${captainToken}`)
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should error has the tournament is full', async () => {
