@@ -214,7 +214,7 @@ describe('GET /admin/users', () => {
     let team: Team;
 
     before(async () => {
-      team = await createFakeTeam({ members: 1, name: 'bonjour', tournament: 'lol' });
+      team = await createFakeTeam({ members: 1, name: 'bonjour', tournament: 'lolCompetitive' });
     });
 
     after(async () => {
@@ -224,7 +224,7 @@ describe('GET /admin/users', () => {
 
     it('should test the tournament field', async () => {
       const { body } = await request(app)
-        .get(`/admin/users?tournament=lol`)
+        .get(`/admin/users?tournament=lolCompetitive`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
       expect(body.users.length).to.be.equal(1);

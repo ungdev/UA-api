@@ -21,9 +21,10 @@ INSERT INTO `settings` (`id`, `value`) VALUES
 ('shop', 0);
 
 INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`) VALUES
-('lol', 'League of Legends', 160, 5),
-('valorant', 'Valorant', 80, 5),
+('lolCompetitive', 'League of Legends Pro', 80, 5),
+('lolLeisure', 'League of Legends Amateur', 80, 5),
 ('csgo', 'Counter-Strike : Global Offensive', 80, 5),
 ('ssbu', 'Super Smash Bros Ultimate', 64, 1),
-('rl', 'Rocket League', 48, 3),
-('tft', 'Teamfight Tactics', 64, 1);
+('rl', 'Rocket League', 96, 3),
+('osu', 'Osu!', 24, 1),
+('open', 'Tournoi Libre', 24, 1);

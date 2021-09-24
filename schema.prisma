@@ -160,10 +160,11 @@ enum UserType {
 }
 
 enum TournamentId {
-  lol
-  valorant
+  lolCompetitive
+  lolLeisure
   csgo
   ssbu
   rl
-  tft
+  osu
+  open
 }
