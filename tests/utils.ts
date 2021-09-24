@@ -62,7 +62,7 @@ export const createFakeUser = async ({
 
 export const createFakeTeam = async ({
   members = 1,
-  tournament = TournamentId.lolPro,
+  tournament = TournamentId.lolCompetitive,
   paid = false,
   locked = false,
   name,

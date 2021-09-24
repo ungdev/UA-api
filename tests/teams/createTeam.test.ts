@@ -19,7 +19,7 @@ describe('POST /teams', () => {
 
   const teamBody = {
     name: 'ZeBest',
-    tournamentId: 'lolPro',
+    tournamentId: 'lolCompetitive',
     userType: UserType.player,
   };
 
@@ -27,7 +27,7 @@ describe('POST /teams', () => {
     user = await createFakeUser();
     token = generateToken(user);
 
-    const lol = await tournamentOperations.fetchTournament('lolPro');
+    const lol = await tournamentOperations.fetchTournament('lolCompetitive');
     lolMaxPlayers = lol.maxPlayers;
   });
 
@@ -36,7 +36,7 @@ describe('POST /teams', () => {
     await database.team.deleteMany();
     await database.user.deleteMany();
 
-    await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lolPro' } });
+    await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lolCompetitive' } });
   });
 
   it('should fail because the token is not provided', () =>
@@ -165,7 +165,7 @@ describe('POST /teams', () => {
         maxPlayers: 5,
       },
       where: {
-        id: 'lolPro',
+        id: 'lolCompetitive',
       },
     });
 

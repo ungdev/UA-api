@@ -159,8 +159,8 @@ enum UserType {
 }
 
 enum TournamentId {
-  lolPro
-  lolAmateur
+  lolCompetitive
+  lolLeisure
   csgo
   ssbu
   rl

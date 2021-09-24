@@ -21,7 +21,7 @@ describe('GET /teams', () => {
   it('should fail with an internal server error', async () => {
     sandbox.stub(teamsOperations, 'fetchTeams').throws('Unexpected error');
 
-    await request(app).get('/teams?tournamentId=lolPro').expect(500, { error: Error.InternalServerError });
+    await request(app).get('/teams?tournamentId=lolCompetitive').expect(500, { error: Error.InternalServerError });
   });
 
   it('should not accept empty query parameters', async () => {
@@ -30,7 +30,7 @@ describe('GET /teams', () => {
 
   it('should not accept bad query parameters', async () => {
     await request(app)
-      .get('/teams?tournamentId=lolPro&locked=mdr')
+      .get('/teams?tournamentId=lolCompetitive&locked=mdr')
       .expect(400, { error: Error.InvalidQueryParameters });
   });
 
@@ -39,13 +39,13 @@ describe('GET /teams', () => {
   });
 
   it('should return 200 with an array of teams', async () => {
-    const { body } = await request(app).get('/teams?tournamentId=lolPro').expect(200);
+    const { body } = await request(app).get('/teams?tournamentId=lolCompetitive').expect(200);
 
     expect(body).to.have.lengthOf(2);
   });
 
   it('should return 200 with an array of locked teams', async () => {
-    const { body } = await request(app).get('/teams?tournamentId=lolPro&locked=true').expect(200);
+    const { body } = await request(app).get('/teams?tournamentId=lolCompetitive&locked=true').expect(200);
 
     expect(body).to.have.lengthOf(1);
 
