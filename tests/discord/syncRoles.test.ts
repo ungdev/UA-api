@@ -2,10 +2,10 @@ import request from 'supertest';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as discordFunctions from '../../src/utils/discord';
-import { Error, Team, User } from '../../src/types';
+import { Error } from '../../src/types';
 import env from '../../src/utils/env';
 
-describe.only('POST /discord/sync-roles', () => {
+describe('POST /discord/sync-roles', () => {
   const token = env.discord.syncKey;
 
   it('should fail because the token is not provided', async () => {
@@ -20,7 +20,7 @@ describe.only('POST /discord/sync-roles', () => {
     sandbox.stub(discordFunctions, 'syncRoles').throws('Unexpected error');
     await request(app)
       .post('/discord/sync-roles')
-      .send({ token: token })
+      .send({ token: `${token}` })
       .expect(500, { error: Error.InternalServerError });
   });
 
