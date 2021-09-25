@@ -69,8 +69,8 @@
               password:
                 type: string
                 minLength: 6
-              discordId:
-                type: string
+              age:
+                $ref: '#/components/schemas/Age'
     responses:
       201:
         description: L'utilisateur a bien été créé

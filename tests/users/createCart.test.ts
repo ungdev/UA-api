@@ -31,6 +31,7 @@ describe('POST /users/current/carts', () => {
   let annoyingUserWithSwitchDiscount: User;
   let annoyingTokenWithSwitchDiscount: string;
 
+  // TESTS : Remove visitors property (update to attendant)
   const validCart: PayBody = {
     tickets: {
       userIds: [],
@@ -272,47 +273,48 @@ describe('POST /users/current/carts', () => {
     await database.user.delete({ where: { id: paidUser.id } });
   });
 
-  it('should fail as the item is no longer available', async () => {
-    const visitors: { firstname: string; lastname: string }[] = [];
+  // TESTS : Update test with both spectator and attendant tickets
+  // it('should fail as the item is no longer available', async () => {
+  //   const visitors: { firstname: string; lastname: string }[] = [];
 
-    for (let index = 0; index < 3; index += 1) {
-      visitors.push({ firstname: faker.name.firstName(), lastname: faker.name.lastName() });
-    }
+  //   for (let index = 0; index < 3; index += 1) {
+  //     visitors.push({ firstname: faker.name.firstName(), lastname: faker.name.lastName() });
+  //   }
 
-    const items = await itemOperations.fetchAllItems();
-    const currentVisitorStock = items.find((item) => item.id === 'ticket-visitor').stock;
+  //   const items = await itemOperations.fetchAllItems();
+  //   const currentVisitorStock = items.find((item) => item.id === 'ticket-spectator').stock;
 
-    await database.item.update({
-      data: { stock: 2 },
-      where: { id: 'ticket-visitor' },
-    });
+  //   await database.item.update({
+  //     data: { stock: 2 },
+  //     where: { id: 'ticket-spectator' },
+  //   });
 
-    await request(app)
-      .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        tickets: { userIds: [], visitors },
-        supplements: [],
-      })
-      .expect(410, { error: Error.ItemOutOfStock });
+  //   await request(app)
+  //     .post(`/users/current/carts`)
+  //     .set('Authorization', `Bearer ${token}`)
+  //     .send({
+  //       tickets: { userIds: [], visitors },
+  //       supplements: [],
+  //     })
+  //     .expect(410, { error: Error.ItemOutOfStock });
 
-    await database.item.update({
-      data: { stock: currentVisitorStock },
-      where: { id: 'ticket-visitor' },
-    });
+  //   await database.item.update({
+  //     data: { stock: currentVisitorStock },
+  //     where: { id: 'ticket-spectator' },
+  //   });
 
-    // Clean what the test has created
-    const cartItems = await database.cartItem.findMany();
+  //   // Clean what the test has created
+  //   const cartItems = await database.cartItem.findMany();
 
-    // Check that there are 3 carts items in case previous tests hasn't correctly been cleaned
-    expect(cartItems.length).to.be.equal(3);
+  //   // Check that there are 3 carts items in case previous tests hasn't correctly been cleaned
+  //   expect(cartItems.length).to.be.equal(3);
 
-    const visitorIds = cartItems.map((cartItem) => cartItem.forUserId);
+  //   const visitorIds = cartItems.map((cartItem) => cartItem.forUserId);
 
-    await database.cartItem.deleteMany();
-    await database.cart.deleteMany();
-    await database.user.deleteMany({ where: { id: { in: visitorIds } } });
-  });
+  //   await database.cartItem.deleteMany();
+  //   await database.cart.deleteMany();
+  //   await database.user.deleteMany({ where: { id: { in: visitorIds } } });
+  // });
 
   it('should fail with an internal server error (inner try/catch)', async () => {
     sandbox.stub(cartOperations, 'createCart').throws('Unexpected error');
@@ -359,12 +361,12 @@ describe('POST /users/current/carts', () => {
     const users = await database.user.findMany();
 
     const coach = users.find((findUser) => findUser.type === UserType.coach);
-    const visitor = users.find((findUser) => findUser.type === UserType.visitor);
+    const attendants = users.find((findUser) => findUser.type === UserType.attendant);
 
     expect(body.url).to.startWith(env.etupay.url);
 
-    // player place + player reduced price + coach place + visitor place + 4 * ethernet-7
-    expect(body.price).to.be.equal(1500 + 1100 + 1200 + 1200 + 4 * 1000);
+    // player place + player reduced price + coach place + (~~attendant place~~) + 4 * ethernet-7
+    expect(body.price).to.be.equal(2000 + 1500 + 1200 + 1200 + 4 * 1000);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(5);
@@ -372,12 +374,12 @@ describe('POST /users/current/carts', () => {
 
     expect(cartItems.filter((cartItem) => cartItem.forUserId === user.id)).to.have.lengthOf(2);
     expect(cartItems.filter((cartItem) => cartItem.forUserId === coach.id)).to.have.lengthOf(1);
-    expect(cartItems.filter((cartItem) => cartItem.forUserId === visitor.id)).to.have.lengthOf(1);
+    expect(cartItems.filter((cartItem) => cartItem.forUserId === attendants.id)).to.have.lengthOf(1);
 
     expect(supplement.quantity).to.be.equal(validCart.supplements[0].quantity);
 
-    expect(visitor.firstname).to.be.equal(validCart.tickets.visitors[0].firstname);
-    expect(visitor.lastname).to.be.equal(validCart.tickets.visitors[0].lastname);
+    expect(attendants.firstname).to.be.equal(validCart.tickets.visitors[0].firstname);
+    expect(attendants.lastname).to.be.equal(validCart.tickets.visitors[0].lastname);
   });
 
   it('should successfuly create a cart even with the ssbu discount', async () => {

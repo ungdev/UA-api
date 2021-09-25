@@ -64,18 +64,22 @@ components:
 
     Type:
       type: string
-      enum: [player, coach, visitor, orga]
+      enum: [player, orga, coach, spectator, attendant]
 
     Permission:
       type: string
       enum: [stream, entry, anim, admin]
+
+    Age:
+      type: string
+      enum: [child, adult]
 
     Tournament:
       type: object
       properties:
         id:
           type: string
-          example: lol-pro
+          example: lolCompetitive
         name:
           type: string
         shortName:

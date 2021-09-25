@@ -11,6 +11,7 @@ export const filterUser = (user: User) =>
     'username',
     'firstname',
     'lastname',
+    'age',
     'email',
     'permissions',
     'place',

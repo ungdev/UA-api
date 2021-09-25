@@ -25,8 +25,8 @@ export default [
         return forbidden(response, Error.EmailNotConfirmed);
       }
 
-      if (user.type === UserType.visitor) {
-        return forbidden(response, Error.LoginAsVisitor);
+      if (user.type === UserType.attendant) {
+        return forbidden(response, Error.LoginAsAttendant);
       }
 
       // Generate a token

@@ -5,7 +5,7 @@ import { Basket } from '../../services/etupay';
 import { validateBody } from '../../middlewares/validation';
 import { createCart } from '../../operations/carts';
 import { fetchUserItems } from '../../operations/item';
-import { createVisitor, deleteUser, fetchUser } from '../../operations/user';
+import { createAttendant, deleteUser, fetchUser } from '../../operations/user';
 import { Cart, Error, PrimitiveCartItem } from '../../types';
 import { encodeToBase64, isPartnerSchool, removeAccents } from '../../utils/helpers';
 import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
@@ -15,6 +15,7 @@ import { isShopAllowed } from '../../middlewares/settings';
 import { isAuthenticated } from '../../middlewares/authentication';
 
 export interface PayBody {
+  // TODO: remove visitors from there (replace with a single attendant)
   tickets: {
     userIds: string[];
     visitors: {
@@ -91,6 +92,7 @@ export default [
 
           // Otherwise, throws an error
         } else {
+          // IMPLEMENT: Spectators
           return forbidden(response, Error.NotPlayerOrCoach);
         }
 
@@ -131,7 +133,8 @@ export default [
         // Manage the visitor parts
         for (const visitor of body.tickets.visitors) {
           // Creates the visitor
-          const visitorUser = await createVisitor(visitor.firstname, visitor.lastname);
+          // TODO: Handle attendant creation
+          const visitorUser = await createAttendant(visitor.firstname, visitor.lastname);
 
           // Add the item to the basket
           cartItems.push({

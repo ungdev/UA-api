@@ -15,7 +15,8 @@ yarn-error.log
 /dbml
 
 # IDE Configs
-/.idea
+.idea
+.vscode
 
 /local
 

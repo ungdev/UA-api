@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { TournamentId, UserType } from '@prisma/client';
+import { TournamentId, UserAge, UserType } from '@prisma/client';
 import { Permission } from '../types';
 
 // Matches with LoL EUW summoner name
@@ -19,6 +19,7 @@ export const email = Joi.string().email();
 export const password = Joi.string().regex(passwordRegex);
 export const discordId = Joi.string();
 export const type = Joi.string().valid(...Object.keys(UserType));
+export const age = Joi.string().valid(...Object.keys(UserAge));
 export const place = Joi.string().regex(placeRegex);
 export const permission = Joi.string().valid(...Object.keys(Permission));
 export const stringBoolean = Joi.string().valid('true', 'false');

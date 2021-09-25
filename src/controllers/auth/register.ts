@@ -20,16 +20,23 @@ export default [
       lastname: validators.lastname.required(),
       email: validators.email.required(),
       password: validators.password.required(),
-      customMessage: Joi.string().optional(),
+      age: validators.age.required(),
     }),
   ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
-    const { username, firstname, lastname, email, password, customMessage } = request.body;
+    const { username, firstname, lastname, email, password, age } = request.body;
     // Tries to create a user
     try {
-      const registeredUser = await createUser({ username, firstname, lastname, email, password, customMessage });
+      const registeredUser = await createUser({
+        username,
+        firstname,
+        lastname,
+        email,
+        password,
+        age,
+      });
 
       // Send registration token by mail
       // Don't send sync when it is not needed

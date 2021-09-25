@@ -95,6 +95,8 @@ export type User = PrimitiveUser & {
   hasPaid: boolean;
 };
 
+// DOCS : Update docs schema
+// UPDATE : Append existing attendant to the object
 export type UserWithTeam = User & {
   team: prisma.Team;
 };
@@ -144,9 +146,9 @@ export type EtupayError = ErrorRequestHandler & {
 /**********/
 /** Misc **/
 /**********/
+
 export const enum Error {
   // More info on https://www.loggly.com/blog/http-status-code-diagram to know where to put an error
-
   // 400
   // Used when the request contains a bad syntax and makes the request unprocessable
   InvalidBody = 'Corps de la requête invalide',
@@ -175,7 +177,7 @@ export const enum Error {
   NotCaptain = "Vous devez être le capitaine de l'équipe pour modifier cette ressource",
   NotSelf = 'Vous ne pouvez pas modifier les information de cette personne',
   NotInTeam = "Vous n'êtes pas dans l'équipe",
-  LoginAsVisitor = 'Vous ne pouvez pas vous connecter en tant que visiteur',
+  LoginAsAttendant = "Vous ne pouvez pas vous connecter en tant qu'accompagnateur",
   AlreadyAuthenticated = 'Vous êtes déjà identifié',
   NotPlayerOrCoach = "L'utilisateur n'est pas un joueur ou un coach",
   AlreadyPaid = 'Le joueur possède déjà une place',
@@ -192,6 +194,7 @@ export const enum Error {
   CannotChangeType = 'Vous ne pouvez pas changer de type si vous avez payé',
   NotSameType = "Les deux utilisateurs n'ont pas le même type",
   BasketCannotBeNegative = 'Le total du panier ne peut pas être négatif',
+  TeamMaxCoachReached = 'Une équipe ne peut pas avoir plus de deux coachs',
 
   // 404
   // The server can't find the requested resource
