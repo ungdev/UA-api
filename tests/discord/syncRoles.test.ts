@@ -5,7 +5,8 @@ import * as discordFunctions from '../../src/utils/discord';
 import { Error } from '../../src/types';
 import env from '../../src/utils/env';
 
-describe('POST /discord/sync-roles', () => {
+// eslint-disable-next-line mocha/no-exclusive-tests
+describe.only('POST /discord/sync-roles', () => {
   const token = env.discord.syncKey;
 
   it('should fail because the token is not provided', async () => {
@@ -25,6 +26,10 @@ describe('POST /discord/sync-roles', () => {
   });
 
   it('should succesfully sync roles', async () => {
-    await request(app).post('/discord/sync-roles').send({ tokns: token }).expect(204);
+    sandbox.stub(discordFunctions, 'syncRoles');
+    await request(app)
+      .post('/discord/sync-roles')
+      .send({ token: `${token}` })
+      .expect(204);
   });
 });

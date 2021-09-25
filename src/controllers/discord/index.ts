@@ -7,6 +7,6 @@ const router = Router();
 
 router.get('/oauth', oauth);
 router.get('/connect', connect);
-router.post('/discord/sync-roles', syncRoles);
+router.post('/sync-roles', syncRoles);
 
 export default router;
