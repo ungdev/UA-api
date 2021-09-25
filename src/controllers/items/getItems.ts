@@ -13,7 +13,7 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const { team } = getRequestInfo(response);
-      let items = await fetchUserItems(team);
+      const items = await fetchUserItems(team);
 
       const result = items.map(filterItem);
       return success(response, result);

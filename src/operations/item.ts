@@ -53,4 +53,4 @@ export const fetchUserItems = async (team: Team) => {
   }
 
   return items;
-}
+};

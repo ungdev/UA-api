@@ -379,8 +379,9 @@ describe('POST /users/current/carts', () => {
         cartId: cart.id,
       },
     });
-    const supplement = cartItems.find((cartItem) => cartItem.itemId === validCartWithSwitchDiscount.supplements[0].itemId);
-
+    const supplement = cartItems.find(
+      (cartItem) => cartItem.itemId === validCartWithSwitchDiscount.supplements[0].itemId,
+    );
 
     expect(body.url).to.startWith(env.etupay.url);
 
@@ -396,7 +397,7 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should not create a cart as not in the ssbu team', async () => {
-    const { body } = await request(app)
+    await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${notValidTokenWithSwitchDiscount}`)
       .send(notValidCartWithSwitchDiscount)
