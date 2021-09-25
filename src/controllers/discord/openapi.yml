@@ -36,3 +36,29 @@
                   type: string
                   description: Lien oauth discord de l'utilisateur
                   example: https://discord.com/api/v9/oauth2/authorize?client_id=01234567890134&response_type=code&redirect_uri=https%3A%2F%2Farena.utt.fr%2Fapi%2Fdiscord%2Foauth&scope=identify&state=2d19a2f32e01b2f
+
+/discord/sync-roles:
+  post:
+    summary: Synchronise les rôles
+    description: Permet de synchroniser les rôles des membres du serveur discord avec leurs informations sur le site arena.utt.fr
+    tags:
+      - Discord
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+                example: mlkqsdmlkqsd-qsd-sqd-dsqnvjd
+                description: Permet de vérifier l'authenticité du client effectuant la requête
+                nullable: false
+    responses:
+      204:
+        description: Les rôles ont été synchronisés
+      400:
+        $ref: '#/components/responses/400Errored'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
