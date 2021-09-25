@@ -16,9 +16,9 @@ export default [
 
   validateBody(
     Joi.object({
-      username: validators.username.required(),
+      username: validators.username.optional(),
       password: validators.password.required(),
-      newPassword: validators.password.required(),
+      newPassword: validators.password.optional(),
     }),
   ),
 
@@ -37,7 +37,7 @@ export default [
         return unauthenticated(response, Error.InvalidCredentials);
       }
 
-      const updatedUser = await updateUser(user.id, username, newPassword);
+      const updatedUser = await updateUser(user.id, { username, newPassword });
 
       return success(response, filterUser(updatedUser));
     } catch (error) {

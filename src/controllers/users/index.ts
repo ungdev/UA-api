@@ -8,7 +8,7 @@ const router = Router();
 
 router.get('/current', getUser);
 
-router.put('/current', updateUser);
+router.patch('/current', updateUser);
 router.post('/current/carts', createCart);
 router.get('/current/carts', getCarts);
 

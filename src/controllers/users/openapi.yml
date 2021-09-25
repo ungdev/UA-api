@@ -42,9 +42,10 @@
         $ref: '#/components/responses/400Errored'
       404:
         $ref: '#/components/responses/404UserNotFound'
-  put:
+  patch:
     summary: Modifie les informations d'un utilisateur
     description: Modifie les informations d'un utilisateur.
+      **Le mot de passe est nécessaire pour que la/les valeur(s) soi(en)t modifiée(s)**
     tags:
       - Users
     security:
@@ -58,9 +59,10 @@
             properties:
               username:
                 type: string
+                nullable: true
               password:
                 type: string
-                nullable: true
+                required: true
               newPassword:
                 type: string
                 nullable: true

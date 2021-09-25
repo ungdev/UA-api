@@ -110,13 +110,19 @@ export const createUser = async (user: {
   });
 };
 
-export const updateUser = async (userId: string, username: string, newPassword: string): Promise<User> => {
+export const updateUser = async (
+  userId: string,
+  data: {
+    username: string;
+    newPassword: string;
+  },
+): Promise<User> => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
-  const hashedPassword = await userOperations.hash(newPassword, salt);
+  const hashedPassword = data.newPassword ? await userOperations.hash(data.newPassword, salt) : undefined;
 
   const user = await database.user.update({
     data: {
-      username,
+      username: data.username,
       password: hashedPassword,
     },
     where: {

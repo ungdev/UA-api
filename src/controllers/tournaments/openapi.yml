@@ -17,4 +17,6 @@
                   - type: object
                     properties:
                       teams:
-                        $ref: '#/components/schemas/TeamWithUsersRestricted'
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TeamWithUsersRestricted'

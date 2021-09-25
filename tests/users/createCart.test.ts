@@ -382,7 +382,7 @@ describe('POST /users/current/carts', () => {
 
     expect(body.url).to.startWith(env.etupay.url);
 
-    // player place + player reduced price + coach place + (~~attendant place~~) + 4 * ethernet-7
+    // player place + player reduced price + coach place + attendant place + 4 * ethernet-7
     expect(body.price).to.be.equal(2000 + 1500 + 1200 + 1200 + 4 * 1000);
 
     expect(carts).to.have.lengthOf(1);
