@@ -19,6 +19,9 @@ export const filterUser = (user: User) =>
     'discordId',
     'teamId',
     'askingTeamId',
+    'attendant.firstname',
+    'attendant.lastname',
+    'attendant.id',
   ]);
 
 export const filterUserWithTeam = (user: UserWithTeam) => {

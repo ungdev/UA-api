@@ -22,6 +22,8 @@
     description: Génère un lien oauth discord pour lier son compte
     tags:
       - Discord
+    security:
+      - BearerAuth: []
     responses:
       200:
         description: Lien Oauth généré

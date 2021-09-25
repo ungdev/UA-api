@@ -1,6 +1,6 @@
 /users:
   get:
-    summary: Renvoie les informations minimales d'un utilisateur
+    summary: (Non implémentée cf. PR#57) Renvoie les informations minimales d'un utilisateur
     description: Renvoie les informations minimales d'un utilisateur.
     tags:
       - Users
@@ -133,9 +133,11 @@
                       type: string
                     example:
                       - V1STGX
-                  visitors:
-                    type: array
-                    description: Liste des billets accompagnateurs à acheter
+                  attendant:
+                    nullable: true
+                    type: object
+                    description: Identité de l'accompagnateur. Nécessite que l'utilisateur (actuel)
+                      soit mineur et ne soit pas déjà accompagné.
                     items:
                       type: object
                       properties:

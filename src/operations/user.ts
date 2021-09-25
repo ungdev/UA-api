@@ -12,6 +12,8 @@ export const userInclusions = {
       cart: true,
     },
   },
+  attendant: true,
+  attended: true,
 };
 
 export const formatUser = (user: PrimitiveUser): User => {
@@ -153,14 +155,23 @@ export const updateAdminUser = async (
   return formatUser(user);
 };
 
-export const createAttendant = (firstname: string, lastname: string) =>
-  database.user.create({
+export const createAttendant = (referrerId: string, firstname: string, lastname: string) =>
+  database.user.update({
     data: {
-      id: nanoid(),
-      firstname,
-      lastname,
-      type: UserType.attendant,
+      attendant: {
+        create: {
+          id: nanoid(),
+          firstname,
+          lastname,
+          type: UserType.attendant,
+          age: UserAge.adult,
+        },
+      },
     },
+    where: {
+      id: referrerId,
+    },
+    include: userInclusions,
   });
 
 export const removeUserRegisterToken = (userId: string) =>

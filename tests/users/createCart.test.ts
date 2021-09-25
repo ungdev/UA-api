@@ -1,10 +1,9 @@
-import { UserType } from '@prisma/client';
+import { UserAge, UserType } from '@prisma/client';
 import request from 'supertest';
-import faker from 'faker';
 import { expect } from 'chai';
 import app from '../../src/app';
 import { sandbox } from '../setup';
-import * as cartOperations from '../../src/operations/carts';
+import * as userOperations from '../../src/operations/user';
 import * as itemOperations from '../../src/operations/item';
 import database from '../../src/services/database';
 import { Error, User, Team } from '../../src/types';
@@ -14,6 +13,7 @@ import { PayBody } from '../../src/controllers/users/createCart';
 import env from '../../src/utils/env';
 import { setShopAllowed } from '../../src/operations/settings';
 import { getCaptain } from '../../src/utils/teams';
+import { createAttendant, deleteUser, updateAdminUser } from '../../src/operations/user';
 
 describe('POST /users/current/carts', () => {
   let user: User;
@@ -35,7 +35,7 @@ describe('POST /users/current/carts', () => {
   const validCart: PayBody = {
     tickets: {
       userIds: [],
-      visitors: [{ firstname: 'toto', lastname: 'de lachô' }],
+      attendant: { firstname: 'toto', lastname: 'de lachô' },
     },
     supplements: [
       {
@@ -48,7 +48,6 @@ describe('POST /users/current/carts', () => {
   const validCartWithSwitchDiscount: PayBody = {
     tickets: {
       userIds: [],
-      visitors: [],
     },
     supplements: [
       {
@@ -61,7 +60,6 @@ describe('POST /users/current/carts', () => {
   const notValidCartWithSwitchDiscount: PayBody = {
     tickets: {
       userIds: [],
-      visitors: [],
     },
     supplements: [
       {
@@ -74,7 +72,6 @@ describe('POST /users/current/carts', () => {
   const annoyingCartWithSwitchDiscount: PayBody = {
     tickets: {
       userIds: [],
-      visitors: [],
     },
     supplements: [
       {
@@ -144,10 +141,10 @@ describe('POST /users/current/carts', () => {
   describe('dynamic tests failures on body', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const badBodies: any[] = [
-      { tickets: { userIds: [], visitors: [] } },
+      { tickets: { userIds: [], attendant: {} } },
       { supplements: [] },
       { tickets: { userIds: [], supplements: [] } },
-      { tickets: { visitors: [], supplements: [] } },
+      { tickets: { attendant: {}, supplements: [] } },
     ];
 
     for (const [index, badBody] of badBodies.entries()) {
@@ -161,6 +158,26 @@ describe('POST /users/current/carts', () => {
     }
   });
 
+  it('should fail when buying attendant ticket from adult account', () =>
+    request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send(validCart)
+      .expect(403, { error: Error.AttendantNotAllowed }));
+
+  it('should fail because child account already has an attendant', async () => {
+    user = await updateAdminUser(user.id, {
+      age: UserAge.child,
+    });
+    user = userOperations.formatUser(await createAttendant(user.id, 'Jean-François', 'Poisson'));
+    await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send(validCart)
+      .expect(403, { error: Error.AttendantAlreadyRegistered });
+    return deleteUser(user.attendantId);
+  });
+
   describe('test fail quantity (negative, null and float)', () => {
     for (const quantity of [-1, 0, 0.25]) {
       it(`should fail as the quantity ${quantity}`, async () => {
@@ -168,7 +185,7 @@ describe('POST /users/current/carts', () => {
           .post(`/users/current/carts`)
           .set('Authorization', `Bearer ${token}`)
           .send({
-            tickets: { userIds: [], visitors: [] },
+            tickets: { userIds: [] },
             supplements: [{ itemId: 'ethernet-7', quantity }],
           })
           .expect(400, { error: Error.InvalidBody });
@@ -181,7 +198,7 @@ describe('POST /users/current/carts', () => {
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: [], visitors: [] },
+        tickets: { userIds: [] },
         supplements: [],
       })
       .expect(400, { error: Error.EmptyBasket });
@@ -192,7 +209,7 @@ describe('POST /users/current/carts', () => {
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: [user.id, user.id], visitors: [] },
+        tickets: { userIds: [user.id, user.id] },
         supplements: [],
       })
       .expect(400, { error: Error.InvalidBody });
@@ -203,7 +220,7 @@ describe('POST /users/current/carts', () => {
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: [], visitors: [] },
+        tickets: { userIds: [] },
         supplements: [
           {
             itemId: 'ethernet-7',
@@ -223,7 +240,7 @@ describe('POST /users/current/carts', () => {
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: ['A1Z2E3'], visitors: [] },
+        tickets: { userIds: ['A1Z2E3'] },
         supplements: [],
       })
       .expect(404, { error: Error.UserNotFound });
@@ -234,7 +251,7 @@ describe('POST /users/current/carts', () => {
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: [], visitors: [] },
+        tickets: { userIds: [] },
         supplements: [{ itemId: 'randomItem', quantity: 1 }],
       })
       .expect(404, { error: Error.ItemNotFound });
@@ -246,10 +263,10 @@ describe('POST /users/current/carts', () => {
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: [orga.id], visitors: [] },
+        tickets: { userIds: [orga.id] },
         supplements: [],
       })
-      .expect(403, { error: Error.NotPlayerOrCoach });
+      .expect(403, { error: Error.NotPlayerOrCoachOrSpectator });
 
     // Delete the user to not make the results wrong for the success test
     await database.user.delete({ where: { id: orga.id } });
@@ -262,7 +279,7 @@ describe('POST /users/current/carts', () => {
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: [paidUser.id], visitors: [] },
+        tickets: { userIds: [paidUser.id] },
         supplements: [],
       })
       .expect(403, { error: Error.AlreadyPaid });
@@ -273,7 +290,7 @@ describe('POST /users/current/carts', () => {
     await database.user.delete({ where: { id: paidUser.id } });
   });
 
-  // TESTS : Update test with both spectator and attendant tickets
+  // TESTS : Update test with spectator tickets
   // it('should fail as the item is no longer available', async () => {
   //   const visitors: { firstname: string; lastname: string }[] = [];
 
@@ -316,20 +333,20 @@ describe('POST /users/current/carts', () => {
   //   await database.user.deleteMany({ where: { id: { in: visitorIds } } });
   // });
 
-  it('should fail with an internal server error (inner try/catch)', async () => {
-    sandbox.stub(cartOperations, 'createCart').throws('Unexpected error');
+  it('should fail with an internal server error (inner try/catch)', () => {
+    sandbox.stub(userOperations, 'createAttendant').throws('Unexpected error');
 
-    await request(app)
+    return request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send(validCart)
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should fail with an internal server error (outer try/catch)', async () => {
+  it('should fail with an internal server error (outer try/catch)', () => {
     sandbox.stub(itemOperations, 'fetchAllItems').throws('Unexpected error');
 
-    await request(app)
+    return request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send(validCart)
@@ -361,7 +378,7 @@ describe('POST /users/current/carts', () => {
     const users = await database.user.findMany();
 
     const coach = users.find((findUser) => findUser.type === UserType.coach);
-    const attendants = users.find((findUser) => findUser.type === UserType.attendant);
+    const attendant = users.find((findUser) => findUser.type === UserType.attendant);
 
     expect(body.url).to.startWith(env.etupay.url);
 
@@ -374,12 +391,12 @@ describe('POST /users/current/carts', () => {
 
     expect(cartItems.filter((cartItem) => cartItem.forUserId === user.id)).to.have.lengthOf(2);
     expect(cartItems.filter((cartItem) => cartItem.forUserId === coach.id)).to.have.lengthOf(1);
-    expect(cartItems.filter((cartItem) => cartItem.forUserId === attendants.id)).to.have.lengthOf(1);
+    expect(cartItems.filter((cartItem) => cartItem.forUserId === attendant.id)).to.have.lengthOf(1);
 
     expect(supplement.quantity).to.be.equal(validCart.supplements[0].quantity);
 
-    expect(attendants.firstname).to.be.equal(validCart.tickets.visitors[0].firstname);
-    expect(attendants.lastname).to.be.equal(validCart.tickets.visitors[0].lastname);
+    expect(attendant.firstname).to.be.equal(validCart.tickets.attendant.firstname);
+    expect(attendant.lastname).to.be.equal(validCart.tickets.attendant.lastname);
   });
 
   it('should successfuly create a cart even with the ssbu discount', async () => {

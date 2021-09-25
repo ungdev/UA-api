@@ -111,6 +111,18 @@ components:
         hasPaid:
           type: boolean
 
+    UserAttendant:
+      type: object
+      description: L'accompagnateur d'un mineur. Cet accompagnateur sera toujours majeur (donc omis de la réponse)
+      properties:
+        id:
+          type: string
+          example: F3SHNV
+        firstname:
+          type: string
+        lastname:
+          type: string
+
     User:
       allOf:
         - $ref: '#/components/schemas/UserRestricted'
@@ -148,6 +160,9 @@ components:
             askingTeamId:
               type: string
               example: I8YNHK
+              nullable: true
+            attendant:
+              $ref: '#/components/schemas/UserAttendant'
               nullable: true
 
     Team:

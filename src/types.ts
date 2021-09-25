@@ -1,4 +1,4 @@
-import prisma, { TournamentId, TransactionState, UserType } from '@prisma/client';
+import prisma, { TournamentId, TransactionState, UserType, UserAge } from '@prisma/client';
 import { ErrorRequestHandler } from 'express';
 import Mail from 'nodemailer/lib/mailer';
 /**
@@ -93,10 +93,15 @@ export type PrimitiveUser = prisma.User & {
 
 export type User = PrimitiveUser & {
   hasPaid: boolean;
+  attendant?: Pick<User, 'firstname' | 'lastname' | 'id'> & {
+    age: typeof UserAge.adult;
+    type: typeof UserType.attendant;
+  };
+  attended?: User & {
+    age: typeof UserAge.child;
+  };
 };
 
-// DOCS : Update docs schema
-// UPDATE : Append existing attendant to the object
 export type UserWithTeam = User & {
   team: prisma.Team;
 };
@@ -179,7 +184,7 @@ export const enum Error {
   NotInTeam = "Vous n'êtes pas dans l'équipe",
   LoginAsAttendant = "Vous ne pouvez pas vous connecter en tant qu'accompagnateur",
   AlreadyAuthenticated = 'Vous êtes déjà identifié',
-  NotPlayerOrCoach = "L'utilisateur n'est pas un joueur ou un coach",
+  NotPlayerOrCoachOrSpectator = "L'utilisateur n'est ni un joueur, ni un coach, ni un spectateur",
   AlreadyPaid = 'Le joueur possède déjà une place',
   AlreadyErrored = 'Vous ne pouvez pas valider une transaction échouée',
   TeamLocked = "L'équipe est verrouillée",
@@ -195,6 +200,8 @@ export const enum Error {
   NotSameType = "Les deux utilisateurs n'ont pas le même type",
   BasketCannotBeNegative = 'Le total du panier ne peut pas être négatif',
   TeamMaxCoachReached = 'Une équipe ne peut pas avoir plus de deux coachs',
+  AttendantNotAllowed = "Un majeur ne peut pas avoir d'accompagnateur",
+  AttendantAlreadyRegistered = "Vous ne pouvez pas avoir plus d'un accompagnateur",
 
   // 404
   // The server can't find the requested resource
