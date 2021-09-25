@@ -1,15 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
 import { noContent, unauthenticated } from '../../utils/responses';
 import { Error } from '../../types';
 import { syncRoles } from '../../utils/discord';
 import env from '../../utils/env';
 
 export default [
-  // Middlewares
-  ...isCaptain,
-  isTeamNotLocked,
-
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
@@ -21,6 +16,7 @@ export default [
       }
 
       // Checks if the token is valid
+      // eslint-disable-next-line security/detect-possible-timing-attacks
       if (token !== env.discord.syncKey) {
         return unauthenticated(response, Error.InvalidToken);
       }
