@@ -35,7 +35,7 @@ describe('GET /items', () => {
   });
 
   it('should fail with an internal server error', async () => {
-    sandbox.stub(itemOperations, 'fetchItems').throws('Unexpected error');
+    sandbox.stub(itemOperations, 'fetchAllItems').throws('Unexpected error');
 
     await request(app).get('/items').expect(500, { error: Error.InternalServerError });
   });

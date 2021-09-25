@@ -7,16 +7,25 @@ import { sandbox } from '../setup';
 import * as cartOperations from '../../src/operations/carts';
 import * as itemOperations from '../../src/operations/item';
 import database from '../../src/services/database';
-import { Error, User } from '../../src/types';
-import { createFakeUser } from '../utils';
+import { Error, User, Team } from '../../src/types';
+import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { PayBody } from '../../src/controllers/users/createCart';
 import env from '../../src/utils/env';
 import { setShopAllowed } from '../../src/operations/settings';
+import { getCaptain } from '../../src/utils/teams';
 
 describe('POST /users/current/carts', () => {
   let user: User;
   let token: string;
+
+  let teamWithSwitchDiscount: Team;
+  let userWithSwitchDiscount: User;
+  let tokenWithSwitchDiscount: string;
+
+  let notValidTeamWithSwitchDiscount: Team;
+  let notValidUserWithSwitchDiscount: User;
+  let notValidTokenWithSwitchDiscount: string;
 
   const validCart: PayBody = {
     tickets: {
@@ -31,6 +40,32 @@ describe('POST /users/current/carts', () => {
     ],
   };
 
+  const validCartWithSwitchDiscount: PayBody = {
+    tickets: {
+      userIds: [],
+      visitors: [],
+    },
+    supplements: [
+      {
+        itemId: 'discount-switch-ssbu',
+        quantity: 1,
+      },
+    ],
+  };
+
+  const notValidCartWithSwitchDiscount: PayBody = {
+    tickets: {
+      userIds: [],
+      visitors: [],
+    },
+    supplements: [
+      {
+        itemId: 'discount-switch-ssbu',
+        quantity: 1,
+      },
+    ],
+  };
+
   before(async () => {
     user = await createFakeUser();
     token = generateToken(user);
@@ -40,6 +75,16 @@ describe('POST /users/current/carts', () => {
 
     // Add three tickets
     validCart.tickets.userIds.push(user.id, coach.id, partnerUser.id);
+
+    teamWithSwitchDiscount = await createFakeTeam({ tournament: 'ssbu' });
+    userWithSwitchDiscount = getCaptain(teamWithSwitchDiscount);
+    tokenWithSwitchDiscount = generateToken(userWithSwitchDiscount);
+    validCartWithSwitchDiscount.tickets.userIds.push(userWithSwitchDiscount.id);
+
+    notValidTeamWithSwitchDiscount = await createFakeTeam({ tournament: 'lolCompetitive' });
+    notValidUserWithSwitchDiscount = getCaptain(notValidTeamWithSwitchDiscount);
+    notValidTokenWithSwitchDiscount = generateToken(notValidUserWithSwitchDiscount);
+    notValidCartWithSwitchDiscount.tickets.userIds.push(notValidUserWithSwitchDiscount.id);
   });
 
   after(async () => {
@@ -47,6 +92,7 @@ describe('POST /users/current/carts', () => {
     await database.log.deleteMany();
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
+    await database.team.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -212,7 +258,7 @@ describe('POST /users/current/carts', () => {
       visitors.push({ firstname: faker.name.firstName(), lastname: faker.name.lastName() });
     }
 
-    const items = await itemOperations.fetchItems();
+    const items = await itemOperations.fetchAllItems();
     const currentVisitorStock = items.find((item) => item.id === 'ticket-visitor').stock;
 
     await database.item.update({
@@ -258,7 +304,7 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should fail with an internal server error (outer try/catch)', async () => {
-    sandbox.stub(itemOperations, 'fetchItems').throws('Unexpected error');
+    sandbox.stub(itemOperations, 'fetchAllItems').throws('Unexpected error');
 
     await request(app)
       .post(`/users/current/carts`)
@@ -301,7 +347,7 @@ describe('POST /users/current/carts', () => {
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(5);
-    expect(users).to.have.lengthOf(4);
+    expect(users).to.have.lengthOf(6);
 
     expect(cartItems.filter((cartItem) => cartItem.forUserId === user.id)).to.have.lengthOf(2);
     expect(cartItems.filter((cartItem) => cartItem.forUserId === coach.id)).to.have.lengthOf(1);
@@ -311,5 +357,49 @@ describe('POST /users/current/carts', () => {
 
     expect(visitor.firstname).to.be.equal(validCart.tickets.visitors[0].firstname);
     expect(visitor.lastname).to.be.equal(validCart.tickets.visitors[0].lastname);
+  });
+
+  it('should successfuly create a cart even with the ssbu discount', async () => {
+    const { body } = await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
+      .send(validCartWithSwitchDiscount)
+      .expect(201);
+
+    const carts = await database.cart.findMany({
+      where: {
+        userId: userWithSwitchDiscount.id,
+      },
+    });
+
+    const cart = carts[0];
+
+    const cartItems = await database.cartItem.findMany({
+      where: {
+        cartId: cart.id,
+      },
+    });
+    const supplement = cartItems.find((cartItem) => cartItem.itemId === validCartWithSwitchDiscount.supplements[0].itemId);
+
+
+    expect(body.url).to.startWith(env.etupay.url);
+
+    // player place - 1 * discount-ssbu
+    expect(body.price).to.be.equal(1500 - 300);
+
+    expect(carts).to.have.lengthOf(1);
+    expect(cartItems).to.have.lengthOf(2);
+
+    expect(cartItems.filter((cartItem) => cartItem.forUserId === userWithSwitchDiscount.id)).to.have.lengthOf(2);
+
+    expect(supplement.quantity).to.be.equal(validCartWithSwitchDiscount.supplements[0].quantity);
+  });
+
+  it('should not create a cart as not in the ssbu team', async () => {
+    const { body } = await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${notValidTokenWithSwitchDiscount}`)
+      .send(notValidCartWithSwitchDiscount)
+      .expect(404, { error: Error.ItemNotFound });
   });
 });

@@ -13,7 +13,7 @@ import {
   generateValidationEmail,
 } from '../../src/services/email/serializer';
 import { randomInt } from '../../src/utils/helpers';
-import { fetchItems } from '../../src/operations/item';
+import { fetchAllItems } from '../../src/operations/item';
 import env from '../../src/utils/env';
 import database from '../../src/services/database';
 import { generateResetToken } from '../../src/operations/user';
@@ -89,7 +89,7 @@ describe('Tests the email utils', () => {
     const visitor = await createFakeUser({ type: UserType.visitor });
     const coach = await createFakeUser({ type: UserType.coach });
 
-    const items = await fetchItems();
+    const items = await fetchAllItems();
     const supplements = items.filter((item) => item.category === ItemCategory.supplement);
 
     // Generate a cart item for each supplement

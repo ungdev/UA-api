@@ -1,8 +1,8 @@
 import { TransactionState } from '@prisma/client';
 import database from '../services/database';
-import { Item } from '../types';
+import { Item, Team } from '../types';
 
-export const fetchItems = async (): Promise<Item[]> => {
+export const fetchAllItems = async (): Promise<Item[]> => {
   // fetches the items
   const items = await database.item.findMany();
 
@@ -42,3 +42,15 @@ export const fetchItems = async (): Promise<Item[]> => {
     ),
   );
 };
+
+export const fetchUserItems = async (team: Team) => {
+  let items = await fetchAllItems();
+
+  // Check if user is not in SSBU tournament
+  if (!team || team.tournamentId !== 'ssbu') {
+    // Remove the SSBU discount
+    items = items.filter((element) => element.id !== 'discount-switch-ssbu');
+  }
+
+  return items;
+}
