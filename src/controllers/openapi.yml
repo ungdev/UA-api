@@ -98,7 +98,7 @@ components:
 
     UserRestricted:
       type: object
-      description: Utilisateur informations personnelles. ⚠ Un visiteur ne peut pas être affiché car il n'a pas de username ⚠
+      description: Utilisateur informations personnelles. ⚠ Un accompagnateur ne peut pas être affiché car il n'a pas de username ⚠
       properties:
         id:
           type: string
@@ -382,3 +382,19 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: Le panier est introuvable
+
+    409UsernameAlreadyExists:
+      description: Le nom d'utilisateur existe déjà
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example: Ce nom d'utilisateur est déjà utilisé
+
+    409PlaceAlreadyAttributed:
+      description: La place est déjà attribuée
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example: Cette place est déjà attribuée

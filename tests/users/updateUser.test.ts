@@ -98,6 +98,8 @@ describe('PATCH /users/current', () => {
       id: log.id,
       createdAt: log.createdAt,
     });
+
+    return database.log.deleteMany();
   });
 
   it('should update the user', async () => {
@@ -113,7 +115,7 @@ describe('PATCH /users/current', () => {
     expect(body.updatedAt).to.be.undefined;
 
     const logs = await database.log.findMany();
-    expect(logs).to.have.lengthOf(2);
+    expect(logs).to.have.lengthOf(1);
 
     const [log] = logs;
 

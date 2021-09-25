@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error } from '../../../types';
-import { forbidden, notFound, success } from '../../../utils/responses';
+import { conflict, forbidden, notFound, success } from '../../../utils/responses';
 import { fetchUser, updateAdminUser } from '../../../operations/user';
 import { filterUser } from '../../../utils/filters';
 import { validateBody } from '../../../middlewares/validation';
@@ -35,7 +35,7 @@ export default [
       const { type, place, permissions, discordId, customMessage, age } = request.body;
 
       // Check that the user type hasn't changed if the user is paid
-      if (type !== undefined && user.hasPaid && user.type !== type) {
+      if (type && user.hasPaid && user.type !== type) {
         return forbidden(response, Error.CannotChangeType);
       }
 
@@ -50,6 +50,9 @@ export default [
 
       return success(response, { ...filterUser(updatedUser), customMessage: updatedUser.customMessage });
     } catch (error) {
+      if (error.code === 'P2002' && error.meta && error.meta.target === 'place_unique')
+        return conflict(response, Error.PlaceAlreadyAttributed);
+
       return next(error);
     }
   },

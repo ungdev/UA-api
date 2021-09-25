@@ -272,6 +272,8 @@
         $ref: '#/components/responses/403Unauthorized'
       404:
         $ref: '#/components/responses/404UserNotFound'
+      409:
+        $ref: '#/components/responses/409PlaceAlreadyAttributed'
 
 /admin/users/{userId}/carts:
   get:

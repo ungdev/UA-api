@@ -54,6 +54,17 @@ describe('POST /teams/:teamId/join-requests', () => {
       .expect(403, { error: Error.AlreadyInTeam });
   });
 
+  it('should fail because the user is a spectator', async () => {
+    const spectator = await createFakeUser({ type: UserType.spectator });
+    const spectatorToken = generateToken(spectator);
+
+    return request(app)
+      .post(`/teams/${team.id}/join-requests`)
+      .send({ userType: UserType.player })
+      .set('Authorization', `Bearer ${spectatorToken}`)
+      .expect(403, { error: Error.NoSpectator });
+  });
+
   it('should fail with an internal server error', async () => {
     sandbox.stub(teamOperations, 'askJoinTeam').throws('Unexpected error');
     await request(app)

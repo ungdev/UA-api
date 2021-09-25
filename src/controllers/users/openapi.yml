@@ -81,6 +81,8 @@
         $ref: '#/components/responses/403Unauthorized'
       404:
         $ref: '#/components/responses/404UserNotFound'
+      409:
+        $ref: '#/components/responses/409UsernameAlreadyExists'
 
 /users/current/carts:
   get:
@@ -184,3 +186,40 @@
         $ref: '#/components/responses/403Unauthorized'
       404:
         $ref: '#/components/responses/404UserNotFound'
+
+/users/current/spectate:
+  post:
+    summary: Transforme l'utilisateur en spectateur.
+    description: Transforme l'utilisateur en spectateur. Cette opération n'est possible que si l'utilisateur
+      n'est pas dans une équipe ou n'est a pas de demandes en attente.<br/>
+      Devenir un spectateur de cette façon **n'assure PAS à l'utilisateur d'avoir ticket** (de spectateur)
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: L'utilisateur est désormais spectateur
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+  delete:
+    summary: Transforme le spectateur en simple utilisateur.
+    description: Transforme le spectateur en simple utilisateur. Cette opération n'est possible que si l'utilisateur
+      n'a pas déjà payé son ticket (et si c'est un spectateur)
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: L'utilisateur n'est plus spectateur
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      403:
+        $ref: '#/components/responses/403Unauthorized'

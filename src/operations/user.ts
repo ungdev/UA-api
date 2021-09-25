@@ -153,6 +153,12 @@ export const updateAdminUser = async (
       discordId: updates.discordId,
       customMessage: updates.customMessage,
       age: updates.age,
+      team:
+        updates.type === UserType.spectator
+          ? {
+              disconnect: true,
+            }
+          : undefined,
     },
     where: { id: userId },
     include: userInclusions,

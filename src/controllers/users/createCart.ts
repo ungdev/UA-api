@@ -155,7 +155,7 @@ export default [
       }
 
       // Calculate if each cart item is available
-      const itemsWithStock = items.filter((item) => item.left);
+      const itemsWithStock = items.filter((item) => item.left !== undefined);
 
       // Foreach item where there is a stock
       for (const item of itemsWithStock) {

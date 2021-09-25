@@ -84,12 +84,15 @@ export const refundCart = (cartId: string): Promise<Cart> =>
 export const forcePay = (user: prisma.User) => {
   let itemId;
 
-  if (user.type === UserType.player) {
-    itemId = 'ticket-player';
-  } else if (user.type === UserType.coach) {
-    itemId = 'ticket-coach';
-  } else {
-    throw new Error(`Can't pay for ${user.type}`);
+  switch (user.type) {
+    case UserType.player:
+    case UserType.coach:
+    case UserType.spectator:
+      itemId = `ticket-${user.type}`;
+      break;
+    default: {
+      throw new Error(`Can't pay for ${user.type}`);
+    }
   }
 
   return database.cart.create({

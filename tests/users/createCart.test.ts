@@ -87,9 +87,10 @@ describe('POST /users/current/carts', () => {
 
     const coach = await createFakeUser({ type: UserType.coach });
     const partnerUser = await createFakeUser({ email: 'toto@utt.fr' });
+    const spectator = await createFakeUser({ type: UserType.spectator });
 
     // Add three tickets
-    validCart.tickets.userIds.push(user.id, coach.id, partnerUser.id);
+    validCart.tickets.userIds.push(user.id, coach.id, partnerUser.id, spectator.id);
 
     teamWithSwitchDiscount = await createFakeTeam({ tournament: 'ssbu' });
     userWithSwitchDiscount = getCaptain(teamWithSwitchDiscount);
@@ -290,49 +291,6 @@ describe('POST /users/current/carts', () => {
     await database.user.delete({ where: { id: paidUser.id } });
   });
 
-  // TESTS : Update test with spectator tickets
-  // it('should fail as the item is no longer available', async () => {
-  //   const visitors: { firstname: string; lastname: string }[] = [];
-
-  //   for (let index = 0; index < 3; index += 1) {
-  //     visitors.push({ firstname: faker.name.firstName(), lastname: faker.name.lastName() });
-  //   }
-
-  //   const items = await itemOperations.fetchAllItems();
-  //   const currentVisitorStock = items.find((item) => item.id === 'ticket-spectator').stock;
-
-  //   await database.item.update({
-  //     data: { stock: 2 },
-  //     where: { id: 'ticket-spectator' },
-  //   });
-
-  //   await request(app)
-  //     .post(`/users/current/carts`)
-  //     .set('Authorization', `Bearer ${token}`)
-  //     .send({
-  //       tickets: { userIds: [], visitors },
-  //       supplements: [],
-  //     })
-  //     .expect(410, { error: Error.ItemOutOfStock });
-
-  //   await database.item.update({
-  //     data: { stock: currentVisitorStock },
-  //     where: { id: 'ticket-spectator' },
-  //   });
-
-  //   // Clean what the test has created
-  //   const cartItems = await database.cartItem.findMany();
-
-  //   // Check that there are 3 carts items in case previous tests hasn't correctly been cleaned
-  //   expect(cartItems.length).to.be.equal(3);
-
-  //   const visitorIds = cartItems.map((cartItem) => cartItem.forUserId);
-
-  //   await database.cartItem.deleteMany();
-  //   await database.cart.deleteMany();
-  //   await database.user.deleteMany({ where: { id: { in: visitorIds } } });
-  // });
-
   it('should fail with an internal server error (inner try/catch)', () => {
     sandbox.stub(userOperations, 'createAttendant').throws('Unexpected error');
 
@@ -379,19 +337,21 @@ describe('POST /users/current/carts', () => {
 
     const coach = users.find((findUser) => findUser.type === UserType.coach);
     const attendant = users.find((findUser) => findUser.type === UserType.attendant);
+    const spectator = users.find((findUser) => findUser.type === UserType.spectator);
 
     expect(body.url).to.startWith(env.etupay.url);
 
-    // player place + player reduced price + coach place + attendant place + 4 * ethernet-7
-    expect(body.price).to.be.equal(2000 + 1500 + 1200 + 1200 + 4 * 1000);
+    // player place + player reduced price + coach place + attendant place + spectator place + 4 * ethernet-7
+    expect(body.price).to.be.equal(2000 + 1500 + 1200 + 1200 + 1200 + 4 * 1000);
 
     expect(carts).to.have.lengthOf(1);
-    expect(cartItems).to.have.lengthOf(5);
-    expect(users).to.have.lengthOf(7);
+    expect(cartItems).to.have.lengthOf(6);
+    expect(users).to.have.lengthOf(8);
 
     expect(cartItems.filter((cartItem) => cartItem.forUserId === user.id)).to.have.lengthOf(2);
     expect(cartItems.filter((cartItem) => cartItem.forUserId === coach.id)).to.have.lengthOf(1);
     expect(cartItems.filter((cartItem) => cartItem.forUserId === attendant.id)).to.have.lengthOf(1);
+    expect(cartItems.filter((cartItem) => cartItem.forUserId === spectator.id)).to.have.lengthOf(1);
 
     expect(supplement.quantity).to.be.equal(validCart.supplements[0].quantity);
 
@@ -450,5 +410,31 @@ describe('POST /users/current/carts', () => {
       .set('Authorization', `Bearer ${annoyingTokenWithSwitchDiscount}`)
       .send(annoyingCartWithSwitchDiscount)
       .expect(403, { error: Error.BasketCannotBeNegative });
+  });
+
+  it('should fail as the item is no longer available', async () => {
+    const items = await itemOperations.fetchAllItems();
+    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator').stock;
+
+    await database.item.update({
+      data: { stock: 1 },
+      where: { id: 'ticket-spectator' },
+    });
+
+    const spectator = await createFakeUser({ type: UserType.spectator });
+
+    await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        tickets: { userIds: [spectator.id] },
+        supplements: [],
+      })
+      .expect(410, { error: Error.ItemOutOfStock });
+
+    return database.item.update({
+      data: { stock: currentSpectatorStock },
+      where: { id: 'ticket-spectator' },
+    });
   });
 });

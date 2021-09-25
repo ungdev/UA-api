@@ -202,6 +202,9 @@ export const enum Error {
   TeamMaxCoachReached = 'Une équipe ne peut pas avoir plus de deux coachs',
   AttendantNotAllowed = "Un majeur ne peut pas avoir d'accompagnateur",
   AttendantAlreadyRegistered = "Vous ne pouvez pas avoir plus d'un accompagnateur",
+  CannotSpectate = 'Vous devez quitter votre équipe pour devenir spectateur',
+  CannotUnSpectate = "Vous n'êtes pas spectateur",
+  NoSpectator = "Les spectateurs n'ont pas accès à cette ressource",
 
   // 404
   // The server can't find the requested resource
@@ -221,6 +224,7 @@ export const enum Error {
   EmailAlreadyExists = 'Cet email est déjà utilisé',
   UsernameAlreadyExists = "Ce nom d'utilisateur est déjà utilisé",
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
+  PlaceAlreadyAttributed = 'Cette place est déjà attribuée',
 
   // 410
   // indicates that access to the target resource is no longer available at the server.
