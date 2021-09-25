@@ -7,7 +7,7 @@ import { validateBody } from '../../middlewares/validation';
 import { createCart, dropStale } from '../../operations/carts';
 import { fetchUserItems } from '../../operations/item';
 import { createAttendant, deleteUser, fetchUser, formatUser } from '../../operations/user';
-import { Cart, Error as Error_, PrimitiveCartItem } from '../../types';
+import { Cart, Error as ResponseError, PrimitiveCartItem } from '../../types';
 import { encodeToBase64, isPartnerSchool, removeAccents } from '../../utils/helpers';
 import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
@@ -75,20 +75,21 @@ export default [
         const ticketUser = await fetchUser(userId);
 
         if (!ticketUser) {
-          return notFound(response, Error_.UserNotFound);
+          return notFound(response, ResponseError.UserNotFound);
         }
 
         // Checks if the user has already paid
         if (ticketUser.hasPaid) {
-          return forbidden(response, Error_.AlreadyPaid);
+          return forbidden(response, ResponseError.AlreadyPaid);
         }
 
         // Checks whether the user can have an attendant because he is an adult
         if (user.age !== UserAge.child && body.tickets.attendant)
-          return forbidden(response, Error_.AttendantNotAllowed);
+          return forbidden(response, ResponseError.AttendantNotAllowed);
 
         // Checks whether a child has already registered an attendant
-        if (user.attendantId && body.tickets.attendant) return forbidden(response, Error_.AttendantAlreadyRegistered);
+        if (user.attendantId && body.tickets.attendant)
+          return forbidden(response, ResponseError.AttendantAlreadyRegistered);
 
         // Defines the ticket id to be either a player or a coach
         let itemId;
@@ -100,7 +101,7 @@ export default [
             itemId = `ticket-${ticketUser.type}`;
             break;
           default:
-            return forbidden(response, Error_.NotPlayerOrCoachOrSpectator);
+            return forbidden(response, ResponseError.NotPlayerOrCoachOrSpectator);
         }
 
         // Adds the item to the basket
@@ -114,7 +115,7 @@ export default [
       // Manage the supplement part. For now, the user can only buy supplements for himself
       for (const supplement of body.supplements) {
         if (!items.some((item) => item.id === supplement.itemId && item.category === ItemCategory.supplement)) {
-          return notFound(response, Error_.ItemNotFound);
+          return notFound(response, ResponseError.ItemNotFound);
         }
 
         if (supplement.itemId === `discount-switch-ssbu`) {
@@ -134,11 +135,11 @@ export default [
           });
 
           if (itemsDiscountSSBU.length > 0) {
-            return forbidden(response, Error_.AlreadyAppliedDiscountSSBU);
+            return forbidden(response, ResponseError.AlreadyAppliedDiscountSSBU);
           }
 
           if (user.type !== UserType.player) {
-            return forbidden(response, Error_.NotPlayerDiscountSSBU);
+            return forbidden(response, ResponseError.NotPlayerDiscountSSBU);
           }
         }
 
@@ -153,7 +154,7 @@ export default [
       // Checks if the basket is empty and there is no visitors
       // This check is used before the visitors because the visitors write in database
       if (cartItems.length === 0 && !body.tickets.attendant) {
-        return badRequest(response, Error_.EmptyBasket);
+        return badRequest(response, ResponseError.EmptyBasket);
       }
 
       // Calculate if each cart item is available
@@ -182,7 +183,7 @@ export default [
 
         // If the user has ordered at least one team and the items left are less than in stock, throw an error
         if (cartItemsCount > 0 && item.left < cartItemsCount) {
-          return gone(response, Error_.ItemOutOfStock);
+          return gone(response, ResponseError.ItemOutOfStock);
         }
       }
 
@@ -249,7 +250,7 @@ export default [
       }
 
       if (basket.getPrice() < 0) {
-        return forbidden(response, Error_.BasketCannotBeNegative);
+        return forbidden(response, ResponseError.BasketCannotBeNegative);
       }
 
       // Returns a answer with the etupay url
