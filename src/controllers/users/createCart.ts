@@ -206,6 +206,10 @@ export default [
         basket.addItem(removeAccents(item.name), itemPrice, cartItem.quantity);
       }
 
+      if (basket.getPrice() < 0) {
+        return forbidden(response, Error.BasketCannotBeNegative);
+      }
+
       // Returns a answer with the etupay url
       return created(response, { url: basket.compute(), price: basket.getPrice() });
     } catch (error) {

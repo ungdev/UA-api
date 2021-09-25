@@ -27,6 +27,10 @@ describe('POST /users/current/carts', () => {
   let notValidUserWithSwitchDiscount: User;
   let notValidTokenWithSwitchDiscount: string;
 
+  let annoyingTeamWithSwitchDiscount: Team;
+  let annoyingUserWithSwitchDiscount: User;
+  let annoyingTokenWithSwitchDiscount: string;
+
   const validCart: PayBody = {
     tickets: {
       userIds: [],
@@ -66,6 +70,19 @@ describe('POST /users/current/carts', () => {
     ],
   };
 
+  const annoyingCartWithSwitchDiscount: PayBody = {
+    tickets: {
+      userIds: [],
+      visitors: [],
+    },
+    supplements: [
+      {
+        itemId: 'discount-switch-ssbu',
+        quantity: 1,
+      },
+    ],
+  };
+
   before(async () => {
     user = await createFakeUser();
     token = generateToken(user);
@@ -85,6 +102,10 @@ describe('POST /users/current/carts', () => {
     notValidUserWithSwitchDiscount = getCaptain(notValidTeamWithSwitchDiscount);
     notValidTokenWithSwitchDiscount = generateToken(notValidUserWithSwitchDiscount);
     notValidCartWithSwitchDiscount.tickets.userIds.push(notValidUserWithSwitchDiscount.id);
+
+    annoyingTeamWithSwitchDiscount = await createFakeTeam({ tournament: 'ssbu' });
+    annoyingUserWithSwitchDiscount = getCaptain(annoyingTeamWithSwitchDiscount);
+    annoyingTokenWithSwitchDiscount = generateToken(annoyingUserWithSwitchDiscount);
   });
 
   after(async () => {
@@ -347,7 +368,7 @@ describe('POST /users/current/carts', () => {
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(5);
-    expect(users).to.have.lengthOf(6);
+    expect(users).to.have.lengthOf(7);
 
     expect(cartItems.filter((cartItem) => cartItem.forUserId === user.id)).to.have.lengthOf(2);
     expect(cartItems.filter((cartItem) => cartItem.forUserId === coach.id)).to.have.lengthOf(1);
@@ -402,5 +423,13 @@ describe('POST /users/current/carts', () => {
       .set('Authorization', `Bearer ${notValidTokenWithSwitchDiscount}`)
       .send(notValidCartWithSwitchDiscount)
       .expect(404, { error: Error.ItemNotFound });
+  });
+
+  it('should not create a cart as basket price is negative', async () => {
+    await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${annoyingTokenWithSwitchDiscount}`)
+      .send(annoyingCartWithSwitchDiscount)
+      .expect(403, { error: Error.BasketCannotBeNegative });
   });
 });
