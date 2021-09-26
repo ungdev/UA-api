@@ -437,4 +437,110 @@ describe('POST /users/current/carts', () => {
       where: { id: 'ticket-spectator' },
     });
   });
+
+  it('should succeed to buy last item', async () => {
+    // We clear previous tickets first
+    await database.cartItem.deleteMany();
+    await database.cart.deleteMany();
+
+    const items = await itemOperations.fetchAllItems();
+    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator').stock;
+
+    await database.item.update({
+      data: { stock: 1 },
+      where: { id: 'ticket-spectator' },
+    });
+
+    const spectator = await createFakeUser({ type: UserType.spectator });
+
+    const { body } = await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        tickets: { userIds: [spectator.id] },
+        supplements: [],
+      })
+      .expect(201);
+
+    expect(body.url).to.startWith(env.etupay.url);
+    expect(body.price).to.be.equal(1200);
+
+    return database.item.update({
+      data: { stock: currentSpectatorStock },
+      where: { id: 'ticket-spectator' },
+    });
+  });
+
+  it('should pass as a stale stock-blocking cart was deleted', async () => {
+    // We clear previous tickets first
+    await database.cartItem.deleteMany();
+    await database.cart.deleteMany();
+
+    // We retrieve ticket-spectator stock to reset it at the end of the test
+    const items = await itemOperations.fetchAllItems();
+    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator').stock;
+
+    // We set stock for the ticket to 1 unit
+    await database.item.update({
+      data: { stock: 1 },
+      where: { id: 'ticket-spectator' },
+    });
+
+    // We use that unit for a spectator and force-stale his cart
+    const staleSpectator = await createFakeUser({ type: UserType.spectator });
+    const staleSpectatorCart = await cartOperations.forcePay(staleSpectator);
+    await database.cart.update({
+      where: {
+        id: staleSpectatorCart.id,
+      },
+      data: {
+        createdAt: new Date(Date.now() - 6000000),
+        updatedAt: new Date(Date.now() - 6000000),
+        transactionState: 'pending',
+        cartItems: {
+          updateMany: {
+            data: {
+              createdAt: new Date(Date.now() - 6000000),
+              updatedAt: new Date(Date.now() - 6000000),
+            },
+            where: {},
+          },
+        },
+      },
+    });
+
+    // We create another spectator who will try to buy a spectator ticket
+    // This operation should succeed.
+    const spectator = await createFakeUser({ type: UserType.spectator });
+
+    const { body } = await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        tickets: { userIds: [spectator.id] },
+        supplements: [],
+      })
+      .expect(201);
+
+    expect(body.url).to.startWith(env.etupay.url);
+    expect(body.price).to.be.equal(1200);
+
+    // Check that the stale cart has been deleted
+    const staleSpectatorCarts = await cartOperations.fetchCarts(staleSpectator.id);
+    expect(staleSpectatorCarts).to.have.lengthOf(0);
+
+    const spectatorTickets = await database.cartItem.findMany({
+      where: {
+        itemId: 'ticket-spectator',
+      },
+    });
+    expect(spectatorTickets).to.have.lengthOf(1);
+    expect(spectatorTickets[0].forUserId).to.be.equal(spectator.id);
+
+    // Restore actual stock
+    return database.item.update({
+      data: { stock: currentSpectatorStock },
+      where: { id: 'ticket-spectator' },
+    });
+  });
 });

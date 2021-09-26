@@ -39,6 +39,7 @@ const env = {
     port: loadIntEnv('API_PORT') || 3000,
     prefix: loadEnv('API_PREFIX') || '/',
     itemsPerPage: 50,
+    cartLifespan: loadIntEnv('API_CART_LIFESPAN') || 3600000,
   },
   front: {
     website: loadEnv('ARENA_WEBSITE') || 'https://arena.utt.fr',

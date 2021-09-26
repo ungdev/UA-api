@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { Basket } from '../../services/etupay';
 import { validateBody } from '../../middlewares/validation';
-import { createCart } from '../../operations/carts';
+import { createCart, dropStale } from '../../operations/carts';
 import { fetchUserItems } from '../../operations/item';
 import { createAttendant, deleteUser, fetchUser, formatUser } from '../../operations/user';
 import { Cart, Error, PrimitiveCartItem } from '../../types';
@@ -55,6 +55,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
+      const dropOperation = dropStale();
       const { body } = request as { body: PayBody };
 
       const requestInfo = getRequestInfo(response);
@@ -126,6 +127,36 @@ export default [
         return badRequest(response, Error.EmptyBasket);
       }
 
+      // Calculate if each cart item is available
+      const itemsWithStock = items.filter((item) => item.left !== undefined);
+
+      // Wait for sql delete query to end (if not already ended)
+      const [droppedItemsResult, droppedCartsResult] = await dropOperation;
+      // Check if rows (ie. carts) were updated
+      if (droppedCartsResult.count > 0 && droppedItemsResult.count > 0) {
+        // Update fetched items
+        const refetchedItems = await fetchUserItems(team);
+        for (const item of itemsWithStock)
+          item.left = refetchedItems.find((fetchedItem) => fetchedItem.id === item.id).left;
+      }
+
+      // Foreach item where there is a stock
+      for (const item of itemsWithStock) {
+        // Checks how many items the user has orders and takes account the quantity
+        const cartItemsCount = cartItems.reduce((previous, cartItem) => {
+          if (cartItem.itemId === item.id) {
+            return previous + cartItem.quantity;
+          }
+
+          return previous;
+        }, 0);
+
+        // If the user has ordered at least one team and the items left are less than in stock, throw an error
+        if (cartItemsCount > 0 && item.left < cartItemsCount) {
+          return gone(response, Error.ItemOutOfStock);
+        }
+      }
+
       // Defines the cart
       let cart: Cart;
 
@@ -152,26 +183,6 @@ export default [
         const attendantTicket = cartItems.find((cartItem) => cartItem.itemId === 'ticket-attendant');
         await deleteUser(attendantTicket.forUserId);
         return next(error);
-      }
-
-      // Calculate if each cart item is available
-      const itemsWithStock = items.filter((item) => item.left !== undefined);
-
-      // Foreach item where there is a stock
-      for (const item of itemsWithStock) {
-        // Checks how many items the user has orders and takes account the quantity
-        const cartItemsCount = cartItems.reduce((previous, cartItem) => {
-          if (cartItem.itemId === item.id) {
-            return previous + cartItem.quantity;
-          }
-
-          return previous;
-        }, 0);
-
-        // If the user has ordered at least one team and the items left are less than in stock, throw an error
-        if (cartItemsCount > 0 && item.left < cartItemsCount) {
-          return gone(response, Error.ItemOutOfStock);
-        }
       }
 
       // Creates a etupay basket. The accents need to be removed as on the website they don't appear otherwise
