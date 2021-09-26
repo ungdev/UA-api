@@ -133,6 +133,10 @@ export default [
           if (itemsDiscountSSBU.length > 0) {
             return forbidden(response, Error.AlreadyAppliedDiscountSSBU);
           }
+
+          if (user.type !== UserType.player) {
+            return forbidden(response, Error.NotPlayerDiscountSSBU);
+          }
         }
 
         // Push the supplement to the basket
