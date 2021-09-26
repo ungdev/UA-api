@@ -2,7 +2,9 @@ import prisma, { TournamentId, UserType } from '@prisma/client';
 import database from '../services/database';
 import { PrimitiveUser, Team, User } from '../types';
 import nanoid from '../utils/nanoid';
-import { formatUser, userInclusions } from './user';
+import { countCoaches, formatUser, userInclusions } from './user';
+
+const teamMaxCoachCount = 2;
 
 const teamInclusions = {
   users: {
@@ -114,6 +116,14 @@ export const deleteTeam = (teamId: string) =>
   ]);
 
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
+  // We check the amount of coaches at that point
+  const teamCoachCount = await countCoaches(teamId);
+  if (teamCoachCount >= teamMaxCoachCount)
+    throw Object.assign(new Error('Query cannot be executed: max count of coach reached already'), {
+      code: 'API_COACH_MAX_TEAM',
+    });
+
+  // Then we create the join request when it is alright
   const updatedUser = await database.user.update({
     data: {
       askingTeam: {

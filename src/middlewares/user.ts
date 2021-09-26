@@ -37,9 +37,9 @@ export const initUserRequest = async (request: Request, response: Response, next
       return forbidden(response, Error.EmailNotConfirmed);
     }
 
-    // It mustn't be a visitor
-    if (user.type === UserType.visitor) {
-      return forbidden(response, Error.LoginAsVisitor);
+    // It mustn't be an attendant
+    if (user.type === UserType.attendant) {
+      return forbidden(response, Error.LoginAsAttendant);
     }
 
     // Set the sentry user to identify the problem in case of 500

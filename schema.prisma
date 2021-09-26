@@ -63,26 +63,26 @@ model Setting {
 }
 
 model Team {
-  id           String         @id
+  id           String       @id
   name         String
   tournamentId TournamentId
-  captainId    String         @unique
+  captainId    String       @unique
   lockedAt     DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @default(now()) @updatedAt
-  captain      User           @relation(fields: [captainId], references: [id])
-  tournament   Tournament     @relation(fields: [tournamentId], references: [id])
-  askingUsers  User[]         @relation("teamAskingUsers")
-  users        User[]         @relation("teamUsers")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now()) @updatedAt
+  captain      User         @relation(fields: [captainId], references: [id])
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+  askingUsers  User[]       @relation("teamAskingUsers")
+  users        User[]       @relation("teamUsers")
 
-  @@index([id])
   @@unique([name, tournamentId])
+  @@index([id])
   @@map("teams")
 }
 
 model Tournament {
-  id                     TournamentId  @id
-  name                   String  @unique
+  id                     TournamentId @id
+  name                   String       @unique
   maxPlayers             Int
   playersPerTeam         Int
   toornamentId           String?
@@ -96,13 +96,13 @@ model Tournament {
 }
 
 model Log {
-  id               String     @id
-  method           String
-  path             String
-  body             Json?
-  userId           String
-  createdAt        DateTime        @default(now())
-  user             User            @relation(fields: [userId], references: [id])
+  id        String   @id
+  method    String
+  path      String
+  body      Json?
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   // We create an index on the userId as the search most of the time used with a userId
   @@index([userId])
@@ -110,30 +110,36 @@ model Log {
 }
 
 model User {
-  id            String     @id
-  username      String?    @unique
-  firstname     String
-  lastname      String
-  email         String?    @unique
-  password      String?
-  type          UserType?
-  permissions   String?
-  registerToken String?    @unique
-  resetToken    String?    @unique
-  place         String?    @unique
-  customMessage String?
-  scannedAt     DateTime?
-  discordId     String?    @unique
-  teamId        String?
-  askingTeamId  String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
-  askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
-  team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
-  captainTeam   Team?      // This field is used to make prisma work but should never be used
-  cartItems     CartItem[]
-  carts         Cart[]
-  logs          Log[]
+  id              String     @id
+  username        String?    @unique
+  firstname       String
+  lastname        String
+  email           String?    @unique
+  password        String?
+  type            UserType?
+  age             UserAge    @default(child)
+  permissions     String?
+  registerToken   String?    @unique
+  resetToken      String?    @unique
+  place           String?    @unique
+  customMessage   String?
+  scannedAt       DateTime?
+  discordId       String?    @unique
+  // Attendant: both sides relation is required by prisma. Read docs:
+  // https://www.prisma.io/docs/concepts/components/prisma-schema/relations/self-relations#one-to-one-self-relations
+  attendantId     String?    @unique
+  attendant       User?      @relation("attendantUser", fields: [attendantId], references: [id])
+  attended        User?      @relation("attendantUser")
+  teamId          String?
+  askingTeamId    String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @default(now()) @updatedAt
+  askingTeam      Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
+  team            Team?      @relation("teamUsers", fields: [teamId], references: [id])
+  captainTeam     Team?      // This field is used to make prisma work but should never be used
+  cartItems       CartItem[]
+  carts           Cart[]
+  logs            Log[]
 
   @@index([id])
   @@map("users")
@@ -154,9 +160,15 @@ enum ItemCategory {
 
 enum UserType {
   player
-  coach
-  visitor
   orga
+  coach
+  spectator
+  attendant
+}
+
+enum UserAge {
+  adult
+  child
 }
 
 enum TournamentId {

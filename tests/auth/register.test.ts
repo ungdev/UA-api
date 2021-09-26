@@ -21,6 +21,7 @@ describe('POST /auth/register', () => {
     lastname: 'Doe',
     email: 'john.doe@test.com',
     password: 'jesuisthomas',
+    age: 'adult',
   };
 
   it('should get an error as the login is not allowed', async () => {
@@ -51,7 +52,7 @@ describe('POST /auth/register', () => {
       .post('/auth/register')
       .send({
         ...userData,
-        type: UserType.visitor,
+        type: UserType.attendant,
       })
       .expect(400, { error: Error.InvalidBody });
   });

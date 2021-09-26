@@ -36,13 +36,13 @@ describe('POST /admin/auth/login', () => {
       .expect(403, { error: Error.NoPermission });
   });
 
-  it('should error because the user is a visitor', async () => {
-    const visitor = await createFakeUser({ type: UserType.visitor });
+  it('should error because the user is an attendant', async () => {
+    const visitor = await createFakeUser({ type: UserType.attendant });
 
     await request(app)
       .post(`/admin/auth/login/${visitor.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(403, { error: Error.LoginAsVisitor });
+      .expect(403, { error: Error.LoginAsAttendant });
   });
 
   it('should error because the user is not confirmed', async () => {

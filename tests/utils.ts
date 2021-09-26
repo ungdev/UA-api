@@ -1,5 +1,5 @@
 import faker from 'faker';
-import prisma, { TournamentId, UserType } from '@prisma/client';
+import prisma, { TournamentId, UserAge, UserType } from '@prisma/client';
 import { createUser, fetchUser, removeUserRegisterToken, setPermissions } from '../src/operations/user';
 import { Permission, User } from '../src/types';
 import { createTeam, fetchTeam, joinTeam, lockTeam } from '../src/operations/team';
@@ -25,6 +25,7 @@ export const createFakeUser = async ({
   discordId = `${Math.floor(Date.now() * (1 + Math.random()))}`,
   permission,
   customMessage,
+  age = UserAge.adult,
 }: {
   username?: string;
   firstname?: string;
@@ -37,6 +38,7 @@ export const createFakeUser = async ({
   discordId?: string;
   permission?: Permission;
   customMessage?: string;
+  age?: UserAge;
 } = {}): Promise<User> => {
   const user: prisma.User = await createUser({
     username,
@@ -47,6 +49,7 @@ export const createFakeUser = async ({
     discordId,
     type,
     customMessage,
+    age,
   });
   logger.verbose(`Created user ${user.username}`);
 

@@ -1,5 +1,5 @@
 import userOperations from 'bcryptjs';
-import prisma, { TransactionState, UserType } from '@prisma/client';
+import prisma, { TransactionState, UserAge, UserType } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
@@ -12,6 +12,8 @@ export const userInclusions = {
       cart: true,
     },
   },
+  attendant: true,
+  attended: true,
 };
 
 export const formatUser = (user: PrimitiveUser): User => {
@@ -21,7 +23,7 @@ export const formatUser = (user: PrimitiveUser): User => {
     throw new Error('Error just to make sure of something');
 
   const hasPaid = user.cartItems.some(
-    (cartItem) => cartItem.itemId === 'ticket-player' && cartItem.cart.transactionState === TransactionState.paid,
+    (cartItem) => cartItem.itemId === `ticket-${user.type}` && cartItem.cart.transactionState === TransactionState.paid,
   );
 
   return {
@@ -84,6 +86,7 @@ export const createUser = async (user: {
   lastname: string;
   email: string;
   password: string;
+  age: UserAge;
   discordId?: string;
   type?: UserType;
   customMessage?: string;
@@ -102,17 +105,24 @@ export const createUser = async (user: {
       password: hashedPassword,
       registerToken: nanoid(),
       customMessage: user.customMessage,
+      age: user.age,
     },
   });
 };
 
-export const updateUser = async (userId: string, username: string, newPassword: string): Promise<User> => {
+export const updateUser = async (
+  userId: string,
+  data: {
+    username: string;
+    newPassword: string;
+  },
+): Promise<User> => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
-  const hashedPassword = await userOperations.hash(newPassword, salt);
+  const hashedPassword = data.newPassword ? await userOperations.hash(data.newPassword, salt) : undefined;
 
   const user = await database.user.update({
     data: {
-      username,
+      username: data.username,
       password: hashedPassword,
     },
     where: {
@@ -132,6 +142,7 @@ export const updateAdminUser = async (
     place?: string;
     discordId?: string;
     customMessage?: string;
+    age?: UserAge;
   },
 ): Promise<User> => {
   const user = await database.user.update({
@@ -141,6 +152,13 @@ export const updateAdminUser = async (
       place: updates.place,
       discordId: updates.discordId,
       customMessage: updates.customMessage,
+      age: updates.age,
+      team:
+        updates.type === UserType.spectator
+          ? {
+              disconnect: true,
+            }
+          : undefined,
     },
     where: { id: userId },
     include: userInclusions,
@@ -149,14 +167,23 @@ export const updateAdminUser = async (
   return formatUser(user);
 };
 
-export const createVisitor = (firstname: string, lastname: string) =>
-  database.user.create({
+export const createAttendant = (referrerId: string, firstname: string, lastname: string) =>
+  database.user.update({
     data: {
-      id: nanoid(),
-      firstname,
-      lastname,
-      type: UserType.visitor,
+      attendant: {
+        create: {
+          id: nanoid(),
+          firstname,
+          lastname,
+          type: UserType.attendant,
+          age: UserAge.adult,
+        },
+      },
     },
+    where: {
+      id: referrerId,
+    },
+    include: userInclusions,
   });
 
 export const removeUserRegisterToken = (userId: string) =>
@@ -224,3 +251,30 @@ export const changePassword = async (user: User, newPassword: string) => {
 };
 
 export const deleteUser = (id: string) => database.user.delete({ where: { id } });
+
+/**
+ * Counts the coaches in a chosen team. If team is not specified,
+ * they are counted globally.
+ * @param teamId the id of the team to count coaches in
+ * @returns the amount of coaches in the given team
+ */
+export const countCoaches = (teamId: string) =>
+  database.user.count({
+    where: {
+      AND: [
+        {
+          type: UserType.coach,
+        },
+        {
+          OR: [
+            {
+              teamId,
+            },
+            {
+              askingTeamId: teamId,
+            },
+          ],
+        },
+      ],
+    },
+  });

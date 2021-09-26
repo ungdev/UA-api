@@ -2,7 +2,31 @@ import prisma, { TransactionState, UserType } from '@prisma/client';
 
 import database from '../services/database';
 import { Cart, CartWithCartItems, DetailedCart, PrimitiveCartItem } from '../types';
+import env from '../utils/env';
 import nanoid from '../utils/nanoid';
+
+export const dropStale = () =>
+  database.$transaction([
+    // We start with deleting cart contents (as prisma relation is this made this way)
+    database.cartItem.deleteMany({
+      where: {
+        cart: {
+          createdAt: {
+            lt: new Date(Date.now() - env.api.cartLifespan),
+          },
+          transactionState: 'pending',
+        },
+      },
+    }),
+    // Delete empty carts: we check all items have a null cartId (ie. cart is empty)
+    database.cart.deleteMany({
+      where: {
+        cartItems: {
+          none: {},
+        },
+      },
+    }),
+  ]);
 
 export const fetchCart = (cartId: string): Promise<Cart> =>
   database.cart.findUnique({
@@ -84,12 +108,15 @@ export const refundCart = (cartId: string): Promise<Cart> =>
 export const forcePay = (user: prisma.User) => {
   let itemId;
 
-  if (user.type === UserType.player) {
-    itemId = 'ticket-player';
-  } else if (user.type === UserType.coach) {
-    itemId = 'ticket-coach';
-  } else {
-    throw new Error(`Can't pay for ${user.type}`);
+  switch (user.type) {
+    case UserType.player:
+    case UserType.coach:
+    case UserType.spectator:
+      itemId = `ticket-${user.type}`;
+      break;
+    default: {
+      throw new Error(`Can't pay for ${user.type}`);
+    }
   }
 
   return database.cart.create({

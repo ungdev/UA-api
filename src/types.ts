@@ -1,4 +1,4 @@
-import prisma, { TournamentId, TransactionState, UserType } from '@prisma/client';
+import prisma, { TournamentId, TransactionState, UserType, UserAge } from '@prisma/client';
 import { ErrorRequestHandler } from 'express';
 import Mail from 'nodemailer/lib/mailer';
 /**
@@ -93,6 +93,13 @@ export type PrimitiveUser = prisma.User & {
 
 export type User = PrimitiveUser & {
   hasPaid: boolean;
+  attendant?: Pick<User, 'firstname' | 'lastname' | 'id'> & {
+    age: typeof UserAge.adult;
+    type: typeof UserType.attendant;
+  };
+  attended?: User & {
+    age: typeof UserAge.child;
+  };
 };
 
 export type UserWithTeam = User & {
@@ -144,9 +151,9 @@ export type EtupayError = ErrorRequestHandler & {
 /**********/
 /** Misc **/
 /**********/
+
 export const enum Error {
   // More info on https://www.loggly.com/blog/http-status-code-diagram to know where to put an error
-
   // 400
   // Used when the request contains a bad syntax and makes the request unprocessable
   InvalidBody = 'Corps de la requête invalide',
@@ -175,9 +182,9 @@ export const enum Error {
   NotCaptain = "Vous devez être le capitaine de l'équipe pour modifier cette ressource",
   NotSelf = 'Vous ne pouvez pas modifier les information de cette personne',
   NotInTeam = "Vous n'êtes pas dans l'équipe",
-  LoginAsVisitor = 'Vous ne pouvez pas vous connecter en tant que visiteur',
+  LoginAsAttendant = "Vous ne pouvez pas vous connecter en tant qu'accompagnateur",
   AlreadyAuthenticated = 'Vous êtes déjà identifié',
-  NotPlayerOrCoach = "L'utilisateur n'est pas un joueur ou un coach",
+  NotPlayerOrCoachOrSpectator = "L'utilisateur n'est ni un joueur, ni un coach, ni un spectateur",
   AlreadyPaid = 'Le joueur possède déjà une place',
   AlreadyErrored = 'Vous ne pouvez pas valider une transaction échouée',
   TeamLocked = "L'équipe est verrouillée",
@@ -192,6 +199,12 @@ export const enum Error {
   CannotChangeType = 'Vous ne pouvez pas changer de type si vous avez payé',
   NotSameType = "Les deux utilisateurs n'ont pas le même type",
   BasketCannotBeNegative = 'Le total du panier ne peut pas être négatif',
+  TeamMaxCoachReached = 'Une équipe ne peut pas avoir plus de deux coachs',
+  AttendantNotAllowed = "Un majeur ne peut pas avoir d'accompagnateur",
+  AttendantAlreadyRegistered = "Vous ne pouvez pas avoir plus d'un accompagnateur",
+  CannotSpectate = 'Vous devez quitter votre équipe pour devenir spectateur',
+  CannotUnSpectate = "Vous n'êtes pas spectateur",
+  NoSpectator = "Les spectateurs n'ont pas accès à cette ressource",
 
   // 404
   // The server can't find the requested resource
@@ -211,6 +224,7 @@ export const enum Error {
   EmailAlreadyExists = 'Cet email est déjà utilisé',
   UsernameAlreadyExists = "Ce nom d'utilisateur est déjà utilisé",
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
+  PlaceAlreadyAttributed = 'Cette place est déjà attribuée',
 
   // 410
   // indicates that access to the target resource is no longer available at the server.

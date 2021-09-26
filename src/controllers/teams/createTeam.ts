@@ -2,7 +2,7 @@ import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { hasLinkedDiscordAccount } from '../../middlewares/oauth';
-import { isNotInATeam } from '../../middlewares/team';
+import { noSpectator } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import { createTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
@@ -13,7 +13,7 @@ import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
-  ...isNotInATeam,
+  ...noSpectator,
   hasLinkedDiscordAccount,
   validateBody(
     Joi.object({

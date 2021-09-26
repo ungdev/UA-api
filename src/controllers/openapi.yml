@@ -64,18 +64,22 @@ components:
 
     Type:
       type: string
-      enum: [player, coach, visitor, orga]
+      enum: [player, orga, coach, spectator, attendant]
 
     Permission:
       type: string
       enum: [stream, entry, anim, admin]
+
+    Age:
+      type: string
+      enum: [child, adult]
 
     Tournament:
       type: object
       properties:
         id:
           type: string
-          example: lol-pro
+          example: lolCompetitive
         name:
           type: string
         shortName:
@@ -94,7 +98,7 @@ components:
 
     UserRestricted:
       type: object
-      description: Utilisateur informations personnelles. ⚠ Un visiteur ne peut pas être affiché car il n'a pas de username ⚠
+      description: Utilisateur informations personnelles. ⚠ Un accompagnateur ne peut pas être affiché car il n'a pas de username ⚠
       properties:
         id:
           type: string
@@ -106,6 +110,18 @@ components:
           nullable: true
         hasPaid:
           type: boolean
+
+    UserAttendant:
+      type: object
+      description: L'accompagnateur d'un mineur. Cet accompagnateur sera toujours majeur (donc omis de la réponse)
+      properties:
+        id:
+          type: string
+          example: F3SHNV
+        firstname:
+          type: string
+        lastname:
+          type: string
 
     User:
       allOf:
@@ -144,6 +160,9 @@ components:
             askingTeamId:
               type: string
               example: I8YNHK
+              nullable: true
+            attendant:
+              $ref: '#/components/schemas/UserAttendant'
               nullable: true
 
     Team:
@@ -363,3 +382,21 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: Le panier est introuvable
+
+    409UsernameAlreadyExists:
+      description: Le nom d'utilisateur existe déjà
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Ce nom d'utilisateur est déjà utilisé
+
+    409PlaceAlreadyAttributed:
+      description: La place est déjà attribuée
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Cette place est déjà attribuée

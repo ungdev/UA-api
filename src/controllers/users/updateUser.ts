@@ -3,7 +3,7 @@ import bcrpyt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import { getRequestInfo } from '../../utils/users';
 import { filterUser } from '../../utils/filters';
-import { success, unauthenticated } from '../../utils/responses';
+import { conflict, success, unauthenticated } from '../../utils/responses';
 import { validateBody } from '../../middlewares/validation';
 import * as validators from '../../utils/validators';
 import { Error } from '../../types';
@@ -16,9 +16,9 @@ export default [
 
   validateBody(
     Joi.object({
-      username: validators.username.required(),
+      username: validators.username.optional(),
       password: validators.password.required(),
-      newPassword: validators.password.required(),
+      newPassword: validators.password.optional(),
     }),
   ),
 
@@ -37,10 +37,14 @@ export default [
         return unauthenticated(response, Error.InvalidCredentials);
       }
 
-      const updatedUser = await updateUser(user.id, username, newPassword);
+      const updatedUser = await updateUser(user.id, { username, newPassword });
 
       return success(response, filterUser(updatedUser));
     } catch (error) {
+      // If the username is already used by someone else, we respond with an error
+      if (error.code === 'P2002' && error.meta && error.meta.target === 'username_unique')
+        return conflict(response, Error.UsernameAlreadyExists);
+
       return next(error);
     }
   },

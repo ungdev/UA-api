@@ -86,7 +86,7 @@ describe('Tests the email utils', () => {
   it(`should generate a payment template`, async () => {
     // Create a fake user and add it in a random team
     const user = await createFakeUser();
-    const visitor = await createFakeUser({ type: UserType.visitor });
+    const spectator = await createFakeUser({ type: UserType.spectator });
     const coach = await createFakeUser({ type: UserType.coach });
 
     const items = await fetchAllItems();
@@ -101,7 +101,7 @@ describe('Tests the email utils', () => {
 
     const createdCart = await createCart(user.id, [
       { itemId: 'ticket-player', quantity: 1, forUserId: user.id },
-      { itemId: 'ticket-visitor', quantity: 1, forUserId: visitor.id },
+      { itemId: 'ticket-spectator', quantity: 1, forUserId: spectator.id },
       { itemId: 'ticket-coach', quantity: 1, forUserId: coach.id },
       ...supplementsCartItems,
     ]);

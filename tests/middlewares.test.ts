@@ -83,11 +83,14 @@ describe('Test middlewares', () => {
     });
 
     // This case should never happen
-    it('should error because the user is a visitor', async () => {
-      const user = await createFakeUser({ type: UserType.visitor });
+    it('should error because the user is a attendant', async () => {
+      const user = await createFakeUser({ type: UserType.attendant });
       const token = generateToken(user);
 
-      await request(app).get('/').set('Authorization', `Bearer ${token}`).expect(403, { error: Error.LoginAsVisitor });
+      await request(app)
+        .get('/')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(403, { error: Error.LoginAsAttendant });
     });
   });
 });

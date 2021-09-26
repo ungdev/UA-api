@@ -76,10 +76,10 @@ describe('POST /auth/login', () => {
   });
 
   // This case should never happen
-  it('should error because the user is a visitor', async () => {
+  it('should error because the user is an attendant', async () => {
     const visitorEmail = 'bonjour@lol.fr';
     const visitorPassword = 'randomPass';
-    await createFakeUser({ type: UserType.visitor, email: visitorEmail, password: visitorPassword });
+    await createFakeUser({ type: UserType.attendant, email: visitorEmail, password: visitorPassword });
 
     await request(app)
       .post('/auth/login')
@@ -87,7 +87,7 @@ describe('POST /auth/login', () => {
         login: visitorEmail,
         password: visitorPassword,
       })
-      .expect(403, { error: Error.LoginAsVisitor });
+      .expect(403, { error: Error.LoginAsAttendant });
   });
 
   let authorizationToken = '';

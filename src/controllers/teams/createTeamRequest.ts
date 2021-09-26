@@ -2,7 +2,7 @@ import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { hasLinkedDiscordAccount } from '../../middlewares/oauth';
-import { isNotInATeam } from '../../middlewares/team';
+import { noSpectator } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import { askJoinTeam, fetchTeam } from '../../operations/team';
 import { Error } from '../../types';
@@ -12,7 +12,7 @@ import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares
-  ...isNotInATeam,
+  ...noSpectator,
   hasLinkedDiscordAccount,
   validateBody(
     Joi.object({
@@ -40,6 +40,9 @@ export default [
 
       return success(response, filterUser(updatedUser));
     } catch (error) {
+      // This may happen when max coach amount is reached already
+      if (error.code === 'API_COACH_MAX_TEAM') return forbidden(response, Error.TeamMaxCoachReached);
+
       return next(error);
     }
   },

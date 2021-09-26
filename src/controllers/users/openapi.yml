@@ -1,6 +1,7 @@
 /users:
   get:
-    summary: Renvoie les informations minimales d'un utilisateur
+    summary: (Non implémentée cf. PR#57) Renvoie les informations minimales d'un utilisateur
+    deprecated: true
     description: Renvoie les informations minimales d'un utilisateur.
     tags:
       - Users
@@ -42,9 +43,10 @@
         $ref: '#/components/responses/400Errored'
       404:
         $ref: '#/components/responses/404UserNotFound'
-  put:
+  patch:
     summary: Modifie les informations d'un utilisateur
     description: Modifie les informations d'un utilisateur.
+      **Le mot de passe est nécessaire pour que la/les valeur(s) soi(en)t modifiée(s)**
     tags:
       - Users
     security:
@@ -58,9 +60,10 @@
             properties:
               username:
                 type: string
+                nullable: true
               password:
                 type: string
-                nullable: true
+                required: true
               newPassword:
                 type: string
                 nullable: true
@@ -79,6 +82,8 @@
         $ref: '#/components/responses/403Unauthorized'
       404:
         $ref: '#/components/responses/404UserNotFound'
+      409:
+        $ref: '#/components/responses/409UsernameAlreadyExists'
 
 /users/current/carts:
   get:
@@ -133,9 +138,11 @@
                       type: string
                     example:
                       - V1STGX
-                  visitors:
-                    type: array
-                    description: Liste des billets accompagnateurs à acheter
+                  attendant:
+                    nullable: true
+                    type: object
+                    description: Identité de l'accompagnateur. Nécessite que l'utilisateur (actuel)
+                      soit mineur et ne soit pas déjà accompagné.
                     items:
                       type: object
                       properties:
@@ -180,3 +187,40 @@
         $ref: '#/components/responses/403Unauthorized'
       404:
         $ref: '#/components/responses/404UserNotFound'
+
+/users/current/spectate:
+  post:
+    summary: Transforme l'utilisateur en spectateur.
+    description: Transforme l'utilisateur en spectateur. Cette opération n'est possible que si l'utilisateur
+      n'est pas dans une équipe ou n'est a pas de demandes en attente.<br/>
+      Devenir un spectateur de cette façon **n'assure PAS à l'utilisateur d'avoir ticket** (de spectateur)
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: L'utilisateur est désormais spectateur
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+  delete:
+    summary: Transforme le spectateur en simple utilisateur.
+    description: Transforme le spectateur en simple utilisateur. Cette opération n'est possible que si l'utilisateur
+      n'a pas déjà payé son ticket (et si c'est un spectateur)
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: L'utilisateur n'est plus spectateur
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
