@@ -93,14 +93,6 @@ describe('POST /teams/current/lock', () => {
       .expect(403, { error: Error.TeamLocked });
   });
 
-  it('should fail with an internal server error', async () => {
-    sandbox.stub(discordFunctions, 'setupTeam').throws('Unexpected error');
-    await request(app)
-      .post('/teams/current/lock')
-      .set('Authorization', `Bearer ${captainToken}`)
-      .expect(500, { error: Error.InternalServerError });
-  });
-
   it('should error has the tournament is full', async () => {
     const otherTeam = await createFakeTeam();
     const otherCaptain = getCaptain(otherTeam);
