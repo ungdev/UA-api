@@ -6,7 +6,8 @@ import { createFakeUser } from '../utils';
 import { Error, User } from '../../src/types';
 import database from '../../src/services/database';
 import app from '../../src/app';
-import { updateAdminUser } from '../../src/operations/user';
+import { sandbox } from '../setup';
+import * as userOperations from '../../src/operations/user';
 
 describe('POST /users/current/spectate', () => {
   let user: User;
@@ -33,8 +34,18 @@ describe('POST /users/current/spectate', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.CannotSpectate }));
 
+  it('should fail with a server error', async () => {
+    user = await userOperations.updateAdminUser(user.id, { type: null });
+    sandbox.stub(userOperations, 'updateAdminUser').throws('Unexpected error');
+
+    return request(app)
+      .post(`/users/current/spectate`)
+      .send()
+      .set('Authorization', `Bearer ${token}`)
+      .expect(500, { error: Error.InternalServerError });
+  });
+
   it('should return the new spectator user', async () => {
-    const updatedUser = await updateAdminUser(user.id, { type: null });
     const response = await request(app)
       .post(`/users/current/spectate`)
       .send()
@@ -44,10 +55,10 @@ describe('POST /users/current/spectate', () => {
       ...response.body,
       updatedAt: null,
     }).to.been.deep.equal({
-      ...updatedUser,
+      ...user,
       type: UserType.spectator,
       updatedAt: null,
-      createdAt: updatedUser.createdAt.toISOString(),
+      createdAt: user.createdAt.toISOString(),
     });
   });
 });

@@ -54,6 +54,39 @@ describe('POST /teams/:teamId/join-requests', () => {
       .expect(403, { error: Error.AlreadyInTeam });
   });
 
+  it('should fail because coach limit is already reached (coach team members)', async () => {
+    const otherTeam = await createFakeTeam({ members: 2 });
+    const [user1, user2] = otherTeam.players;
+    await updateAdminUser(user1.id, { type: UserType.coach });
+    await updateAdminUser(user2.id, { type: UserType.coach });
+
+    const otherCoach = await createFakeUser();
+    const otherToken = generateToken(otherCoach);
+
+    return request(app)
+      .post(`/teams/${otherTeam.id}/join-requests`)
+      .send({ userType: UserType.coach })
+      .set('Authorization', `Bearer ${otherToken}`)
+      .expect(403, { error: Error.TeamMaxCoachReached });
+  });
+
+  it('should fail because coach limit is already reached (coach team member requests)', async () => {
+    const otherTeam = await createFakeTeam();
+    const [user1] = otherTeam.players;
+    const user2 = await createFakeUser();
+    await updateAdminUser(user1.id, { type: UserType.coach });
+    await teamOperations.askJoinTeam(otherTeam.id, user2.id, UserType.coach);
+
+    const otherCoach = await createFakeUser();
+    const otherToken = generateToken(otherCoach);
+
+    return request(app)
+      .post(`/teams/${otherTeam.id}/join-requests`)
+      .send({ userType: UserType.coach })
+      .set('Authorization', `Bearer ${otherToken}`)
+      .expect(403, { error: Error.TeamMaxCoachReached });
+  });
+
   it('should fail because the user is a spectator', async () => {
     const spectator = await createFakeUser({ type: UserType.spectator });
     const spectatorToken = generateToken(spectator);

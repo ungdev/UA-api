@@ -41,7 +41,7 @@ export default [
       return success(response, filterUser(updatedUser));
     } catch (error) {
       // This may happen when max coach amount is reached already
-      if (error.code === 'API_MAX_COACH') return forbidden(response, Error.TeamMaxCoachReached);
+      if (error.code === 'API_COACH_MAX_TEAM') return forbidden(response, Error.TeamMaxCoachReached);
 
       return next(error);
     }

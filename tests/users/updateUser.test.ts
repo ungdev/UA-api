@@ -102,6 +102,23 @@ describe('PATCH /users/current', () => {
     return database.log.deleteMany();
   });
 
+  it('should fail as username is already in use', async () => {
+    const username = 'tartempiondu10';
+    const password = 'whatARandomPassword';
+
+    const otherUser = await createFakeUser({ password });
+    const userToken = generateToken(otherUser);
+
+    return request(app)
+      .patch(`/users/current`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        username,
+        password,
+      })
+      .expect(409, { error: Error.UsernameAlreadyExists });
+  });
+
   it('should update the user', async () => {
     const { body } = await request(app)
       .patch(`/users/current`)

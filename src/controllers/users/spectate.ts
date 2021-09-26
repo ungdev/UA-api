@@ -5,7 +5,7 @@ import { validateBody } from '../../middlewares/validation';
 import { getRequestInfo } from '../../utils/users';
 import { forbidden, success } from '../../utils/responses';
 import { Error } from '../../types';
-import { updateAdminUser } from '../../operations/user';
+import { fetchUser, updateAdminUser } from '../../operations/user';
 import { UserType } from '.prisma/client';
 
 export const become = [
@@ -42,12 +42,14 @@ export const leave = [
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
-    const { user } = getRequestInfo(response);
+    let { user } = getRequestInfo(response);
 
-    // If the user has already paid, he can't discard his spectator ticket
-    if (user.hasPaid) return forbidden(response, Error.AlreadyPaid);
     // The user is not a spectator: we send him an error
     if (user.type !== UserType.spectator) return forbidden(response, Error.CannotUnSpectate);
+
+    // If the user has already paid, he can't discard his spectator ticket
+    user = await fetchUser(user.id);
+    if (user.hasPaid) return forbidden(response, Error.AlreadyPaid);
 
     try {
       const updatedUser = await updateAdminUser(user.id, {

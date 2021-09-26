@@ -5,6 +5,7 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as userOperations from '../../src/operations/user';
 import * as itemOperations from '../../src/operations/item';
+import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
 import { Error, User, Team } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
@@ -31,7 +32,6 @@ describe('POST /users/current/carts', () => {
   let annoyingUserWithSwitchDiscount: User;
   let annoyingTokenWithSwitchDiscount: string;
 
-  // TESTS : Remove visitors property (update to attendant)
   const validCart: PayBody = {
     tickets: {
       userIds: [],
@@ -292,7 +292,7 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should fail with an internal server error (inner try/catch)', () => {
-    sandbox.stub(userOperations, 'createAttendant').throws('Unexpected error');
+    sandbox.stub(cartOperations, 'createCart').throws('Unexpected error');
 
     return request(app)
       .post(`/users/current/carts`)
@@ -386,7 +386,7 @@ describe('POST /users/current/carts', () => {
     expect(body.url).to.startWith(env.etupay.url);
 
     // player place - 1 * discount-ssbu
-    expect(body.price).to.be.equal(1500 - 300);
+    expect(body.price).to.be.equal(2000 - 300);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(2);

@@ -163,13 +163,12 @@ describe('PATCH /admin/users/:userId', () => {
       .expect(409, { error: Error.PlaceAlreadyAttributed }));
 
   it('should fail as the user has already paid and wants to change its type', async () => {
+    user = await userOperations.fetchUser(user.id);
     await forcePay(user);
-    const paidUser = await userOperations.fetchUser(user.id);
-    expect(paidUser.hasPaid).to.be.true;
     return request(app)
       .patch(`/admin/users/${user.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ type: paidUser.type === UserType.player ? UserType.coach : UserType.player })
+      .send({ type: user.type === UserType.player ? UserType.coach : UserType.player })
       .expect(403, { error: Error.CannotChangeType });
   });
 });

@@ -389,7 +389,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-          example: Ce nom d'utilisateur est déjà utilisé
+          example:
+            error: Ce nom d'utilisateur est déjà utilisé
 
     409PlaceAlreadyAttributed:
       description: La place est déjà attribuée
@@ -397,4 +398,5 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-          example: Cette place est déjà attribuée
+          example:
+            error: Cette place est déjà attribuée

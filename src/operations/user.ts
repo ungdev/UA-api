@@ -23,7 +23,7 @@ export const formatUser = (user: PrimitiveUser): User => {
     throw new Error('Error just to make sure of something');
 
   const hasPaid = user.cartItems.some(
-    (cartItem) => cartItem.itemId === 'ticket-player' && cartItem.cart.transactionState === TransactionState.paid,
+    (cartItem) => cartItem.itemId === `ticket-${user.type}` && cartItem.cart.transactionState === TransactionState.paid,
   );
 
   return {
@@ -258,25 +258,23 @@ export const deleteUser = (id: string) => database.user.delete({ where: { id } }
  * @param teamId the id of the team to count coaches in
  * @returns the amount of coaches in the given team
  */
-export const countCoaches = (teamId?: string) =>
+export const countCoaches = (teamId: string) =>
   database.user.count({
     where: {
       AND: [
         {
           type: UserType.coach,
         },
-        teamId
-          ? {
-              OR: [
-                {
-                  teamId,
-                },
-                {
-                  askingTeamId: teamId,
-                },
-              ],
-            }
-          : undefined,
+        {
+          OR: [
+            {
+              teamId,
+            },
+            {
+              askingTeamId: teamId,
+            },
+          ],
+        },
       ],
     },
   });

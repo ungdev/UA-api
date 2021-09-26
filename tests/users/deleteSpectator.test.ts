@@ -2,11 +2,12 @@ import { UserType } from '@prisma/client';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app';
-import { updateAdminUser } from '../../src/operations/user';
 import database from '../../src/services/database';
 import { Error, User } from '../../src/types';
 import { generateToken } from '../../src/utils/users';
 import { createFakeUser } from '../utils';
+import { sandbox } from '../setup';
+import * as userOperations from '../../src/operations/user';
 
 describe('DELETE /users/current/spectate', () => {
   let user: User;
@@ -20,6 +21,8 @@ describe('DELETE /users/current/spectate', () => {
   after(async () => {
     // Delete the user created
     await database.log.deleteMany();
+    await database.cartItem.deleteMany();
+    await database.cart.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -33,8 +36,29 @@ describe('DELETE /users/current/spectate', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.CannotUnSpectate }));
 
+  it('should fail with a server error', async () => {
+    user = await userOperations.updateAdminUser(user.id, { type: UserType.spectator });
+    sandbox.stub(userOperations, 'updateAdminUser').throws('Unexpected error');
+
+    return request(app)
+      .delete(`/users/current/spectate`)
+      .send()
+      .set('Authorization', `Bearer ${token}`)
+      .expect(500, { error: Error.InternalServerError });
+  });
+
+  it('should fail because user has already paid', async () => {
+    const paidUser = await createFakeUser({ type: UserType.spectator, paid: true });
+    const paidToken = generateToken(paidUser);
+
+    return request(app)
+      .delete(`/users/current/spectate`)
+      .send()
+      .set('Authorization', `Bearer ${paidToken}`)
+      .expect(403, { error: Error.AlreadyPaid });
+  });
+
   it('should return the new spectator user', async () => {
-    const updatedUser = await updateAdminUser(user.id, { type: UserType.spectator });
     const response = await request(app)
       .delete(`/users/current/spectate`)
       .send()
@@ -44,10 +68,10 @@ describe('DELETE /users/current/spectate', () => {
       ...response.body,
       updatedAt: null,
     }).to.been.deep.equal({
-      ...updatedUser,
+      ...user,
       type: null,
       updatedAt: null,
-      createdAt: updatedUser.createdAt.toISOString(),
+      createdAt: user.createdAt.toISOString(),
     });
   });
 
