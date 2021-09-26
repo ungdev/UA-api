@@ -1,6 +1,7 @@
 /users:
   get:
     summary: (Non implémentée cf. PR#57) Renvoie les informations minimales d'un utilisateur
+    deprecated: true
     description: Renvoie les informations minimales d'un utilisateur.
     tags:
       - Users
