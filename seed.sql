@@ -2,6 +2,7 @@ INSERT INTO `items` (`id`, `name`, `category`, `attribute`, `price`, `reducedPri
 ('ticket-player', 'Place joueur', 'ticket', NULL, 1500, 1100, NULL, NULL, NULL),
 ('ticket-coach', 'Place coach', 'ticket', NULL, 1200, NULL, NULL, NULL, 40),
 ('ticket-visitor', 'Place accompagnateur', 'ticket', NULL, 1200, NULL, NULL, NULL, 60),
+('discount-switch-ssbu', 'Réduction si tu amènes ta propre Nintendo Switch', 'supplement', NULL, -300, NULL, 'Une réduction applicable si tu amènes ta propre Nintendo Switch pendant le weekend', NULL, 16),
 ('ethernet-5', 'Câble ethernet (5m)', 'supplement', NULL, 700, NULL, 'Un câble ethernet est requis pour se brancher aux switchs des tables', NULL, 30),
 ('ethernet-7', 'Câble ethernet (7m)', 'supplement', NULL, 1000, NULL, 'Un câble ethernet plus long pour les joueurs situés en bout de table', NULL, 30),
 ('multi-socket', 'Multiprise 3 trous', 'supplement', NULL, 500, NULL, 'Une multiprise 3 trous pour brancher tout ton setup', NULL, 30),

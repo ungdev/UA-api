@@ -191,6 +191,7 @@ export const enum Error {
   CaptainCannotQuit = "Un capitaine ne peut pas se bannir, veuillez dissoudre l'équipe ou nommer un autre chef d'équipe",
   CannotChangeType = 'Vous ne pouvez pas changer de type si vous avez payé',
   NotSameType = "Les deux utilisateurs n'ont pas le même type",
+  BasketCannotBeNegative = 'Le total du panier ne peut pas être négatif',
 
   // 404
   // The server can't find the requested resource

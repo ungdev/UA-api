@@ -4,7 +4,7 @@ import Joi from 'joi';
 import { Basket } from '../../services/etupay';
 import { validateBody } from '../../middlewares/validation';
 import { createCart } from '../../operations/carts';
-import { fetchItems } from '../../operations/item';
+import { fetchUserItems } from '../../operations/item';
 import { createVisitor, deleteUser, fetchUser } from '../../operations/user';
 import { Cart, Error, PrimitiveCartItem } from '../../types';
 import { encodeToBase64, isPartnerSchool, removeAccents } from '../../utils/helpers';
@@ -59,8 +59,8 @@ export default [
     try {
       const { body } = request;
 
-      const { user } = getRequestInfo(response);
-      const items = await fetchItems();
+      const { user, team } = getRequestInfo(response);
+      const items = await fetchUserItems(team);
 
       const cartItems: PrimitiveCartItem[] = [];
 
@@ -204,6 +204,10 @@ export default [
 
         // Add the item to the etupay basket
         basket.addItem(removeAccents(item.name), itemPrice, cartItem.quantity);
+      }
+
+      if (basket.getPrice() < 0) {
+        return forbidden(response, Error.BasketCannotBeNegative);
       }
 
       // Returns a answer with the etupay url
