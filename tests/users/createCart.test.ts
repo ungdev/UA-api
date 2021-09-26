@@ -57,6 +57,22 @@ describe('POST /users/current/carts', () => {
     ],
   };
 
+  const validCartWithSwitchDiscountWithoutTicket: PayBody = {
+    tickets: {
+      userIds: [],
+    },
+    supplements: [
+      {
+        itemId: 'ethernet-7',
+        quantity: 4,
+      },
+      {
+        itemId: 'discount-switch-ssbu',
+        quantity: 1,
+      },
+    ],
+  };
+
   const notValidCartWithSwitchDiscount: PayBody = {
     tickets: {
       userIds: [],
@@ -394,6 +410,14 @@ describe('POST /users/current/carts', () => {
     expect(cartItems.filter((cartItem) => cartItem.forUserId === userWithSwitchDiscount.id)).to.have.lengthOf(2);
 
     expect(supplement.quantity).to.be.equal(validCartWithSwitchDiscount.supplements[0].quantity);
+  });
+
+  it('should send an error as ssbu discount is already applied', async () => {
+    await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
+      .send(validCartWithSwitchDiscountWithoutTicket)
+      .expect(403, { error: Error.AlreadyAppliedDiscountSSBU });
   });
 
   it('should not create a cart as not in the ssbu team', async () => {

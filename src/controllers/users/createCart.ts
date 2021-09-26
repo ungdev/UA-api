@@ -1,6 +1,7 @@
-import { ItemCategory, UserType, UserAge } from '@prisma/client';
+import { ItemCategory, UserType, UserAge, TransactionState } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
+import database from '../../services/database';
 import { Basket } from '../../services/etupay';
 import { validateBody } from '../../middlewares/validation';
 import { createCart, dropStale } from '../../operations/carts';
@@ -111,6 +112,31 @@ export default [
       for (const supplement of body.supplements) {
         if (!items.some((item) => item.id === supplement.itemId && item.category === ItemCategory.supplement)) {
           return notFound(response, Error.ItemNotFound);
+        }
+
+        if (supplement.itemId === `discount-switch-ssbu`) {
+          supplement.quantity = 1;
+
+          // Test if SSBU discount already applied
+          const itemsDiscountSSBU = await database.cartItem.findMany({
+            where: {
+              itemId: `discount-switch-ssbu`,
+              forUserId: user.id,
+              cart: {
+                transactionState: {
+                  in: [TransactionState.paid, TransactionState.pending],
+                },
+              },
+            },
+          });
+
+          if (itemsDiscountSSBU.length > 0) {
+            return forbidden(response, Error.AlreadyAppliedDiscountSSBU);
+          }
+
+          if (user.type !== UserType.player) {
+            return forbidden(response, Error.NotPlayerDiscountSSBU);
+          }
         }
 
         // Push the supplement to the basket

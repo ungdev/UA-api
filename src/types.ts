@@ -205,6 +205,8 @@ export const enum Error {
   CannotSpectate = 'Vous devez quitter votre équipe pour devenir spectateur',
   CannotUnSpectate = "Vous n'êtes pas spectateur",
   NoSpectator = "Les spectateurs n'ont pas accès à cette ressource",
+  AlreadyAppliedDiscountSSBU = 'Vous avez déjà profité de la promotion !',
+  NotPlayerDiscountSSBU = 'Seul les joueurs peuvent profiter de la promotion !',
 
   // 404
   // The server can't find the requested resource
