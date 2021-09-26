@@ -23,6 +23,9 @@ const respondError = (response: Response, error: Error, code: number) => {
   return response.status(code).json({ error }).end();
 };
 
+// Sends a 302 http response code with its redirection header
+export const redirect = (response: Response, url: string): void => response.status(302).set({ Location: url }).end();
+
 export const badRequest = (response: Response, error: Error): void => respondError(response, error, 400);
 
 export const unauthenticated = (response: Response, error?: Error): void =>

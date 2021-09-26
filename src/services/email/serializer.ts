@@ -129,7 +129,7 @@ export const generateValidationEmail = (user: User) =>
           "On sait bien que c'est pénible mais on doit vérifier que ton adresse email fonctionne bien (sinon tu ne pourras pas recevoir tes billets&nbsp;!).",
           {
             name: 'Confirme ton adresse email',
-            location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}`,
+            location: `${env.front.website}/api/auth/validate/${user.registerToken}`,
           },
         ],
       },

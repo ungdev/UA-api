@@ -1,36 +1,32 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { fetchUser, removeUserRegisterToken } from '../../operations/user';
-import { Error } from '../../types';
-import { filterUser } from '../../utils/filters';
-import { badRequest, success } from '../../utils/responses';
-import { generateToken } from '../../utils/users';
+import { ActionFeedback } from '../../types';
+import env from '../../utils/env';
+import { redirect } from '../../utils/responses';
 
 export default [
   // Middlewares
   ...isNotAuthenticated,
 
   // Controller
-  async (request: Request, response: Response, next: NextFunction) => {
+  async (request: Request, response: Response) => {
     try {
       const { token } = request.params;
 
+      // find corresponding user
       const user = await fetchUser(token, 'registerToken');
 
-      if (!user) {
-        return badRequest(response, Error.InvalidParameters);
-      }
+      // if no user has the registerToken, we send an error
+      if (!user) return redirect(response, `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=1`);
 
+      // Otherwise we delete the registerToken and send a success status to the client
       await removeUserRegisterToken(user.id);
 
-      const jwt = generateToken(user);
-
-      return success(response, {
-        token: jwt,
-        user: filterUser(user),
-      });
-    } catch (error) {
-      return next(error);
+      return redirect(response, `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=0`);
+    } catch {
+      // An unknown error occurred. We redirect the client to an error state.
+      return redirect(response, `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=2`);
     }
   },
 ];
