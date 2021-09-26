@@ -36,7 +36,7 @@ export default [
 
       const lockedTeam = await lockTeam(team.id);
 
-      setupTeam(team.name, team.tournamentId);
+      await setupTeam(team.name, team.tournamentId);
 
       return success(response, filterTeam(lockedTeam));
     } catch (error) {
