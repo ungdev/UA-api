@@ -4,7 +4,19 @@ import { Item, Team } from '../types';
 
 export const fetchAllItems = async (): Promise<Item[]> => {
   // fetches the items
-  const items = await database.item.findMany();
+  let items = await database.item.findMany();
+  const order = [
+    'tshirt-f-s',
+    'tshirt-f-m',
+    'tshirt-f-l',
+    'tshirt-f-xl',
+    'tshirt-h-s',
+    'tshirt-h-m',
+    'tshirt-h-l',
+    'tshirt-h-xl',
+  ];
+  // sort items according to size attribute
+  items = items.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
 
   // Add a left property which tells how many items are there left
   return Promise.all(
