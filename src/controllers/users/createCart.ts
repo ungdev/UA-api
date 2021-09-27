@@ -162,9 +162,9 @@ export default [
       const itemsWithStock = items.filter((item) => item.left !== undefined);
 
       // Wait for sql delete query to end (if not already ended)
-      const [droppedItemsResult, droppedCartsResult] = await dropOperation;
+      const { count: droppedCartsCount } = await dropOperation;
       // Check if rows (ie. carts) were updated
-      if (droppedCartsResult.count > 0 && droppedItemsResult.count > 0) {
+      if (droppedCartsCount > 0) {
         // Update fetched items
         const refetchedItems = await fetchUserItems(team);
         for (const item of itemsWithStock)

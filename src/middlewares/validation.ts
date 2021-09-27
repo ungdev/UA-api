@@ -17,40 +17,34 @@ export const validateBody = (schema: ObjectSchema) => (request: Request, respons
   return next();
 };
 
-export const validateQuery = (schema: ObjectSchema) => (
-  request: Request,
-  response: Response,
-  next: NextFunction,
-): void => {
-  const { error, value } = schema.validate(request.query);
+export const validateQuery =
+  (schema: ObjectSchema) =>
+  (request: Request, response: Response, next: NextFunction): void => {
+    const { error, value } = schema.validate(request.query);
 
-  if (error) {
-    logger.verbose(error.message);
-    return badRequest(response, Error.InvalidQueryParameters);
-  }
+    if (error) {
+      logger.verbose(error.message);
+      return badRequest(response, Error.InvalidQueryParameters);
+    }
 
-  request.query = value;
+    request.query = value;
 
-  return next();
-};
+    return next();
+  };
 
 // Validate that a parameter is valid
 // Must be used in a app.param and not app.use
-export const validateParameter = (schema: Schema) => (
-  request: Request,
-  response: Response,
-  next: NextFunction,
-  parameter: string,
-) => {
-  const { error } = schema.validate(parameter);
+export const validateParameter =
+  (schema: Schema) => (request: Request, response: Response, next: NextFunction, parameter: string) => {
+    const { error } = schema.validate(parameter);
 
-  if (error) {
-    logger.debug(error.message);
-    return badRequest(response, Error.InvalidParameters);
-  }
+    if (error) {
+      logger.debug(error.message);
+      return badRequest(response, Error.InvalidParameters);
+    }
 
-  return next();
-};
+    return next();
+  };
 
 export const enforceQueryString = (request: Request, response: Response, next: NextFunction) => {
   for (const query of Object.keys(request.query)) {

@@ -72,6 +72,7 @@
     "unicorn/no-null": "off",
     "unicorn/prefer-set-has": "off",
     "unicorn/prefer-spread": "warn",
+    "unicorn/prefer-object-from-entries": "off",
     "unicorn/prefer-node-protocol": "off",
     "unicorn/prefer-module": "off",
     "unicorn/prevent-abbreviations": [
