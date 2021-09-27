@@ -28,7 +28,7 @@ describe('POST /contact', () => {
       ...validBody,
       email: 'wrong email',
     };
-    await request(app).post('/contact').send(body).expect(400, { error: Error.InvalidBody });
+    await request(app).post('/contact').send(body).expect(400, { error: Error.InvalidEmail });
   });
 
   it('should not accept missing parameters in body', async () => {
@@ -36,6 +36,6 @@ describe('POST /contact', () => {
       subject: 'Test',
       message: 'Test test',
     };
-    await request(app).post('/contact').send(body).expect(400, { error: Error.InvalidBody });
+    await request(app).post('/contact').send(body).expect(400, { error: Error.InvalidFirstName });
   });
 });

@@ -71,14 +71,14 @@ describe('POST /teams', () => {
       .post('/teams')
       .send({ name: teamBody.name })
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: Error.InvalidBody }));
+      .expect(400, { error: "Ce tournoi n'existe pas" }));
 
   it("should fail because the tournament doesn't exists", () =>
     request(app)
       .post('/teams')
       .send({ ...teamBody, tournamentId: 'factorio' })
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: Error.InvalidBody }));
+      .expect(400, { error: "Ce tournoi n'existe pas" }));
 
   it('should fail with an internal server error (test nested check)', () => {
     sandbox.stub(teamOperations, 'createTeam').throws('Unexpected error');
@@ -198,7 +198,7 @@ describe('POST /teams', () => {
         userType: UserType.orga,
       })
       .set('Authorization', `Bearer ${newToken}`)
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidUserType });
   });
 
   it("should fail if captain hasn't chosen a type", async () => {
@@ -212,7 +212,7 @@ describe('POST /teams', () => {
         tournamentId: teamBody.tournamentId,
       })
       .set('Authorization', `Bearer ${newToken}`)
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidUserType });
   });
 
   it('should fail because user has no linked discord account', async () => {

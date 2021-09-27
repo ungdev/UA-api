@@ -35,7 +35,7 @@ describe('PATCH /users/current', () => {
     await request(app)
       .patch(`/users/current`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidPassword });
   });
 
   it('shoud fail because the password is missing', async () => {
@@ -43,7 +43,7 @@ describe('PATCH /users/current', () => {
       .patch(`/users/current`)
       .set('Authorization', `Bearer ${token}`)
       .send({ username: 'bonjour', newPassowrd: 'Bonjour123456' })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidPassword });
   });
 
   it('should fail because the user is not authenticated', async () => {

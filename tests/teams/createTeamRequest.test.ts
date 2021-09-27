@@ -122,7 +122,7 @@ describe('POST /teams/:teamId/join-requests', () => {
       .post(`/teams/${team.id}/join-requests`)
       .send({ userType: UserType.orga })
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: "L'utilisateur doit être un joueur ou un coach" });
   });
 
   it('should succesfully request to join a team as a coach', async () => {

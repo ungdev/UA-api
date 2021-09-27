@@ -4,16 +4,12 @@ import { Error } from '../types';
 import logger from '../utils/logger';
 import { badRequest } from '../utils/responses';
 
-export const validateBody = (schema: ObjectSchema) => (
-  request: Request,
-  response: Response,
-  next: NextFunction,
-): void => {
+export const validateBody = (schema: ObjectSchema) => (request: Request, response: Response, next: NextFunction) => {
   const { error, value } = schema.validate(request.body);
 
   if (error) {
     logger.debug(error.message);
-    return badRequest(response, Error.InvalidBody);
+    return response.status(400).json({ error: error.message });
   }
 
   request.body = value;

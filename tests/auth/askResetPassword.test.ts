@@ -36,7 +36,7 @@ describe('POST /auth/reset-password/ask', () => {
       .send({
         fake: 'fake',
       })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidEmail });
   });
 
   it('should return valid answer even if incorrect email', async () => {

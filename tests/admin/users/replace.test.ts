@@ -46,7 +46,7 @@ describe('POST /admin/users/:userId/replace', () => {
       .post(`/admin/users/${user.id}/replace`)
       .send({ replacingUserId: 'lol' })
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(400, { error: Error.InvalidBody }));
+      .expect(400, { error: Error.InvalidUsername }));
 
   it('should error as the user is not an administrator', () => {
     const userToken = generateToken(user);

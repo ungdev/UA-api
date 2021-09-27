@@ -161,6 +161,24 @@ export const enum Error {
   InvalidParameters = 'Paramètres de la requête invalides',
   InvalidQueryParameters = 'Paramètres de la requête invalides (query)',
   EmptyBasket = 'Le panier est vide',
+  InvalidUsername = "Nom d'utilisateur invalide",
+  InvalidFirstName = 'Prénom invalide',
+  InvalidLastName = 'Nom de famille invalide',
+  InvalidEmail = 'Email invalide',
+  InvalidPassword = 'Mot de passe invalide',
+  InvalidDiscordid = 'Identifiant Discord invalide',
+  InvalidAge = 'Vous devez préciser si vous êtes majeur ou mineur',
+  InvalidUserType = "Type d'utilisateur invalide",
+  InvalidPlace = 'Numéro de place invalide',
+  stringBooleanError = "Ce n'est pas du texte",
+
+  InvalidTeamName = "Nom d'équipe invalide !",
+  InvalidTournamentId = "Ce tournoi n'existe pas",
+
+  InvalidQRCode = 'Le QR code est invalide',
+  NoQRCode = "Le QR code n'existe pas",
+
+  InvalidCart = 'Le contenu de la commande est invalide',
 
   // 401
   // The user credentials were refused or not provided
@@ -184,6 +202,7 @@ export const enum Error {
   NotInTeam = "Vous n'êtes pas dans l'équipe",
   LoginAsAttendant = "Vous ne pouvez pas vous connecter en tant qu'accompagnateur",
   AlreadyAuthenticated = 'Vous êtes déjà identifié',
+  NotplayerOrCoach = "L'utilisateur doit être un joueur ou un coach",
   NotPlayerOrCoachOrSpectator = "L'utilisateur n'est ni un joueur, ni un coach, ni un spectateur",
   AlreadyPaid = 'Le joueur possède déjà une place',
   AlreadyErrored = 'Vous ne pouvez pas valider une transaction échouée',

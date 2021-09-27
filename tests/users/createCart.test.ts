@@ -152,25 +152,25 @@ describe('POST /users/current/carts', () => {
     await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidCart });
   });
-
   describe('dynamic tests failures on body', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const badBodies: any[] = [
-      { tickets: { userIds: [], attendant: {} } },
+      { tickets: { userIds: [] } },
+
       { supplements: [] },
       { tickets: { userIds: [], supplements: [] } },
-      { tickets: { attendant: {}, supplements: [] } },
+      { tickets: { supplements: [] } },
     ];
 
-    for (const [index, badBody] of badBodies.entries()) {
+    for (const [index, body] of badBodies.entries()) {
       it(`should not accept this bad body (${index + 1}/${badBodies.length})`, async () => {
         await request(app)
           .post(`/users/current/carts`)
           .set('Authorization', `Bearer ${token}`)
-          .send(badBody)
-          .expect(400, { error: Error.InvalidBody });
+          .send(body)
+          .expect(400, { error: Error.InvalidCart });
       });
     }
   });
@@ -205,7 +205,7 @@ describe('POST /users/current/carts', () => {
             tickets: { userIds: [] },
             supplements: [{ itemId: 'ethernet-7', quantity }],
           })
-          .expect(400, { error: Error.InvalidBody });
+          .expect(400, { error: Error.InvalidCart });
       });
     }
   });
@@ -229,7 +229,7 @@ describe('POST /users/current/carts', () => {
         tickets: { userIds: [user.id, user.id] },
         supplements: [],
       })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidCart });
   });
 
   it('should fail because a supplement is listed twice', async () => {
@@ -249,7 +249,7 @@ describe('POST /users/current/carts', () => {
           },
         ],
       })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidCart });
   });
 
   it('should fail as the user does not exists', async () => {

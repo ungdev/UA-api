@@ -32,7 +32,7 @@ describe('PUT /teams/current', () => {
       .put('/teams/current')
       .send({ fake: 'fake' })
       .set('Authorization', `Bearer ${captainToken}`)
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidTeamName });
   });
 
   it('should error as the token is missing', async () => {

@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
-import { Permission, Error } from '../../../types';
+import { Permission, Error as ResponseError } from '../../../types';
 import { badRequest, forbidden, notFound, success } from '../../../utils/responses';
 import { decrypt } from '../../../utils/helpers';
 import logger from '../../../utils/logger';
@@ -14,7 +14,7 @@ export default [
   ...hasPermission(Permission.entry),
   validateBody(
     Joi.object({
-      qrcode: Joi.string().required(),
+      qrcode: Joi.string().required().error(new Error(ResponseError.NoQRCode)),
     }),
   ),
 
@@ -34,19 +34,19 @@ export default [
         userId = decrypt(decodedQrcode);
       } catch (error) {
         logger.error(error);
-        return badRequest(response, Error.InvalidBody);
+        return badRequest(response, ResponseError.InvalidQRCode);
       }
 
       // Retrieve the user from the QR Code
       const user = await fetchUser(userId);
 
-      if (!user) return notFound(response, Error.UserNotFound);
+      if (!user) return notFound(response, ResponseError.UserNotFound);
 
       // Check if the user has paid
-      if (!user.hasPaid) return forbidden(response, Error.NotPaid);
+      if (!user.hasPaid) return forbidden(response, ResponseError.NotPaid);
 
       // Check if the user has already validated
-      if (user.scannedAt) return forbidden(response, Error.UserAlreadyScanned);
+      if (user.scannedAt) return forbidden(response, ResponseError.UserAlreadyScanned);
 
       await scanUser(user.id);
 
