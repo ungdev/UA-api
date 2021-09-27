@@ -198,7 +198,7 @@ describe('POST /teams', () => {
         userType: UserType.orga,
       })
       .set('Authorization', `Bearer ${newToken}`)
-      .expect(400, { error: "Le type d'utilisateur n'est pas mentionné" });
+      .expect(400, { error: Error.InvalidUserType });
   });
 
   it("should fail if captain hasn't chosen a type", async () => {
@@ -212,7 +212,7 @@ describe('POST /teams', () => {
         tournamentId: teamBody.tournamentId,
       })
       .set('Authorization', `Bearer ${newToken}`)
-      .expect(400, { error: "Le type d'utilisateur n'est pas mentionné" });
+      .expect(400, { error: Error.InvalidUserType });
   });
 
   it('should fail because user has no linked discord account', async () => {

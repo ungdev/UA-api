@@ -40,9 +40,8 @@ export default [
         // Paying no ticket with this cart is possible, just provide an empty array
         userIds: Joi.array().items(validators.id.optional()).unique().required(),
         attendant: Joi.object({ firstname: validators.firstname, lastname: validators.lastname }).optional(),
-      })
-        .required()
-        .error(new Error('Les tickets sont invalides')),
+      }).required(),
+
       supplements: Joi.array()
         .items(
           Joi.object({
@@ -52,7 +51,9 @@ export default [
         )
         .unique((a, b) => a.itemId === b.itemId)
         .required(),
-    }).required(),
+    })
+      .required()
+      .error(new Error(ResponseError.InvalidCart)),
   ),
 
   // Controller

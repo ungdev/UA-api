@@ -22,7 +22,7 @@ export default [
       userType: Joi.string()
         .valid(UserType.player, UserType.coach)
         .required()
-        .error(new Error("Le type d'utilisateur n'est pas mentionné")),
+        .error(new Error(ResponseError.InvalidUserType)),
     }),
   ),
 

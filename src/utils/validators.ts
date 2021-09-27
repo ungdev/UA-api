@@ -23,7 +23,9 @@ export const discordId = Joi.string().error(new Error(ResponseError.InvalidDisco
 export const type = Joi.string()
   .valid(...Object.keys(UserType))
   .error(new Error(ResponseError.InvalidUserType));
-export const age = Joi.string().valid(...Object.keys(UserAge));
+export const age = Joi.string()
+  .valid(...Object.keys(UserAge))
+  .error(new Error(ResponseError.InvalidAge));
 export const place = Joi.string().regex(placeRegex).error(new Error(ResponseError.InvalidPlace));
 export const permission = Joi.string()
   .valid(...Object.keys(Permission))

@@ -152,17 +152,16 @@ describe('POST /users/current/carts', () => {
     await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: 'Les tickets sont invalides' });
+      .expect(400, { error: Error.InvalidCart });
   });
   describe('dynamic tests failures on body', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const badBodies: any[] = [
-      {
-        body: { tickets: { userIds: [], visitors: [] } },
-      },
-      { body: { supplements: [] } },
-      { body: { tickets: { userIds: [], supplements: [] } } },
-      { body: { tickets: { visitors: [], supplements: [] } } },
+      { tickets: { userIds: [] } },
+
+      { supplements: [] },
+      { tickets: { userIds: [], supplements: [] } },
+      { tickets: { supplements: [] } },
     ];
 
     for (const [index, body] of badBodies.entries()) {
@@ -171,7 +170,7 @@ describe('POST /users/current/carts', () => {
           .post(`/users/current/carts`)
           .set('Authorization', `Bearer ${token}`)
           .send(body)
-          .expect(400, { error: 'Les tickets sont invalides' });
+          .expect(400, { error: Error.InvalidCart });
       });
     }
   });
@@ -206,7 +205,7 @@ describe('POST /users/current/carts', () => {
             tickets: { userIds: [] },
             supplements: [{ itemId: 'ethernet-7', quantity }],
           })
-          .expect(400, { error: Error.EmptyBasket });
+          .expect(400, { error: Error.InvalidCart });
       });
     }
   });
@@ -230,7 +229,7 @@ describe('POST /users/current/carts', () => {
         tickets: { userIds: [user.id, user.id] },
         supplements: [],
       })
-      .expect(400, { error: 'Les tickets sont invalides' });
+      .expect(400, { error: Error.InvalidCart });
   });
 
   it('should fail because a supplement is listed twice', async () => {
@@ -250,7 +249,7 @@ describe('POST /users/current/carts', () => {
           },
         ],
       })
-      .expect(400, { error: '"supplements[1]" contains a duplicate value' });
+      .expect(400, { error: Error.InvalidCart });
   });
 
   it('should fail as the user does not exists', async () => {
