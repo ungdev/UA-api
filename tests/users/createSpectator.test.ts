@@ -20,7 +20,6 @@ describe('POST /users/current/spectate', () => {
 
   after(async () => {
     // Delete the user created
-    await database.log.deleteMany();
     await database.user.deleteMany();
   });
 

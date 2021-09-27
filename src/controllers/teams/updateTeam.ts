@@ -29,7 +29,7 @@ export default [
       return success(response, filterTeam(updatedTeam));
     } catch (error) {
       // If a team with this name already exists for this tournament in the database, throw a bad request
-      if (error.code === 'P2002' && error.meta && error.meta.target === 'name_tournamentId_unique')
+      if (error.code === 'P2002' && error.meta && error.meta.target === 'teams_name_tournamentId_key')
         return conflict(response, Error.TeamAlreadyExists);
       return next(error);
     }

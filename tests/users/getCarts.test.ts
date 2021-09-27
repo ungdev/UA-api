@@ -18,7 +18,6 @@ describe('POST /users/current/carts', () => {
 
   after(async () => {
     // Delete the user created
-    await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.user.deleteMany();
   });

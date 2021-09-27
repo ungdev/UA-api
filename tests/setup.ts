@@ -17,9 +17,7 @@ before(async () => {
   await setShopAllowed(true);
 
   // Delete the data to make the command idempotent
-  await database.cartItem.deleteMany();
   await database.cart.deleteMany();
-  await database.log.deleteMany();
   await database.team.deleteMany();
   await database.user.deleteMany();
 });

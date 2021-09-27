@@ -32,7 +32,6 @@ describe('POST /teams', () => {
   });
 
   after(async () => {
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
 

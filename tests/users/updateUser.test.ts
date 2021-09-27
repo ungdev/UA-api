@@ -8,6 +8,11 @@ import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 
+const wait = (ms: number) =>
+  new Promise<void>((result) => {
+    setTimeout(result, ms);
+  });
+
 describe('PATCH /users/current', () => {
   let user: User;
   let token: string;
@@ -25,8 +30,6 @@ describe('PATCH /users/current', () => {
 
   after(async () => {
     // Delete the user created
-    await database.log.deleteMany();
-    await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.user.deleteMany();
   });
@@ -84,6 +87,9 @@ describe('PATCH /users/current', () => {
     // Check if the object was filtered
     expect(body.updatedAt).to.be.undefined;
 
+    // Logs may take some time to written out
+    // as they are supposed to be written after the success of the request
+    await wait(100);
     const logs = await database.log.findMany();
     expect(logs).to.have.lengthOf(1);
 
@@ -131,6 +137,9 @@ describe('PATCH /users/current', () => {
     // Check if the object was filtered
     expect(body.updatedAt).to.be.undefined;
 
+    // Logs may take some time to be written out
+    // as they are supposed to be written after the success of the request
+    await wait(100);
     const logs = await database.log.findMany();
     expect(logs).to.have.lengthOf(1);
 

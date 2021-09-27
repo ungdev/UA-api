@@ -43,7 +43,7 @@ export default [
         return created(response, filterTeam(team));
       } catch (error) {
         // If the email already exists in the database, throw a bad request
-        if (error.code === 'P2002' && error.meta && error.meta.target === 'name_tournamentId_unique')
+        if (error.code === 'P2002' && error.meta && error.meta.target === 'teams_name_tournamentId_key')
           return conflict(response, ResponseError.TeamAlreadyExists);
 
         return next(error);

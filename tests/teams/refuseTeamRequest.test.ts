@@ -27,7 +27,6 @@ describe('DELETE /teams/current/join-requests/:userId', () => {
   });
 
   after(async () => {
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });

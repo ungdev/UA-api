@@ -21,7 +21,6 @@ describe('POST /admin/auth/login', () => {
 
   after(async () => {
     // Delete the user created
-    await database.log.deleteMany();
     await database.user.deleteMany();
   });
 

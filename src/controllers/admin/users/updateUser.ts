@@ -50,7 +50,7 @@ export default [
 
       return success(response, { ...filterUser(updatedUser), customMessage: updatedUser.customMessage });
     } catch (error) {
-      if (error.code === 'P2002' && error.meta && error.meta.target === 'place_unique')
+      if (error.code === 'P2002' && error.meta && error.meta.target === 'users_place_key')
         return conflict(response, Error.PlaceAlreadyAttributed);
 
       return next(error);

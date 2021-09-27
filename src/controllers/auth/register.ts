@@ -48,11 +48,11 @@ export default [
       });
     } catch (error) {
       // If the email already exists in the database, throw a bad request
-      if (error.code === 'P2002' && error.meta && error.meta.target === 'email_unique')
+      if (error.code === 'P2002' && error.meta && error.meta.target === 'users_email_key')
         return conflict(response, Error.EmailAlreadyExists);
 
       // If the username already exists in the database, throw a bad request
-      if (error.code === 'P2002' && error.meta && error.meta.target === 'username_unique')
+      if (error.code === 'P2002' && error.meta && error.meta.target === 'users_username_key')
         return conflict(response, Error.UsernameAlreadyExists);
 
       // Otherwise, forward the error to the central error handling

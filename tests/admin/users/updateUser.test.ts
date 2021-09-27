@@ -33,9 +33,7 @@ describe('PATCH /admin/users/:userId', () => {
 
   after(async () => {
     // Delete the user created
-    await database.cartItem.deleteMany();
     await database.cart.deleteMany();
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });
