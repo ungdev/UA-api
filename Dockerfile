@@ -18,4 +18,7 @@ COPY --chown=node:node ./ ./
 RUN yarn prisma generate
 RUN yarn build
 
+# Prunes devDependencies
+RUN yarn install --production --ignore-scripts --prefer-offline
+
 CMD yarn start
