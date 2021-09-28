@@ -4,6 +4,7 @@ import Joi from 'joi';
 import { hasLinkedDiscordAccount } from '../../middlewares/oauth';
 import { noSpectator } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
+import whitelist from '../../middlewares/whitelist';
 import { createTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
 import { Error as ResponseError } from '../../types';
@@ -14,6 +15,7 @@ import * as validators from '../../utils/validators';
 export default [
   // Middlewares
   ...noSpectator,
+  ...whitelist,
   hasLinkedDiscordAccount,
   validateBody(
     Joi.object({
