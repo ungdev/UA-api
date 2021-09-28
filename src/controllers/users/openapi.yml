@@ -143,15 +143,15 @@
                     type: object
                     description: Identité de l'accompagnateur. Nécessite que l'utilisateur (actuel)
                       soit mineur et ne soit pas déjà accompagné.
-                    items:
-                      type: object
-                      properties:
-                        firstname:
-                          type: string
-                          description: Prénom de l'accompagnateur
-                        lastname:
-                          type: string
-                          description: Nom de l'accompagnateur
+                    properties:
+                      firstname:
+                        type: string
+                        description: Prénom de l'accompagnateur
+                        required: true
+                      lastname:
+                        type: string
+                        description: Nom de l'accompagnateur
+                        required: true
               supplements:
                 type: array
                 description: Liste des goodies à acheter
