@@ -125,8 +125,6 @@ describe('POST /users/current/carts', () => {
 
   after(async () => {
     // Delete the user created
-    await database.log.deleteMany();
-    await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
@@ -518,14 +516,14 @@ describe('POST /users/current/carts', () => {
         id: staleSpectatorCart.id,
       },
       data: {
-        createdAt: new Date(Date.now() - 6000000),
-        updatedAt: new Date(Date.now() - 6000000),
+        createdAt: new Date(Date.now() - 6e6),
+        updatedAt: new Date(Date.now() - 6e6),
         transactionState: 'pending',
         cartItems: {
           updateMany: {
             data: {
-              createdAt: new Date(Date.now() - 6000000),
-              updatedAt: new Date(Date.now() - 6000000),
+              createdAt: new Date(Date.now() - 6e6),
+              updatedAt: new Date(Date.now() - 6e6),
             },
             where: {},
           },

@@ -68,7 +68,7 @@ export default [
       // The id has not changed because the same discord account was used
       return redirect(response, DiscordFeedbackCode.NOT_MODIFIED);
     } catch (updateError) {
-      if (updateError.code === 'P2002' && updateError.meta && updateError.meta.target === 'discordId_unique')
+      if (updateError.code === 'P2002' && updateError.meta && updateError.meta.target === 'users_discordId_key')
         return redirect(response, DiscordFeedbackCode.ERR_ALREADY_LINKED);
 
       // If the user uses an invalid state the {@link decrypt} function cannot decrypt,

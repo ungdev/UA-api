@@ -6,27 +6,14 @@ import env from '../utils/env';
 import nanoid from '../utils/nanoid';
 
 export const dropStale = () =>
-  database.$transaction([
-    // We start with deleting cart contents (as prisma relation is this made this way)
-    database.cartItem.deleteMany({
-      where: {
-        cart: {
-          createdAt: {
-            lt: new Date(Date.now() - env.api.cartLifespan),
-          },
-          transactionState: 'pending',
-        },
+  database.cart.deleteMany({
+    where: {
+      createdAt: {
+        lt: new Date(Date.now() - env.api.cartLifespan),
       },
-    }),
-    // Delete empty carts: we check all items have a null cartId (ie. cart is empty)
-    database.cart.deleteMany({
-      where: {
-        cartItems: {
-          none: {},
-        },
-      },
-    }),
-  ]);
+      transactionState: 'pending',
+    },
+  });
 
 export const fetchCart = (cartId: string): Promise<Cart> =>
   database.cart.findUnique({

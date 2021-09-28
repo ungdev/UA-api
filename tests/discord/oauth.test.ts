@@ -37,7 +37,7 @@ describe('GET /discord/oauth', () => {
         () =>
           <DiscordAuthorizationData>{
             scopes: [scope],
-            expires: new Date(Date.now() + 10000).toISOString(),
+            expires: new Date(Date.now() + 1e4).toISOString(),
             user:
               authorized === true
                 ? {

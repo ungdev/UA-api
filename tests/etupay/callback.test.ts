@@ -64,7 +64,7 @@ describe('GET /etupay/callback', () => {
     // This is the data format how it is encrypted in the payload
     const etupayBody = {
       // Create a random transaction id
-      transaction_id: randomInt(10000, 99999),
+      transaction_id: randomInt(1e4, 1e5 - 1),
       type: 'checkout',
       // We bought a ticket for a player, so 15€ (the price doesn't matter now),
       amount: 1500,
@@ -87,7 +87,6 @@ describe('GET /etupay/callback', () => {
 
   after(async () => {
     // Delete the user created
-    await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.user.deleteMany();
   });

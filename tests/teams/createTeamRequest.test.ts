@@ -22,7 +22,6 @@ describe('POST /teams/:teamId/join-requests', () => {
   });
 
   after(async () => {
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });

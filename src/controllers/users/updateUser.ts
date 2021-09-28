@@ -42,7 +42,7 @@ export default [
       return success(response, filterUser(updatedUser));
     } catch (error) {
       // If the username is already used by someone else, we respond with an error
-      if (error.code === 'P2002' && error.meta && error.meta.target === 'username_unique')
+      if (error.code === 'P2002' && error.meta && error.meta.target === 'users_username_key')
         return conflict(response, Error.UsernameAlreadyExists);
 
       return next(error);

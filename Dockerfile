@@ -11,11 +11,14 @@ USER node
 # Node has the uid 1000
 COPY --chown=node:node package.json yarn.lock schema.prisma ./
 
-RUN yarn --frozen-lockfile
+RUN yarn --frozen-lockfile --production=false
 
 COPY --chown=node:node ./ ./
 
 RUN yarn prisma generate
 RUN yarn build
+
+# Prunes devDependencies
+RUN yarn install --production --ignore-scripts --prefer-offline
 
 CMD yarn start

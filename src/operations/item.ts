@@ -20,38 +20,36 @@ export const fetchAllItems = async (): Promise<Item[]> => {
 
   // Add a left property which tells how many items are there left
   return Promise.all(
-    items.map(
-      async (item): Promise<Item> => {
-        // Defines the left variable to undefined
-        let left;
+    items.map(async (item): Promise<Item> => {
+      // Defines the left variable to undefined
+      let left;
 
-        // If the item contains stocks, computes the left variables
-        if (item.stock) {
-          // Fetches all the cart items related to the item
-          const cartItems = await database.cartItem.findMany({
-            where: {
-              itemId: item.id,
-              cart: {
-                transactionState: {
-                  in: [TransactionState.paid, TransactionState.pending],
-                },
+      // If the item contains stocks, computes the left variables
+      if (item.stock) {
+        // Fetches all the cart items related to the item
+        const cartItems = await database.cartItem.findMany({
+          where: {
+            itemId: item.id,
+            cart: {
+              transactionState: {
+                in: [TransactionState.paid, TransactionState.pending],
               },
             },
-          });
+          },
+        });
 
-          // Calculates how many items where ordered by adding all the quantity ordered
-          const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
+        // Calculates how many items where ordered by adding all the quantity ordered
+        const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
 
-          // Returns the stock minus the count. The max 0 is used in case of negative number, which should never happen
-          left = Math.max(item.stock - count, 0);
-        }
+        // Returns the stock minus the count. The max 0 is used in case of negative number, which should never happen
+        left = Math.max(item.stock - count, 0);
+      }
 
-        return {
-          ...item,
-          left,
-        };
-      },
-    ),
+      return {
+        ...item,
+        left,
+      };
+    }),
   );
 };
 

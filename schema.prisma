@@ -14,12 +14,15 @@ datasource db {
 model Cart {
   id               String           @id
   userId           String
+  user             User             @relation(fields: [userId], references: [id])
+
   transactionState TransactionState @default(pending)
   transactionId    Int?
+
   paidAt           DateTime?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now()) @updatedAt
-  user             User             @relation(fields: [userId], references: [id])
+
   cartItems        CartItem[]
 
   @@map("carts")
@@ -27,15 +30,19 @@ model Cart {
 
 model CartItem {
   id        String   @id
+
   itemId    String
+  item      Item     @relation(fields: [itemId], references: [id])
   quantity  Int
-  cartId    String
+
   forUserId String
+  forUser   User     @relation(fields: [forUserId], references: [id])
+
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-  cart      Cart     @relation(fields: [cartId], references: [id])
-  forUser   User     @relation(fields: [forUserId], references: [id])
-  item      Item     @relation(fields: [itemId], references: [id])
 
   @@map("cartitems")
 }
@@ -43,12 +50,15 @@ model CartItem {
 model Item {
   id           String       @id
   name         String
+
   category     ItemCategory
   attribute    String?
   price        Int
   reducedPrice Int?
+
   infos        String?
   image        String?
+
   stock        Int?
   cartItems    CartItem[]
 
@@ -65,13 +75,17 @@ model Setting {
 model Team {
   id           String       @id
   name         String
+
   tournamentId TournamentId
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+
   captainId    String       @unique
+  captain      User         @relation(fields: [captainId], references: [id])
+
   lockedAt     DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @default(now()) @updatedAt
-  captain      User         @relation(fields: [captainId], references: [id])
-  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+
   askingUsers  User[]       @relation("teamAskingUsers")
   users        User[]       @relation("teamUsers")
 
@@ -83,26 +97,30 @@ model Team {
 model Tournament {
   id                     TournamentId @id
   name                   String       @unique
+
   maxPlayers             Int
   playersPerTeam         Int
-  toornamentId           String?
+  teams                  Team[]
+
   discordRoleId          String?
   discordStaffRoleId     String?
   discordVocalCategoryId String?
   discordTextCategoryId  String?
-  teams                  Team[]
 
   @@map("tournaments")
 }
 
 model Log {
   id        String   @id
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   method    String
   path      String
   body      Json?
-  userId    String
+
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
 
   // We create an index on the userId as the search most of the time used with a userId
   @@index([userId])
@@ -110,36 +128,41 @@ model Log {
 }
 
 model User {
-  id              String     @id
-  username        String?    @unique
-  firstname       String
-  lastname        String
-  email           String?    @unique
-  password        String?
-  type            UserType?
-  age             UserAge    @default(child)
-  permissions     String?
-  registerToken   String?    @unique
-  resetToken      String?    @unique
-  place           String?    @unique
-  customMessage   String?
-  scannedAt       DateTime?
-  discordId       String?    @unique
-  // Attendant: both sides relation is required by prisma. Read docs:
-  // https://www.prisma.io/docs/concepts/components/prisma-schema/relations/self-relations#one-to-one-self-relations
-  attendantId     String?    @unique
-  attendant       User?      @relation("attendantUser", fields: [attendantId], references: [id])
-  attended        User?      @relation("attendantUser")
-  teamId          String?
-  askingTeamId    String?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @default(now()) @updatedAt
-  askingTeam      Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
-  team            Team?      @relation("teamUsers", fields: [teamId], references: [id])
-  captainTeam     Team?      // This field is used to make prisma work but should never be used
-  cartItems       CartItem[]
-  carts           Cart[]
-  logs            Log[]
+  id            String     @id
+  username      String?    @unique
+  firstname     String
+  lastname      String
+  email         String?    @unique
+  password      String?
+  type          UserType?
+  age           UserAge
+  discordId     String?    @unique
+
+  permissions   String?
+
+  registerToken String?    @unique
+  resetToken    String?    @unique
+
+  place         String?    @unique
+  customMessage String?
+  scannedAt     DateTime?
+
+  attendantId   String?    @unique
+  attendant     User?      @relation("attendantUser", fields: [attendantId], references: [id])
+  attended      User?      @relation("attendantUser")
+
+  teamId        String?
+  team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
+  askingTeamId  String?
+  askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @default(now()) @updatedAt
+
+  captainTeam   Team?
+  cartItems     CartItem[]
+  carts         Cart[]
+  logs          Log[]
 
   @@index([id])
   @@map("users")

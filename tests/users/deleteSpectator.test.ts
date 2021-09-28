@@ -20,8 +20,6 @@ describe('DELETE /users/current/spectate', () => {
 
   after(async () => {
     // Delete the user created
-    await database.log.deleteMany();
-    await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.user.deleteMany();
   });
