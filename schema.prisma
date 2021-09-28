@@ -13,8 +13,8 @@ datasource db {
 
 model Cart {
   id               String           @id
-  userId           String?
-  user             User?            @relation(fields: [userId], references: [id])
+  userId           String
+  user             User             @relation(fields: [userId], references: [id])
 
   transactionState TransactionState @default(pending)
   transactionId    Int?
@@ -135,7 +135,7 @@ model User {
   email         String?    @unique
   password      String?
   type          UserType?
-  age           UserAge    @default(adult)
+  age           UserAge
   discordId     String?    @unique
 
   permissions   String?

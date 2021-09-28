@@ -11,7 +11,7 @@ USER node
 # Node has the uid 1000
 COPY --chown=node:node package.json yarn.lock schema.prisma ./
 
-RUN yarn --frozen-lockfile
+RUN yarn --frozen-lockfile --production=false
 
 COPY --chown=node:node ./ ./
 

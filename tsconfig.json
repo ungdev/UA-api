@@ -5,7 +5,7 @@
     "removeComments": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es6",
+    "target": "ES2019",
     "strict": true,
     "strictNullChecks": false,
     "emitDecoratorMetadata": true,
