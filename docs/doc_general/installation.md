@@ -110,7 +110,6 @@ Exécutez `CREATE DATABASE arena CHARACTER SET utf8;` dedans. Cela va créer une
 Depuis le terminal Ubuntu, dans le dossier du projet "UA API" que vous avez obtenu en clonant depuis GitHub, effectuez :
 
 - `cp .env.example .env`. Ensuite, modifiez la variable `DATABASE_URL` dans le `.env` avec la valeur `mysql://root:@localhost/arena`
-- `yarn prisma generate` _(Cela va générer des fichiers)_
 - `yarn prisma db push`
 - `yarn fake` Commande optionnelle pour générer des faux users et fausses équipes.
 
@@ -136,15 +135,13 @@ Pour lancer votre base de données locale, exécutez la commande `sudo service m
 Nous allons maintenant créer un compte avec toutes les permissions pour avoir accès à toutes les fonctionnalités. Pour cela, commencez tout d'abord par entrer `CREATE USER 'dev'@'%' IDENTIFIED BY 'dev';`. Cette ligne va permettre de créer un utilisateur nommé `dev` avec comme mot de passe `dev`. Pour lui attribuer tous les privilèges, tapez maintenant `GRANT ALL PRIVILEGES ON *.* TO 'dev'@'%' WITH GRANT OPTION;` pour ensuite faire `FLUSH PRIVILEGES;` pour appliquer toutes les modifications.
 Créons maintenant le table `arena`. Pour cela, faites `CREATE DATABASE arena CHARACTER SET utf8;`.
 
-Si ce n'est pas déjà fait, copiez le fichier `.env.example`. Pour ce faire, tapez simplement `cp .env.example .env`. Rendez-vous dans le fichier `.env` et au niveau de la variable `DATABASE_URL`, changez le `root@root` en `dev@dev` et le `localhost` en `127.0.0.1`. La ligne doit ressembler à `DATABASE_URL=mysql://dev:dev@127.0.0.1/arena`.
-
 Vous pouvez sortir de la console mysql en faisant `exit`.
 
-On va maintenant installer les dépendances manquantes. Pour cela, entrez juste `yarn`.
-Il faut ensuite configurer les fichiers pour la base de données. Il faut entrer ces deux commandes:
+Si ce n'est pas déjà fait, copiez le fichier `.env.example`. Pour ce faire, tapez simplement `cp .env.example .env`. Rendez-vous dans le fichier `.env` et au niveau de la variable `DATABASE_URL`, changez le `root@root` en `dev@dev` et le `localhost` en `127.0.0.1`. La ligne doit ressembler à `DATABASE_URL=mysql://dev:dev@127.0.0.1/arena`.
 
-- `yarn prisma generate` pour générer les fichiers nécessaires
-- `yarn prisma db push` pour envoyer tous les fichiers dans la base de données
+On va maintenant installer les dépendances manquantes. Pour cela, entrez juste `yarn`.
+Il faut ensuite configurer les fichiers pour la base de données. Il faut entrer la commande suivante : \
+`yarn prisma db push` - cela va créer les tables de la base de données ainsi que leur structure.
 
 Maintenant la base de données configurée, nous allons la remplir grâce au fichier seed.sql qui se trouve dans le dossier. Entrez `mysql -u dev -p arena < seed.sql` pour, dans un premier temps se connecter à la base de données puis dans un second temps remplir cette base de données avec les informations du fichier seed.sql. Le mot de passe à utiliser quand il est demandé est `dev`.
 
