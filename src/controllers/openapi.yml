@@ -273,9 +273,15 @@ components:
           example: 8MF1b0
         itemId:
           type: integer
-        forUserId:
-          type: string
-          example: V1STGX
+        forUser:
+          type: object
+          properties:
+            id:
+              type: string
+              example: V1STGX
+            username:
+              type: string
+              example: totodelacho
 
     CartWithCartItems:
       allOf:

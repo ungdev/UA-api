@@ -28,7 +28,11 @@ export const fetchCarts = (userId: string): Promise<CartWithCartItems[]> =>
       userId,
     },
     include: {
-      cartItems: true,
+      cartItems: {
+        include: {
+          forUser: true,
+        },
+      },
     },
   });
 
