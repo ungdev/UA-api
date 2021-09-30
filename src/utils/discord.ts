@@ -5,7 +5,7 @@ import { fetchTeams } from '../operations/team';
 import env from './env';
 
 // Create bot as a discord client
-const bot = new discord.Client();
+export const bot = new discord.Client();
 
 const createChannel = async (channelName: string, channelType: 'voice' | 'text', tournamentId: TournamentId) => {
   // Get channel and create channels in it
