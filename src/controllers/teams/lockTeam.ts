@@ -34,9 +34,9 @@ export default [
         return forbidden(response, Error.TeamNotPaid);
       }
 
-      const lockedTeam = await lockTeam(team.id);
-
       await setupTeam(team.name, team.tournamentId);
+
+      const lockedTeam = await lockTeam(team.id);
 
       return success(response, filterTeam(lockedTeam));
     } catch (error) {
