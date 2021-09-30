@@ -2,13 +2,13 @@
 
 ## Nouveau site - 15 septembre
 
-Contenu
+- Contenu ✔️
 
-Title
+- Title ✔️
 
 ## Billetterie - Equipe billetterie - 8 Octobre
 
-- API : 26 Septembre
+- API : 26 Septembre ✔️
 
 - Front 3 Octobre
 
