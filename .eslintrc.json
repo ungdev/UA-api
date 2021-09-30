@@ -37,6 +37,7 @@
     "radix": "off",
     "require-await": "warn",
     "spaced-comment": ["warn", "always", { "exceptions": ["*"] }],
+    "no-continue": "off",
 
     // Typescript
     "@typescript-eslint/ban-ts-comment": "off",

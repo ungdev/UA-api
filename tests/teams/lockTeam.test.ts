@@ -71,6 +71,15 @@ describe('POST /teams/current/lock', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
+  it('should throw an internal server error because of the setupTeam function', async () => {
+    sandbox.stub(discordFunctions, 'setupTeam').throws('Unknown error');
+
+    await request(app)
+      .post('/teams/current/lock')
+      .set('Authorization', `Bearer ${captainToken}`)
+      .expect(500, { error: Error.InternalServerError });
+  });
+
   it('should lock the team', async () => {
     const { body } = await request(app)
       .post('/teams/current/lock')

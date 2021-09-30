@@ -15,26 +15,25 @@ const createChannel = async (channelName: string, channelType: 'voice' | 'text',
   });
 
   const tournament = await fetchTournament(tournamentId);
-  await channel.setParent(tournament.discordCategoryId);
-
+  const setParentPromise = await channel.setParent(tournament.discordCategoryId);
   // Configure channel's permissions
-  await channel.createOverwrite(channel.guild.roles.everyone, {
+  const denyEveryonePromise = channel.createOverwrite(channel.guild.roles.everyone, {
     VIEW_CHANNEL: false,
   });
-
-  await channel.createOverwrite(
+  const allowTeamPromise = channel.createOverwrite(
     channel.guild.roles.cache.find((r) => r.name === channelName),
     {
       VIEW_CHANNEL: true,
     },
   );
-
-  await channel.createOverwrite(
+  const allowRespPromise = channel.createOverwrite(
     channel.guild.roles.cache.find((r) => r.id === tournament.discordRespRoleId),
     {
       VIEW_CHANNEL: true,
     },
   );
+
+  return Promise.all([setParentPromise, denyEveryonePromise, allowTeamPromise, allowRespPromise]);
 };
 
 const createRole = (teamName: string) => {
@@ -49,12 +48,17 @@ const createRole = (teamName: string) => {
 };
 
 // eslint-disable-next-line arrow-body-style
-export const setupTeam = (team: string, tournamentId: TournamentId) => {
-  return Promise.all([
-    createRole(team),
-    createChannel(team, 'text', tournamentId),
-    createChannel(team, 'voice', tournamentId),
-  ]);
+export const setupTeam = async (team: string, tournamentId: TournamentId) => {
+  const tournament = await fetchTournament(tournamentId);
+  // Only create channel if there are more than 1 player per team
+  if (tournament.playersPerTeam !== 1) {
+    return Promise.all([
+      createRole(team),
+      createChannel(team, 'text', tournamentId),
+      createChannel(team, 'voice', tournamentId),
+    ]);
+  }
+  return null;
 };
 
 export const syncRoles = async () => {
@@ -62,20 +66,21 @@ export const syncRoles = async () => {
   const server = bot.guilds.cache.get(env.discord.server);
 
   for (const tournament of await fetchTournaments()) {
+    // Do not care about the solo tournaments
     if (tournament.playersPerTeam === 1) {
-      // eslint-disable-next-line no-continue
       continue;
     }
     const tournamentRole = server.roles.cache.find((role) => role.id === tournament.discordRoleId);
 
     for (const team of await fetchTeams(tournament.id)) {
+      // Do not care about the non-locked teams
       if (team.lockedAt === null) {
-        // eslint-disable-next-line no-continue
         continue;
       }
 
       const teamRole = server.roles.cache.find((role) => role.name === team.name);
 
+      // Add the team and tournament role to team's players
       for (const player of team.players) {
         const member = await server.members.fetch(player.discordId);
         if (member) {
@@ -83,6 +88,7 @@ export const syncRoles = async () => {
           member.roles.add(teamRole);
         }
       }
+      // Add team and tournament role for the team coaches
       for (const coach of team.coaches) {
         const member = await server.members.fetch(coach.discordId);
         if (member) {
