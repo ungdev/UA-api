@@ -10,6 +10,7 @@ export default [
   (request: Request, response: Response, next: NextFunction) => {
     const { user } = getRequestInfo(response);
     const { tournamentId } = request.body;
+
     if (tournamentId in whitelist) {
       return whitelist[<keyof typeof whitelist>tournamentId].includes(user.email)
         ? next()
