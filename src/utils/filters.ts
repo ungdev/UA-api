@@ -38,7 +38,7 @@ export const filterItem = (item: Item) =>
   pick(item, ['id', 'name', 'category', 'attribute', 'price', 'infos', 'image']);
 
 export const filterCartItem = (cartItem: CartItem) =>
-  pick(cartItem, ['id', 'quantity', 'cartId', 'itemId', 'forUserId']);
+  pick(cartItem, ['id', 'quantity', 'cartId', 'itemId', 'forUser.id', 'forUser.username']);
 
 export const filterCartWithCartItems = (cart: CartWithCartItems) => {
   const filteredCart = pick(cart, ['id', 'userId', 'transactionState', 'transactionId', 'paidAt']);

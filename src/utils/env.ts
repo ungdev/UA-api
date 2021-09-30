@@ -78,7 +78,7 @@ const env = {
     id: loadIntEnv('ETUPAY_ID') || notInProduction(1),
     // random 256 bits key genereated if not in production
     key: loadEnv('ETUPAY_KEY') || notInProduction(crypto.randomBytes(32).toString('base64')),
-    url: loadEnv('ETUPAY_KEY') || 'https://etupay.utt.fr/initiate',
+    url: loadEnv('ETUPAY_URL') || 'https://etupay.utt.fr/initiate',
     successUrl: loadEnv('ETUPAY_SUCCESS_URL') || 'https://arena.utt.fr/dashboard/payment?type=success',
     errorUrl: loadEnv('ETUPAY_ERROR_URL') || 'https://arena.utt.fr/dashboard/payment?type=error',
   },

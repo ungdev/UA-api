@@ -68,7 +68,10 @@ describe('POST /users/current/carts', () => {
               quantity: 1,
               cartId: cart.id,
               itemId: 'ethernet-5',
-              forUserId: user.id,
+              forUser: {
+                id: user.id,
+                username: user.username,
+              },
             },
           ],
         },
