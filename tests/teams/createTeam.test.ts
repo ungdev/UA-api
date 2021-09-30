@@ -9,7 +9,7 @@ import database from '../../src/services/database';
 import { Error, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
-import { UserType } from '.prisma/client';
+import { TournamentId, UserType } from '.prisma/client';
 
 describe('POST /teams', () => {
   let user: User;
@@ -228,5 +228,19 @@ describe('POST /teams', () => {
       })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(403, { error: Error.NoDiscordAccountLinked });
+  });
+
+  it('should fail as the user is not whitelisted for osu!', async () => {
+    const osuPlayer = await createFakeUser();
+    const newToken = generateToken(osuPlayer);
+    return request(app)
+      .post('/teams')
+      .send({
+        ...teamBody,
+        name: 'osuPlayer',
+        tournamentId: TournamentId.osu,
+      })
+      .set('Authorization', `Bearer ${newToken}`)
+      .expect(403, { error: Error.NotWhitelisted });
   });
 });

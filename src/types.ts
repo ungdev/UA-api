@@ -226,6 +226,7 @@ export const enum Error {
   NoSpectator = "Les spectateurs n'ont pas accès à cette ressource",
   AlreadyAppliedDiscountSSBU = 'Vous avez déjà profité de la promotion !',
   NotPlayerDiscountSSBU = 'Seul les joueurs peuvent profiter de la promotion !',
+  NotWhitelisted = "Vous n'êtes pas qualifié pour ce tournoi",
 
   // 404
   // The server can't find the requested resource
