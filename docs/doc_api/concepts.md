@@ -137,6 +137,24 @@ Quand le paiement sera validé, un mail de confirmation sera envoyé à l'utilis
 
 Les tickets sont aussi disponibles sur `GET /tickets/{cartItemId}`. Et accessibles à la fois pour celui qui a acheté le ticket et le bénéficiaire du dit ticket.
 
+## Fonctionnement du paiement
+
+`POST /users/current/carts` renvoie le prix total du panier et l'url pour procéder au paiement. L'utilisateur doit être rédirigé sur cette url afin de procéder au paiement.
+
+### Workflow
+
+| Etape | Exécutée sur | Description                                                                                                                                                                                                                                                |
+| :---: | :----------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|   1   |    Front     | L'utilisateur choisit ses articles et le front envoie le contenu du panier sur `POST /users/current/cart`                                                                                                                                                  |
+|   2   |     API      | Enregistre le panier et renvoie le prix total (avec réductions) du panier ainsi que l'url pour le paiement                                                                                                                                                 |
+|   3   |    Front     | (Affiche le prix total qui contient toutes les réductions applicables ?) et redirige l'utilisateur sur l'url etupay                                                                                                                                        |
+|   4   |    Etupay    | L'utilisateur procède au paiement sur etupay                                                                                                                                                                                                               |
+|   5   |     API      | Etupay redirige l'utilisateur sur `GET /etupay/callback`. L'API vérifie (et enregistre) le paiement puis redirige l'utilisateur sur `ETUPAY_SUCCESS_URL` ou `ETUPAY_ERROR_URL`. (ie. `/dashboard/payment?type=success` ou `/dashboard/payment?type=error`) |
+|   6   |    Front     | Le front affiche la réussite ou l'échec du paiement                                                                                                                                                                                                        |
+
+> Les paniers réservent les articles du shop le temps de la transaction. Pour cette raison, **ils (les paniers) ont une durée de validité limitée à 60 minutes** (`API_CART_LIFESPAN` dans le `.env`, exprimée en millisecondes). \
+> Passé ce délai, toute création de panier _(par quelqu'un d'autre ou par l'utilisateur lui même)_ supprimera le panier obsolète.
+
 # Monitoring
 
 ## Etat du serveur
