@@ -140,7 +140,8 @@ export declare const enum DiscordChannelPermissionType {
  * @see {@link [Discord Docs](https://discord.com/developers/docs/topics/permissions#permissions-bitwise-permission-flags)}
  */
 export declare const enum DiscordChannelPermission {
-  VIEW_CHANNEL = 0x400,
+  DEFAULT = '0',
+  VIEW_CHANNEL = '1024',
 }
 
 /**
@@ -150,8 +151,8 @@ export declare const enum DiscordChannelPermission {
 export declare interface DiscordChannelPermissionOverwrite {
   readonly id: Snowflake;
   readonly type: DiscordChannelPermissionType;
-  readonly allow?: DiscordChannelPermission;
-  readonly deny?: DiscordChannelPermission;
+  readonly allow: DiscordChannelPermission;
+  readonly deny: DiscordChannelPermission;
 }
 
 /**

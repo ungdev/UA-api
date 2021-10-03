@@ -38,17 +38,20 @@ const createDiscordTeamChannel = async (
       {
         id: everyoneRole.id,
         type: DiscordChannelPermissionType.ROLE,
+        allow: DiscordChannelPermission.DEFAULT,
         deny: DiscordChannelPermission.VIEW_CHANNEL,
       },
       {
         id: tournament.discordRespoRoleId,
         type: DiscordChannelPermissionType.ROLE,
         allow: DiscordChannelPermission.VIEW_CHANNEL,
+        deny: DiscordChannelPermission.DEFAULT,
       },
       {
         id: teamRole.id,
         type: DiscordChannelPermissionType.ROLE,
         allow: DiscordChannelPermission.VIEW_CHANNEL,
+        deny: DiscordChannelPermission.DEFAULT,
       },
     ],
   });
