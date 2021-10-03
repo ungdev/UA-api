@@ -62,7 +62,7 @@ export const setupDiscordTeam = async (team: Team, tournament: Tournament) => {
 
   // Only create channel if there are more than 1 player per team
   if (tournament.playersPerTeam !== 1) {
-    const role = await createDiscordRole({ name: team.name, color: 0xff_eb_ab });
+    const role = await createDiscordRole({ name: team.name, color: env.discord.teamRoleColor });
 
     logger.debug(`Create discord channels for ${team.name}`);
     // Create the channels and update in the database the role.

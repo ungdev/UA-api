@@ -72,6 +72,7 @@
     "unicorn/no-reduce": "off",
     "unicorn/no-null": "off",
     "unicorn/number-literal-case": "off",
+    "unicorn/numeric-separators-style": "off",
     "unicorn/prefer-set-has": "off",
     "unicorn/prefer-spread": "warn",
     "unicorn/prefer-object-from-entries": "off",
