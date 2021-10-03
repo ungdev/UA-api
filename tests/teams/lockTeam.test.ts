@@ -3,7 +3,6 @@ import request from 'supertest';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
-import * as discordFunctions from '../../src/utils/discord';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeTeam } from '../utils';
@@ -70,18 +69,7 @@ describe('POST /teams/current/lock', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should throw an internal server error because of the setupTeam function', () => {
-    sandbox.stub(discordFunctions, 'setupTeam').throws('Unknown error');
-
-    return request(app)
-      .post('/teams/current/lock')
-      .set('Authorization', `Bearer ${captainToken}`)
-      .expect(500, { error: Error.InternalServerError });
-  });
-
   it('should lock the team', async () => {
-    sandbox.stub(discordFunctions, 'setupTeam').returns(null);
-
     const { body } = await request(app)
       .post('/teams/current/lock')
       .set('Authorization', `Bearer ${captainToken}`)

@@ -73,21 +73,24 @@ model Setting {
 }
 
 model Team {
-  id           String       @id
-  name         String
+  id               String       @id
+  name             String
 
-  tournamentId TournamentId
-  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+  tournamentId     TournamentId
+  tournament       Tournament   @relation(fields: [tournamentId], references: [id])
 
-  captainId    String       @unique
-  captain      User         @relation(fields: [captainId], references: [id])
+  captainId        String       @unique
+  captain          User         @relation(fields: [captainId], references: [id])
 
-  lockedAt     DateTime?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @default(now()) @updatedAt
+  lockedAt         DateTime?
 
-  askingUsers  User[]       @relation("teamAskingUsers")
-  users        User[]       @relation("teamUsers")
+  discordRoleId    String?
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @default(now()) @updatedAt
+
+  askingUsers      User[]       @relation("teamAskingUsers")
+  users            User[]       @relation("teamUsers")
 
   @@unique([name, tournamentId])
   @@index([id])
@@ -103,7 +106,7 @@ model Tournament {
   teams                  Team[]
 
   discordRoleId          String?
-  discordRespRoleId      String?
+  discordRespoRoleId     String?
   discordCategoryId      String?
 
   @@map("tournaments")

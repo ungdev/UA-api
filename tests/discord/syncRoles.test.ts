@@ -23,7 +23,6 @@ describe('POST /discord/sync-roles', () => {
   });
 
   it('should succesfully sync roles', () => {
-    sandbox.stub(discordFunctions, 'syncRoles');
     return request(app).post('/discord/sync-roles').send({ token }).expect(204);
   });
 });
