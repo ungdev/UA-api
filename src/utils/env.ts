@@ -97,6 +97,7 @@ const env = {
   },
   discord: {
     client: loadEnv('DISCORD_CLIENT'),
+    secret: loadEnv('DISCORD_SECRET'),
     token: loadEnv('DISCORD_TOKEN'),
     server: loadEnv('DISCORD_SERVER'),
     oauthUrl: loadEnv('DISCORD_OAUTH_URL') || 'https://discord.com/api/v9/oauth2',
