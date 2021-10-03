@@ -116,7 +116,7 @@ export type Snowflake = string;
  * Interface for a channel type
  * @see {@link [Discord Docs](https://discord.com/developers/docs/resources/channel#channel-object-channel-types)}
  */
-export enum DiscordChannelType {
+export declare const enum DiscordChannelType {
   GUILD_TEXT = 0,
   DM = 1,
   GUILD_VOICE = 2,
@@ -130,7 +130,7 @@ export enum DiscordChannelType {
   GUILD_STAGE_VOICE = 13,
 }
 
-export enum DiscordChannelPermissionType {
+export declare const enum DiscordChannelPermissionType {
   ROLE = 0,
   MEMBER = 1,
 }
@@ -139,7 +139,7 @@ export enum DiscordChannelPermissionType {
  * Enum to list all permissions (incomplete)
  * @see {@link [Discord Docs](https://discord.com/developers/docs/topics/permissions#permissions-bitwise-permission-flags)}
  */
-export enum DiscordChannelPermission {
+export declare const enum DiscordChannelPermission {
   VIEW_CHANNEL = 0x4_00,
 }
 
