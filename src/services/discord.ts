@@ -49,7 +49,7 @@ export const getToken = async (grantCode: string) => {
     `${env.discord.oauthUrl}/token`,
     qs.stringify(<DiscordTokenRequest>{
       client_id: env.discord.client,
-      client_secret: env.discord.token,
+      client_secret: env.discord.secret,
       code: grantCode,
       grant_type: 'authorization_code',
       redirect_uri: env.discord.oauthCallback,
