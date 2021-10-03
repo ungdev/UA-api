@@ -4,7 +4,7 @@ import { fetchTeams } from '../operations/team';
 import {
   createDiscordChannel,
   createDiscordRole,
-  findDiscordEveryoneRole,
+  fetchDiscordRoles,
   findDiscordRoleById,
   findDiscordMemberById,
   addDiscordMemberRole,
@@ -20,6 +20,8 @@ import { Team, Tournament } from '../types';
 import env from './env';
 import logger from './logger';
 
+let everyoneRole: DiscordRole;
+
 const createDiscordTeamChannel = async (
   channelName: string,
   channelType: DiscordChannelType,
@@ -27,8 +29,6 @@ const createDiscordTeamChannel = async (
   teamRole: DiscordRole,
 ) => {
   const tournament = await fetchTournament(tournamentId);
-
-  const everyoneRole = await findDiscordEveryoneRole();
 
   return createDiscordChannel({
     name: channelName,
@@ -120,3 +120,11 @@ export const syncRoles = async () => {
     }
   }
 };
+
+// Load everyone role on server start to avoid one discord call on lockTeam
+if (env.discord.token) {
+  fetchDiscordRoles().then((roles) => {
+    everyoneRole = roles.find((role) => role.name === '@everyone');
+    logger.debug('Discord @everyone role loaded');
+  });
+}

@@ -29,6 +29,7 @@ const bot = axios.create({
   headers: {
     Authorization: `Bot ${env.discord.token}`,
     'Content-Type': 'application/json',
+    'User-Agent': `DiscordBot (https://github.com/ungdev/UA-api, 1.0.0)`,
   },
 });
 
@@ -103,37 +104,37 @@ export const fetchDiscordUser = async (discordApiToken: DiscordToken) => {
 };
 
 export const createDiscordChannel = async (requestBody: DiscordCreateChannelRequest) => {
-  const request = await bot.post<DiscordChannel>(`guilds/${env.discord.server}/channels`, requestBody);
+  const response = await bot.post<DiscordChannel>(`guilds/${env.discord.server}/channels`, requestBody);
 
-  return request.data;
+  return response.data;
 };
 
 /**
  * Create a discord role
  */
 export const createDiscordRole = async (requestBody: DiscordCreateRoleRequest) => {
-  const request = await bot.post<DiscordRole>(`guilds/${env.discord.server}/roles`, requestBody);
+  const response = await bot.post<DiscordRole>(`guilds/${env.discord.server}/roles`, requestBody);
 
-  return request.data;
+  return response.data;
 };
 
 export const findDiscordRoleById = async (id: Snowflake) => {
-  const request = await bot.get<DiscordRole[]>(`guilds/${env.discord.server}/roles`);
+  const response = await bot.get<DiscordRole[]>(`guilds/${env.discord.server}/roles`);
 
-  return request.data.find((role) => role.id === id);
+  return response.data.find((role) => role.id === id);
 };
 
-export const findDiscordEveryoneRole = async () => {
-  const request = await bot.get<DiscordRole[]>(`guilds/${env.discord.server}/roles`);
+export const fetchDiscordRoles = async () => {
+  const response = await bot.get<DiscordRole[]>(`guilds/${env.discord.server}/roles`);
 
-  return request.data.find((role) => role.name === '@everyone');
+  return response.data;
 };
 
 export const addDiscordMemberRole = (userId: Snowflake, roleId: Snowflake) =>
   bot.put<DiscordRole[]>(`guilds/${env.discord.server}/members/${userId}/roles/${roleId}`);
 
 export const findDiscordMemberById = async (userId: Snowflake) => {
-  const request = await bot.get<DiscordMember>(`guilds/${env.discord.server}/members/${userId}`);
+  const response = await bot.get<DiscordMember>(`guilds/${env.discord.server}/members/${userId}`);
 
-  return request.data;
+  return response.data;
 };

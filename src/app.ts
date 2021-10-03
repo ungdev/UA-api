@@ -13,7 +13,6 @@ import env from './utils/env';
 import errorHandler from './middlewares/errorHandler';
 import { enforceQueryString, validateParameter } from './middlewares/validation';
 import * as validators from './utils/validators';
-import './utils/discord';
 
 const app = express();
 
