@@ -106,3 +106,124 @@ export declare interface DiscordAuthorizationRequest<State = string> {
   readonly state?: State;
   readonly prompt?: 'consent' | 'none';
 }
+
+/**
+ * Make an alias of snowflake to string to be more precise on the expected type
+ */
+export type Snowflake = string;
+
+/**
+ * Interface for a channel type
+ * @see {@link [Discord Docs](https://discord.com/developers/docs/resources/channel#channel-object-channel-types)}
+ */
+export declare const enum DiscordChannelType {
+  GUILD_TEXT = 0,
+  DM = 1,
+  GUILD_VOICE = 2,
+  GROUP_DM = 3,
+  GUILD_CATEGORY = 4,
+  GUILD_NEWS = 5,
+  GUILD_STORE = 6,
+  GUILD_NEWS_THREAD = 10,
+  GUILD_PUBLIC_THREAD = 11,
+  GUILD_PRIVATE_THREAD = 12,
+  GUILD_STAGE_VOICE = 13,
+}
+
+export declare const enum DiscordChannelPermissionType {
+  ROLE = 0,
+  MEMBER = 1,
+}
+
+/**
+ * Enum to list all permissions (incomplete)
+ * @see {@link [Discord Docs](https://discord.com/developers/docs/topics/permissions#permissions-bitwise-permission-flags)}
+ */
+export declare const enum DiscordChannelPermission {
+  DEFAULT = '0',
+  VIEW_CHANNEL = '1024',
+}
+
+/**
+ * Interface for a channel permission
+ * @see {@link [Discord Docs](https://discord.com/developers/docs/resources/channel#overwrite-object)}
+ */
+export declare interface DiscordChannelPermissionOverwrite {
+  readonly id: Snowflake;
+  readonly type: DiscordChannelPermissionType;
+  readonly allow: DiscordChannelPermission;
+  readonly deny: DiscordChannelPermission;
+}
+
+/**
+ * Interface for a channel request
+ * @see {@link [Discord Docs](https://discord.com/developers/docs/resources/guild#create-guild-channel)}
+ */
+export declare interface DiscordCreateChannelRequest {
+  readonly name: string;
+  readonly type: DiscordChannelType;
+  readonly topic?: string;
+  readonly bitrate?: number;
+  readonly user_limit?: number;
+  readonly rate_limit_per_user?: number;
+  readonly position?: number;
+  readonly parent_id?: Snowflake;
+  readonly permission_overwrites?: DiscordChannelPermissionOverwrite[];
+  readonly nsfw?: boolean;
+}
+
+/**
+ * Interface for a channel (used in channel responses), (not complete)
+ * @see {@link [Discord Docs](https://discord.com/developers/docs/resources/channel#channel-object)}
+ */
+export declare interface DiscordChannel {
+  readonly id: Snowflake;
+  readonly type: DiscordChannelType;
+  readonly guild_id?: Snowflake;
+  readonly position?: number;
+  readonly permission_overwrites?: DiscordChannelPermissionOverwrite[];
+  readonly name?: string;
+  readonly topic?: string;
+  readonly nsfw?: boolean;
+  readonly last_message_id?: Snowflake;
+  readonly bitrate?: number;
+  readonly user_limit?: number;
+  readonly rate_limit_per_user?: number;
+  readonly icon?: string;
+  readonly owner_id?: Snowflake;
+  readonly application_id?: Snowflake;
+  readonly parent_id?: Snowflake;
+  readonly rtc_region?: string;
+  readonly video_quality_mode?: number;
+  readonly message_count?: number;
+  readonly member_count?: number;
+  readonly default_auto_archive_duration?: number;
+  readonly permissions?: string;
+}
+
+/**
+ * Request body to create a role (not complete)
+ * @see {@link [Discord Docs](https://discord.com/developers/docs/resources/guild#create-guild-role)}
+ */
+export declare interface DiscordCreateRoleRequest {
+  readonly name: string;
+  readonly color: number;
+}
+
+/**
+ * Interface for a role (used in role responses), (not complete)
+ * @see {@link [Discord Docs](https://discord.com/developers/docs/topics/permissions#role-object)}
+ */
+export declare interface DiscordRole {
+  readonly id: Snowflake;
+  readonly name: string;
+  readonly color: number;
+}
+
+/**
+ * Interface for a member (used in member responses), (not complete)
+ * @see {@link [Discord Docs](https://discord.com/developers/docs/resources/guild#guild-member-object)}
+ */
+export declare interface DiscordMember {
+  readonly nick?: string;
+}

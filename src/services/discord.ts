@@ -5,6 +5,12 @@ import {
   DiscordAuthorizationRequest,
   DiscordToken,
   DiscordTokenRequest,
+  DiscordCreateChannelRequest,
+  DiscordChannel,
+  DiscordCreateRoleRequest,
+  DiscordRole,
+  Snowflake,
+  DiscordMember,
 } from '../controllers/discord/discordApi';
 import { User } from '../types';
 import env from '../utils/env';
@@ -16,6 +22,17 @@ const discordFetcher = axios.create({
   timeout: env.discord.apiTimeout,
 });
 
+// Create an instance used with the bot token
+const bot = axios.create({
+  timeout: env.discord.apiTimeout,
+  baseURL: env.discord.apiUrl,
+  headers: {
+    Authorization: `Bot ${env.discord.token}`,
+    'Content-Type': 'application/json',
+    'User-Agent': `DiscordBot (https://github.com/ungdev/UA-api, 1.0.0)`,
+  },
+});
+
 /**
  * Generates the discord oauth link of a specified user
  * @param user the user to generate the link for
@@ -25,7 +42,7 @@ export const generateUserOAuthLink = (user: User) =>
   discordFetcher
     .getUri({
       method: 'GET',
-      url: `${env.discord.oauthUrl}/authorize`,
+      url: `${env.discord.apiUrl}/oauth2/authorize`,
       params: <DiscordAuthorizationRequest>{
         client_id: env.discord.client,
         redirect_uri: env.discord.oauthCallback,
@@ -46,7 +63,7 @@ export const generateUserOAuthLink = (user: User) =>
  */
 export const getToken = async (grantCode: string) => {
   const discordApiResponse = await discordFetcher.post<DiscordToken>(
-    `${env.discord.oauthUrl}/token`,
+    `${env.discord.apiUrl}/oauth2/token`,
     qs.stringify(<DiscordTokenRequest>{
       client_id: env.discord.client,
       client_secret: env.discord.secret,
@@ -77,11 +94,35 @@ export const getToken = async (grantCode: string) => {
  * and throw an error if no response was received during that delay.
  */
 export const fetchDiscordUser = async (discordApiToken: DiscordToken) => {
-  const userRequest = await discordFetcher.get<DiscordAuthorizationData>(`${env.discord.oauthUrl}/@me`, {
+  const userRequest = await discordFetcher.get<DiscordAuthorizationData>(`${env.discord.apiUrl}/oauth2/@me`, {
     headers: {
       // Authenticate to discord api with Bearer user token
       Authorization: `Bearer ${discordApiToken.access_token}`,
     },
   });
   return userRequest.data.user;
+};
+
+export const createDiscordChannel = async (requestBody: DiscordCreateChannelRequest) => {
+  const response = await bot.post<DiscordChannel>(`guilds/${env.discord.server}/channels`, requestBody);
+
+  return response.data;
+};
+
+/**
+ * Create a discord role
+ */
+export const createDiscordRole = async (requestBody: DiscordCreateRoleRequest) => {
+  const response = await bot.post<DiscordRole>(`guilds/${env.discord.server}/roles`, requestBody);
+
+  return response.data;
+};
+
+export const addDiscordMemberRole = (userId: Snowflake, roleId: Snowflake) =>
+  bot.put<DiscordRole[]>(`guilds/${env.discord.server}/members/${userId}/roles/${roleId}`);
+
+export const findDiscordMemberById = async (userId: Snowflake) => {
+  const response = await bot.get<DiscordMember>(`guilds/${env.discord.server}/members/${userId}`);
+
+  return response.data;
 };

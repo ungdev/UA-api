@@ -100,9 +100,10 @@ const env = {
     secret: loadEnv('DISCORD_SECRET'),
     token: loadEnv('DISCORD_TOKEN'),
     server: loadEnv('DISCORD_SERVER'),
-    oauthUrl: loadEnv('DISCORD_OAUTH_URL') || 'https://discord.com/api/v9/oauth2',
+    apiUrl: loadEnv('DISCORD_OAUTH_URL') || 'https://discord.com/api/v9',
     apiTimeout: Number.parseInt(loadEnv('DISCORD_API_TIMEOUT')) || 5000,
-    syncKey: loadEnv('SYNC_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
+    syncKey: loadEnv('DISCORD_SYNC_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
+    teamRoleColor: Number.parseInt(loadEnv('DISCORD_TEAM_ROLE_COLOR')) || 0x3498db,
     get oauthCallback() {
       return `${env.front.website}${env.api.prefix}discord/oauth`;
     },

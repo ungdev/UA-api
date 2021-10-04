@@ -31,7 +31,7 @@ describe('GET /discord/connect', () => {
       .get('/discord/connect')
       .set('Authorization', `Bearer ${token}`)
       .expect(200, {
-        link: `${env.discord.oauthUrl}/authorize?client_id=${env.discord.client}&redirect_uri=${encodeURIComponent(
+        link: `${env.discord.apiUrl}/oauth2/authorize?client_id=${env.discord.client}&redirect_uri=${encodeURIComponent(
           env.discord.oauthCallback,
         )}&response_type=code&scope=identify&state=${encodeURIComponent(encrypt(user.id).toString('base64'))}`,
       }));

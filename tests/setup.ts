@@ -8,7 +8,6 @@ import sinon from 'sinon';
 import database from '../src/services/database';
 import { setLoginAllowed, setShopAllowed } from '../src/operations/settings';
 import { transporter } from '../src/services/email';
-import { bot } from '../src/utils/discord';
 
 export const sandbox = sinon.createSandbox();
 
@@ -28,9 +27,6 @@ afterEach('Restore the sandbox after every tests', () => {
 });
 
 after(async () => {
-  // Destroy discord bot
-  bot?.destroy();
-
   // Reset the database at it was
   await setLoginAllowed(false);
   await setShopAllowed(false);

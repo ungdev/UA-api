@@ -1,76 +1,92 @@
-import discord from 'discord.js';
 import { TournamentId } from '.prisma/client';
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
 import { fetchTeams } from '../operations/team';
+import {
+  createDiscordChannel,
+  createDiscordRole,
+  findDiscordMemberById,
+  addDiscordMemberRole,
+} from '../services/discord';
+import {
+  DiscordChannelPermission,
+  DiscordChannelPermissionType,
+  DiscordChannelType,
+  DiscordRole,
+} from '../controllers/discord/discordApi';
+import database from '../services/database';
+import { Team, Tournament } from '../types';
 import env from './env';
+import logger from './logger';
 
-// Create bot as a discord client
-export const bot = new discord.Client();
+const createDiscordTeamChannel = async (
+  channelName: string,
+  channelType: DiscordChannelType,
+  tournamentId: TournamentId,
+  teamRole: DiscordRole,
+) => {
+  const tournament = await fetchTournament(tournamentId);
 
-const createChannel = async (channelName: string, channelType: 'voice' | 'text', tournamentId: TournamentId) => {
-  // Get channel and create channels in it
-  const server = bot.guilds.cache.get(env.discord.server);
-  const channel = await server.channels.create(channelName, {
+  return createDiscordChannel({
+    name: channelName,
     type: channelType,
-  });
-
-  const tournament = await fetchTournament(tournamentId);
-  const setParentPromise = await channel.setParent(tournament.discordCategoryId);
-  // Configure channel's permissions
-  const denyEveryonePromise = channel.createOverwrite(channel.guild.roles.everyone, {
-    VIEW_CHANNEL: false,
-  });
-  const allowTeamPromise = channel.createOverwrite(
-    channel.guild.roles.cache.find((r) => r.name === channelName),
-    {
-      VIEW_CHANNEL: true,
-    },
-  );
-  const allowRespPromise = channel.createOverwrite(
-    channel.guild.roles.cache.find((r) => r.id === tournament.discordRespRoleId),
-    {
-      VIEW_CHANNEL: true,
-    },
-  );
-
-  return Promise.all([setParentPromise, denyEveryonePromise, allowTeamPromise, allowRespPromise]);
-};
-
-const createRole = (teamName: string) => {
-  // Get the server and create a role in it
-  const server = bot.guilds.cache.get(env.discord.server);
-  server.roles.create({
-    data: {
-      name: teamName,
-      color: 'FFEBAB',
-    },
+    parent_id: tournament.discordCategoryId,
+    permission_overwrites: [
+      {
+        // The discord server id corresponds to @everyone role id
+        // https://discord.com/developers/docs/topics/permissions#role-object
+        id: env.discord.server,
+        type: DiscordChannelPermissionType.ROLE,
+        allow: DiscordChannelPermission.DEFAULT,
+        deny: DiscordChannelPermission.VIEW_CHANNEL,
+      },
+      {
+        id: tournament.discordRespoRoleId,
+        type: DiscordChannelPermissionType.ROLE,
+        allow: DiscordChannelPermission.VIEW_CHANNEL,
+        deny: DiscordChannelPermission.DEFAULT,
+      },
+      {
+        id: teamRole.id,
+        type: DiscordChannelPermissionType.ROLE,
+        allow: DiscordChannelPermission.VIEW_CHANNEL,
+        deny: DiscordChannelPermission.DEFAULT,
+      },
+    ],
   });
 };
 
-// eslint-disable-next-line arrow-body-style
-export const setupTeam = async (team: string, tournamentId: TournamentId) => {
-  const tournament = await fetchTournament(tournamentId);
+export const setupDiscordTeam = async (team: Team, tournament: Tournament) => {
+  if (!env.discord.token) {
+    logger.warn('Discord token missing. It will skip discord calls');
+    return;
+  }
+
   // Only create channel if there are more than 1 player per team
   if (tournament.playersPerTeam !== 1) {
-    return Promise.all([
-      createRole(team),
-      createChannel(team, 'text', tournamentId),
-      createChannel(team, 'voice', tournamentId),
+    const role = await createDiscordRole({ name: team.name, color: env.discord.teamRoleColor });
+
+    logger.debug(`Create discord channels for ${team.name}`);
+    // Create the channels and update in the database the role.
+    await Promise.all([
+      createDiscordTeamChannel(team.name, DiscordChannelType.GUILD_TEXT, tournament.id, role),
+      createDiscordTeamChannel(team.name, DiscordChannelType.GUILD_VOICE, tournament.id, role),
+      database.team.update({ data: { discordRoleId: role.id }, where: { id: team.id } }),
     ]);
   }
-  return null;
 };
 
 export const syncRoles = async () => {
-  // Get the server, loop all tournaments, loop all teams in tournaments and loop all player in teams to give them the role
-  const server = bot.guilds.cache.get(env.discord.server);
+  if (!env.discord.token) {
+    logger.warn('Discord token missing. It will skip discord calls');
+    return;
+  }
 
+  // Get the server, loop all tournaments, loop all teams in tournaments and loop all player in teams to give them the role
   for (const tournament of await fetchTournaments()) {
     // Do not care about the solo tournaments
     if (tournament.playersPerTeam === 1) {
       continue;
     }
-    const tournamentRole = server.roles.cache.find((role) => role.id === tournament.discordRoleId);
 
     for (const team of await fetchTeams(tournament.id)) {
       // Do not care about the non-locked teams
@@ -78,33 +94,29 @@ export const syncRoles = async () => {
         continue;
       }
 
-      const teamRole = server.roles.cache.find((role) => role.name === team.name);
+      const users = [...team.players, ...team.coaches];
 
-      // Add the team and tournament role to team's players
-      for (const player of team.players) {
-        const member = await server.members.fetch(player.discordId);
-        if (member) {
-          member.roles.add(tournamentRole);
-          member.roles.add(teamRole);
-        }
-      }
-      // Add team and tournament role for the team coaches
-      for (const coach of team.coaches) {
-        const member = await server.members.fetch(coach.discordId);
-        if (member) {
-          member.roles.add(tournamentRole);
-          member.roles.add(teamRole);
-        }
-      }
+      // Only parallelize the requests per user to avoid being rate limited
+      await Promise.all(
+        users.map(async (user) => {
+          try {
+            // Make this call only to check if the member is in the server
+            await findDiscordMemberById(user.discordId);
+
+            logger.debug(`Add roles to user ${user.username}`);
+
+            await Promise.all([
+              addDiscordMemberRole(user.discordId, tournament.discordRoleId),
+              addDiscordMemberRole(user.discordId, team.discordRoleId),
+            ]);
+          } catch (error) {
+            // Check if the error corresponds to a member not in the server
+            if (error?.response?.data?.code === 10007) {
+              logger.warn(`[${tournament.id}][${team.name}] ${user.username} is not on discord`);
+            } else throw error;
+          }
+        }),
+      );
     }
   }
 };
-
-export const clearRoles = async (playerId: string) => {
-  // Get the member and remove roles
-  const member = await bot.guilds.cache.get(env.discord.server).members.fetch(playerId);
-  member.roles.remove(member.roles.cache);
-};
-
-// Login the bot
-bot.login(env.discord.token);
