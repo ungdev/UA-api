@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ObjectSchema, Schema } from 'joi';
+import { ObjectSchema } from 'joi';
 import { Error } from '../types';
 import logger from '../utils/logger';
 import { badRequest } from '../utils/responses';
