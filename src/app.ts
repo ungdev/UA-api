@@ -11,8 +11,7 @@ import { morgan } from './utils/logger';
 import { initUserRequest } from './middlewares/user';
 import env from './utils/env';
 import errorHandler from './middlewares/errorHandler';
-import { enforceQueryString, validateParameter } from './middlewares/validation';
-import * as validators from './utils/validators';
+import { enforceQueryString } from './middlewares/validation';
 
 const app = express();
 
@@ -30,7 +29,6 @@ app.use(json);
 
 // Validate the parameters that contains an id and check that query paramers doesn't contain an array
 app.use(enforceQueryString);
-app.param(['userId', 'teamId', 'cartId', 'cartItemId'], validateParameter(validators.id));
 
 // Fetch user from database
 app.use(initUserRequest);

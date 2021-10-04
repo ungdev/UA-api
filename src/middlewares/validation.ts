@@ -32,23 +32,9 @@ export const validateQuery =
     return next();
   };
 
-// Validate that a parameter is valid
-// Must be used in a app.param and not app.use
-export const validateParameter =
-  (schema: Schema) => (request: Request, response: Response, next: NextFunction, parameter: string) => {
-    const { error } = schema.validate(parameter);
-
-    if (error) {
-      logger.debug(error.message);
-      return badRequest(response, Error.InvalidParameters);
-    }
-
-    return next();
-  };
-
 export const enforceQueryString = (request: Request, response: Response, next: NextFunction) => {
-  for (const query of Object.keys(request.query)) {
-    if (Array.isArray(query)) {
+  for (const parameter of Object.keys(request.query)) {
+    if (Array.isArray(request.query[parameter]) || request.query[parameter] instanceof Object) {
       return badRequest(response, Error.InvalidQueryParameters);
     }
   }

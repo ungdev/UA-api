@@ -12,8 +12,8 @@ export default [
       return success(response, {
         link: generateUserOAuthLink(user),
       });
-    } catch {
-      return next();
+    } catch (error) {
+      return next(error);
     }
   },
 ];
