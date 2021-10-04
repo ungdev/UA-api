@@ -6,6 +6,8 @@ import { fetchTournament } from '../../operations/tournament';
 import { Error } from '../../types';
 import { filterTeam } from '../../utils/filters';
 import { getRequestInfo } from '../../utils/users';
+import { setupDiscordTeam } from '../../utils/discord';
+import logger from '../../utils/logger';
 
 export default [
   // Middlewares
@@ -33,7 +35,11 @@ export default [
         return forbidden(response, Error.TeamNotPaid);
       }
 
+      await setupDiscordTeam(team, tournament);
+
       const lockedTeam = await lockTeam(team.id);
+
+      logger.info(`[${team.tournamentId}] ${team.name} has just locked`);
 
       return success(response, filterTeam(lockedTeam));
     } catch (error) {

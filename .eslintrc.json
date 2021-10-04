@@ -24,10 +24,10 @@
     "arrow-body-style": "warn",
     "eol-last": "off",
     "guard-for-in": "off",
-    "no-alert": "error",
+    "no-alert": "warn",
     "no-async-promise-executor": "off",
     "no-await-in-loop": "off",
-    "no-console": "error",
+    "no-console": "warn",
     "no-loop-func": "off",
     "no-restricted-syntax": "off",
     "no-shadow": "off", // We use the typescript no shadow. More info on https://github.com/typescript-eslint/typescript-eslint/issues/2471
@@ -37,6 +37,7 @@
     "radix": "off",
     "require-await": "warn",
     "spaced-comment": ["warn", "always", { "exceptions": ["*"] }],
+    "no-continue": "off",
 
     // Typescript
     "@typescript-eslint/ban-ts-comment": "off",
@@ -70,6 +71,8 @@
     "unicorn/no-process-exit": "off",
     "unicorn/no-reduce": "off",
     "unicorn/no-null": "off",
+    "unicorn/number-literal-case": "off",
+    "unicorn/numeric-separators-style": "off",
     "unicorn/prefer-set-has": "off",
     "unicorn/prefer-spread": "warn",
     "unicorn/prefer-object-from-entries": "off",

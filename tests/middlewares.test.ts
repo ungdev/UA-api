@@ -93,4 +93,12 @@ describe('Test middlewares', () => {
         .expect(403, { error: Error.LoginAsAttendant });
     });
   });
+
+  describe('Test validation middleware', () => {
+    it('should error as we submit a query array', () =>
+      request(app).get('/?a=1&a=2').expect(400, { error: Error.InvalidQueryParameters }));
+
+    it('should error as we submit a query object', () =>
+      request(app).get('/?a[b]=1').expect(400, { error: Error.InvalidQueryParameters }));
+  });
 });
