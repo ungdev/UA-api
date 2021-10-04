@@ -118,18 +118,6 @@ export const createDiscordRole = async (requestBody: DiscordCreateRoleRequest) =
   return response.data;
 };
 
-export const findDiscordRoleById = async (id: Snowflake) => {
-  const response = await bot.get<DiscordRole[]>(`guilds/${env.discord.server}/roles`);
-
-  return response.data.find((role) => role.id === id);
-};
-
-export const fetchDiscordRoles = async () => {
-  const response = await bot.get<DiscordRole[]>(`guilds/${env.discord.server}/roles`);
-
-  return response.data;
-};
-
 export const addDiscordMemberRole = (userId: Snowflake, roleId: Snowflake) =>
   bot.put<DiscordRole[]>(`guilds/${env.discord.server}/members/${userId}/roles/${roleId}`);
 

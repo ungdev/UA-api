@@ -4,8 +4,6 @@ import { fetchTeams } from '../operations/team';
 import {
   createDiscordChannel,
   createDiscordRole,
-  fetchDiscordRoles,
-  findDiscordRoleById,
   findDiscordMemberById,
   addDiscordMemberRole,
 } from '../services/discord';
@@ -19,8 +17,6 @@ import database from '../services/database';
 import { Team, Tournament } from '../types';
 import env from './env';
 import logger from './logger';
-
-let everyoneRole: DiscordRole;
 
 const createDiscordTeamChannel = async (
   channelName: string,
@@ -36,7 +32,9 @@ const createDiscordTeamChannel = async (
     parent_id: tournament.discordCategoryId,
     permission_overwrites: [
       {
-        id: everyoneRole.id,
+        // The discord server id corresponds to @everyone role id
+        // https://discord.com/developers/docs/topics/permissions#role-object
+        id: env.discord.server,
         type: DiscordChannelPermissionType.ROLE,
         allow: DiscordChannelPermission.DEFAULT,
         deny: DiscordChannelPermission.VIEW_CHANNEL,
@@ -89,7 +87,6 @@ export const syncRoles = async () => {
     if (tournament.playersPerTeam === 1) {
       continue;
     }
-    const tournamentRole = await findDiscordRoleById(tournament.discordRoleId);
 
     for (const team of await fetchTeams(tournament.id)) {
       // Do not care about the non-locked teams
@@ -99,7 +96,7 @@ export const syncRoles = async () => {
 
       const users = [...team.players, ...team.coaches];
 
-      // Only parallelize the requests per user to avoid beging rate limited
+      // Only parallelize the requests per user to avoid being rate limited
       await Promise.all(
         users.map(async (user) => {
           try {
@@ -109,12 +106,12 @@ export const syncRoles = async () => {
             logger.debug(`Add roles to user ${user.username}`);
 
             await Promise.all([
-              addDiscordMemberRole(user.discordId, tournamentRole.id),
+              addDiscordMemberRole(user.discordId, tournament.discordRoleId),
               addDiscordMemberRole(user.discordId, team.discordRoleId),
             ]);
           } catch (error) {
             // Check if the error corresponds to a member not in the server
-            if (error?.response?.data?.code === 10_007) {
+            if (error?.response?.data?.code === 10007) {
               logger.warn(`[${tournament.id}][${team.name}] ${user.username} is not on discord`);
             } else throw error;
           }
@@ -123,11 +120,3 @@ export const syncRoles = async () => {
     }
   }
 };
-
-// Load everyone role on server start to avoid one discord call on lockTeam
-if (env.discord.token) {
-  fetchDiscordRoles().then((roles) => {
-    everyoneRole = roles.find((role) => role.name === '@everyone');
-    logger.debug('Discord @everyone role loaded');
-  });
-}
