@@ -107,7 +107,7 @@ const env = {
     apiTimeout: Number.parseInt(loadEnv('DISCORD_API_TIMEOUT')) || 5000,
     syncKey: loadEnv('DISCORD_SYNC_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
     teamRoleColor: Number.parseInt(loadEnv('DISCORD_TEAM_ROLE_COLOR')) || 0x3498db,
-    oauthCallback: `${apiEndpoint}discord/oauth`,
+    oauthCallback: `${apiEndpoint}${apiEndpointPrefix === '/' ? '' : '/'}discord/oauth`,
   },
   log: {
     level: loadEnv('LOG_LEVEL') || 'silly',
