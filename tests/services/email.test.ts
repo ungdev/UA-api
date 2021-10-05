@@ -67,7 +67,7 @@ describe('Tests the email utils', () => {
       },
     });
 
-    server.listen(env.email.port);
+    server.listen(env.email.uri.match(/:(\d+)/)[1]);
 
     await sendEmail(
       {
@@ -149,9 +149,24 @@ describe('Tests the email utils', () => {
             {
               test: 'This is a test',
             },
+            {
+              test: 'A random row',
+            },
           ],
         }),
       ).to.be.match(/^<tr><td></);
+    });
+
+    it('should not generate table when empty', () => {
+      expect(
+        inflate({
+          items: [
+            {
+              test: 'This is a test',
+            },
+          ],
+        }),
+      ).to.be.equal('');
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

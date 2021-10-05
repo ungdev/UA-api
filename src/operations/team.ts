@@ -118,7 +118,7 @@ export const deleteTeam = (teamId: string) =>
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
   // We check the amount of coaches at that point
   const teamCoachCount = await countCoaches(teamId);
-  if (teamCoachCount >= teamMaxCoachCount)
+  if (userType === UserType.coach && teamCoachCount >= teamMaxCoachCount)
     throw Object.assign(new Error('Query cannot be executed: max count of coach reached already'), {
       code: 'API_COACH_MAX_TEAM',
     });

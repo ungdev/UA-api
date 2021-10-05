@@ -9,21 +9,7 @@ import type { SerializedMail } from './types';
 
 export type { Component, Mail, SerializedMail } from './types';
 
-export const transporter = nodemailer.createTransport({
-  host: env.email.host,
-  port: env.email.port,
-  auth: {
-    user: env.email.user,
-    pass: env.email.password,
-  },
-  pool: true,
-  secure: false,
-  maxConnections: 1,
-  tls: {
-    // Rejects TLS errors only if we are not in test environment. (Rejects due to self signed certificate)
-    rejectUnauthorized: !env.test,
-  },
-});
+export const transporter = nodemailer.createTransport(env.email.uri);
 
 /**
  * Sends a mail (using the smtp server).
