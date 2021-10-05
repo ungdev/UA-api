@@ -88,7 +88,7 @@
     "dev": "ts-node-dev --no-notify --exit-child src/server.ts",
     "fake": "ts-node tests/fake.ts",
     "build": "tsc",
-    "postbuild": "cpy '**/*.yml' ../build --cwd=src/ --parents",
+    "postbuild": "cpy '**/*.yml' ../build/src --cwd=src/ --parents",
     "start": "node build/src/server.js",
     "lint": "eslint src/ tests/ --ext .ts --max-warnings 0",
     "lint:fix": "eslint --fix src/ tests/ --ext .ts --max-warnings 0",
