@@ -1,0 +1,39 @@
+/tickets/{cartItemId}:
+  get:
+    summary: Renvoie le billet associé au cartItem
+    description: Renvoie le billet associé au cartItem au format PDF.<br/>
+      **L'utilisateur doit nécessairement avoir payé ce cartItem ou se l'être fait payer par quelqu'un d'autre.**
+    tags:
+      - Tickets
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: cartItemId
+        description: Identifiant du cartItem. Peut être omis pour désigner le ticket du joueur actuel
+        schema:
+          type: string
+        required: false
+    responses:
+      200:
+        description: Renvoie le billet au format PDF (encodé en base64)
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        description: Vous n'avez pas la permission de télécharger ce billet
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Vous n'avez pas la permission de télécharger ce billet
+      404:
+        description: Aucun billet n'est associé à cet identifiant
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Aucun billet n'est associé à cet identifiant
