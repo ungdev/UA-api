@@ -51,7 +51,7 @@ const inflateButtonWrapper = (item: Component.Button | Component.Button[]) =>
 
 const inflateTable = (item: Component.Table) => {
   const properties = Object.keys(item.items[0] ?? {});
-  if (properties.length === 0) return '';
+  if (properties.length === 0 || item.items.length < 2) return '';
   return `${
     item.name
       ? `<tr><td style="font-size:18px;color:${style.title.color};font-family:${style.title.font};padding:8px 0">${item.name}</td></tr>`
