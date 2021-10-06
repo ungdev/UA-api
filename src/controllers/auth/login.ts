@@ -7,7 +7,7 @@ import { validateBody } from '../../middlewares/validation';
 import { filterUser } from '../../utils/filters';
 import { forbidden, success, unauthenticated } from '../../utils/responses';
 import { generateToken } from '../../utils/users';
-import { Error } from '../../types';
+import { Error as ResponseError } from '../../types';
 import { fetchUser } from '../../operations/user';
 import * as validators from '../../utils/validators';
 
@@ -16,7 +16,7 @@ export default [
   ...isNotAuthenticated,
   validateBody(
     Joi.object({
-      login: Joi.string().required(),
+      login: Joi.string().required().error(new Error(ResponseError.EmptyLogin)),
       password: validators.password.required(),
     }),
   ),
@@ -33,22 +33,22 @@ export default [
       } else if (!validators.username.validate(login).error) {
         field = 'username';
       } else {
-        return unauthenticated(response, Error.InvalidCredentials);
+        return unauthenticated(response, ResponseError.InvalidCredentials);
       }
 
       const user = await fetchUser(login, field);
 
       // Checks if the user exists
       if (!user) {
-        return unauthenticated(response, Error.InvalidCredentials);
+        return unauthenticated(response, ResponseError.InvalidCredentials);
       }
 
       if (user.registerToken) {
-        return forbidden(response, Error.EmailNotConfirmed);
+        return forbidden(response, ResponseError.EmailNotConfirmed);
       }
 
       if (user.type === UserType.attendant) {
-        return forbidden(response, Error.LoginAsAttendant);
+        return forbidden(response, ResponseError.LoginAsAttendant);
       }
 
       // Compares the hash from the password given
@@ -56,7 +56,7 @@ export default [
 
       // If the password is not valid, rejects the request
       if (!isPasswordValid) {
-        return unauthenticated(response, Error.InvalidCredentials);
+        return unauthenticated(response, ResponseError.InvalidCredentials);
       }
 
       const token = generateToken(user);
