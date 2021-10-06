@@ -1,12 +1,7 @@
 import { TournamentId } from '.prisma/client';
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
 import { fetchTeams } from '../operations/team';
-import {
-  createDiscordChannel,
-  createDiscordRole,
-  findDiscordMemberById,
-  addDiscordMemberRole,
-} from '../services/discord';
+import { createDiscordChannel, createDiscordRole, fetchGuildMembers, setMemberRoles } from '../services/discord';
 import {
   DiscordChannelPermission,
   DiscordChannelPermissionType,
@@ -81,6 +76,9 @@ export const syncRoles = async () => {
     return;
   }
 
+  // First step: download the entire guild member list from discord
+  const guildMembers = await fetchGuildMembers();
+
   // Get the server, loop all tournaments, loop all teams in tournaments and loop all player in teams to give them the role
   for (const tournament of await fetchTournaments()) {
     // Do not care about the solo tournaments
@@ -96,27 +94,17 @@ export const syncRoles = async () => {
 
       const users = [...team.players, ...team.coaches];
 
-      // Only parallelize the requests per user to avoid being rate limited
-      await Promise.all(
-        users.map(async (user) => {
-          try {
-            // Make this call only to check if the member is in the server
-            await findDiscordMemberById(user.discordId);
-
-            logger.debug(`Add roles to user ${user.username}`);
-
-            await Promise.all([
-              addDiscordMemberRole(user.discordId, tournament.discordRoleId),
-              addDiscordMemberRole(user.discordId, team.discordRoleId),
-            ]);
-          } catch (error) {
-            // Check if the error corresponds to a member not in the server
-            if (error?.response?.data?.code === 10007) {
-              logger.warn(`[${tournament.id}][${team.name}] ${user.username} is not on discord`);
-            } else throw error;
-          }
-        }),
-      );
+      // Using a for loop not to parallelize too much requests to the discord api
+      // (discord limit is 50 requests per second)
+      for (const user of users) {
+        // Retrieve the guildmember corresponding to the user (if it exists)
+        const member = guildMembers.find((guildMember) => guildMember.user.id === user.discordId);
+        // Jump to next member if member does not exist or if member already has the roles
+        if (!member || (member.roles.includes(tournament.discordRoleId) && member.roles.includes(team.discordRoleId)))
+          continue;
+        logger.debug(`Add roles to user ${user.username}`);
+        await setMemberRoles(member.user.id, [...member.roles, tournament.discordRoleId, team.discordRoleId]);
+      }
     }
   }
 };

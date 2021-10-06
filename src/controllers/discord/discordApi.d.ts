@@ -1,5 +1,10 @@
 /* eslint-disable camelcase */
 
+/**
+ * Make an alias of snowflake to string to be more precise on the expected type
+ */
+export type Snowflake = string;
+
 export declare type Scope =
   | `activities.${'read' | 'write'}`
   | `applications.${`builds.${'read' | 'upload'}` | `commands${'' | '.update'}` | 'entitlements' | 'store.update'}`
@@ -16,13 +21,22 @@ export declare type Scope =
 
 export declare type RedirectURI = `${'http' | 'https'}://${string}`;
 
+export declare interface DiscordUser {
+  readonly id: Snowflake;
+  readonly username: string;
+  readonly avatar: string;
+  readonly discriminator: string;
+  readonly public_flags: number;
+  readonly bot?: true;
+}
+
 /**
  * Information about the current OAuth2 Authorization
  * @see {@link [Discord Docs](https://discord.com/developers/docs/topics/oauth2#get-current-authorization-information-response-structure)}
  */
 export declare interface DiscordAuthorizationData {
   readonly application: {
-    readonly id: string;
+    readonly id: Snowflake;
     readonly name: string;
     readonly icon: string;
     readonly description: string;
@@ -34,13 +48,7 @@ export declare interface DiscordAuthorizationData {
   };
   readonly scopes: string[];
   readonly expires: string;
-  readonly user?: {
-    readonly id: string;
-    readonly username: string;
-    readonly avatar: string;
-    readonly discriminator: string;
-    readonly public_flags: number;
-  };
+  readonly user?: DiscordUser;
 }
 
 /**
@@ -49,7 +57,7 @@ export declare interface DiscordAuthorizationData {
  * @see {@link [Discord Docs](https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-redirect-url-example)}
  */
 export declare interface DiscordTokenRequest {
-  readonly client_id: string;
+  readonly client_id: Snowflake;
   readonly client_secret: string;
   readonly code: string;
   readonly grant_type: 'authorization_code';
@@ -57,7 +65,7 @@ export declare interface DiscordTokenRequest {
 }
 
 export declare interface DiscordTokenRefreshRequest {
-  readonly client_id: string;
+  readonly client_id: Snowflake;
   readonly client_secret: string;
   readonly grant_type: 'refresh_token';
   readonly refresh_token: string;
@@ -100,17 +108,12 @@ export declare type DiscordAuthorization = Partial<DiscordAuthorizationSuccess> 
  */
 export declare interface DiscordAuthorizationRequest<State = string> {
   readonly response_type: 'code';
-  readonly client_id: string;
+  readonly client_id: Snowflake;
   readonly scope: Scope;
   readonly redirect_uri: RedirectURI;
   readonly state?: State;
   readonly prompt?: 'consent' | 'none';
 }
-
-/**
- * Make an alias of snowflake to string to be more precise on the expected type
- */
-export type Snowflake = string;
 
 /**
  * Interface for a channel type
@@ -226,4 +229,15 @@ export declare interface DiscordRole {
  */
 export declare interface DiscordMember {
   readonly nick?: string;
+}
+
+export declare interface DiscordGuildMember extends DiscordMember {
+  readonly user: DiscordUser;
+  readonly roles: Snowflake[];
+  readonly avatar: string | null;
+  readonly premium_since: string | null;
+  readonly is_pending: boolean;
+  readonly pending: boolean;
+  readonly mute: boolean;
+  readonly deaf: boolean;
 }

@@ -10,7 +10,7 @@ import {
   DiscordCreateRoleRequest,
   DiscordRole,
   Snowflake,
-  DiscordMember,
+  DiscordGuildMember,
 } from '../controllers/discord/discordApi';
 import { User } from '../types';
 import env from '../utils/env';
@@ -29,7 +29,7 @@ const bot = axios.create({
   headers: {
     Authorization: `Bot ${env.discord.token}`,
     'Content-Type': 'application/json',
-    'User-Agent': `DiscordBot (https://github.com/ungdev/UA-api, 1.0.0)`,
+    'User-Agent': `DiscordBot (https://github.com/ungdev/UA-api, 1.0.1)`,
   },
 });
 
@@ -118,11 +118,42 @@ export const createDiscordRole = async (requestBody: DiscordCreateRoleRequest) =
   return response.data;
 };
 
-export const addDiscordMemberRole = (userId: Snowflake, roleId: Snowflake) =>
-  bot.put<DiscordRole[]>(`guilds/${env.discord.server}/members/${userId}/roles/${roleId}`);
+/**
+ * Sets the roles of the targeted discord user.
+ * Previous user's roles MUST be provided along with the new roles (if you add some)
+ * not to be removed from the user.
+ * @param userId the id of the {@link DiscordGuildMember} to set the roles to
+ * @param roles the roles to set to the discord user
+ * @returns the updated guild member
+ */
+export const setMemberRoles = (userId: Snowflake, roles: Snowflake[]) =>
+  bot
+    .patch<DiscordGuildMember>(`guilds/${env.discord.server}/members/${userId}`, {
+      roles,
+    })
+    .then((response) => response.data);
 
-export const findDiscordMemberById = async (userId: Snowflake) => {
-  const response = await bot.get<DiscordMember>(`guilds/${env.discord.server}/members/${userId}`);
-
-  return response.data;
+/**
+ * Fetches all of the {@link DiscordGuildMember} connected to the server.
+ * During this process, the api downloads the entire guild member list from discord.
+ *
+ * Note: the member list doesn't contain partials at that time. This means that
+ * retrieved data includes roles and user data
+ * @requires GUILD_MEMBERS privileged intent enabled on the application
+ * @returns the list of all guild members (ie. discord user in the server)
+ */
+export const fetchGuildMembers = async () => {
+  const members: DiscordGuildMember[] = [];
+  let chunkSize;
+  do {
+    const playerListChunk = await bot.get<DiscordGuildMember[]>(`guilds/${env.discord.server}/members`, {
+      params: {
+        limit: 1000,
+        after: members[0]?.user?.id ?? 0,
+      },
+    });
+    members.push(...playerListChunk.data.sort((a, b) => -a.user.id.localeCompare(b.user.id)));
+    chunkSize = playerListChunk.data.length;
+  } while (chunkSize === 1000);
+  return members;
 };
