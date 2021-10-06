@@ -59,6 +59,8 @@ describe('Tests the email utils', () => {
           // Check if html is there
           expect(message).to.contain('<html>hello world !</html>');
 
+          // Check if the attachement is there
+          expect(message).to.contain('Content-Type: application/octet-stream; name=random.dat');
           return callback();
         });
         stream.on('error', () => callback(new Error('A stream error occured')));
@@ -67,11 +69,14 @@ describe('Tests the email utils', () => {
 
     server.listen(env.email.uri.match(/:(\d+)/)[1]);
 
-    await sendEmail({
-      to: 'bonjour@lol.fr',
-      subject: "je kiffe l'ua",
-      html: '<html>hello world !</html>',
-    });
+    await sendEmail(
+      {
+        to: 'bonjour@lol.fr',
+        subject: "je kiffe l'ua",
+        html: '<html>hello world !</html>',
+      },
+      [{ filename: 'random.dat', content: Buffer.from([255]) }],
+    );
 
     server.close();
   });
