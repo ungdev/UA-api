@@ -1,9 +1,8 @@
-import { ItemCategory, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import nodemailer from 'nodemailer';
 import { DetailedCart, EmailAttachement } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
-import { generateTicket } from '../../utils/pdf';
 import { generateTicketsEmail, generateValidationEmail, generatePasswordResetEmail } from './serializer';
 import type { SerializedMail } from './types';
 
@@ -59,13 +58,9 @@ export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttache
  * @throws an error if the mail declared above (corresponding to this
  * request) is invalid ie. contains an object which is not a {@link Component}
  */
-export const sendTickets = async (cart: DetailedCart) => {
-  const cartTickets = cart.cartItems.filter((cartItem) => cartItem.item.category === ItemCategory.ticket);
-  const [content, tickets] = await Promise.all([
-    generateTicketsEmail(cart),
-    Promise.all(cartTickets.map(generateTicket)),
-  ]);
-  return sendEmail(content, tickets);
+export const sendPaymentConfirmation = async (cart: DetailedCart) => {
+  const content = await generateTicketsEmail(cart);
+  return sendEmail(content);
 };
 
 /**
