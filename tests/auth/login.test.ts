@@ -75,6 +75,15 @@ describe('POST /auth/login', () => {
       .expect(401, { error: Error.InvalidCredentials });
   });
 
+  it('should return an error as the login is empty', async () => {
+    await request(app)
+      .post('/auth/login')
+      .send({
+        password: user.password,
+      })
+      .expect(400, { error: Error.EmptyLogin });
+  });
+
   // This case should never happen
   it('should error because the user is an attendant', async () => {
     const visitorEmail = 'bonjour@lol.fr';
