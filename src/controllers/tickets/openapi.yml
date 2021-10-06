@@ -22,13 +22,13 @@
       401:
         $ref: '#/components/responses/401Unauthenticated'
       403:
-        description: Vous n'avez pas la permission de télécharger ce billet
+        description: Tu n'as pas la permission de télécharger ce billet
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
             example:
-              error: Vous n'avez pas la permission de télécharger ce billet
+              error: Tu n'as pas la permission de télécharger ce billet
       404:
         description: Aucun billet n'est associé à cet identifiant
         content:
