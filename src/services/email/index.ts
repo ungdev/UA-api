@@ -1,9 +1,8 @@
-import { ItemCategory, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import nodemailer from 'nodemailer';
-import { DetailedCart } from '../../types';
+import { DetailedCart, EmailAttachement } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
-import { generateTicket } from '../../utils/pdf';
 import { generateTicketsEmail, generateValidationEmail, generatePasswordResetEmail } from './serializer';
 import type { SerializedMail } from './types';
 
@@ -37,7 +36,7 @@ export const transporter = nodemailer.createTransport(env.email.uri);
  *  ]
  * }))
  */
-export const sendEmail = async (mail: SerializedMail) => {
+export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttachement[]) => {
   const from = `${env.email.sender.name} <${env.email.sender.address}>`;
 
   await transporter.sendMail({
@@ -45,6 +44,7 @@ export const sendEmail = async (mail: SerializedMail) => {
     to: mail.to,
     subject: mail.subject,
     html: mail.html,
+    attachments,
   });
 
   logger.info(`Email sent to ${mail.to}`);
@@ -58,9 +58,8 @@ export const sendEmail = async (mail: SerializedMail) => {
  * @throws an error if the mail declared above (corresponding to this
  * request) is invalid ie. contains an object which is not a {@link Component}
  */
-export const sendTickets = async (cart: DetailedCart) => {
-  const cartTickets = cart.cartItems.filter((cartItem) => cartItem.item.category === ItemCategory.ticket);
-  const [content] = await Promise.all([generateTicketsEmail(cart), Promise.all(cartTickets.map(generateTicket))]);
+export const sendPaymentConfirmation = async (cart: DetailedCart) => {
+  const content = await generateTicketsEmail(cart);
   return sendEmail(content);
 };
 
