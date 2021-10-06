@@ -345,22 +345,22 @@ components:
             $ref: '#/components/schemas/Error'
 
     401Unauthenticated:
-      description: Vous n'êtes pas authentifié
+      description: Tu n'es pas authentifié
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            error: Vous n'êtes pas authentifié
+            error: Tu n'es pas authentifié
 
     403Unauthorized:
-      description: Vous n'avez pas la permission
+      description: Tu n'as pas la permission
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            error: Vous n'avez pas la permission
+            error: Tu n'as pas la permission
 
     404UserNotFound:
       description: L'utilisateur est introuvable

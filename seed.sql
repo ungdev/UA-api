@@ -9,14 +9,14 @@ INSERT INTO `items` (`id`, `name`, `category`, `attribute`, `price`, `reducedPri
 ('multi-socket', 'Multiprise 3 trous', 'supplement', NULL, 500, NULL, 'Une multiprise 3 trous pour brancher tout ton setup', NULL, NULL),
 ('pin', "Pin's", 'supplement', NULL, 100, NULL, "Un pin's doré, souvenir de cette LAN de folie", 'pin.png', NULL),
 ('tombola', 'Ticket tombola', 'supplement', NULL, 100, NULL, 'Participe à la tombola qui aura lieu pendant le weekend !', NULL, NULL),
-('tshirt-f-s', 'T-shirt UA 2020 (Femme)', 'supplement', 's', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
-('tshirt-f-m', 'T-shirt UA 2020 (Femme)', 'supplement', 'm', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
-('tshirt-f-l', 'T-shirt UA 2020 (Femme)', 'supplement', 'l', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png',NULL),
-('tshirt-f-xl', 'T-shirt UA 2020 (Femme)', 'supplement', 'xl', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
-('tshirt-h-s', 'T-shirt UA 2020 (Homme)', 'supplement', 's', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
-('tshirt-h-m', 'T-shirt UA 2020 (Homme)', 'supplement', 'm', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
-('tshirt-h-l', 'T-shirt UA 2020 (Homme)', 'supplement', 'l', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
-('tshirt-h-xl', 'T-shirt UA 2020 (Homme)', 'supplement', 'xl', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL);
+('tshirt-f-s', 'T-shirt UA 2021 (Femme)', 'supplement', 's', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
+('tshirt-f-m', 'T-shirt UA 2021 (Femme)', 'supplement', 'm', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
+('tshirt-f-l', 'T-shirt UA 2021 (Femme)', 'supplement', 'l', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png',NULL),
+('tshirt-f-xl', 'T-shirt UA 2021 (Femme)', 'supplement', 'xl', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
+('tshirt-h-s', 'T-shirt UA 2021 (Homme)', 'supplement', 's', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
+('tshirt-h-m', 'T-shirt UA 2021 (Homme)', 'supplement', 'm', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
+('tshirt-h-l', 'T-shirt UA 2021 (Homme)', 'supplement', 'l', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL),
+('tshirt-h-xl', 'T-shirt UA 2021 (Homme)', 'supplement', 'xl', 1300, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', NULL);
 
 INSERT INTO `settings` (`id`, `value`) VALUES
 ('login', 0),
