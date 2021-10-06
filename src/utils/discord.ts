@@ -102,8 +102,13 @@ export const syncRoles = async () => {
         // Jump to next member if member does not exist or if member already has the roles
         if (!member || (member.roles.includes(tournament.discordRoleId) && member.roles.includes(team.discordRoleId)))
           continue;
-        logger.debug(`Add roles to user ${user.username}`);
-        await setMemberRoles(member.user.id, [...member.roles, tournament.discordRoleId, team.discordRoleId]);
+        const updatedMember = await setMemberRoles(member.user.id, [
+          ...member.roles,
+          tournament.discordRoleId,
+          team.discordRoleId,
+        ]);
+        // Check that we were not rate limited before logging role addition
+        if (updatedMember) logger.debug(`Added roles to user ${user.username}`);
       }
     }
   }
