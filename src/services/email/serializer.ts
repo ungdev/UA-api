@@ -64,10 +64,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
           },
         ],
       },
-      {
-        title: 'Billet',
-        components: ['Tu trouveras ton *billet personnalisé* en pièce jointe de ce mail&nbsp;!'],
-      },
+
       {
         title: 'Confirmation de commande',
         components: [

@@ -1,6 +1,6 @@
 import { ItemCategory, User } from '@prisma/client';
 import nodemailer from 'nodemailer';
-import { DetailedCart, EmailAttachement } from '../../types';
+import { DetailedCart } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
 import { generateTicket } from '../../utils/pdf';
@@ -37,7 +37,7 @@ export const transporter = nodemailer.createTransport(env.email.uri);
  *  ]
  * }))
  */
-export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttachement[]) => {
+export const sendEmail = async (mail: SerializedMail) => {
   const from = `${env.email.sender.name} <${env.email.sender.address}>`;
 
   await transporter.sendMail({
@@ -45,7 +45,6 @@ export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttache
     to: mail.to,
     subject: mail.subject,
     html: mail.html,
-    attachments,
   });
 
   logger.info(`Email sent to ${mail.to}`);
@@ -61,11 +60,8 @@ export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttache
  */
 export const sendTickets = async (cart: DetailedCart) => {
   const cartTickets = cart.cartItems.filter((cartItem) => cartItem.item.category === ItemCategory.ticket);
-  const [content, tickets] = await Promise.all([
-    generateTicketsEmail(cart),
-    Promise.all(cartTickets.map(generateTicket)),
-  ]);
-  return sendEmail(content, tickets);
+  const [content] = await Promise.all([generateTicketsEmail(cart), Promise.all(cartTickets.map(generateTicket))]);
+  return sendEmail(content);
 };
 
 /**
