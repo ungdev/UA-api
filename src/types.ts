@@ -179,6 +179,7 @@ export const enum Error {
   NoQRCode = "Le QR code n'existe pas",
 
   InvalidCart = 'Le contenu de la commande est invalide',
+  EmptyLogin = "Le nom d'utilisateur ne peut pas être vide",
 
   // 401
   // The user credentials were refused or not provided
