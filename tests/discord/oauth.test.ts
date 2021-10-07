@@ -64,7 +64,7 @@ describe('GET /discord/oauth', () => {
   });
 
   after(() => {
-    nock.restore();
+    nock.cleanAll();
     database.user.deleteMany();
   });
 

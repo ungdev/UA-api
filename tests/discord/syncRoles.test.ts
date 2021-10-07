@@ -19,25 +19,42 @@ import {
 
 describe('POST /discord/sync-roles', () => {
   const token = env.discord.syncKey;
+  // eslint-disable-next-line global-require
+  axios.defaults.adapter = require('axios/lib/adapters/http');
 
   before(async () => {
-    // eslint-disable-next-line global-require
-    axios.defaults.adapter = require('axios/lib/adapters/http');
     let rateLimitRemain = 5;
     const team = await createFakeTeam({
       locked: true,
       paid: true,
       members: 5,
     });
+    env.discord.token = 'test-token';
     const nocked = nock('https://discord.com/api/v9')
       .persist()
-      .get(`guilds/${env.discord.server}/members`)
-      .reply(200, '[]', {
-        'X-RateLimit-Limit': `${5}`,
-        'X-RateLimit-Remaining': `${rateLimitRemain--}`,
-        'X-RateLimit-Reset': `${Date.now() / 1000 + 60}`,
-      })
-      .post(`guilds/${env.discord.server}/roles`)
+      .get(`/guilds/${env.discord.server}/members`)
+      .query(true)
+      .reply(
+        200,
+        <DiscordGuildMember[]>[...team.players, ...team.coaches].map((user) => ({
+          avatar: '',
+          deaf: false,
+          is_pending: false,
+          mute: false,
+          pending: false,
+          premium_since: '',
+          roles: [],
+          user: {
+            id: user.discordId,
+          },
+        })),
+        {
+          'X-RateLimit-Limit': 5,
+          'X-RateLimit-Remaining': rateLimitRemain--,
+          'X-RateLimit-Reset': Date.now() / 1000 + 60,
+        } as unknown as nock.ReplyHeaders,
+      )
+      .post(`/guilds/${env.discord.server}/roles`)
       .reply(
         201,
         (...[, body]: [string, DiscordCreateRoleRequest]) =>
@@ -47,7 +64,7 @@ describe('POST /discord/sync-roles', () => {
             id: '1420070400000',
           },
       )
-      .post(`guilds/${env.discord.server}/channels`)
+      .post(`/guilds/${env.discord.server}/channels`)
       .reply(
         201,
         (...[, body]: [string, DiscordCreateChannelRequest]) =>
@@ -57,7 +74,7 @@ describe('POST /discord/sync-roles', () => {
           },
       );
     for (const member of [...team.players, ...team.coaches])
-      nocked.patch(`guilds/${env.discord.server}/members/${member.discordId}`).reply(204, <DiscordGuildMember>{
+      nocked.patch(`/guilds/${env.discord.server}/members/${member.discordId}`).reply(204, <DiscordGuildMember>{
         roles: [],
         avatar: '',
         deaf: false,
@@ -72,7 +89,8 @@ describe('POST /discord/sync-roles', () => {
   });
 
   after(async () => {
-    nock.restore();
+    nock.cleanAll();
+    delete env.discord.token;
     await database.cart.deleteMany();
     await database.team.deleteMany();
     return database.user.deleteMany();
