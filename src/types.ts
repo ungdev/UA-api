@@ -71,7 +71,7 @@ export type DetailedCartItem = CartItem & {
 export type Cart = prisma.Cart;
 
 export type CartWithCartItems = Cart & {
-  cartItems: CartItem[];
+  cartItems: (CartItem & { forUser: prisma.User })[];
 };
 
 export type DetailedCart = Cart & {
