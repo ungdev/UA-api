@@ -107,7 +107,8 @@ model Tournament {
 
   discordRoleId          String?
   discordRespoRoleId     String?
-  discordCategoryId      String?
+  discordTextCategoryId  String?
+  discordVocalCategoryId String?
 
   @@map("tournaments")
 }
