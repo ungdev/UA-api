@@ -7,6 +7,7 @@ import {
   DiscordChannelPermissionType,
   DiscordChannelType,
   DiscordRole,
+  Snowflake,
 } from '../controllers/discord/discordApi';
 import database from '../services/database';
 import { Team, Tournament } from '../types';
@@ -18,13 +19,14 @@ const createDiscordTeamChannel = async (
   channelType: DiscordChannelType,
   tournamentId: TournamentId,
   teamRole: DiscordRole,
+  parentId: Snowflake,
 ) => {
   const tournament = await fetchTournament(tournamentId);
 
   return createDiscordChannel({
     name: channelName,
     type: channelType,
-    parent_id: tournament.discordCategoryId,
+    parent_id: parentId,
     permission_overwrites: [
       {
         // The discord server id corresponds to @everyone role id
@@ -63,8 +65,20 @@ export const setupDiscordTeam = async (team: Team, tournament: Tournament) => {
     logger.debug(`Create discord channels for ${team.name}`);
     // Create the channels and update in the database the role.
     await Promise.all([
-      createDiscordTeamChannel(team.name, DiscordChannelType.GUILD_TEXT, tournament.id, role),
-      createDiscordTeamChannel(team.name, DiscordChannelType.GUILD_VOICE, tournament.id, role),
+      createDiscordTeamChannel(
+        team.name,
+        DiscordChannelType.GUILD_TEXT,
+        tournament.id,
+        role,
+        tournament.discordTextCategoryId,
+      ),
+      createDiscordTeamChannel(
+        team.name,
+        DiscordChannelType.GUILD_VOICE,
+        tournament.id,
+        role,
+        tournament.discordVocalCategoryId,
+      ),
       database.team.update({ data: { discordRoleId: role.id }, where: { id: team.id } }),
     ]);
   }
