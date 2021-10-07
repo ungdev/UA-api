@@ -4,7 +4,7 @@ import request from 'supertest';
 import app from '../src/app';
 import database from '../src/services/database';
 import { Error } from '../src/types';
-import { generateToken } from '../src/utils/user';
+import { generateToken } from '../src/utils/users';
 import { createFakeUser } from './utils';
 import env from '../src/utils/env';
 
@@ -72,7 +72,7 @@ describe('Test middlewares', () => {
     });
 
     // This case should never happen. (Authenticated as a not confirmed user (has to login before))
-    it('should tell the user does not exists', async () => {
+    it('should tell the user is not confirmed', async () => {
       const user = await createFakeUser({ confirmed: false });
       const token = generateToken(user);
 
@@ -83,11 +83,22 @@ describe('Test middlewares', () => {
     });
 
     // This case should never happen
-    it('should error because the user is a visitor', async () => {
-      const user = await createFakeUser({ type: UserType.visitor });
+    it('should error because the user is a attendant', async () => {
+      const user = await createFakeUser({ type: UserType.attendant });
       const token = generateToken(user);
 
-      await request(app).get('/').set('Authorization', `Bearer ${token}`).expect(403, { error: Error.LoginAsVisitor });
+      await request(app)
+        .get('/')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(403, { error: Error.LoginAsAttendant });
     });
+  });
+
+  describe('Test validation middleware', () => {
+    it('should error as we submit a query array', () =>
+      request(app).get('/?a=1&a=2').expect(400, { error: Error.InvalidQueryParameters }));
+
+    it('should error as we submit a query object', () =>
+      request(app).get('/?a[b]=1').expect(400, { error: Error.InvalidQueryParameters }));
   });
 });

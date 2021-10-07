@@ -53,7 +53,7 @@ describe('POST /auth/reset-password/:uuid', () => {
     await request(app)
       .post(`/auth/reset-password/${user.resetToken}`)
       .send({ fake: 'fake' })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidPassword });
   });
 
   it('should return an internal server error', async () => {
@@ -83,7 +83,7 @@ describe('POST /auth/reset-password/:uuid', () => {
     const response = await request(app)
       .post('/auth/login')
       .send({
-        email: user.email,
+        login: user.email,
         password: 'validPassword',
       })
       .expect(200);

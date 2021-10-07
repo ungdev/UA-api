@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
+import { UserType } from '.prisma/client';
 import { Error } from '../types';
 import { forbidden } from '../utils/responses';
-import { getRequestInfo } from '../utils/user';
+import { getRequestInfo } from '../utils/users';
 import { isAuthenticated } from './authentication';
 
 // Checks if the user is the captain of his team. If not, it will return an error.
@@ -44,6 +45,20 @@ export const isInATeam = [
 
     if (!user.teamId) {
       return forbidden(response, Error.NotInTeam);
+    }
+
+    return next();
+  },
+];
+
+// Checks the user is not a team and not a spectator
+export const noSpectator = [
+  ...isNotInATeam,
+  (request: Request, response: Response, next: NextFunction): void => {
+    const { user } = getRequestInfo(response);
+
+    if (user.type === UserType.spectator) {
+      return forbidden(response, Error.NoSpectator);
     }
 
     return next();

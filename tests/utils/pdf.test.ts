@@ -10,7 +10,6 @@ import database from '../../src/services/database';
 describe('Tests the PDF utils', () => {
   after(async () => {
     await database.team.deleteMany();
-    await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.user.deleteMany();
   });

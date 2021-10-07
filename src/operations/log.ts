@@ -2,17 +2,13 @@ import database from '../services/database';
 import nanoid from '../utils/nanoid';
 
 export const createLog = (method: string, path: string, userId: string, body: object | undefined) => {
-  const safeBody = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const safeBody: any = {};
 
-  // Remove all the keys from the body container the word password to avoid logging plain text passwords
-  if (body) {
-    for (const [key, value] of Object.entries(body)) {
-      if (!key.toLowerCase().includes('password')) {
-        // @ts-ignore
-        safeBody[key] = value;
-      }
-    }
-  }
+  // Remove all the values of the keys containing the word password to avoid logging plain text passwords
+  if (body)
+    for (const [key, value] of Object.entries(body))
+      safeBody[key] = !key.toLowerCase().includes('password') ? value : '***';
 
   return database.log.create({
     data: {

@@ -29,18 +29,27 @@ export const notInProduction = <T = string>(key: T) => {
   }
 };
 
+// Compute these values first to get the right environment variables
+const frontEndpoint = loadEnv('ARENA_WEBSITE') || 'https://arena.utt.fr';
+const apiEndpointPort = loadIntEnv('API_PORT') || 3000;
+const apiEndpointPrefix = loadEnv('API_PREFIX') || '/';
+const apiEndpoint = `${frontEndpoint.replace(/:\d+$/, `:${apiEndpointPort}`)}${apiEndpointPrefix}`;
+const isTest = process.env.NODE_ENV === 'test';
+
 const env = {
   development: process.env.NODE_ENV === 'development',
   production: process.env.NODE_ENV === 'production',
-  test: process.env.NODE_ENV === 'test',
+  test: isTest,
   // Defines the environment used by sentry
   environment: (loadEnv('ENVIRONMENT') || notInProduction('development')) as 'development' | 'staging' | 'production',
   api: {
-    port: loadIntEnv('API_PORT') || 3000,
-    prefix: loadEnv('API_PREFIX') || '/',
+    port: apiEndpointPort,
+    prefix: apiEndpointPrefix,
+    itemsPerPage: 50,
+    cartLifespan: loadIntEnv('API_CART_LIFESPAN') || 36e5,
   },
   front: {
-    website: loadEnv('API_WEBSITE') || 'https://arena.utt.fr',
+    website: frontEndpoint,
   },
   bcrypt: {
     rounds: loadIntEnv('API_BCRYPT_ROUNDS') || 10,
@@ -52,32 +61,19 @@ const env = {
   },
   jwt: {
     secret: loadEnv('JWT_SECRET') || notInProduction('LongRandomKey'),
-    expires: loadEnv('NANOID_ALPHABET') || '1y',
+    expires: loadEnv('JWT_EXPIRES') || '1y',
   },
   slack: {
     token: loadEnv('SLACK_TOKEN'),
     contactChannel: loadEnv('SLACK_CONTACT_CHANNEL'),
   },
-
-  // Allow variable injection in testing environment for database credentials
-  database: {
-    host: loadEnv('DATABASE_HOST', true) || 'localhost',
-    port: loadIntEnv('DATABASE_PORT', true) || 3306,
-    username: loadEnv('DATABASE_USERNAME', true),
-    password: loadEnv('DATABASE_PASSWORD', true),
-    name: loadEnv('DATABASE_NAME', true) || 'arena',
-  },
   email: {
-    host: loadEnv('EMAIL_HOST') || 'localhost',
-    port: loadIntEnv('EMAIL_PORT') || 2525,
-    user: loadEnv('EMAIL_USER'),
-    password: loadEnv('EMAIL_PASSWORD'),
+    // We don't use the normal 25 port because of testing (25 listening is usually denied)
+    // Also reject self signed certificates only in tests
+    uri: loadEnv('SMTP_URI') || `smtp://localhost:2525/?pool=true&maxConnections=1&tls.rejectUnauthorized=${!isTest}`,
     sender: {
       name: loadEnv('EMAIL_SENDER_NAME') || 'UTT Arena',
       address: loadEnv('EMAIL_SENDER_ADDRESS') || 'arena@utt.fr',
-    },
-    subjects: {
-      payment: loadEnv('EMAIL_SUBJECT_PAYMENT') || 'Reçu de votre paiement',
     },
     partners: ['utt.fr', 'utc.fr', 'utbm.fr'],
   },
@@ -85,17 +81,17 @@ const env = {
     id: loadIntEnv('ETUPAY_ID') || notInProduction(1),
     // random 256 bits key genereated if not in production
     key: loadEnv('ETUPAY_KEY') || notInProduction(crypto.randomBytes(32).toString('base64')),
-    url: loadEnv('ETUPAY_KEY') || 'https://etupay.utt.fr/initiate',
-    successUrl: loadEnv('ETUPAY_SUCCESS_URL') || 'https://arena.utt.fr/dashboard/payment?type=success',
-    errorUrl: loadEnv('ETUPAY_ERROR_URL') || 'https://arena.utt.fr/dashboard/payment?type=error',
+    url: loadEnv('ETUPAY_URL') || 'https://etupay.utt.fr/initiate',
+    successUrl: loadEnv('ETUPAY_SUCCESS_URL') || `${frontEndpoint}/dashboard/payment?type=success`,
+    errorUrl: loadEnv('ETUPAY_ERROR_URL') || `${frontEndpoint}/dashboard/payment?type=error`,
   },
-  qrcode: {
+  crypto: {
     // random 128 bits key generated if not in production
-    key: loadEnv('QRCODE_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
+    key: loadEnv('CRYPTO_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
 
     // The initial vector is global and not local to not having to store it in the QR Codes.
     // As we encrypt unique ids, it doesn't matter to have a static initial vector
-    initialVector: loadEnv('QRCODE_IV') || notInProduction(crypto.randomBytes(16).toString('base64')),
+    initialVector: loadEnv('CRYPTO_IV') || notInProduction(crypto.randomBytes(16).toString('base64')),
   },
   toornament: {
     clientId: loadEnv('TOORNAMENT_CLIENT_ID'),
@@ -103,11 +99,19 @@ const env = {
     key: loadEnv('TOORNAMENT_KEY'),
   },
   discord: {
+    client: loadEnv('DISCORD_CLIENT'),
+    secret: loadEnv('DISCORD_SECRET'),
     token: loadEnv('DISCORD_TOKEN'),
     server: loadEnv('DISCORD_SERVER'),
+    apiUrl: loadEnv('DISCORD_OAUTH_URL') || 'https://discord.com/api/v9',
+    apiTimeout: Number.parseInt(loadEnv('DISCORD_API_TIMEOUT')) || 5000,
+    syncKey: loadEnv('DISCORD_SYNC_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
+    teamRoleColor: Number.parseInt(loadEnv('DISCORD_TEAM_ROLE_COLOR')) || 0x3498db,
+    oauthCallback: `${apiEndpoint}${apiEndpointPrefix === '/' ? '' : '/'}discord/oauth`,
   },
   log: {
     level: loadEnv('LOG_LEVEL') || 'silly',
+    enabledInTest: loadEnv('LOG_IN_TEST', true) === 'true',
     sentryDsn: loadEnv('LOG_SENTRY_DSN'),
   },
 };

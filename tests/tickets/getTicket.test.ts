@@ -7,7 +7,7 @@ import * as cartItemOperations from '../../src/operations/cartItem';
 import database from '../../src/services/database';
 import { CartItem, Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { createCart, fetchCarts, updateCart } from '../../src/operations/carts';
 
 describe('POST /users/:userId/carts', () => {
@@ -44,7 +44,6 @@ describe('POST /users/:userId/carts', () => {
 
   after(async () => {
     // Delete the user created
-    await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.user.deleteMany();
   });
@@ -88,16 +87,26 @@ describe('POST /users/:userId/carts', () => {
       .expect(403, { error: Error.NotPaid });
   });
 
-  it('shoud successfuly get the pdf', async () => {
+  it('shoud successfully get the pdf of current user', async () => {
     // Pay the cart
     await updateCart(ticket.cartId, 123, TransactionState.paid);
 
+    const { body } = await request(app)
+      .get(`/tickets`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect('Content-Type', 'application/pdf; charset=utf-8')
+      .expect(200);
+
+    return expect(Buffer.isBuffer(body)).to.be.true;
+  });
+
+  it('shoud successfully get the pdf', async () => {
     const { body } = await request(app)
       .get(`/tickets/${ticket.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect('Content-Type', 'application/pdf; charset=utf-8')
       .expect(200);
 
-    expect(Buffer.isBuffer(body)).to.be.true;
+    return expect(Buffer.isBuffer(body)).to.be.true;
   });
 });

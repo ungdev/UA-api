@@ -1,0 +1,41 @@
+/etupay/callback:
+  get:
+    summary: Confirme le paiement d'un panier EtuPay de la part du client
+    description: Confirme le paiement d'un panier EtuPay de la part du client.
+      Le client est redirigé vers cette URL après avoir confirmé la transaction auprès d'EtuPay.
+      Les paramètres étant directement gérés par la bibliothèque EtuPay (@ung/node-etupay), ils ne seront pas détaillés ici.
+    tags:
+      - Etupay
+    responses:
+      302:
+        description: Succès ou erreur de l'opération. Redirection vers la page correspondante sur le site web de l'UA.
+          En cas de succès, les billets ont été envoyés au client par email.
+      403:
+        description: Une action interdite est survenue
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Le joueur possède déjà une place
+      404:
+        $ref: '#/components/responses/404CartNotFound'
+
+  post:
+    summary: Confirme le paiement d'un panier EtuPay de la part de la banque
+    description: Confirme le paiement d'un panier EtuPay de la part de la banque du client.
+      La banque appelle cette URL quelques minutes après le callback client pour confirmer la prise en compte de la transaction.
+      Dans la pratique, cette URL n'a aucune action sur l'API.
+    tags:
+      - Etupay
+    responses:
+      200:
+        description: Réponse statique
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                api:
+                  type: string
+                  example: 'ok'

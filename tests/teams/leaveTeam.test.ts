@@ -6,9 +6,10 @@ import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeTeam } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
+import { UserType } from '.prisma/client';
 
 describe('DELETE /teams/current/users/current', () => {
   let user: User;
@@ -25,7 +26,6 @@ describe('DELETE /teams/current/users/current', () => {
   });
 
   after(async () => {
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });
@@ -69,8 +69,9 @@ describe('DELETE /teams/current/users/current', () => {
     const removedUser = await fetchUser(user.id);
 
     expect(removedUser.teamId).to.be.null;
+    expect(removedUser.type).to.be.null;
 
     // Rejoin the team for next tests
-    await teamOperations.joinTeam(team.id, removedUser);
+    await teamOperations.joinTeam(team.id, removedUser, UserType.player);
   });
 });

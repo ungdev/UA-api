@@ -48,7 +48,7 @@ describe('POST /auth/validate/{token}', () => {
     await request(app)
       .post('/auth/login')
       .send({
-        email: user.email,
+        login: user.email,
         password: user.password,
       })
       .expect(403, { error: Error.EmailNotConfirmed });

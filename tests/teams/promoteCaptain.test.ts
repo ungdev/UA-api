@@ -7,7 +7,7 @@ import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeTeam, createFakeUser } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
 describe('PUT /teams/current/captain/:userId', () => {
@@ -27,7 +27,6 @@ describe('PUT /teams/current/captain/:userId', () => {
   });
 
   after(async () => {
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });
@@ -99,19 +98,11 @@ describe('PUT /teams/current/captain/:userId', () => {
     expect(body.updatedAt).to.be.undefined;
   });
 
-  it('should promote the new captain again (check idempotency)', async () => {
-    const { body } = await request(app)
+  it('should not promote as he is already a captain', async () => {
+    await request(app)
       .put(`/teams/current/captain/${futureCaptain.id}`)
       .set('Authorization', `Bearer ${generateToken(futureCaptain)}`)
-      .expect(200);
-
-    const updatedTeam = await teamOperations.fetchTeam(team.id);
-
-    expect(body.captainId).to.be.equal(futureCaptain.id);
-    expect(updatedTeam.captainId).to.be.equal(futureCaptain.id);
-
-    // Check if the object was filtered
-    expect(body.updatedAt).to.be.undefined;
+      .expect(403, { error: Error.AlreadyCaptain });
   });
 
   it('should error as the old captain is trying to promote someone', async () => {

@@ -1,0 +1,187 @@
+/auth/login:
+  post:
+    summary: Authentifie l'utilisateur
+    description: Permet d'obtenir un token d'authentification.<br/>
+      *La connexion doit être autorisée (seuls les organisateurs sont toujours autorisés à accéder à cette route).*
+      *Le compte doit être activé.*
+    tags:
+      - Authentication
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              login:
+                type: string
+                description: Adresse mail ou username de l'utilisateur cible
+              password:
+                type: string
+                description: Mot de passe de l'utilisateur cible
+    responses:
+      200:
+        description: Renvoie le token d'authentification et les informations de l'utilisateur.
+          Le champ 'captivePortalSuccess' indique si l'utilisateur a été ajouté au portail captif ou non.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+                token:
+                  type: string
+                captivePortalSuccess:
+                  type: boolean
+      400:
+        $ref: '#/components/responses/400Errored'
+
+/auth/register:
+  post:
+    summary: Crée un nouvel utilisateur
+    description: Crée un nouvel utilisateur et lui envoie un mail pour confirmer son adresse mail.<br/>
+      *La connexion doit être autorisée.*
+    tags:
+      - Authentication
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                minLength: 3
+                maxLength: 100
+              firstname:
+                type: string
+                minLength: 2
+                maxLength: 100
+              lastname:
+                type: string
+                minLength: 2
+                maxLength: 100
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+                minLength: 6
+              age:
+                $ref: '#/components/schemas/Age'
+    responses:
+      201:
+        description: L'utilisateur a bien été créé
+      400:
+        $ref: '#/components/responses/400Errored'
+      409:
+        description: L'email existe déjà
+
+/auth/reset-password/ask:
+  post:
+    summary: Envoie un mail permettant de changer son mot de passe
+    description: Envoie un mail contenant un token permettant de réinitialiser son mot de passe.<br/>
+      *La connexion doit être autorisée.*
+    tags:
+      - Authentication
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+    responses:
+      204:
+        description: Si un utilisateur est associé à cette adresse mail, alors le mail a bien été envoyé
+      400:
+        $ref: '#/components/responses/400Errored'
+
+/auth/reset-password/{token}:
+  post:
+    summary: Modifie le mot de passe de l'utilisateur associé au token
+    description: Modifie le mot de passe de l'utilisateur associé au token de réinitialisation de mot de passe.<br/>
+      *La connexion doit être autorisée.*
+    tags:
+      - Authentication
+    parameters:
+      - in: path
+        name: token
+        description: Token de réinitialisation de mot de passe
+        schema:
+          type: string
+        required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              password:
+                type: string
+                description: Nouveau mot de passe de l'utilisateur
+    responses:
+      200:
+        description: Le mot de passe a bien été modifié. Les informations nécessaires à l'authentification sont renvoyées.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+                token:
+                  type: string
+      400:
+        $ref: '#/components/responses/400Errored'
+      404:
+        description: Aucun utilisateur n'est associé à ce token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Le token est invalide
+
+/auth/validate/{token}:
+  post:
+    summary: Valide le compte de l'utilisateur
+    description: Valide le compte de l'utilisateur associé au token d'inscription.<br/>
+      *La connexion doit être autorisée.*
+    tags:
+      - Authentication
+    parameters:
+      - in: path
+        name: token
+        description: Token d'inscription
+        schema:
+          type: string
+        required: true
+    responses:
+      200:
+        description: Le compte a été validé. Les informations nécessaires à l'authentification sont renvoyées.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+                token:
+                  type: string
+      400:
+        $ref: '#/components/responses/400Errored'
+      404:
+        description: Aucun utilisateur n'est associé à ce token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Le token est invalide

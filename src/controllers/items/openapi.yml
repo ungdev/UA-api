@@ -1,0 +1,16 @@
+/items:
+  get:
+    summary: Renvoie la liste des items en vente
+    description: Renvoie la liste des items en vente dans la billetterie.<br />
+      *La billetterie doit être ouverte.*
+    tags:
+      - Items
+    responses:
+      200:
+        description: Renvoie la liste des items
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Item'

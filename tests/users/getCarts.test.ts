@@ -5,7 +5,7 @@ import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
 import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 
 describe('POST /users/current/carts', () => {
   let user: User;
@@ -18,7 +18,6 @@ describe('POST /users/current/carts', () => {
 
   after(async () => {
     // Delete the user created
-    await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.user.deleteMany();
   });
@@ -69,7 +68,10 @@ describe('POST /users/current/carts', () => {
               quantity: 1,
               cartId: cart.id,
               itemId: 'ethernet-5',
-              forUserId: user.id,
+              forUser: {
+                id: user.id,
+                username: user.username,
+              },
             },
           ],
         },

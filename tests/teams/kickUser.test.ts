@@ -7,7 +7,7 @@ import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
@@ -28,7 +28,6 @@ describe('DELETE /teams/current/users/:userId', () => {
   });
 
   after(async () => {
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });
@@ -104,7 +103,7 @@ describe('DELETE /teams/current/users/:userId', () => {
       .expect(404, { error: Error.UserNotFound });
   });
 
-  it('should succesfully kick the user (as the captain of the team and as a player)', async () => {
+  it('should successfully kick the user (as the captain of the team and as a player)', async () => {
     await request(app)
       .delete(`/teams/current/users/${userToKick.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
@@ -112,12 +111,13 @@ describe('DELETE /teams/current/users/:userId', () => {
 
     const kickedUser = await fetchUser(userToKick.id);
     expect(kickedUser.teamId).to.be.null;
+    expect(kickedUser.type).to.be.null;
 
     // Rejoin the team for next tests
-    await teamOperations.joinTeam(team.id, kickedUser);
+    await teamOperations.joinTeam(team.id, kickedUser, UserType.player);
   });
 
-  it('should succesfully kick the user (as the captain of the team and as a coach)', async () => {
+  it('should successfully kick the user (as the captain of the team and as a coach)', async () => {
     const captain = getCaptain(team);
 
     // Set the captain to a coach
@@ -130,6 +130,7 @@ describe('DELETE /teams/current/users/:userId', () => {
 
     const kickedUser = await fetchUser(userToKick.id);
     expect(kickedUser.teamId).to.be.null;
+    expect(kickedUser.type).to.be.null;
   });
 
   it('should fail as the user has already been kicked', async () => {

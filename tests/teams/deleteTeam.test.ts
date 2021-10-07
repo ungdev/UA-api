@@ -6,7 +6,7 @@ import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeTeam, createFakeUser } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchUser } from '../../src/operations/user';
 
@@ -23,7 +23,6 @@ describe('DELETE /teams/current', () => {
   });
 
   after(async () => {
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });
@@ -80,5 +79,6 @@ describe('DELETE /teams/current', () => {
 
     const updatedCaptain = await fetchUser(captain.id);
     expect(updatedCaptain.teamId).to.be.null;
+    expect(updatedCaptain.type).to.be.null;
   });
 });

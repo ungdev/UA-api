@@ -7,7 +7,7 @@ import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
@@ -20,14 +20,13 @@ describe('POST /teams/current/join-requests/:userId', () => {
   before(async () => {
     team = await createFakeTeam({ members: 2 });
     user = await createFakeUser();
-    await teamOperations.askJoinTeam(team.id, user.id);
+    await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
 
     captain = getCaptain(team);
     token = generateToken(captain);
   });
 
   after(async () => {
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });
@@ -99,7 +98,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
 
     const fullCaptain = getCaptain(fullTeam);
     const fullToken = generateToken(fullCaptain);
-    await teamOperations.askJoinTeam(fullTeam.id, otherUser.id);
+    await teamOperations.askJoinTeam(fullTeam.id, otherUser.id, UserType.player);
 
     await request(app)
       .post(`/teams/current/join-requests/${otherUser.id}`)
@@ -109,11 +108,11 @@ describe('POST /teams/current/join-requests/:userId', () => {
 
   it('should succeed to join a full team as a coach', async () => {
     const fullTeam = await createFakeTeam({ members: 5 });
-    const otherUser = await createFakeUser({ type: UserType.coach });
+    const otherUser = await createFakeUser();
 
     const fullCaptain = getCaptain(fullTeam);
     const fullToken = generateToken(fullCaptain);
-    await teamOperations.askJoinTeam(fullTeam.id, otherUser.id);
+    await teamOperations.askJoinTeam(fullTeam.id, otherUser.id, UserType.coach);
 
     await request(app)
       .post(`/teams/current/join-requests/${otherUser.id}`)

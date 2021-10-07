@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
 import { noContent } from '../../utils/responses';
 import { deleteTeam } from '../../operations/team';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares

@@ -15,6 +15,11 @@ before(async () => {
   chai.use(chaiString);
   await setLoginAllowed(true);
   await setShopAllowed(true);
+
+  // Delete the data to make the command idempotent
+  await database.cart.deleteMany();
+  await database.team.deleteMany();
+  await database.user.deleteMany();
 });
 
 afterEach('Restore the sandbox after every tests', () => {

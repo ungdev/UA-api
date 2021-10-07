@@ -1,0 +1,22 @@
+/tournaments:
+  get:
+    summary: Renvoie les informations des tournois, des teams et des joueurs.
+    description: Renvoie les informations des tournois, des teams et des joueurs.
+    tags:
+      - Tournaments
+    responses:
+      200:
+        description: Renvoie les informations des tournois, des teams et des joueurs.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/Tournament'
+                  - type: object
+                    properties:
+                      teams:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TeamWithUsersRestricted'

@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import database from '../../src/services/database';
 import * as userOperations from '../../src/operations/user';
@@ -20,7 +21,7 @@ describe('POST /auth/register', () => {
     lastname: 'Doe',
     email: 'john.doe@test.com',
     password: 'jesuisthomas',
-    type: 'player',
+    age: 'adult',
   };
 
   it('should get an error as the login is not allowed', async () => {
@@ -29,16 +30,6 @@ describe('POST /auth/register', () => {
     await request(app).post('/auth/register').send(userData).expect(403, { error: Error.LoginNotAllowed });
 
     await setLoginAllowed(true);
-  });
-
-  it('should be able to register as orga', async () => {
-    await request(app)
-      .post('/auth/register')
-      .send({
-        ...userData,
-        type: 'orga',
-      })
-      .expect(400, { error: Error.InvalidBody });
   });
 
   it('should throw an internal server error', async () => {
@@ -56,28 +47,48 @@ describe('POST /auth/register', () => {
     expect(newUser.registerToken).to.have.lengthOf(6);
   });
 
-  it('should not create a duplicate user', async () => {
-    await request(app).post('/auth/register').send(userData).expect(409, { error: Error.EmailAlreadyExists });
+  it('should not create users with types', async () => {
+    await request(app)
+      .post('/auth/register')
+      .send({
+        ...userData,
+        type: UserType.attendant,
+      })
+      .expect(400, { error: '"type" is not allowed' });
+  });
+
+  it('should not create a duplicate user if email is the same', async () => {
+    await request(app)
+      .post('/auth/register')
+      .send({ ...userData, username: 'toto2' })
+      .expect(409, { error: Error.EmailAlreadyExists });
+  });
+
+  it('should not create a duplicate user if username is the same', async () => {
+    await request(app)
+      .post('/auth/register')
+      .send({ ...userData, email: 'john.doe2@test.com' })
+      .expect(409, { error: Error.UsernameAlreadyExists });
   });
 
   it('should not create a user with incomplete body', async () => {
     await request(app)
       .post('/auth/register')
       .send({ firstname: userData.firstname, email: userData.email })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidUsername });
   });
 
   it('should not accept wrong email', async () => {
     await request(app)
       .post('/auth/register')
       .send({ ...userData, email: 'wrong email' })
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidEmail });
   });
 
-  it('should not accept wrong type', async () => {
+  it('should not accept dot in username', async () => {
     await request(app)
       .post('/auth/register')
-      .send({ ...userData, type: 'wrong type' })
-      .expect(400, { error: Error.InvalidBody });
+      .send({ ...userData, username: 'to.to' })
+      .expect(400, { error: Error.InvalidUsername });
   });
 });

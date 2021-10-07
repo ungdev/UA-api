@@ -1,0 +1,226 @@
+/users:
+  get:
+    summary: (Non implémentée cf. PR#57) Renvoie les informations minimales d'un utilisateur
+    deprecated: true
+    description: Renvoie les informations minimales d'un utilisateur.
+    tags:
+      - Users
+    parameters:
+      - in: query
+        name: search
+        description: Identifiant ou adresse mail de l'utilisateur cible
+        schema:
+          type: string
+        required: true
+    responses:
+      200:
+        description: Renvoie les informations minimales de l'utilisateur
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRestricted'
+      400:
+        $ref: '#/components/responses/400Errored'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/users/current:
+  get:
+    summary: Renvoie les informations de utilisateur
+    description: Renvoie les informations de utilisateur.
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Renvoie les informations de utilisateur
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      400:
+        $ref: '#/components/responses/400Errored'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+  patch:
+    summary: Modifie les informations d'un utilisateur
+    description: Modifie les informations d'un utilisateur.
+      **Le mot de passe est nécessaire pour que la/les valeur(s) soi(en)t modifiée(s)**
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                nullable: true
+              password:
+                type: string
+                required: true
+              newPassword:
+                type: string
+                nullable: true
+    responses:
+      200:
+        description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+      409:
+        $ref: '#/components/responses/409UsernameAlreadyExists'
+
+/users/current/carts:
+  get:
+    summary: Renvoie la liste des achats de l'utilisateur
+    description: Renvoie la liste des achats de l'utilisateur.
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Renvoie la liste des achats de l'utilisateur
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CartWithCartItems'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+  post:
+    summary: Crée un panier
+    description: Crée un panier et renvoie une URL afin de procéder au paiement.
+      Pour chaque accompagnateur, un compte inaccessible est créé et sera lié à l'équipe actuelle de l'utilisateur.<br/>
+      *La billetterie doit être ouverte.*
+      *Le stock d'items restant doit être suffisant pour satisfaire la demande.*
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              tickets:
+                type: object
+                properties:
+                  userIds:
+                    type: array
+                    description: Liste des identifiants des utilisateurs pour qui acheter les billets
+                    items:
+                      type: string
+                    example:
+                      - V1STGX
+                  attendant:
+                    nullable: true
+                    type: object
+                    description: Identité de l'accompagnateur. Nécessite que l'utilisateur (actuel)
+                      soit mineur et ne soit pas déjà accompagné.
+                    properties:
+                      firstname:
+                        type: string
+                        description: Prénom de l'accompagnateur
+                        required: true
+                      lastname:
+                        type: string
+                        description: Nom de l'accompagnateur
+                        required: true
+              supplements:
+                type: array
+                description: Liste des goodies à acheter
+                items:
+                  type: object
+                  properties:
+                    itemId:
+                      type: integer
+                      description: Identifiant de l'item à acheter
+                    quantity:
+                      type: integer
+                      description: Quantité à acheter
+    responses:
+      201:
+        description: Le panier a bien été créé. L'URL permettant de procéder au paiement est renvoyée.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  description: URL vers EtuPay
+                price:
+                  type: integer
+                  description: Prix du panier en centimes
+
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/users/current/spectate:
+  post:
+    summary: Transforme l'utilisateur en spectateur.
+    description: Transforme l'utilisateur en spectateur. Cette opération n'est possible que si l'utilisateur
+      n'est pas dans une équipe ou n'est a pas de demandes en attente.<br/>
+      Devenir un spectateur de cette façon **n'assure PAS à l'utilisateur d'avoir ticket** (de spectateur)
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: L'utilisateur est désormais spectateur
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+  delete:
+    summary: Transforme le spectateur en simple utilisateur.
+    description: Transforme le spectateur en simple utilisateur. Cette opération n'est possible que si l'utilisateur
+      n'a pas déjà payé son ticket (et si c'est un spectateur)
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: L'utilisateur n'est plus spectateur
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      403:
+        $ref: '#/components/responses/403Unauthorized'

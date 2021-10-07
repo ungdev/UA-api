@@ -1,0 +1,386 @@
+/teams:
+  get:
+    summary: Renvoie la liste des équipes d'un tournoi
+    description: Renvoie les informations publiques des équipes d'un tournoi.
+    tags:
+      - Teams
+    parameters:
+      - in: query
+        name: tournamentId
+        description: Identifiant du tournoi cible
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: locked
+        description: Filtre les équipes en fonction de si elles sont verrouillées ou non
+        schema:
+          type: boolean
+    responses:
+      200:
+        description: Renvoie les informations publiques des équipes du tournoi
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/Team'
+                  - type: object
+                    properties:
+                      players:
+                        type: array
+                        description: Liste des noms d'utilisateurs des joueurs de l'équipe
+                        items:
+                          type: string
+                      coachs:
+                        type: array
+                        description: Liste des noms d'utilisateurs des coachs de l'équipe
+                        items:
+                          type: string
+      400:
+        $ref: '#/components/responses/400Errored'
+      404:
+        description: Aucun tournoi n'est associé à cet identifiant
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Aucun tournoi n'est associé à cet identifiant
+  post:
+    summary: Crée une équipe
+    description: Crée une équipe.<br/>
+      *L'utilisateur ne doit pas avoir d'équipe.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                description: Nom de l'équipe. Ne sera pas pris en compte pour les tournois solo.
+                type: string
+              tournamentId:
+                description: Identifiant du tournoi
+                type: string
+                example: lol-pro
+              userType:
+                description: Type d'utilisateur
+                type: string
+                enum: [player, coach]
+    responses:
+      201:
+        description: L'équipe a bien été créée. Ses informations sont retournées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamWithUsers'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      409:
+        description: Le nom de l'équipe existe déjà
+      410:
+        description: Le tournoi est plein
+
+/teams/current:
+  delete:
+    summary: Détruit l'équipe
+    description: Détruit l'équipe cible.<br/>
+      **L'utilisateur doit être le chef de l'équipe cible.**<br/>
+      *L'équipe cible ne doit pas être verrouillée.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    responses:
+      204:
+        description: L'équipe a bien été détruite
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+  get:
+    summary: Renvoie les informations de l'équipe
+    description: Renvoie les informations de l'équipe cible.<br/>
+      **L'utilisateur doit être dans l'équipe cible.**
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Renvoie les informations de l'équipe
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamWithUsers'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+  put:
+    summary: Modifie les informations de l'équipe
+    description: Modifie les informations de l'équipe cible.<br/>
+      **L'utilisateur doit être le chef de l'équipe cible.**<br/>
+      *L'équipe cible ne doit pas être verrouillée.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Nouveau nom de l'équipe
+    responses:
+      204:
+        description: L'équipe a bien été modifiée.
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      409:
+        description: Le nom de l'équipe existe déjà
+
+/teams/current/captain/{userId}:
+  put:
+    summary: Définit le nouveau chef d'équipe
+    description: Transfère son rôle de chef d'équipe.<br/>
+      **L'utilisateur doit être le chef de l'équipe cible.**<br/>
+      *L'équipe cible ne doit pas être verrouillée.*
+      *L'utilisateur cible doit être dans l'équipe cible.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        description: Identifiant du nouveau chef d'équipe
+        schema:
+          type: string
+        required: true
+    responses:
+      204:
+        description: Le rôle de chef d'équipe a bien été transféré.
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/teams/{teamId}/join-requests:
+  post:
+    summary: Crée une demande pour rejoindre une équipe
+    description: Crée une demande pour rejoindre une équipe.<br/>
+      *L'utilisateur ne doit pas avoir d'équipe.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: teamId
+        description: Identifiant de l'équipe cible
+        schema:
+          type: string
+        required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userType:
+                description: Type d'utilisateur
+                type: string
+                enum: [player, coach]
+    responses:
+      200:
+        description: La demande a bien été envoyée. Les informations de l'utilisateur sont renvoyées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404TeamNotFound'
+
+/teams/current/join-requests/{userId}:
+  delete:
+    summary: Refuse la demande d'équipe
+    description: Refuse la demande d'équipe de l'utilisateur cible.<br/>
+      **L'utilisateur doit être le chef de l'équipe cible.**<br/>
+      *L'équipe ne doit pas être verrouillée.*
+      *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        description: Identifiant de l'utilisateur cible
+        schema:
+          type: string
+        required: true
+    responses:
+      204:
+        description: La demande a bien été annulée.
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+  post:
+    summary: Accepte la demande d'équipe
+    description: Accepte la demande d'équipe de l'utilisateur cible.<br/>
+      **L'utilisateur doit être le chef de l'équipe cible.**<br/>
+      *L'équipe ne doit pas être verrouillée.*
+      *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        description: Identifiant de l'utilisateur cible
+        schema:
+          type: string
+        required: true
+    responses:
+      200:
+        description: L'utilisateur a été ajouté à l'équipe. Les informations de l'équipe sont renvoyées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamWithUsers'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/teams/current/join-requests/current:
+  delete:
+    summary: Annule la demande d'équipe
+    description: Annule la demande d'équipe de l'utilisateur cible.<br/>
+      *L'utilisateur cible doit avoir une demande en cours pour l'équipe cible.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    responses:
+      204:
+        description: La demande a bien été annulée.
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+/teams/current/lock:
+  post:
+    summary: Verrouille l'équipe
+    description: Verrouille l'équipe cible.<br/>
+      **L'utilisateur doit être le chef de l'équipe cible.**<br/>
+      *L'équipe doit être verrouillable (équipe complète et tous les membres ont payé).*
+      *Le tournoi ne doit pas être complet.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    responses:
+      204:
+        description: L'équipe a bien été verrouillée.
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      410:
+        description: Le tournoi est plein
+
+/teams/current/users/{userId}:
+  delete:
+    summary: Retire l'utilisateur de l'équipe
+    description: Retire l'utilisateur de l'équipe.<br/>
+      **L'utilisateur doit être le chef de l'équipe cible.**<br/>
+      *L'utilisateur cible doit être dans l'équipe cible.*
+      *L'équipe ne doit pas être verrouillée.*
+      *Le chef d'équipe ne peut pas quitter l'équipe.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        description: Identifiant de l'utilisateur cible
+        schema:
+          type: string
+        required: true
+    responses:
+      204:
+        description: L'utilisateur a bien été retiré de l'équipe.
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+
+/teams/current/users/current:
+  delete:
+    summary: Quitte l'équipe
+    description: Quitte l'équipe.<br/>
+      *L'utilisateur cible doit être dans l'équipe cible.*
+      *L'équipe ne doit pas être verrouillée.*
+      *Le chef d'équipe ne peut pas quitter l'équipe.*
+    tags:
+      - Teams
+    security:
+      - BearerAuth: []
+    responses:
+      204:
+        description: L'utilisateur a bien été retiré de l'équipe.
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'

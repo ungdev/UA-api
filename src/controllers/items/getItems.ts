@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { isShopAllowed } from '../../middlewares/settings';
-import { fetchItems } from '../../operations/item';
+import { fetchUserItems } from '../../operations/item';
 import { filterItem } from '../../utils/filters';
 import { success } from '../../utils/responses';
+import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares
@@ -11,7 +12,8 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const items = await fetchItems();
+      const { team } = getRequestInfo(response);
+      const items = await fetchUserItems(team);
 
       const result = items.map(filterItem);
       return success(response, result);

@@ -6,7 +6,7 @@ import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeTeam } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
 describe('PUT /teams/current', () => {
@@ -22,7 +22,6 @@ describe('PUT /teams/current', () => {
   });
 
   after(async () => {
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });
@@ -32,7 +31,7 @@ describe('PUT /teams/current', () => {
       .put('/teams/current')
       .send({ fake: 'fake' })
       .set('Authorization', `Bearer ${captainToken}`)
-      .expect(400, { error: Error.InvalidBody });
+      .expect(400, { error: Error.InvalidTeamName });
   });
 
   it('should error as the token is missing', async () => {

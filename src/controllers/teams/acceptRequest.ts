@@ -7,7 +7,7 @@ import { filterTeam } from '../../utils/filters';
 import { fetchUser } from '../../operations/user';
 import { Error } from '../../types';
 import { fetchTournament } from '../../operations/tournament';
-import { getRequestInfo } from '../../utils/user';
+import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares

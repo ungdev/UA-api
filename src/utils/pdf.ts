@@ -2,7 +2,7 @@ import { TournamentId } from '@prisma/client';
 import { readFileSync } from 'fs';
 import QRCode from 'qrcode';
 import PDFkit from 'pdfkit';
-import { encryptQrCode } from './helpers';
+import { encrypt } from './helpers';
 import { fetchTeam } from '../operations/team';
 import { DetailedCartItem, EmailAttachement } from '../types';
 
@@ -39,7 +39,7 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
     background = notInTeamBackground;
   }
 
-  const encryptedUserId = encryptQrCode(user.id);
+  const encryptedUserId = encrypt(user.id);
 
   const qrcode = await QRCode.toDataURL([{ data: encryptedUserId, mode: 'byte' }], {
     width: qrCodeSize,

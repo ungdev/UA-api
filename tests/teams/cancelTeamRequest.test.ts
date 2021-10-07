@@ -6,8 +6,9 @@ import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
-import { generateToken } from '../../src/utils/user';
+import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
+import { UserType } from '.prisma/client';
 
 describe('DELETE /teams/current/join-requests/current', () => {
   let user: User;
@@ -17,12 +18,11 @@ describe('DELETE /teams/current/join-requests/current', () => {
   before(async () => {
     team = await createFakeTeam({ members: 2 });
     user = await createFakeUser();
-    await teamOperations.askJoinTeam(team.id, user.id);
+    await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
     token = generateToken(user);
   });
 
   after(async () => {
-    await database.log.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });
@@ -48,6 +48,7 @@ describe('DELETE /teams/current/join-requests/current', () => {
     const deletedRequestUser = await fetchUser(user.id);
 
     expect(deletedRequestUser.askingTeamId).to.be.null;
+    expect(deletedRequestUser.type).to.be.null;
   });
 
   it('should fail as the user has removed the request', async () => {
