@@ -147,7 +147,6 @@ export const setMemberRoles = async (userId: Snowflake, roles: Snowflake[]) => {
       logger.warn(`Rate limit reached for GuildMember patch: ${remain}/${limit} requests remaining before reset`);
       memberRoleUpdateRateLimit = reset;
     }
-    logger.info(remain, reset, limit);
     return response.data;
   } catch (error) {
     if (error.status === 429) {
