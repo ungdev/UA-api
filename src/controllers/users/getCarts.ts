@@ -14,7 +14,9 @@ export default [
     try {
       const { user } = getRequestInfo(response);
       const carts = await fetchCarts(user.id);
-
+      for (const item of carts.flatMap((cart) => cart.cartItems))
+        if (item.itemId === 'ticket-attendant')
+          item.forUser.username = `${item.forUser.firstname} ${item.forUser.lastname}`;
       return success(response, carts.map(filterCartWithCartItems));
     } catch (error) {
       return next(error);
