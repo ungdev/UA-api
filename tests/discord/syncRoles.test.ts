@@ -1,28 +1,94 @@
 /* eslint-disable arrow-body-style */
 import request from 'supertest';
+import nock from 'nock';
+import axios from 'axios';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as discordFunctions from '../../src/utils/discord';
 import { Error } from '../../src/types';
 import env from '../../src/utils/env';
+import database from '../../src/services/database';
+import { createFakeTeam } from '../utils';
+import {
+  DiscordChannel,
+  DiscordCreateChannelRequest,
+  DiscordCreateRoleRequest,
+  DiscordGuildMember,
+  DiscordRole,
+} from '../../src/controllers/discord/discordApi';
 
 describe('POST /discord/sync-roles', () => {
   const token = env.discord.syncKey;
 
-  it('should fail because the token is not provided', () => {
-    return request(app).post('/discord/sync-roles').expect(401, { error: Error.NoToken });
+  before(async () => {
+    // eslint-disable-next-line global-require
+    axios.defaults.adapter = require('axios/lib/adapters/http');
+    let rateLimitRemain = 5;
+    const team = await createFakeTeam({
+      locked: true,
+      paid: true,
+      members: 5,
+    });
+    const nocked = nock('https://discord.com/api/v9')
+      .persist()
+      .get(`guilds/${env.discord.server}/members`)
+      .reply(200, '[]', {
+        'X-RateLimit-Limit': `${5}`,
+        'X-RateLimit-Remaining': `${rateLimitRemain--}`,
+        'X-RateLimit-Reset': `${Date.now() / 1000 + 60}`,
+      })
+      .post(`guilds/${env.discord.server}/roles`)
+      .reply(
+        201,
+        (...[, body]: [string, DiscordCreateRoleRequest]) =>
+          <DiscordRole>{
+            name: body.name,
+            color: body.color,
+            id: '1420070400000',
+          },
+      )
+      .post(`guilds/${env.discord.server}/channels`)
+      .reply(
+        201,
+        (...[, body]: [string, DiscordCreateChannelRequest]) =>
+          <DiscordChannel>{
+            ...body,
+            id: '1420070400000',
+          },
+      );
+    for (const member of [...team.players, ...team.coaches])
+      nocked.patch(`guilds/${env.discord.server}/members/${member.discordId}`).reply(204, <DiscordGuildMember>{
+        roles: [],
+        avatar: '',
+        deaf: false,
+        is_pending: false,
+        mute: false,
+        pending: false,
+        premium_since: '',
+        user: {
+          id: member.discordId,
+        },
+      });
   });
 
-  it('should fail because the provided token is invalid', () => {
-    return request(app).post('/discord/sync-roles').send({ token: 'e' }).expect(401, { error: Error.InvalidToken });
+  after(async () => {
+    nock.restore();
+    await database.cart.deleteMany();
+    await database.team.deleteMany();
+    return database.user.deleteMany();
   });
 
-  it('should fail with an internal server error', () => {
-    sandbox.stub(discordFunctions, 'syncRoles').throws('Unexpected error');
-    return request(app).post('/discord/sync-roles').send({ token }).expect(500, { error: Error.InternalServerError });
+  it('should fail because the token is not provided', () =>
+    request(app).post('/discord/sync-roles').expect(401, { error: Error.NoToken }));
+
+  it('should fail because the provided token is invalid', () =>
+    request(app).post('/discord/sync-roles').send({ token: 'e' }).expect(401, { error: Error.InvalidToken }));
+
+  it('should fail with an internal server error', async () => {
+    const stub = sandbox.stub(discordFunctions, 'syncRoles').throws('Unexpected error');
+    await request(app).post('/discord/sync-roles').send({ token }).expect(500, { error: Error.InternalServerError });
+    return stub.restore();
   });
 
-  it('should succesfully sync roles', () => {
-    return request(app).post('/discord/sync-roles').send({ token }).expect(204);
-  });
+  it('should succesfully sync roles', () => request(app).post('/discord/sync-roles').send({ token }).expect(204));
 });

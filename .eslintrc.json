@@ -32,6 +32,7 @@
     "no-restricted-syntax": "off",
     "no-shadow": "off", // We use the typescript no shadow. More info on https://github.com/typescript-eslint/typescript-eslint/issues/2471
     "no-useless-constructor": "off",
+    "no-plusplus": "off",
     "object-curly-newline": "off",
     "prefer-destructuring": "warn",
     "radix": "off",
