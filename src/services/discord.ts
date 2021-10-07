@@ -177,7 +177,7 @@ export const fetchGuildMembers = async () => {
         after: members[0]?.user?.id ?? 0,
       },
     });
-    members.push(...playerListChunk.data.sort((a, b) => -a.user.id.localeCompare(b.user.id)));
+    members.unshift(...playerListChunk.data.sort((a, b) => -a.user.id.localeCompare(b.user.id)));
     chunkSize = playerListChunk.data.length;
   } while (chunkSize === 1000);
   return members;
