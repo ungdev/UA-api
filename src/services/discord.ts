@@ -10,11 +10,12 @@ import {
   DiscordCreateRoleRequest,
   DiscordRole,
   Snowflake,
-  DiscordMember,
+  DiscordGuildMember,
 } from '../controllers/discord/discordApi';
 import { User } from '../types';
 import env from '../utils/env';
 import { encrypt } from '../utils/helpers';
+import logger from '../utils/logger';
 
 // baseURL is not set in this instance because it may contain
 // bugs with getUri (https://github.com/axios/axios/issues/2468)
@@ -29,7 +30,7 @@ const bot = axios.create({
   headers: {
     Authorization: `Bot ${env.discord.token}`,
     'Content-Type': 'application/json',
-    'User-Agent': `DiscordBot (https://github.com/ungdev/UA-api, 1.0.0)`,
+    'User-Agent': `DiscordBot (https://github.com/ungdev/UA-api, 1.0.1)`,
   },
 });
 
@@ -118,11 +119,66 @@ export const createDiscordRole = async (requestBody: DiscordCreateRoleRequest) =
   return response.data;
 };
 
-export const addDiscordMemberRole = (userId: Snowflake, roleId: Snowflake) =>
-  bot.put<DiscordRole[]>(`guilds/${env.discord.server}/members/${userId}/roles/${roleId}`);
+let memberRoleUpdateRateLimit = 0;
+/**
+ * Sets the roles of the targeted discord user.
+ * Previous user's roles MUST be provided along with the new roles (if you add some)
+ * not to be removed from the user.
+ * @param userId the id of the {@link DiscordGuildMember} to set the roles to
+ * @param roles the roles to set to the discord user
+ * @returns the updated guild member or false if the rate limit was reached
+ */
+export const setMemberRoles = async (userId: Snowflake, roles: Snowflake[]) => {
+  if (memberRoleUpdateRateLimit) {
+    // If we are rate limited, don't perform any operation on the discord api
+    if (Date.now() / 1000 < memberRoleUpdateRateLimit) return false;
+    memberRoleUpdateRateLimit = 0;
+  }
+  try {
+    const response = await bot.patch<DiscordGuildMember>(`guilds/${env.discord.server}/members/${userId}`, {
+      roles,
+    });
+    const {
+      'X-RateLimit-Remaining': remain,
+      'X-RateLimit-Reset': reset,
+      'X-RateLimit-Limit': limit,
+    } = response.headers;
+    if (remain === 0 && limit && reset) {
+      logger.warn(`Rate limit reached for GuildMember patch: ${remain}/${limit} requests remaining before reset`);
+      memberRoleUpdateRateLimit = reset;
+    }
+    return response.data;
+  } catch (error) {
+    if (error.status === 429) {
+      const { 'Retry-After': after } = error.headers;
+      memberRoleUpdateRateLimit = Date.now() / 1000 + after;
+      return false;
+    }
+    throw error;
+  }
+};
 
-export const findDiscordMemberById = async (userId: Snowflake) => {
-  const response = await bot.get<DiscordMember>(`guilds/${env.discord.server}/members/${userId}`);
-
-  return response.data;
+/**
+ * Fetches all of the {@link DiscordGuildMember} connected to the server.
+ * During this process, the api downloads the entire guild member list from discord.
+ *
+ * Note: the member list doesn't contain partials at that time. This means that
+ * retrieved data includes roles and user data
+ * @requires GUILD_MEMBERS privileged intent enabled on the application
+ * @returns the list of all guild members (ie. discord user in the server)
+ */
+export const fetchGuildMembers = async () => {
+  const members: DiscordGuildMember[] = [];
+  let chunkSize;
+  do {
+    const playerListChunk = await bot.get<DiscordGuildMember[]>(`guilds/${env.discord.server}/members`, {
+      params: {
+        limit: 1000,
+        after: members[0]?.user?.id ?? 0,
+      },
+    });
+    members.unshift(...playerListChunk.data.sort((a, b) => -a.user.id.localeCompare(b.user.id)));
+    chunkSize = playerListChunk.data.length;
+  } while (chunkSize === 1000);
+  return members;
 };
