@@ -135,7 +135,15 @@ describe('POST /teams/current/join-requests/:userId', () => {
     expect(body.updatedAt).to.be.undefined;
   });
 
+  it('should fail because the user is already in a team', async () => {
+    await request(app)
+      .post(`/teams/current/join-requests/${user.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403, { error: Error.AlreadyInTeam });
+  });
+
   it('should fail because the user has not asked for a team', async () => {
+    await teamOperations.kickUser(user.id);
     await request(app)
       .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)

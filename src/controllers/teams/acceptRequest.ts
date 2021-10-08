@@ -20,11 +20,13 @@ export default [
       const { userId } = request.params;
       const askingUser = await fetchUser(userId);
 
-      const { team } = getRequestInfo(response);
-      const tournament = await fetchTournament(team.tournamentId);
-
       // If the user does not exists
       if (!askingUser) return notFound(response, Error.UserNotFound);
+
+      if (askingUser.teamId) return forbidden(response, Error.AlreadyInTeam);
+
+      const { team } = getRequestInfo(response);
+      const tournament = await fetchTournament(team.tournamentId);
 
       // If the user has not asked the team or a different team
       if (team.id !== askingUser.askingTeamId) return forbidden(response, Error.NotAskedTeam);
