@@ -45,7 +45,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
       highlight: "Bienvenue à l'UTT Arena&nbsp;🔥&nbsp;!",
     },
     reason:
-      "Vous avez reçu cet email car vous êtes inscrit à l'UTT Arena. Si ce n'est pas le cas, contactez-nous et changez le mot de passe de votre boîte mail.",
+      "Tu as reçu cet email car tu es inscrit à l'UTT Arena 2021. Si ce n'est pas le cas, contacte-nous et change le mot de passe de ta boîte mail.",
     receiver: cart.user.email,
     sections: [
       {
@@ -54,9 +54,8 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
           'Voilà les dernières informations importantes nécessaires au bon déroulement de la compétition&nbsp;:',
           [
             'Il est nécessaire que *tous les joueurs* de *toutes les équipes* soient présents sur notre Discord',
-            "Ce vendredi à 21h aura lieu une cérémonie d'ouverture sur notre stream où on vous donnera tous les détails de cette édition un peu spéciale et où on répondra à toutes vos questions 😁",
             'Tous les tournois débutent samedi à 10h, il faudra donc être présent *à partir de 9h30* pour un check-in de toutes les équipes et joueurs',
-            "N'hésitez à contacter un membre du staff sur Discord si vous avez une question ou que vous rencontrez un quelconque problème 😉",
+            "N'hésite pas à contacter un membre du staff sur Discord si tu as une question ou que tu rencontres un quelconque problème 😉",
           ],
           {
             name: 'Rejoindre le serveur Discord',
@@ -64,11 +63,14 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
           },
         ],
       },
-
+      {
+        title: 'Billet',
+        components: ["Tu reçevras ton *billet personnalisé* par mail quelques jours avant l'UTT Arena&nbsp;!"],
+      },
       {
         title: 'Confirmation de commande',
         components: [
-          'On te confirme aussi ta commande _(et tu as bon goût&nbsp;!)_',
+          'On te confirme aussi ta commande',
           {
             name: 'Tickets',
             items: [
@@ -112,7 +114,7 @@ export const generateValidationEmail = (user: User) =>
   serialize({
     receiver: user.email,
     reason:
-      "Vous avez reçu ce mail car vous avez envoyé une demande de création de compte à l'UTT Arena. Si ce n'est pas vous, ignorez ce message ou contactez nous.",
+      "Tu as reçu ce mail car tu as envoyé une demande de création de compte à l'UTT Arena. Si ce n'est pas toi, ignore ce message ou contacte nous.",
     title: {
       topic: 'Code de validation',
       banner: 'Création du compte',
@@ -145,7 +147,7 @@ export const generateValidationEmail = (user: User) =>
       {
         title: 'Des questions ?',
         components: [
-          "On t'invite à lire la faq ou à poser tes questions directement sur discord.",
+          "On t'invite à lire la FAQ ou à poser tes questions directement sur Discord.",
           [
             {
               name: 'FAQ',
@@ -165,9 +167,9 @@ export const generatePasswordResetEmail = (user: User) =>
   serialize({
     receiver: user.email,
     reason:
-      "Vous avez reçu ce mail car vous avez demandé à réinitialiser votre mot de passe. Si ce n'est pas le cas, ignorez ce message.",
+      "Tu as reçu ce mail car tu as demandé à réinitialiser ton mot de passe. Si ce n'est pas le cas, ignore ce message.",
     title: {
-      topic: 'Réinitialisation de votre mot de passe',
+      topic: 'Réinitialisation de ton mot de passe',
       banner: 'Réinitialisation du mot de passe',
       short: `Salut ${user.firstname},`,
       highlight: 'Tu es sur le point de réinitialiser ton mot de passe',
