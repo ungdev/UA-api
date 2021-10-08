@@ -20,6 +20,8 @@ export default [
       const { userId } = request.params;
       const askingUser = await fetchUser(userId);
 
+      if (askingUser.teamId) return forbidden(response, Error.AlreadyInTeam);
+
       const { team } = getRequestInfo(response);
       const tournament = await fetchTournament(team.tournamentId);
 

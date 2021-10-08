@@ -213,6 +213,7 @@ export const enum Error {
   TeamNotFull = "L'équipe est incomplète",
   TeamFull = "L'équipe est complète",
   AlreadyInTeam = "Tu es déjà dans l'équipe",
+  PlayerAlreadyInTeam = "L'utilisateur a déjà rejoint une équipe",
   AlreadyAskedATeam = "Tu as déjà demandé de t'inscrire dans une équipe",
   AlreadyCaptain = 'Tu es déjà un capitaine',
   NotAskedTeam = "Tu ne demandes pas l'accès à l'équipe",

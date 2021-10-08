@@ -70,6 +70,9 @@ export const createTeam = async (
           },
         },
       },
+      askingTeam: {
+        disconnect: true,
+      },
       type: userType,
     },
 
