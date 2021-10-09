@@ -34,7 +34,7 @@ export default [
       // Remove silly logs
       logs = logs.filter((log) => log.level !== 'silly');
 
-      return success(response, logs);
+      return success(response, { logs });
     } catch (error) {
       return next(error);
     }

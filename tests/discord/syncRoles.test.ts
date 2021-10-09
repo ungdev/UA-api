@@ -16,6 +16,7 @@ import {
   DiscordGuildMember,
   DiscordRole,
 } from '../../src/controllers/discord/discordApi';
+import { expect } from 'chai';
 
 describe('POST /discord/sync-roles', () => {
   const token = env.discord.syncKey;
@@ -73,19 +74,9 @@ describe('POST /discord/sync-roles', () => {
             id: '1420070400000',
           },
       );
+
     for (const member of [...team.players, ...team.coaches])
-      nocked.patch(`/guilds/${env.discord.server}/members/${member.discordId}`).reply(204, <DiscordGuildMember>{
-        roles: [],
-        avatar: '',
-        deaf: false,
-        is_pending: false,
-        mute: false,
-        pending: false,
-        premium_since: '',
-        user: {
-          id: member.discordId,
-        },
-      });
+      nocked.put(new RegExp(`/guilds/${env.discord.server}/members/${member.discordId}/roles/[0-9]+$`)).reply(204);
   });
 
   after(async () => {
@@ -108,5 +99,8 @@ describe('POST /discord/sync-roles', () => {
     return stub.restore();
   });
 
-  it('should succesfully sync roles', () => request(app).post('/discord/sync-roles').send({ token }).expect(204));
+  it('should succesfully sync roles', async () => {
+    const { body } = await request(app).post('/discord/sync-roles').send({ token }).expect(200);
+    expect(Array.isArray(body.logs)).to.be.equal(true);
+  });
 });
