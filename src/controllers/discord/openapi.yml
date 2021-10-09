@@ -56,8 +56,22 @@
                 description: Permet de vérifier l'authenticité du client effectuant la requête
                 nullable: false
     responses:
-      204:
+      200:
         description: Les rôles ont été synchronisés
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logs:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      level:
+                        type: string
       400:
         $ref: '#/components/responses/400Errored'
       403:

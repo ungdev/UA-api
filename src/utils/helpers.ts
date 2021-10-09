@@ -6,6 +6,8 @@ import crypto from 'crypto';
 import { Permission } from '../types';
 import env from './env';
 
+export const sleep = (seconds: number) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+
 export const encodeToBase64 = (object: object) => {
   const data = JSON.stringify(object);
   return Buffer.from(data).toString('base64');

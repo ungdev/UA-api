@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { Request, Response } from 'express';
+import { Format } from 'logform';
 import { ConsoleTransportInstance } from 'winston/lib/winston/transports';
 import split from 'split';
 import morganMiddleware from 'morgan';
@@ -9,13 +10,21 @@ import { getIp } from './network';
 import { getRequestInfo } from './users';
 import env, { warnLogs } from './env';
 
+export type WinstonLog = { message: string; level: string };
+
 // Create console Transport
 const { combine, colorize, printf } = format;
+
+const formats: Format[] = [];
+
+if (env.log.colorize) {
+  formats.push(colorize({ level: env.log.colorize }));
+}
+
+formats.push(printf(({ level, message }) => `${moment().format('HH:mm:ss')} ${level}: ${message}`));
+
 const consoleTransport = new transports.Console({
-  format: combine(
-    colorize(),
-    printf(({ level, message }) => `${moment().format('HH:mm:ss')} ${level}: ${message}`),
-  ),
+  format: combine(...formats),
   level: env.log.level,
   silent: env.test && !env.log.enabledInTest, // Doesn't log if we are in testing environment and if the logging is disabled
 });
