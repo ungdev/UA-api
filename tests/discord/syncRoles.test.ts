@@ -9,7 +9,7 @@ import * as discordFunctions from '../../src/utils/discord';
 import { Error } from '../../src/types';
 import env from '../../src/utils/env';
 import database from '../../src/services/database';
-import { createFakeTeam } from '../utils';
+import { createFakeTeam, generateFakeDiscordId } from '../utils';
 import {
   DiscordChannel,
   DiscordCreateChannelRequest,
@@ -17,6 +17,7 @@ import {
   DiscordGuildMember,
   DiscordRole,
 } from '../../src/controllers/discord/discordApi';
+import { fetchTournament } from '../../src/operations/tournament';
 
 describe('POST /discord/sync-roles', () => {
   const token = env.discord.syncKey;
@@ -25,12 +26,18 @@ describe('POST /discord/sync-roles', () => {
 
   before(async () => {
     let rateLimitRemain = 5;
+
     const team = await createFakeTeam({
       locked: true,
       paid: true,
       members: 5,
     });
+
+    const tournament = await fetchTournament(team.tournamentId);
+
     env.discord.token = 'test-token';
+    env.discord.server = generateFakeDiscordId();
+
     const nocked = nock('https://discord.com/api/v9')
       .persist()
       .get(`/guilds/${env.discord.server}/members`)
@@ -75,13 +82,18 @@ describe('POST /discord/sync-roles', () => {
           },
       );
 
-    for (const member of [...team.players, ...team.coaches])
-      nocked.put(new RegExp(`/guilds/${env.discord.server}/members/${member.discordId}/roles/[0-9]+$`)).reply(204);
+    for (const member of [...team.players, ...team.coaches]) {
+      nocked.put(`/guilds/${env.discord.server}/members/${member.discordId}/roles/${team.discordRoleId}`).reply(204);
+      nocked
+        .put(`/guilds/${env.discord.server}/members/${member.discordId}/roles/${tournament.discordRoleId}`)
+        .reply(204);
+    }
   });
 
   after(async () => {
     nock.cleanAll();
     delete env.discord.token;
+    delete env.discord.server;
     await database.cart.deleteMany();
     await database.team.deleteMany();
     return database.user.deleteMany();
