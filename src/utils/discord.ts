@@ -1,7 +1,7 @@
 import { TournamentId } from '.prisma/client';
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
 import { fetchTeams } from '../operations/team';
-import { createDiscordChannel, createDiscordRole, fetchGuildMembers, setMemberRoles } from '../services/discord';
+import { createDiscordChannel, createDiscordRole, fetchGuildMembers, addMemberRole } from '../services/discord';
 import {
   DiscordChannelPermission,
   DiscordChannelPermissionType,
@@ -95,11 +95,6 @@ export const syncRoles = async () => {
 
   // Get the server, loop all tournaments, loop all teams in tournaments and loop all player in teams to give them the role
   for (const tournament of await fetchTournaments()) {
-    // Do not care about the solo tournaments
-    if (tournament.playersPerTeam === 1) {
-      continue;
-    }
-
     for (const team of await fetchTeams(tournament.id)) {
       // Do not care about the non-locked teams
       if (team.lockedAt === null) {
@@ -109,20 +104,23 @@ export const syncRoles = async () => {
       const users = [...team.players, ...team.coaches];
 
       // Using a for loop not to parallelize too much requests to the discord api
-      // (discord limit is 50 requests per second)
       for (const user of users) {
         // Retrieve the guildmember corresponding to the user (if it exists)
         const member = guildMembers.find((guildMember) => guildMember.user.id === user.discordId);
-        // Jump to next member if member does not exist or if member already has the roles
-        if (!member || (member.roles.includes(tournament.discordRoleId) && member.roles.includes(team.discordRoleId)))
-          continue;
-        const updatedMember = await setMemberRoles(member.user.id, [
-          ...member.roles,
-          tournament.discordRoleId,
-          team.discordRoleId,
-        ]);
-        // Check that we were not rate limited before logging role addition
-        if (updatedMember) logger.debug(`Added roles to user ${user.username}`);
+        // Jump to next member if member does not exist
+        if (!member) continue;
+
+        // If the member doesn't have the tournament role, add it
+        if (!member.roles.includes(tournament.discordRoleId)) {
+          logger.debug(`Add ${tournament.id} tournament role to ${user.username}`);
+          await addMemberRole(member.user.id, tournament.discordRoleId);
+        }
+
+        // If the team has a role id (not for discord roles) and the member doesn't have it, add it
+        if (team.discordRoleId && !member.roles.includes(team.discordRoleId)) {
+          logger.debug(`Add ${team.name} team (${tournament.id}) role to ${user.username}`);
+          await addMemberRole(member.user.id, team.discordRoleId);
+        }
       }
     }
   }
