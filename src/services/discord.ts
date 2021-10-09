@@ -14,7 +14,7 @@ import {
 } from '../controllers/discord/discordApi';
 import { User } from '../types';
 import env from '../utils/env';
-import { encrypt } from '../utils/helpers';
+import { encrypt, sleep } from '../utils/helpers';
 import logger from '../utils/logger';
 
 // baseURL is not set in this instance because it may contain
@@ -119,42 +119,18 @@ export const createDiscordRole = async (requestBody: DiscordCreateRoleRequest) =
   return response.data;
 };
 
-let memberRoleUpdateRateLimit = 0;
 /**
- * Sets the roles of the targeted discord user.
- * Previous user's roles MUST be provided along with the new roles (if you add some)
- * not to be removed from the user.
+ * Add a role to a discord membmer. Checks if the next request is about to be rate limited, in this case, sleep before ending function
  * @param userId the id of the {@link DiscordGuildMember} to set the roles to
- * @param roles the roles to set to the discord user
- * @returns the updated guild member or false if the rate limit was reached
+ * @param role the role to add to the discord user
  */
-export const setMemberRoles = async (userId: Snowflake, roles: Snowflake[]) => {
-  if (memberRoleUpdateRateLimit) {
-    // If we are rate limited, don't perform any operation on the discord api
-    if (Date.now() / 1000 < memberRoleUpdateRateLimit) return false;
-    memberRoleUpdateRateLimit = 0;
-  }
-  try {
-    const response = await bot.patch<DiscordGuildMember>(`guilds/${env.discord.server}/members/${userId}`, {
-      roles,
-    });
-    const {
-      'X-RateLimit-Remaining': remain,
-      'X-RateLimit-Reset': reset,
-      'X-RateLimit-Limit': limit,
-    } = response.headers;
-    if (remain === 0 && limit && reset) {
-      logger.warn(`Rate limit reached for GuildMember patch: ${remain}/${limit} requests remaining before reset`);
-      memberRoleUpdateRateLimit = reset;
-    }
-    return response.data;
-  } catch (error) {
-    if (error.status === 429) {
-      const { 'Retry-After': after } = error.headers;
-      memberRoleUpdateRateLimit = Date.now() / 1000 + after;
-      return false;
-    }
-    throw error;
+export const addMemberRole = async (userId: Snowflake, role: Snowflake) => {
+  const response = await bot.put<null>(`guilds/${env.discord.server}/members/${userId}/roles/${role}`);
+
+  if (response.headers['x-ratelimit-remaining'] <= 2) {
+    const resetAfter = Number(response.headers['x-ratelimit-reset-after']);
+    logger.warn(`Wait ${resetAfter} seconds to avoid rate limit`);
+    await sleep(resetAfter);
   }
 };
 

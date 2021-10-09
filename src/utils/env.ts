@@ -111,6 +111,8 @@ const env = {
   },
   log: {
     level: loadEnv('LOG_LEVEL') || 'silly',
+    // Colorize by default unless explicied false
+    colorize: loadEnv('LOG_COLORIZE') !== 'false',
     enabledInTest: loadEnv('LOG_IN_TEST', true) === 'true',
     sentryDsn: loadEnv('LOG_SENTRY_DSN'),
   },
