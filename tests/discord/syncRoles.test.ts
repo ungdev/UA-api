@@ -2,6 +2,7 @@
 import request from 'supertest';
 import nock from 'nock';
 import axios from 'axios';
+import { expect } from 'chai';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as discordFunctions from '../../src/utils/discord';
@@ -16,7 +17,6 @@ import {
   DiscordGuildMember,
   DiscordRole,
 } from '../../src/controllers/discord/discordApi';
-import { expect } from 'chai';
 
 describe('POST /discord/sync-roles', () => {
   const token = env.discord.syncKey;
