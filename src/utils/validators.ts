@@ -5,6 +5,7 @@ import { Permission, Error as ResponseError } from '../types';
 // Matches with LoL EUW summoner name
 const usernameRegex = /^[0-9\p{L} _-]{3,16}$/u;
 const nameRegex = /^[\p{L} _'-]{3,100}/u;
+const lastnameRegex = /^[\p{L} _'-]{2,100}/u;
 const passwordRegex = /^.{6,100}$/;
 const placeRegex = /^[A-Z]\d{1,3}$/;
 
@@ -16,7 +17,7 @@ export const id = Joi.string()
 // User
 export const username = Joi.string().regex(usernameRegex).error(new Error(ResponseError.InvalidUsername));
 export const firstname = Joi.string().regex(nameRegex).error(new Error(ResponseError.InvalidFirstName));
-export const lastname = Joi.string().regex(nameRegex).error(new Error(ResponseError.InvalidLastName));
+export const lastname = Joi.string().regex(lastnameRegex).error(new Error(ResponseError.InvalidLastName));
 export const email = Joi.string().email().error(new Error(ResponseError.InvalidEmail));
 export const password = Joi.string().regex(passwordRegex).error(new Error(ResponseError.InvalidPassword));
 export const discordId = Joi.string().error(new Error(ResponseError.InvalidDiscordid));
