@@ -68,6 +68,7 @@ describe('GET /items', () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').expect(200);
 
-    return expect(response.body[0].left).to.be.equal(items.find((item) => item.id === response.body[0].id).stock);
+    for (const responseItem of response.body)
+      expect(responseItem.left ?? null).to.be.equal(items.find((item) => item.name === responseItem.name).stock);
   });
 });
