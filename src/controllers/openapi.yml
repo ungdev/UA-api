@@ -314,6 +314,9 @@ components:
         image:
           type: string
           nullable: true
+        left:
+          type: integer
+          description: La quantité disponible de cet Item
 
     Log:
       type: object
