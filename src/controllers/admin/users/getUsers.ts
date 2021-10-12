@@ -14,13 +14,9 @@ export default [
   ...hasPermission(Permission.entry, Permission.anim),
   validateQuery(
     Joi.object({
-      username: Joi.string(),
-      firstname: validators.firstname,
-      lastname: validators.lastname,
-      email: Joi.string(), // Only string because it starts with
+      search: Joi.string(),
       place: Joi.string(),
       type: validators.type,
-      team: validators.teamName,
       tournament: validators.tournamentId,
       locked: validators.stringBoolean,
       scanned: validators.stringBoolean,

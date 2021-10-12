@@ -54,12 +54,12 @@ export const fetchUsers = async (query: UserSearchQuery): Promise<UserWithTeam[]
   const users = await database.user.findMany({
     where: {
       OR: {
-        firstname: query.firstname ? { startsWith: query.firstname } : undefined,
-        lastname: query.lastname ? { startsWith: query.lastname } : undefined,
-        username: query.username ? { startsWith: query.username } : undefined,
-        email: query.email ? { startsWith: query.email } : undefined,
+        firstname: query.search ? { startsWith: query.search } : undefined,
+        lastname: query.search ? { startsWith: query.search } : undefined,
+        username: query.search ? { startsWith: query.search } : undefined,
+        email: query.search ? { startsWith: query.search } : undefined,
         team: {
-          name: query.team ? { startsWith: query.team } : undefined,
+          name: query.search ? { startsWith: query.search } : undefined,
           tournamentId: query.tournament || undefined,
         },
       },

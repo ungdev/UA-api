@@ -118,13 +118,9 @@ export type UserWithTeam = User & {
 
 // We need to use here a type instead of an interface as it is used for a casting that wouldn't work on an interface
 export type UserSearchQuery = {
-  username: string;
-  firstname: string;
-  lastname: string;
-  email: string;
+  search: string;
   type: UserType;
   permission: Permission;
-  team: string;
   tournament: TournamentId;
   scanned: string;
   place: string;
