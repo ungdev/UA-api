@@ -178,7 +178,7 @@
         name: tournament
         description: Filtre les utilisateurs en fonction de l'identifiant de leur tournoi
         schema:
-          type: integer
+          type: string
           minimum: 0
       - in: query
         name: locked

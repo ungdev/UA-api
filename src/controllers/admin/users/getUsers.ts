@@ -37,13 +37,19 @@ export default [
       // Get the page from the params. Default to zero and put it in max to ensure there is no negative numbers
       const page = Math.max(Number.parseInt(request.params.page) || 0, 0);
 
-      const users = await fetchUsers(userSearch, page);
+      const users = await fetchUsers(userSearch);
+
+      // get users from page
+      const usersOnPage = users.slice(env.api.itemsPerPage * page, env.api.itemsPerPage * page + env.api.itemsPerPage);
+
+      const nbPages = Math.ceil(users.length / env.api.itemsPerPage);
+
       return success(response, {
         itemsPerPage: env.api.itemsPerPage,
         currentPage: page,
-        totalItems: 0,
-        totalPages: 0,
-        users: users.map((user) => ({
+        totalItems: users.length,
+        totalPages: nbPages,
+        users: usersOnPage.map((user) => ({
           ...filterUserWithTeam(user),
           customMessage: user.customMessage,
         })),

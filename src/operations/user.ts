@@ -50,7 +50,7 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
   return formatUser(user);
 };
 
-export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<UserWithTeam[]> => {
+export const fetchUsers = async (query: UserSearchQuery): Promise<UserWithTeam[]> => {
   const users = await database.user.findMany({
     where: {
       firstname: query.firstname ? { startsWith: query.firstname } : undefined,
@@ -69,8 +69,6 @@ export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<
         tournamentId: query.tournament || undefined,
       },
     },
-    skip: env.api.itemsPerPage * page,
-    take: env.api.itemsPerPage,
     include: {
       ...userInclusions,
       team: true,
