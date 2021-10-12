@@ -53,21 +53,22 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
 export const fetchUsers = async (query: UserSearchQuery): Promise<UserWithTeam[]> => {
   const users = await database.user.findMany({
     where: {
-      firstname: query.firstname ? { startsWith: query.firstname } : undefined,
-      lastname: query.lastname ? { startsWith: query.lastname } : undefined,
-      username: query.username ? { startsWith: query.username } : undefined,
-      email: query.email ? { startsWith: query.email } : undefined,
+      OR: {
+        firstname: query.firstname ? { startsWith: query.firstname } : undefined,
+        lastname: query.lastname ? { startsWith: query.lastname } : undefined,
+        username: query.username ? { startsWith: query.username } : undefined,
+        email: query.email ? { startsWith: query.email } : undefined,
+        team: {
+          name: query.team ? { startsWith: query.team } : undefined,
+          tournamentId: query.tournament || undefined,
+        },
+      },
       type: query.type || undefined,
       permissions: query.permission ? { contains: query.permission } : undefined,
       place: query.place ? { startsWith: query.place } : undefined,
 
       // Checks first if scanned exists, and then if it is true of false
       scannedAt: query.scanned ? (query.scanned === 'true' ? { not: null } : null) : undefined,
-
-      team: {
-        name: query.team ? { startsWith: query.team } : undefined,
-        tournamentId: query.tournament || undefined,
-      },
     },
     include: {
       ...userInclusions,
