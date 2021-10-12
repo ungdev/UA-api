@@ -63,4 +63,12 @@ describe('GET /items', () => {
     // without the "discount-switch-ssbu" item
     expect(response.body).to.have.lengthOf(items.length - 1);
   });
+
+  it('should return items with their stock', async () => {
+    const items = await database.item.findMany();
+    const response = await request(app).get('/items').expect(200);
+
+    for (const responseItem of response.body)
+      expect(responseItem.left ?? null).to.be.equal(items.find((item) => item.name === responseItem.name).stock);
+  });
 });
