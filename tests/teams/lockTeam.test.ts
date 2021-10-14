@@ -5,10 +5,11 @@ import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
-import { createFakeTeam } from '../utils';
+import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchTournament } from '../../src/operations/tournament';
+import { UserType } from '.prisma/client';
 
 describe('POST /teams/current/lock', () => {
   let captain: User;
@@ -57,6 +58,19 @@ describe('POST /teams/current/lock', () => {
     return request(app)
       .post('/teams/current/lock')
       .set('Authorization', `Bearer ${notPaidToken}`)
+      .expect(403, { error: Error.TeamNotPaid });
+  });
+
+  it('should error if some coach has not paid', async () => {
+    const notFullyPaidTeam = await createFakeTeam({ members: 5, paid: true });
+    const notPaidCoach = await createFakeUser();
+    await teamOperations.joinTeam(notFullyPaidTeam.id, notPaidCoach, UserType.coach);
+    const paidCaptain = getCaptain(notFullyPaidTeam);
+    const paidCaptainToken = generateToken(paidCaptain);
+
+    return request(app)
+      .post('/teams/current/lock')
+      .set('Authorization', `Bearer ${paidCaptainToken}`)
       .expect(403, { error: Error.TeamNotPaid });
   });
 
