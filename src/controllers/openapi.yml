@@ -314,6 +314,11 @@ components:
         image:
           type: string
           nullable: true
+        left:
+          type: integer
+          description: La quantité disponible de cet Item. Si l'item n'est pas limité,
+            cette valeur est omise (et vaudra donc undefined en javascript)
+          optional: true
 
     Log:
       type: object

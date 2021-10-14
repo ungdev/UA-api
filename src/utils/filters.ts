@@ -35,7 +35,7 @@ export const filterUserWithTeam = (user: UserWithTeam) => {
 };
 
 export const filterItem = (item: Item) =>
-  pick(item, ['id', 'name', 'category', 'attribute', 'price', 'infos', 'image']);
+  pick(item, ['id', 'name', 'category', 'attribute', 'price', 'infos', 'image', 'left']);
 
 export const filterCartItem = (cartItem: CartItem) =>
   pick(cartItem, ['id', 'quantity', 'cartId', 'itemId', 'forUser.id', 'forUser.username']);
