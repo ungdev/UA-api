@@ -31,7 +31,7 @@ export default [
       }
 
       // Checks if everyone has paid
-      if (!team.players.every((player) => player.hasPaid)) {
+      if (![...team.coaches, ...team.players].every((member) => member.hasPaid)) {
         return forbidden(response, Error.TeamNotPaid);
       }
 
