@@ -1,6 +1,7 @@
 import { PrismaPromise } from '.prisma/client';
 import { Log } from '../types';
 import database from '../services/database';
+import { LogSearchQuery } from '../types';
 import nanoid from '../utils/nanoid';
 
 export const createLog = (
@@ -27,3 +28,19 @@ export const createLog = (
     },
   });
 };
+
+export const fetchLogs = (query: LogSearchQuery) =>
+  database.$transaction([
+    database.log.findMany({
+      where: {
+        OR: { userId: query.userId ?? undefined, user: query.teamId === null ? undefined : { teamId: query.teamId } },
+      },
+      take: 100,
+      skip: query.page * 100,
+    }),
+    database.log.count({
+      where: {
+        OR: { userId: query.userId ?? undefined, user: query.teamId === null ? undefined : { teamId: query.teamId } },
+      },
+    }),
+  ]);

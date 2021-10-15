@@ -171,6 +171,11 @@ export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
   users: RawUserWithCartItems[];
   askingUsers: RawUserWithCartItems[];
 };
+export type LogSearchQuery = {
+  page: number;
+  userId: string;
+  teamId: string;
+};
 
 export type Team = PrimitiveTeam & {
   users: undefined;
@@ -219,7 +224,7 @@ export const enum Error {
   InvalidEmail = 'Email invalide',
   InvalidPassword = 'Mot de passe invalide',
   InvalidDiscordid = 'Identifiant Discord invalide',
-  InvalidAge = 'Tu dois préciser si tu êtes majeur ou mineur',
+  InvalidAge = 'Tu dois préciser si tu es majeur ou mineur',
   InvalidUserType = "Type d'utilisateur invalide",
   InvalidPlace = 'Numéro de place invalide',
   InvalidPermission = "Ces permissions n'existent pas",
