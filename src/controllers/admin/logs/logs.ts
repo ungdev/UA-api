@@ -15,10 +15,10 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const query = request.query as unknown as LogSearchQuery;
-      const [logs, count] = await fetchLogs(query);
+      const logSearch = request.query as LogSearchQuery;
+      const [logs, count] = await fetchLogs(logSearch);
 
-      return success(response, { logs, pageIndex: query.page, maxPages: Math.ceil(count) });
+      return success(response, { logs, pageIndex: logSearch.page, maxPages: Math.ceil(count) });
     } catch (error) {
       return next(error);
     }

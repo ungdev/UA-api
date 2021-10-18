@@ -171,10 +171,11 @@ export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
   users: RawUserWithCartItems[];
   askingUsers: RawUserWithCartItems[];
 };
-export type LogSearchQuery = {
+
+export type LogSearchQuery = ParsedQs & {
   page: number;
-  userId: string;
-  teamId: string;
+  userId?: string;
+  teamId?: string;
 };
 
 export type Team = PrimitiveTeam & {
