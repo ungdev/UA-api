@@ -341,6 +341,25 @@ components:
         user:
           $ref: '#/components/schemas/User'
 
+    SentMail:
+      type: object
+      properties:
+        sender:
+          $ref: '#/components/schemas/User'
+        subject:
+          type: string
+          example: Informations pour le tournoi osu!
+        content:
+          type: object
+        tournamentId:
+          type: string
+          example: lolCompetitive
+        locked:
+          type: boolean
+        sentAt:
+          type: string
+          format: date-time
+
   responses:
     400Errored:
       description: Requête erronée

@@ -71,6 +71,27 @@
               error: Aucun panier n'est associé à cet identifiant
 
 /admin/emails:
+  get:
+    summary: Récupère tous les emails envoyés via cette route
+    description: **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Les mails déjà envoyés par des admins
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref:
+
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
   post:
     summary: Envoie un mail d'information
     description: |-
@@ -93,7 +114,7 @@
                 description: Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non
               tournamentId:
                 type: string
-                example: lol-pro
+                example: lolCompetitive
                 description: |-
                   Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.
                   Le champ 'locked' doit être non nul.

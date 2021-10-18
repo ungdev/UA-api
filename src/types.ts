@@ -1,6 +1,7 @@
 import prisma, { TournamentId, TransactionState, UserType, UserAge } from '@prisma/client';
 import { ErrorRequestHandler } from 'express';
 import Mail from 'nodemailer/lib/mailer';
+import { ParsedQs } from 'qs';
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
  * Redémarrer le serveur dans ce cas là
@@ -33,6 +34,13 @@ export interface DecodedToken {
 export type EmailAttachement = Mail.Attachment & {
   filename: string;
   content: Buffer;
+};
+
+export type MailQuery = ParsedQs & {
+  readonly locked?: boolean;
+  readonly tournamentId?: TournamentId;
+  readonly subject: string;
+  readonly content: string;
 };
 
 export interface Contact {
