@@ -2,6 +2,7 @@ import prisma, { TournamentId, TransactionState, UserType, UserAge } from '@pris
 import { ErrorRequestHandler } from 'express';
 import Mail from 'nodemailer/lib/mailer';
 import { ParsedQs } from 'qs';
+import type { Mail as Email } from './services/email';
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
  * Redémarrer le serveur dans ce cas là
@@ -40,7 +41,7 @@ export type MailQuery = ParsedQs & {
   readonly locked?: boolean;
   readonly tournamentId?: TournamentId;
   readonly subject: string;
-  readonly content: string;
+  readonly content: Email['sections'];
 };
 
 export interface Contact {

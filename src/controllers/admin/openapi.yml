@@ -73,7 +73,8 @@
 /admin/emails:
   get:
     summary: Récupère tous les emails envoyés via cette route
-    description: **Permission 'admin' requise.**
+    description: Récupère les mails envoyés par les anims (& admins) via le `POST /admin/emails`<br/>
+      **Permission 'admin' requise.**
     tags:
       - Admin
     security:
@@ -86,8 +87,7 @@
             schema:
               type: array
               items:
-                $ref:
-
+                $ref: '#/components/schemas/Mail'
       401:
         $ref: '#/components/responses/401Unauthenticated'
       403:
@@ -107,24 +107,7 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              locked:
-                type: boolean
-                description: Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non
-              tournamentId:
-                type: string
-                example: lolCompetitive
-                description: |-
-                  Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.
-                  Le champ 'locked' doit être non nul.
-                nullable: true
-              subject:
-                type: string
-                description: Sujet du mail
-              content:
-                type: string
-                description: Contenu du mail
+            $ref: '#/components/schemas/MailQuery'
     responses:
       204:
         description: Le mail a été envoyé avec succès
@@ -357,7 +340,8 @@
 
     responses:
       200:
-        description: Un tableau de logs
+        description: Un tableau de logs<br/>
+          **Permission 'admin' requise.**
         content:
           application/json:
             schema:

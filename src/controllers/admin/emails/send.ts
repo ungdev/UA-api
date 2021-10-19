@@ -18,7 +18,7 @@ export default [
       locked: Joi.boolean().optional(),
       tournamentId: validators.tournamentId.optional(),
       subject: Joi.string().required(),
-      content: Joi.string().required(),
+      content: Joi.array().required(),
     }),
   ),
 
@@ -52,7 +52,7 @@ export default [
       for (const adress of mails)
         await sendEmail(
           await serialize({
-            sections: JSON.parse(mail.content),
+            sections: mail.content,
             reason: null,
             title: {
               banner: mail.subject,

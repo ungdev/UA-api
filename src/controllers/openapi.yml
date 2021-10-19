@@ -111,6 +111,96 @@ components:
         hasPaid:
           type: boolean
 
+    MailButton:
+      type: object
+      description: Un bouton (sur lequel on peut cliquer - sauf sur windows xp)
+      properties:
+        name:
+          type: string
+          example: Clique ici !
+        location:
+          type: string
+          example: https://arena.utt.fr
+        color:
+          nullable: true
+          type: string
+          example: '#fff'
+
+    MailTable:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            type: object
+
+    MailSection:
+      oneOf:
+        - type: string
+          description: Un paragraphe contenant du texte
+        - type: array
+          items:
+            type: string
+        - $ref: '#/components/schemas/MailButton'
+        - type: array
+          items:
+            $ref: '#/components/schemas/MailButton'
+        - $ref: '#/components/schemas/MailTable'
+
+    Mail:
+      type: object
+      description: Un mail envoyable par un anim/admin.
+      properties:
+        locked:
+          type: boolean
+          description: Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non
+        tournamentId:
+          type: string
+          example: lolCompetitive
+          description: |-
+            Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.
+            Le champ 'locked' doit être non nul.
+          nullable: true
+        subject:
+          type: string
+          description: Sujet du mail
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/MailSection'
+          description: Contenu du mail
+        sentAt:
+          type: string
+          format: date-time
+        sender:
+          $ref: '#/components/schemas/User'
+
+    MailQuery:
+      type: object
+      description: Un mail envoyable par un anim/admin.
+      properties:
+        locked:
+          type: boolean
+          description: Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non
+        tournamentId:
+          type: string
+          example: lolCompetitive
+          description: |-
+            Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.
+            Le champ 'locked' doit être non nul.
+          nullable: true
+        subject:
+          type: string
+          description: Sujet du mail
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/MailSection'
+          description: Contenu du mail
+
     UserAttendant:
       type: object
       description: L'accompagnateur d'un mineur. Cet accompagnateur sera toujours majeur (donc omis de la réponse)
@@ -175,7 +265,7 @@ components:
           type: string
         tournamentId:
           type: string
-          example: lol-pro
+          example: lolCompetitive
         captainId:
           type: string
           example: XiHGta
