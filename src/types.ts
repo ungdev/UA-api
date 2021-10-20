@@ -60,7 +60,7 @@ export enum Permission {
 }
 
 /************************/
-/** Databse extensions **/
+/** Database extensions **/
 /************************/
 
 // We define all the type here, even if we dont extend them to avoid importing @prisma/client in files and mix both types to avoid potential errors

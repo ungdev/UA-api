@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { JsonObject } from 'swagger-ui-express';
 import { fetchCarts } from '../../../operations/carts';
-import { filterCartWithCartItems } from '../../../utils/filters';
+import { filterCartWithCartItems, filterCartWithCartItemsAdmin } from '../../../utils/filters';
 import { notFound, success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
 import { fetchUser } from '../../../operations/user';
@@ -59,9 +59,9 @@ export default [
           cartsFinal.push(cart);
         }
 
-        const cartsFinalTyped = cartsFinal as unknown as CartWithCartItemsAdmin;
+        const cartsFinalTyped = cartsFinal as unknown as CartWithCartItemsAdmin[];
 
-        return success(response, cartsFinalTyped);
+        return success(response, cartsFinalTyped.map(filterCartWithCartItemsAdmin));
       }
       return success(response, carts.filter(filterCartWithCartItems));
     } catch (error) {

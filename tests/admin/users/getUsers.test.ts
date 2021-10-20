@@ -61,12 +61,15 @@ describe('GET /admin/users', () => {
   });
 
   it('should fetch one user', async () => {
-    const { body } = await request(app).get(`/admin/users`).set('Authorization', `Bearer ${adminToken}`).expect(200);
+    const { body } = await request(app)
+      .get(`/admin/users?userId=${user.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
 
     expect(body.itemsPerPage).to.be.equal(env.api.itemsPerPage);
     expect(body.currentPage).to.be.equal(0);
-    expect(body.totalItems).to.be.equal(0);
-    expect(body.totalPages).to.be.equal(0);
+    expect(body.totalItems).to.be.equal(1);
+    expect(body.totalPages).to.be.equal(1);
 
     const responseUser = body.users.find((findUser: User) => findUser.id === user.id);
 
@@ -88,47 +91,12 @@ describe('GET /admin/users', () => {
     });
   });
 
-  describe('Test firstname field', () => {
-    for (const firstname of ['firstname', 'first'])
-      it(`should fetch the user with name ${firstname}`, async () => {
+  // there is now only one field for firstname, lastname, email and team name
+  describe('Test search field', () => {
+    for (const search of ['username', 'user', 'adm', 'admin'])
+      it(`should fetch the user with search ${search}`, async () => {
         const { body } = await request(app)
-          .get(`/admin/users?firstname=${firstname}`)
-          .set('Authorization', `Bearer ${adminToken}`)
-          .expect(200);
-
-        expect(body.users.length).to.be.equal(1);
-      });
-  });
-
-  describe('Test lastname field', () => {
-    for (const lastname of ['lastname', 'last'])
-      it(`should fetch the user with name ${lastname}`, async () => {
-        const { body } = await request(app)
-          .get(`/admin/users?lastname=${lastname}`)
-          .set('Authorization', `Bearer ${adminToken}`)
-          .expect(200);
-
-        expect(body.users.length).to.be.equal(1);
-      });
-  });
-
-  describe('Test email field', () => {
-    for (const email of ['email', 'email@gmail.com'])
-      it(`should fetch the user with email ${email}`, async () => {
-        const { body } = await request(app)
-          .get(`/admin/users?email=${email}`)
-          .set('Authorization', `Bearer ${adminToken}`)
-          .expect(200);
-
-        expect(body.users.length).to.be.equal(1);
-      });
-  });
-
-  describe('Test username field', () => {
-    for (const username of ['username', 'user', 'adm', 'admin'])
-      it(`should fetch the user with username ${username}`, async () => {
-        const { body } = await request(app)
-          .get(`/admin/users?username=${username}`)
+          .get(`/admin/users?search=${search}`)
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -138,7 +106,7 @@ describe('GET /admin/users', () => {
 
   it('should combine multiple filters', async () => {
     const { body } = await request(app)
-      .get(`/admin/users?firstname=firstname&email=email&username=user`)
+      .get(`/admin/users?search=firstname&type=player`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
@@ -185,9 +153,9 @@ describe('GET /admin/users', () => {
     it('should fetch only the user in a team', async () => {
       const team = await createFakeTeam({ members: 1, name: 'bonjour' });
 
-      for (const query of ['bon', 'bonjour']) {
+      for (const search of ['bon', 'bonjour']) {
         const { body } = await request(app)
-          .get(`/admin/users?team=${query}`)
+          .get(`/admin/users?search=${search}`)
           .set('Authorization', `Bearer ${adminToken}`)
           .expect(200);
 
@@ -201,7 +169,7 @@ describe('GET /admin/users', () => {
 
     it('should fetch not fetch the user as it is not in a team', async () => {
       const { body } = await request(app)
-        .get(`/admin/users?team=random`)
+        .get(`/admin/users?search=random`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 

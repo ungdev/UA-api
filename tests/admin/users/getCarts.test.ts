@@ -6,6 +6,7 @@ import { Error, Permission, User } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
+import { fetchAllItems } from '../../../src/operations/item';
 
 describe('GET /admin/users/:userId/carts', () => {
   let user: User;
@@ -67,6 +68,9 @@ describe('GET /admin/users/:userId/carts', () => {
     const [cart] = carts;
     const [cartItem] = cart.cartItems;
 
+    const items = await fetchAllItems();
+    const item = items.find((findItem) => findItem.id === 'ethernet-5');
+
     await request(app)
       .get(`/admin/users/${user.id}/carts`)
       .set('Authorization', `Bearer ${adminToken}`)
@@ -77,12 +81,14 @@ describe('GET /admin/users/:userId/carts', () => {
           transactionState: cart.transactionState,
           paidAt: null,
           transactionId: null,
+          totalPrice: item.price,
           cartItems: [
             {
               id: cartItem.id,
               quantity: 1,
               cartId: cart.id,
               itemId: 'ethernet-5',
+              itemName: item.name,
               forUser: {
                 id: user.id,
                 username: user.username,

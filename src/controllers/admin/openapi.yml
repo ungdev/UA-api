@@ -140,28 +140,8 @@
       - BearerAuth: []
     parameters:
       - in: query
-        name: username
-        description: Recherche par nom d'utilisateur
-        schema:
-          type: string
-      - in: query
-        name: firstname
-        description: Recherche par prénom
-        schema:
-          type: string
-      - in: query
-        name: lastname
-        description: Recherche par nom
-        schema:
-          type: string
-      - in: query
-        name: email
-        description: Recherche par adresse email
-        schema:
-          type: string
-      - in: query
-        name: team
-        description: Recherche par nom d'équipe
+        name: search
+        description: Recherche par nom d'utilisateur, prénom, nom, adresse email, nom d'équipe
         schema:
           type: string
       - in: query
@@ -312,7 +292,7 @@
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/CartWithCartItems'
+                $ref: '#/components/schemas/CartWithCartItemsAdmin'
       400:
         $ref: '#/components/responses/400Errored'
       401:

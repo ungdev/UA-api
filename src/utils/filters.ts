@@ -1,5 +1,14 @@
 import { pick } from 'lodash';
-import { CartItem, CartWithCartItems, Item, Team, Tournament, User, UserWithTeam } from '../types';
+import {
+  CartItem,
+  CartWithCartItems,
+  CartWithCartItemsAdmin,
+  Item,
+  Team,
+  Tournament,
+  User,
+  UserWithTeam,
+} from '../types';
 
 export const filterUserRestricted = (user: User) => pick(user, ['id', 'username', 'type', 'hasPaid']);
 
@@ -49,6 +58,18 @@ export const filterCartWithCartItems = (cart: CartWithCartItems) => {
   return {
     ...filteredCart,
     cartItems: cart.cartItems.map(filterCartItem),
+  };
+};
+
+export const filterCartItemAdmin = (cartItem: CartItem) =>
+  pick(cartItem, ['id', 'quantity', 'cartId', 'itemId', 'itemName', 'forUser.id', 'forUser.username']);
+
+export const filterCartWithCartItemsAdmin = (cart: CartWithCartItemsAdmin) => {
+  const filteredCart = pick(cart, ['id', 'userId', 'transactionState', 'transactionId', 'paidAt', 'totalPrice']);
+
+  return {
+    ...filteredCart,
+    cartItems: cart.cartItems.map(filterCartItemAdmin),
   };
 };
 
