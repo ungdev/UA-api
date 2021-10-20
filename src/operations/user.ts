@@ -61,16 +61,17 @@ export const fetchUsers = async (query: UserSearchQuery): Promise<UserWithTeam[]
         {
           team: {
             name: query.search ? { contains: query.search } : undefined,
-            tournamentId: query.tournament || undefined,
           },
         },
         {
           // Always true condition in order to avoid no result as OR filter
-          email: {
-            not: null,
-          },
+          email: query.search ? undefined : { not: null },
         },
       ],
+
+      team: {
+        tournamentId: query.tournament || undefined,
+      },
 
       id: query.userId || undefined,
       type: query.type || undefined,

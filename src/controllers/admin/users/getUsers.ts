@@ -11,7 +11,7 @@ import env from '../../../utils/env';
 
 export default [
   // Middlewares
-  // ...hasPermission(Permission.entry, Permission.anim),
+  ...hasPermission(Permission.entry, Permission.anim),
   validateQuery(
     Joi.object({
       userId: Joi.string(),
