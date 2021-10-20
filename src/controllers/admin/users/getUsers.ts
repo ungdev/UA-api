@@ -11,11 +11,11 @@ import env from '../../../utils/env';
 
 export default [
   // Middlewares
-  // ...hasPermission(Permission.entry, Permission.anim),
+  ...hasPermission(Permission.entry, Permission.anim),
   validateQuery(
     Joi.object({
       userId: Joi.string(),
-      search: Joi.string() || "",
+      search: Joi.string() || '',
       place: Joi.string(),
       type: validators.type,
       tournament: validators.tournamentId,

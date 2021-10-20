@@ -53,25 +53,24 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
 export const fetchUsers = async (query: UserSearchQuery): Promise<UserWithTeam[]> => {
   const users = await database.user.findMany({
     where: {
-      OR:[
+      OR: [
         { firstname: query.search ? { contains: query.search } : undefined },
         { lastname: query.search ? { contains: query.search } : undefined },
         { username: query.search ? { contains: query.search } : undefined },
         { email: query.search ? { contains: query.search } : undefined },
-        { 
+        {
           team: {
             name: query.search ? { contains: query.search } : undefined,
             tournamentId: query.tournament || undefined,
-          }
+          },
         },
         {
           // Always true condition in order to avoid no result as OR filter
           email: {
             not: null,
-          }
-        }
+          },
+        },
       ],
-      
 
       id: query.userId || undefined,
       type: query.type || undefined,

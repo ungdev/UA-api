@@ -1,19 +1,18 @@
-import { NextFunction, Request, Response } from "express";
-import { fetchCarts } from "../../../operations/carts";
-import { filterCartWithCartItems } from "../../../utils/filters";
-import { notFound, success } from "../../../utils/responses";
-import { hasPermission } from "../../../middlewares/authentication";
-import { fetchUser } from "../../../operations/user";
-import { CartWithCartItemsAdmin, Error, Permission } from "../../../types";
-import { fetchAllItems } from "../../../operations/item";
-import { isPartnerSchool } from "../../../utils/helpers";
-import { ItemCategory } from ".prisma/client";
-import { AdminAnalyticsGetFileResponse } from "@slack/web-api";
-import { JsonObject } from "swagger-ui-express";
+import { NextFunction, Request, Response } from 'express';
+import { JsonObject } from 'swagger-ui-express';
+import { fetchCarts } from '../../../operations/carts';
+import { filterCartWithCartItems } from '../../../utils/filters';
+import { notFound, success } from '../../../utils/responses';
+import { hasPermission } from '../../../middlewares/authentication';
+import { fetchUser } from '../../../operations/user';
+import { CartWithCartItemsAdmin, Error, Permission } from '../../../types';
+import { fetchAllItems } from '../../../operations/item';
+import { isPartnerSchool } from '../../../utils/helpers';
+import { ItemCategory } from '.prisma/client';
 
 export default [
   // Middlewares
-  //...hasPermission(Permission.admin),
+  ...hasPermission(Permission.admin),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
@@ -24,21 +23,18 @@ export default [
 
       const carts = await fetchCarts(user.id);
       const items = await fetchAllItems();
-     
-      if(carts[0] != undefined){
-        let cartsFinal = [];
-        for (let i = 0; i < carts.length; i++) {
-          let totalPrice = 0;
-          let cart = carts[i] as JsonObject;
-          // add item name and total price
-          for (let j = 0; j < cart["cartItems"].length; j++) {
 
-            const cartItem = cart["cartItems"][j] as JsonObject;
+      if (carts[0] !== undefined) {
+        const cartsFinal = [];
+        for (const cartTemporary of carts) {
+          let totalPrice = 0;
+          const cart = cartTemporary as JsonObject;
+          // add item name and total price
+          for (let index = 0; index < cart.cartItems.length; index++) {
+            const cartItem = cart.cartItems[index] as JsonObject;
 
             // Finds the item associated with the cartitem
-            const item = items.find(
-              (findItem) => findItem.id === cartItem.itemId
-            );
+            const item = items.find((findItem) => findItem.id === cartItem.itemId);
 
             // Retreives the price of the item
             let itemPrice = item.price;
@@ -53,17 +49,17 @@ export default [
                 itemPrice = item.reducedPrice;
               }
             }
-            
+
             totalPrice += itemPrice * cartItem.quantity;
-            cartItem["itemName"] = item.name;
-            cart["cartItems"][j] = cartItem;
+            cartItem.itemName = item.name;
+            cart.cartItems[index] = cartItem;
           }
 
-          cart["totalPrice"] = totalPrice;
+          cart.totalPrice = totalPrice;
           cartsFinal.push(cart);
         }
 
-        let cartsFinalTyped = (cartsFinal as unknown) as CartWithCartItemsAdmin;
+        const cartsFinalTyped = cartsFinal as unknown as CartWithCartItemsAdmin;
 
         return success(response, cartsFinalTyped);
       }
