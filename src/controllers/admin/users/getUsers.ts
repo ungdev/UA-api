@@ -11,10 +11,11 @@ import env from '../../../utils/env';
 
 export default [
   // Middlewares
-  ...hasPermission(Permission.entry, Permission.anim),
+  // ...hasPermission(Permission.entry, Permission.anim),
   validateQuery(
     Joi.object({
-      search: Joi.string(),
+      userId: Joi.string(),
+      search: Joi.string() || "",
       place: Joi.string(),
       type: validators.type,
       tournament: validators.tournamentId,
@@ -30,8 +31,9 @@ export default [
     try {
       const userSearch = request.query as UserSearchQuery;
 
-      // Get the page from the params. Default to zero and put it in max to ensure there is no negative numbers
-      const page = Math.max(Number.parseInt(request.params.page) || 0, 0);
+      // Get the page from the query. Default to zero and put it in max to ensure there is no negative numbers
+      const pageNumber: string = request.query.page as string;
+      const page = Math.max(Number.parseInt(pageNumber) || 0, 0);
 
       const users = await fetchUsers(userSearch);
 

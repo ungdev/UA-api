@@ -84,6 +84,11 @@ export type CartWithCartItems = Cart & {
   cartItems: (CartItem & { forUser: prisma.User })[];
 };
 
+export type CartWithCartItemsAdmin = Cart & {
+  totalPrice: number;
+  cartItems: (CartItem & { forUser: prisma.User; itemName: string })[];
+};
+
 export type DetailedCart = Cart & {
   cartItems: DetailedCartItem[];
   user: prisma.User;
@@ -118,6 +123,7 @@ export type UserWithTeam = User & {
 
 // We need to use here a type instead of an interface as it is used for a casting that wouldn't work on an interface
 export type UserSearchQuery = {
+  userId: string;
   search: string;
   type: UserType;
   permission: Permission;
