@@ -91,6 +91,43 @@ describe('GET /admin/users', () => {
     });
   });
 
+  it('should fetch one user per place', async () => {
+    const placedUser = await userOperations.updateAdminUser((await createFakeUser()).id, {
+      place: 'A21',
+    });
+
+    const { body } = await request(app)
+      .get(`/admin/users?place=${placedUser.place}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.itemsPerPage).to.be.equal(env.api.itemsPerPage);
+    expect(body.currentPage).to.be.equal(0);
+    expect(body.totalItems).to.be.equal(1);
+    expect(body.totalPages).to.be.equal(1);
+
+    const responseUser = body.users.find((findUser: User) => findUser.id === placedUser.id);
+
+    expect(responseUser).to.deep.equal({
+      id: placedUser.id,
+      firstname: placedUser.firstname,
+      lastname: placedUser.lastname,
+      email: placedUser.email,
+      permissions: null,
+      place: placedUser.place,
+      teamId: null,
+      askingTeamId: null,
+      discordId: placedUser.discordId,
+      type: placedUser.type,
+      age: placedUser.age,
+      username: placedUser.username,
+      hasPaid: false,
+      customMessage: null,
+    });
+
+    return database.user.delete({ where: { id: placedUser.id } });
+  });
+
   // there is now only one field for firstname, lastname, email and team name
   describe('Test search field', () => {
     for (const search of ['username', 'user', 'adm', 'admin'])

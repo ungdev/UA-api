@@ -57,7 +57,7 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
  * @returns {Promise<[UserWithTeam[], number]>} the entries corresponding to the page,
  * along with count of entries matching the query.
  */
-export const fetchUsers = async (query: UserSearchQuery, page = 0): Promise<[UserWithTeam[], number]> => {
+export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<[UserWithTeam[], number]> => {
   const [users, count] = await database.$transaction([
     database.user.findMany({
       where: {
