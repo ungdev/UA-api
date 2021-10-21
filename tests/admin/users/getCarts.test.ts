@@ -87,8 +87,10 @@ describe('GET /admin/users/:userId/carts', () => {
               id: cartItem.id,
               quantity: 1,
               cartId: cart.id,
-              itemId: 'ethernet-5',
-              itemName: item.name,
+              item: {
+                name: item.name,
+                id: 'ethernet-5',
+              },
               forUser: {
                 id: user.id,
                 username: user.username,

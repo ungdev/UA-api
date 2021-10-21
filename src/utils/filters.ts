@@ -62,7 +62,7 @@ export const filterCartWithCartItems = (cart: CartWithCartItems) => {
 };
 
 export const filterCartItemAdmin = (cartItem: CartItem) =>
-  pick(cartItem, ['id', 'quantity', 'cartId', 'itemId', 'itemName', 'forUser.id', 'forUser.username']);
+  pick(cartItem, ['id', 'quantity', 'cartId', 'item.id', 'item.name', 'forUser.id', 'forUser.username']);
 
 export const filterCartWithCartItemsAdmin = (cart: CartWithCartItemsAdmin) => {
   const filteredCart = pick(cart, ['id', 'userId', 'transactionState', 'transactionId', 'paidAt', 'totalPrice']);

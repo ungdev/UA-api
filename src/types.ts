@@ -84,13 +84,9 @@ export type CartWithCartItems = Cart & {
   cartItems: (CartItem & { forUser: prisma.User })[];
 };
 
-export type CartItemAdmin = DetailedCartItem & {
-  itemName: string;
-};
-  
-export interface CartWithCartItemsAdmin extends Cart {
-  totalPrice: number;
-  cartItems: (CartItem & { forUser: prisma.User; itemName: string })[];
+export interface CartWithCartItemsAdmin extends CartWithCartItems {
+  totalPrice?: number;
+  cartItems: (DetailedCartItem & { forUser: prisma.User; item: prisma.Item })[];
 }
 
 export type DetailedCart = Cart & {

@@ -1,12 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { JsonObject } from 'swagger-ui-express';
 import { fetchCarts } from '../../../operations/carts';
-import { filterCartWithCartItems, filterCartWithCartItemsAdmin } from '../../../utils/filters';
+import { filterCartWithCartItemsAdmin } from '../../../utils/filters';
 import { notFound, success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
 import { fetchUser } from '../../../operations/user';
-import { CartItemAdmin, CartWithCartItemsAdmin, Error, Permission } from '../../../types';
-import { fetchAllItems } from '../../../operations/item';
+import { Error, Permission } from '../../../types';
 import { isPartnerSchool } from '../../../utils/helpers';
 import { ItemCategory } from '.prisma/client';
 
@@ -21,47 +19,23 @@ export default [
 
       if (!user) return notFound(response, Error.UserNotFound);
 
-      const carts = await fetchCarts(user.id);
-      const items = await fetchAllItems();
+      const carts = await fetchCarts(user.id, true);
 
-      if (carts.length !== 0) {
-        const cartsFinal: CartWithCartItemsAdmin[] = [];
-        for (const cartTemporary of carts) {
-          let totalPrice = 0;
-          const cart = cartTemporary as CartItemAdmin;
-          // add item name and total price
-          for (let index = 0; index < cart.cartItems.length; index++) {
-            const cartItem = cart.cartItems[index] as CartItemAdmin;
+      const adminCarts = carts.map((cart) => ({
+        ...cart,
+        totalPrice: cart.cartItems
+          .map(
+            (cartItem) =>
+              (cartItem.item.category === ItemCategory.ticket &&
+              cartItem.item.reducedPrice &&
+              isPartnerSchool(cartItem.forUser.email)
+                ? cartItem.item.reducedPrice
+                : cartItem.item.price) * cartItem.quantity,
+          )
+          .reduce((price1, price2) => price1 + price2, 0),
+      }));
 
-            // Finds the item associated with the cartitem
-            const item = items.find((findItem) => findItem.id === cartItem.itemId);
-
-            // Retreives the price of the item
-            let itemPrice = item.price;
-
-            // Checks if the category is a ticket and the reduce price exists
-            if (item.category === ItemCategory.ticket && item.reducedPrice) {
-              // Fetch the user who will get the ticket
-              const forUser = await fetchUser(cartItem.forUserId);
-
-              // If the ticket is a partner school, set the price to the reduced price
-              if (isPartnerSchool(forUser.email)) {
-                itemPrice = item.reducedPrice;
-              }
-            }
-
-            totalPrice += itemPrice * cartItem.quantity;
-            cartItem.itemName = item.name;
-            cart.cartItems[index] = cartItem;
-          }
-
-          cart.totalPrice = totalPrice;
-          cartsFinal.push(cart);
-        }
-
-        return success(response, cartsFinal.map(filterCartWithCartItemsAdmin));
-      }
-      return success(response, carts.filter(filterCartWithCartItems));
+      return success(response, adminCarts.map(filterCartWithCartItemsAdmin));
     } catch (error) {
       return next(error);
     }
