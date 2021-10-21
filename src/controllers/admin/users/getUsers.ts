@@ -32,22 +32,21 @@ export default [
       const userSearch = request.query as UserSearchQuery;
 
       // Get the page from the query. Default to zero and put it in max to ensure there is no negative numbers
-      const pageNumber: string = request.query.page as string;
+      const pageNumber = request.query.page as string;
       const page = Math.max(Number.parseInt(pageNumber) || 0, 0);
 
-      const users = await fetchUsers(userSearch);
+      // Fetch matching users and database entry count
+      const [users, userCount] = await fetchUsers(userSearch, page);
 
-      // get users from page
-      const usersOnPage = users.slice(env.api.itemsPerPage * page, env.api.itemsPerPage * page + env.api.itemsPerPage);
-
-      const nbPages = Math.ceil(users.length / env.api.itemsPerPage);
+      // Compute page count
+      const nbPages = Math.ceil(userCount / env.api.itemsPerPage);
 
       return success(response, {
         itemsPerPage: env.api.itemsPerPage,
         currentPage: page,
         totalItems: users.length,
         totalPages: nbPages,
-        users: usersOnPage.map((user) => ({
+        users: users.map((user) => ({
           ...filterUserWithTeam(user),
           customMessage: user.customMessage,
         })),

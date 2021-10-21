@@ -22,6 +22,11 @@ export const fetchCart = (cartId: string): Promise<Cart> =>
     },
   });
 
+/**
+ * Retrieves all carts created by a {@link prisma.User}
+ * @param userId the id of the user to fetch the carts of
+ * @param includeItem whether the result should include the {@link prisma.Item} in the {@link prisma.CartItem}
+ */
 export function fetchCarts(userId: string, includeItem: true): Promise<CartWithCartItemsAdmin[]>;
 export function fetchCarts(userId: string, includeItem?: false): Promise<CartWithCartItems[]>;
 export function fetchCarts(

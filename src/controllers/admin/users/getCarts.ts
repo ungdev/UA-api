@@ -19,10 +19,15 @@ export default [
 
       if (!user) return notFound(response, Error.UserNotFound);
 
+      // Retrieve user carts. The boolean `true` is used to include the
+      // Cart#cartItems[x]#item property (and the details of the cartItem)
       const carts = await fetchCarts(user.id, true);
 
       const adminCarts = carts.map((cart) => ({
         ...cart,
+        // Compute the price of each cart. In order to do so, we check whether
+        // the bought item is a `ItemCategory.ticket` and whether the recipient
+        // is eligible for a discount
         totalPrice: cart.cartItems
           .map(
             (cartItem) =>
@@ -35,6 +40,7 @@ export default [
           .reduce((price1, price2) => price1 + price2, 0),
       }));
 
+      // Then we filter the object to reduce output
       return success(response, adminCarts.map(filterCartWithCartItemsAdmin));
     } catch (error) {
       return next(error);
