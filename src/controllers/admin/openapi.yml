@@ -144,43 +144,51 @@
         description: Recherche par nom d'utilisateur, prénom, nom, adresse email, nom d'équipe
         schema:
           type: string
+        optional: true
       - in: query
         name: place
         description: Recherche par place
         schema:
           type: string
+        optional: true
       - in: query
         name: type
         description: Filtre les utilisateurs par leur type
         schema:
           $ref: '#/components/schemas/Type'
+        optional: true
       - in: query
         name: tournament
         description: Filtre les utilisateurs en fonction de l'identifiant de leur tournoi
         schema:
           type: string
+        optional: true
       - in: query
         name: locked
         description: Filtre les utilisateurs en fonction de s'ils sont dans une équipe verrouillée ou non
         schema:
           type: boolean
+        optional: true
       - in: query
         name: permission
         description: Filtre les utilisateurs en fonction de leurs permissions
         schema:
           $ref: '#/components/schemas/Permission'
+        optional: true
       - in: query
         name: scanned
         description: Filtre les utilisateurs en fonction de s'ils ont été scannés ou non
         schema:
           type: boolean
+        optional: true
       - in: query
         name: page
         description: '(Pagination) Indice de la page'
         schema:
           type: integer
           minimum: 0
-        required: true
+        optional: true
+        default: 0
     responses:
       200:
         description: La liste de tous les utilisateurs filtrés est renvoyée

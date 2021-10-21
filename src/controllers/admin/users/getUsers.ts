@@ -14,16 +14,16 @@ export default [
   ...hasPermission(Permission.entry, Permission.anim),
   validateQuery(
     Joi.object({
-      userId: Joi.string(),
-      search: Joi.string() || '',
-      place: Joi.string(),
-      type: validators.type,
-      tournament: validators.tournamentId,
-      locked: validators.stringBoolean,
-      scanned: validators.stringBoolean,
-      permission: validators.permission,
-      page: Joi.string().default('0'), // must be a string as it is in query
-    }),
+      userId: Joi.string().optional(),
+      search: Joi.string().optional(),
+      place: Joi.string().optional(),
+      type: validators.type.optional(),
+      tournament: validators.tournamentId.optional(),
+      locked: validators.stringBoolean.optional(),
+      scanned: validators.stringBoolean.optional(),
+      permission: validators.permission.optional(),
+      page: Joi.number().integer().positive().default('0'),
+    }).required(),
   ),
 
   // Controller
@@ -33,7 +33,7 @@ export default [
 
       // Get the page from the query. Default to zero and put it in max to ensure there is no negative numbers
       const pageNumber = request.query.page as string;
-      const page = Math.max(Number.parseInt(pageNumber) || 0, 0);
+      const page = Number.parseInt(pageNumber);
 
       // Fetch matching users and database entry count
       const [users, userCount] = await fetchUsers(userSearch, page);
@@ -44,7 +44,7 @@ export default [
       return success(response, {
         itemsPerPage: env.api.itemsPerPage,
         currentPage: page,
-        totalItems: users.length,
+        totalItems: userCount,
         totalPages: nbPages,
         users: users.map((user) => ({
           ...filterUserWithTeam(user),

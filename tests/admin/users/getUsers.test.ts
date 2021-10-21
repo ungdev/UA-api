@@ -91,6 +91,19 @@ describe('GET /admin/users', () => {
     });
   });
 
+  it('should return an empty page 2', async () => {
+    const { body } = await request(app)
+      .get(`/admin/users?page=1`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.itemsPerPage).to.be.equal(env.api.itemsPerPage);
+    expect(body.currentPage).to.be.equal(1);
+    expect(body.totalItems).to.be.equal(2);
+    expect(body.totalPages).to.be.equal(1);
+    expect(body.users).to.have.lengthOf(0);
+  });
+
   it('should fetch one user per place', async () => {
     const placedUser = await userOperations.updateAdminUser((await createFakeUser()).id, {
       place: 'A21',
