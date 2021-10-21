@@ -159,7 +159,6 @@
         description: Filtre les utilisateurs en fonction de l'identifiant de leur tournoi
         schema:
           type: string
-          minimum: 0
       - in: query
         name: locked
         description: Filtre les utilisateurs en fonction de s'ils sont dans une équipe verrouillée ou non

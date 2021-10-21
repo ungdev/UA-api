@@ -425,6 +425,43 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/CartItem'
+    
+    CartItemAdmin:
+      type: object
+      properties:
+        id:
+          type: string
+          example: wS6p0t
+        quantity:
+          type: integer
+        cartId:
+          type: string
+          example: 8MF1b0
+        itemId:
+          type: integer
+        itemName:
+          type: string
+        forUser:
+          type: object
+          properties:
+            id:
+              type: string
+              example: V1STGX
+            username:
+              type: string
+              example: totodelacho
+
+    CartWithCartItemsAdmin:
+      allOf:
+        - $ref: '#/components/schemas/Cart'
+        - type: object
+          properties:
+            totalPrice:
+              type: int
+            cartItems:
+              type: array
+              items:
+                $ref: '#/components/schemas/CartItemAdmin'
 
     Item:
       type: object

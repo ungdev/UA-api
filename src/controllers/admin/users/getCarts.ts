@@ -5,7 +5,7 @@ import { filterCartWithCartItems, filterCartWithCartItemsAdmin } from '../../../
 import { notFound, success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
 import { fetchUser } from '../../../operations/user';
-import { CartWithCartItemsAdmin, Error, Permission } from '../../../types';
+import { CartItemAdmin, CartWithCartItemsAdmin, Error, Permission } from '../../../types';
 import { fetchAllItems } from '../../../operations/item';
 import { isPartnerSchool } from '../../../utils/helpers';
 import { ItemCategory } from '.prisma/client';
@@ -24,14 +24,14 @@ export default [
       const carts = await fetchCarts(user.id);
       const items = await fetchAllItems();
 
-      if (carts[0] !== undefined) {
-        const cartsFinal = [];
+      if (carts.length !== 0) {
+        const cartsFinal: CartWithCartItemsAdmin[] = [];
         for (const cartTemporary of carts) {
           let totalPrice = 0;
-          const cart = cartTemporary as JsonObject;
+          const cart = cartTemporary as CartItemAdmin;
           // add item name and total price
           for (let index = 0; index < cart.cartItems.length; index++) {
-            const cartItem = cart.cartItems[index] as JsonObject;
+            const cartItem = cart.cartItems[index] as CartItemAdmin;
 
             // Finds the item associated with the cartitem
             const item = items.find((findItem) => findItem.id === cartItem.itemId);
@@ -59,9 +59,7 @@ export default [
           cartsFinal.push(cart);
         }
 
-        const cartsFinalTyped = cartsFinal as unknown as CartWithCartItemsAdmin[];
-
-        return success(response, cartsFinalTyped.map(filterCartWithCartItemsAdmin));
+        return success(response, cartsFinal.map(filterCartWithCartItemsAdmin));
       }
       return success(response, carts.filter(filterCartWithCartItems));
     } catch (error) {
