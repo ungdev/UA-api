@@ -32,6 +32,14 @@ describe('GET /admin/emails', () => {
       .expect(403, { error: Error.NoPermission });
   });
 
+  it('should return a 500 error code', () => {
+    sandbox.stub(database.log, 'findMany').throws('This method is temporarily broken');
+    return request(app)
+      .get(`/admin/emails`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
+  });
+
   it('should fetch one mail', async () => {
     const mailContent = {
       subject: 'Very important news&nbsp;!',
