@@ -27,6 +27,9 @@ export default [
         include: {
           user: true,
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
       })) as (Log & {
         body: MailQuery;
         user: User;
@@ -40,6 +43,7 @@ export default [
           tournamentId: log.body.tournamentId,
           locked: log.body.locked,
           sentAt: log.createdAt,
+          preview: log.body.preview,
         })),
       );
     } catch (error) {

@@ -106,18 +106,30 @@ describe('POST /admin/emails', () => {
   });
 
   describe('Test mail recipient filters', () => {
-    it('should successfully send a valid mail to everyone', () =>
+    const validMailBody = {
+      subject: "Tomorrow's tournament cancelled due to extreme weather conditions",
+      content: [
+        {
+          title: 'Why did we choose to cancel the tournament ?',
+          components: ["There was definitely no reason for that. We're just too lazy. _That's it_"],
+        },
+      ],
+    };
+
+    it('should successfully send a valid preview mail to the sender (only)', () =>
       request(app)
         .post(`/admin/emails`)
         .send({
-          subject: "Tomorrow's tournament cancelled due to extreme weather conditions",
-          content: [
-            {
-              title: 'Why did we choose to cancel the tournament ?',
-              components: ["There was definitely no reason for that. We're just too lazy. _That's it_"],
-            },
-          ],
+          ...validMailBody,
+          preview: true,
         })
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(201, { malformed: 0, delivered: 1, undelivered: 0 }));
+
+    it('should successfully send a valid mail to everyone', () =>
+      request(app)
+        .post(`/admin/emails`)
+        .send(validMailBody)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201, { malformed: 0, delivered: 12, undelivered: 0 }));
 
@@ -126,13 +138,7 @@ describe('POST /admin/emails', () => {
         .post(`/admin/emails`)
         .send({
           locked: true,
-          subject: "Tomorrow's tournament cancelled due to extreme weather conditions",
-          content: [
-            {
-              title: 'Why did we choose to cancel the tournament ?',
-              components: ["There was definitely no reason for that. We're just too lazy. _That's it_"],
-            },
-          ],
+          ...validMailBody,
         })
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201, { malformed: 0, delivered: 5, undelivered: 0 }));
@@ -142,13 +148,7 @@ describe('POST /admin/emails', () => {
         .post(`/admin/emails`)
         .send({
           tournamentId: TournamentId.csgo,
-          subject: "Tomorrow's tournament cancelled due to extreme weather conditions",
-          content: [
-            {
-              title: 'Why did we choose to cancel the tournament ?',
-              components: ["There was definitely no reason for that. We're just too lazy. _That's it_"],
-            },
-          ],
+          ...validMailBody,
         })
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201, { malformed: 0, delivered: 9, undelivered: 0 }));
@@ -159,13 +159,7 @@ describe('POST /admin/emails', () => {
         .send({
           tournamentId: TournamentId.csgo,
           locked: true,
-          subject: "Tomorrow's tournament cancelled due to extreme weather conditions",
-          content: [
-            {
-              title: 'Why did we choose to cancel the tournament ?',
-              components: ["There was definitely no reason for that. We're just too lazy. _That's it_"],
-            },
-          ],
+          ...validMailBody,
         })
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201, { malformed: 0, delivered: 5, undelivered: 0 }));
@@ -176,13 +170,7 @@ describe('POST /admin/emails', () => {
         .send({
           tournamentId: TournamentId.csgo,
           locked: false,
-          subject: "Tomorrow's tournament cancelled due to extreme weather conditions",
-          content: [
-            {
-              title: 'Why did we choose to cancel the tournament ?',
-              components: ["There was definitely no reason for that. We're just too lazy. _That's it_"],
-            },
-          ],
+          ...validMailBody,
         })
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201, { malformed: 0, delivered: 4, undelivered: 0 }));
@@ -192,13 +180,7 @@ describe('POST /admin/emails', () => {
         .post(`/admin/emails`)
         .send({
           locked: false,
-          subject: "Tomorrow's tournament cancelled due to extreme weather conditions",
-          content: [
-            {
-              title: 'Why did we choose to cancel the tournament ?',
-              components: ["There was definitely no reason for that. We're just too lazy. _That's it_"],
-            },
-          ],
+          ...validMailBody,
         })
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(201, { malformed: 0, delivered: 6, undelivered: 0 }));

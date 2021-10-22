@@ -40,6 +40,7 @@ export type EmailAttachement = Mail.Attachment & {
 export type MailQuery = ParsedQs & {
   readonly locked?: boolean;
   readonly tournamentId?: TournamentId;
+  readonly preview: boolean;
   readonly subject: string;
   readonly content: Email['sections'];
 };

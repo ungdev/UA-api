@@ -84,6 +84,57 @@ describe('GET /admin/emails', () => {
             permissions: admin.permissions,
           },
           sentAt: log.createdAt.toISOString(),
+          preview: false,
+        },
+      ]);
+  });
+
+  it('should fetch one preview mail', async () => {
+    await database.log.deleteMany();
+    const mailContent = {
+      subject: 'Very important news&nbsp;!',
+      content: [
+        {
+          title: 'Save the date&nbsp;!',
+          components: ['UA 20XX will be on *XX/XX/20XX*'],
+        },
+      ],
+    };
+    sandbox.stub(mailOperations, 'sendEmail');
+    await request(app)
+      .post('/admin/emails')
+      .send({ preview: true, ...mailContent })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(201, {
+        malformed: 0,
+        delivered: 1,
+        undelivered: 0,
+      });
+    await new Promise<void>((result) => setTimeout(result, 1e2));
+    const [log] = await database.log.findMany({
+      where: {
+        method: 'POST',
+        userId: admin.id,
+        path: `/admin/emails`,
+      },
+    });
+    return request(app)
+      .get(`/admin/emails`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, [
+        {
+          ...mailContent,
+          sender: {
+            id: admin.id,
+            username: admin.username,
+            type: admin.type,
+            firstname: admin.firstname,
+            lastname: admin.lastname,
+            email: admin.email,
+            permissions: admin.permissions,
+          },
+          sentAt: log.createdAt.toISOString(),
+          preview: true,
         },
       ]);
   });

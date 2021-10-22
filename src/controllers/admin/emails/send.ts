@@ -9,12 +9,14 @@ import * as validators from '../../../utils/validators';
 import { sendEmail, SerializedMail } from '../../../services/email';
 import { serialize } from '../../../services/email/serializer';
 import database from '../../../services/database';
+import { getRequestInfo } from '../../../utils/users';
 
 export default [
   // Middlewares
   ...hasPermission(Permission.anim),
   validateBody(
     Joi.object({
+      preview: Joi.boolean().default(false),
       locked: Joi.boolean().optional(),
       tournamentId: validators.tournamentId.optional(),
       subject: Joi.string().required(),
@@ -34,24 +36,29 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const mail = request.body as MailQuery;
+      const { user } = getRequestInfo(response);
 
       // Find mail adresses to send the mail to
       const mails = await database.user
         .findMany({
-          where: {
-            team: {
-              ...(mail.locked
-                ? {
-                    NOT: {
-                      lockedAt: null,
-                    },
-                  }
-                : mail.locked === false
-                ? { lockedAt: null }
-                : {}),
-              tournamentId: mail.tournamentId,
-            },
-          },
+          where: mail.preview
+            ? {
+                id: user.id,
+              }
+            : {
+                team: {
+                  ...(mail.locked
+                    ? {
+                        NOT: {
+                          lockedAt: null,
+                        },
+                      }
+                    : mail.locked === false
+                    ? { lockedAt: null }
+                    : {}),
+                  tournamentId: mail.tournamentId,
+                },
+              },
           select: {
             email: true,
           },
@@ -75,7 +82,7 @@ export default [
                 banner: mail.subject,
                 highlight: mail.subject,
                 short: mail.subject,
-                topic: mail.subject,
+                topic: mail.preview ? `[PREVIEW]: ${mail.subject}` : mail.subject,
               },
               receiver: adress,
             });

@@ -95,8 +95,7 @@
   post:
     summary: Envoie un mail d'information
     description: |-
-      Envoie un mail d'information à tous les joueurs, coachs et accompagnateurs en fonction des filtres sélectionnés.
-      Envoie également une copie à arena@utt.fr.<br/>
+      Envoie un mail d'information à tous les joueurs, coachs et accompagnateurs en fonction des filtres sélectionnés.<br/>
       **Permission 'admin' requise.**
     tags:
       - Admin
