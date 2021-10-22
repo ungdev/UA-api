@@ -24,6 +24,9 @@ export const filterUser = (user: User) =>
     'attendant.id',
   ]);
 
+export const filterAdminAccount = (user: User) =>
+  pick(user, ['id', 'type', 'username', 'firstname', 'lastname', 'email', 'permissions']);
+
 export const filterUserWithTeam = (user: UserWithTeam) => {
   const filteredUser = filterUser(user);
   const filteredTeam = user.team ? pick(user.team, ['id', 'name', 'tournamentId', 'captainId', 'lockedAt']) : undefined;

@@ -11,7 +11,7 @@ import type { Mail, SerializedMail, Component } from '.';
  * Applied {@link Mail} content in the template
  * @throws an error when an unknwon component is in the {@link Mail#sections#components}
  */
-const serialize = async (content: Mail) => {
+export const serialize = async (content: Mail) => {
   const template = await readFile('assets/email/template.html', 'utf8');
   const year = new Date().getFullYear();
   return <SerializedMail>{

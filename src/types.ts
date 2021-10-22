@@ -1,6 +1,8 @@
 import prisma, { TournamentId, TransactionState, UserType, UserAge } from '@prisma/client';
 import { ErrorRequestHandler } from 'express';
 import Mail from 'nodemailer/lib/mailer';
+import { ParsedQs } from 'qs';
+import type { Mail as Email } from './services/email';
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
  * Redémarrer le serveur dans ce cas là
@@ -33,6 +35,14 @@ export interface DecodedToken {
 export type EmailAttachement = Mail.Attachment & {
   filename: string;
   content: Buffer;
+};
+
+export type MailQuery = ParsedQs & {
+  readonly locked?: boolean;
+  readonly tournamentId?: TournamentId;
+  readonly preview: boolean;
+  readonly subject: string;
+  readonly content: Email['sections'];
 };
 
 export interface Contact {
@@ -180,6 +190,7 @@ export const enum Error {
 
   InvalidCart = 'Le contenu de la commande est invalide',
   EmptyLogin = "Le nom d'utilisateur ne peut pas être vide",
+  MalformedMailBody = 'Structure du mail incorrecte',
 
   // 401
   // The user credentials were refused or not provided

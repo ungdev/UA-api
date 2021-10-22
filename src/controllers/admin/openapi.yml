@@ -71,11 +71,31 @@
               error: Aucun panier n'est associé à cet identifiant
 
 /admin/emails:
+  get:
+    summary: Récupère tous les emails envoyés via cette route
+    description: Récupère les mails envoyés par les anims (& admins) via le `POST /admin/emails`<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Les mails déjà envoyés par des admins
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Mail'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
   post:
     summary: Envoie un mail d'information
     description: |-
-      Envoie un mail d'information à tous les joueurs, coachs et accompagnateurs en fonction des filtres sélectionnés.
-      Envoie également une copie à arena@utt.fr.<br/>
+      Envoie un mail d'information à tous les joueurs, coachs et accompagnateurs en fonction des filtres sélectionnés.<br/>
       **Permission 'admin' requise.**
     tags:
       - Admin
@@ -86,27 +106,21 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              locked:
-                type: boolean
-                description: Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non
-              tournamentId:
-                type: string
-                example: lol-pro
-                description: |-
-                  Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.
-                  Le champ 'locked' doit être non nul.
-                nullable: true
-              subject:
-                type: string
-                description: Sujet du mail
-              content:
-                type: string
-                description: Contenu du mail
+            $ref: '#/components/schemas/MailQuery'
     responses:
-      204:
+      201:
         description: Le mail a été envoyé avec succès
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                malformed:
+                  type: integer
+                delivered:
+                  type: integer
+                undelivered:
+                  type: integer
       400:
         $ref: '#/components/responses/400Errored'
       401:
@@ -336,7 +350,8 @@
 
     responses:
       200:
-        description: Un tableau de logs
+        description: Un tableau de logs<br/>
+          **Permission 'admin' requise.**
         content:
           application/json:
             schema:
