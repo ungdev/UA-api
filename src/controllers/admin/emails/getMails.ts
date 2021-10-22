@@ -2,10 +2,12 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
-import { MailQuery, Permission } from '../../../types';
+import { User, MailQuery, Permission } from '../../../types';
 import { validateQuery } from '../../../middlewares/validation';
 import database from '../../../services/database';
-import { Log, User } from '.prisma/client';
+import { Log } from '.prisma/client';
+import env from '../../../utils/env';
+import { filterAdminAccount } from '../../../utils/filters';
 
 export default [
   // Middlewares
@@ -19,7 +21,7 @@ export default [
         where: {
           AND: {
             method: 'POST',
-            path: '/api/admin/emails',
+            path: `${env.api.prefix}${env.api.prefix === '/' ? '' : '/'}admin/emails`,
           },
         },
         include: {
@@ -32,7 +34,7 @@ export default [
       return success(
         response,
         logs.map((log) => ({
-          sender: log.user,
+          sender: filterAdminAccount(log.user),
           subject: log.body.subject,
           content: log.body.content,
           tournamentId: log.body.tournamentId,

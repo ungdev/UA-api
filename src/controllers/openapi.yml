@@ -176,7 +176,7 @@ components:
           type: string
           format: date-time
         sender:
-          $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/AdminUser'
 
     MailQuery:
       type: object
@@ -184,22 +184,29 @@ components:
       properties:
         locked:
           type: boolean
-          description: Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non
+          description: |-
+            Si cette propriété est omise, tous les utilisateurs pourront recevoir le mail.
+            Autrement, si elle vaut `false`, seuls les joueurs **membres d'équipes non validées** recevront le mail.
+            Sinon, si elle vaut `true`, seuls les joueurs **membres d'équipes validées** recevront le mail.
+          optional: true
         tournamentId:
           type: string
           example: lolCompetitive
           description: |-
-            Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.
-            Le champ 'locked' doit être non nul.
+            Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.<br />
+            *Cette propriété **peut** être utilisée avec `locked` pour envoyer un mail aux équipes non validées d'un certain
+            tournoi (par exemple s'il y a moins de places disponibles que d'équipes crées).*
           nullable: true
         subject:
           type: string
           description: Sujet du mail
+          required: true
         content:
           type: array
           items:
             $ref: '#/components/schemas/MailSection'
           description: Contenu du mail
+          required: true
 
     UserAttendant:
       type: object
@@ -254,6 +261,30 @@ components:
             attendant:
               $ref: '#/components/schemas/UserAttendant'
               nullable: true
+
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: string
+          example: Z5jdHi
+        type:
+          $ref: '#/components/schemas/Type'
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        permissions:
+          $ref: '#/components/schemas/Permission'
+          nullable: true
 
     Team:
       type: object

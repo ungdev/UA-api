@@ -109,8 +109,19 @@
           schema:
             $ref: '#/components/schemas/MailQuery'
     responses:
-      204:
+      201:
         description: Le mail a été envoyé avec succès
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                malformed:
+                  type: integer
+                delivered:
+                  type: integer
+                undelivered:
+                  type: integer
       400:
         $ref: '#/components/responses/400Errored'
       401:

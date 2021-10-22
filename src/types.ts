@@ -189,6 +189,7 @@ export const enum Error {
 
   InvalidCart = 'Le contenu de la commande est invalide',
   EmptyLogin = "Le nom d'utilisateur ne peut pas être vide",
+  MalformedMailBody = 'Structure du mail incorrecte',
 
   // 401
   // The user credentials were refused or not provided
