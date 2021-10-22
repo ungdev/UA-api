@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { badRequest, created } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
-import { Error as ApiError, MailQuery, Permission } from '../../../types';
+import { Error as ApiError, MailQuery } from '../../../types';
 import { validateBody } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
 import { sendEmail, SerializedMail } from '../../../services/email';
@@ -13,7 +13,7 @@ import { getRequestInfo } from '../../../utils/users';
 
 export default [
   // Middlewares
-  ...hasPermission(Permission.anim),
+  ...hasPermission(),
   validateBody(
     Joi.object({
       preview: Joi.boolean().default(false),
