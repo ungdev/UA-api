@@ -22,7 +22,7 @@ export default [
       locked: validators.stringBoolean.optional(),
       scanned: validators.stringBoolean.optional(),
       permission: validators.permission.optional(),
-      page: Joi.number().integer().positive().default('0'),
+      page: Joi.number().integer().min(0).default('0'),
     }).required(),
   ),
 
