@@ -1,6 +1,6 @@
-import prisma, { TournamentId, UserType } from '@prisma/client';
+import type { PrismaPromise } from '@prisma/client';
 import database from '../services/database';
-import { PrimitiveUser, Team, User } from '../types';
+import { PrimitiveUser, Team, User, TournamentId, UserType, PrimitiveTeam, RawUser } from '../types';
 import nanoid from '../utils/nanoid';
 import { countCoaches, formatUser, userInclusions } from './user';
 
@@ -15,7 +15,7 @@ const teamInclusions = {
   },
 };
 
-export const formatTeam = (team: prisma.Team & { users: PrimitiveUser[]; askingUsers: PrimitiveUser[] }): Team => {
+export const formatTeam = (team: PrimitiveTeam & { users: PrimitiveUser[]; askingUsers: PrimitiveUser[] }): Team => {
   if (!team) return null;
 
   const players = team.users.filter((player) => player.type === 'player');
@@ -208,7 +208,7 @@ export const joinTeam = (teamId: string, user: User, newUserType?: UserType) =>
 
 export const replaceUser = (user: User, targetUser: User, team: Team) => {
   // Create the first transaction to replace the user
-  const transactions: prisma.PrismaPromise<prisma.User | prisma.Team>[] = [
+  const transactions: PrismaPromise<RawUser | PrimitiveTeam>[] = [
     kickUser(user.id),
     joinTeam(team.id, targetUser, user.type),
   ];

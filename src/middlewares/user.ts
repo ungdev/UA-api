@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import * as Sentry from '@sentry/node';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
-import { UserType } from '@prisma/client';
-import { Error, DecodedToken } from '../types';
+import { Error, DecodedToken, UserType } from '../types';
 import { forbidden, notFound, unauthenticated } from '../utils/responses';
 import { fetchUser } from '../operations/user';
 import env from '../utils/env';

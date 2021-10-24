@@ -4,9 +4,8 @@ import { isNotInATeam } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import { getRequestInfo } from '../../utils/users';
 import { forbidden, success } from '../../utils/responses';
-import { Error } from '../../types';
+import { Error, UserType } from '../../types';
 import { fetchUser, updateAdminUser } from '../../operations/user';
-import { UserType } from '.prisma/client';
 
 export const become = [
   // Middlewares

@@ -1,9 +1,8 @@
-import { UserType } from '@prisma/client';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app';
 import database from '../../src/services/database';
-import { Error, User } from '../../src/types';
+import { Error, User, UserType } from '../../src/types';
 import { generateToken } from '../../src/utils/users';
 import { createFakeUser } from '../utils';
 import { sandbox } from '../setup';

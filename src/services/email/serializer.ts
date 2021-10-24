@@ -1,7 +1,6 @@
-import { User, ItemCategory } from '@prisma/client';
 import { readFile } from 'fs/promises';
 import { render } from 'mustache';
-import { ActionFeedback, DetailedCart } from '../../types';
+import { ActionFeedback, DetailedCart, RawUser, ItemCategory } from '../../types';
 import { escapeText, inflate, style } from './components';
 import env from '../../utils/env';
 import { formatPrice } from '../../utils/helpers';
@@ -110,7 +109,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
     ],
   });
 
-export const generateValidationEmail = (user: User) =>
+export const generateValidationEmail = (user: RawUser) =>
   serialize({
     receiver: user.email,
     reason:
@@ -163,7 +162,7 @@ export const generateValidationEmail = (user: User) =>
     ],
   });
 
-export const generatePasswordResetEmail = (user: User) =>
+export const generatePasswordResetEmail = (user: RawUser) =>
   serialize({
     receiver: user.email,
     reason:

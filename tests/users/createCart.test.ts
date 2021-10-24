@@ -1,4 +1,3 @@
-import { UserAge, UserType } from '@prisma/client';
 import request from 'supertest';
 import { expect } from 'chai';
 import app from '../../src/app';
@@ -7,7 +6,7 @@ import * as userOperations from '../../src/operations/user';
 import * as itemOperations from '../../src/operations/item';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
-import { Error, User, Team } from '../../src/types';
+import { Error, User, Team, UserAge, UserType } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { PayBody } from '../../src/controllers/users/createCart';

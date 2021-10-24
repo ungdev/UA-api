@@ -4,12 +4,11 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, User } from '../../src/types';
+import { Error, Team, User, UserType } from '../../src/types';
 import { createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
-import { UserType } from '.prisma/client';
 
 describe('DELETE /teams/current/users/current', () => {
   let user: User;

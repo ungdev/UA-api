@@ -1,9 +1,8 @@
 import fs from 'fs';
 import { SMTPServer } from 'smtp-server';
-import { ItemCategory, TransactionState, UserType } from '@prisma/client';
 import { expect } from 'chai';
 import { createFakeUser } from '../utils';
-import { PrimitiveCartItem } from '../../src/types';
+import { PrimitiveCartItem, ItemCategory, TransactionState, UserType } from '../../src/types';
 import { createCart, updateCart } from '../../src/operations/carts';
 import { sendEmail } from '../../src/services/email';
 import { inflate } from '../../src/services/email/components';

@@ -1,6 +1,5 @@
-import { User } from '@prisma/client';
 import nodemailer from 'nodemailer';
-import { DetailedCart, EmailAttachement } from '../../types';
+import { DetailedCart, EmailAttachement, RawUser } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
 import { generateTicketsEmail, generateValidationEmail, generatePasswordResetEmail } from './serializer';
@@ -73,7 +72,7 @@ export const sendPaymentConfirmation = async (cart: DetailedCart) => {
  * @throws an error if the mail declared above (corresponding to this
  * request) is invalid ie. contains an object which is not a {@link Component}
  */
-export const sendValidationCode = async (user: User) => sendEmail(await generateValidationEmail(user));
+export const sendValidationCode = async (user: RawUser) => sendEmail(await generateValidationEmail(user));
 
 /**
  * Sends an email to the user with a password reset link.
@@ -84,4 +83,4 @@ export const sendValidationCode = async (user: User) => sendEmail(await generate
  * @throws an error if the mail declared above (corresponding to this
  * request) is invalid ie. contains an object which is not a {@link Component}
  */
-export const sendPasswordReset = async (user: User) => sendEmail(await generatePasswordResetEmail(user));
+export const sendPasswordReset = async (user: RawUser) => sendEmail(await generatePasswordResetEmail(user));

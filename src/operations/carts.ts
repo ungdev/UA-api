@@ -1,7 +1,15 @@
-import prisma, { TransactionState, UserType } from '@prisma/client';
+import {
+  TransactionState,
+  UserType,
+  Cart,
+  CartWithCartItems,
+  CartWithCartItemsAdmin,
+  DetailedCart,
+  PrimitiveCartItem,
+  RawUser,
+} from '../types';
 
 import database from '../services/database';
-import { Cart, CartWithCartItems, CartWithCartItemsAdmin, DetailedCart, PrimitiveCartItem } from '../types';
 import env from '../utils/env';
 import nanoid from '../utils/nanoid';
 
@@ -108,7 +116,7 @@ export const refundCart = (cartId: string): Promise<Cart> =>
     where: { id: cartId },
   });
 
-export const forcePay = (user: prisma.User) => {
+export const forcePay = (user: RawUser) => {
   let itemId;
 
   switch (user.type) {

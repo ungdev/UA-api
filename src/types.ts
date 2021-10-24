@@ -1,8 +1,9 @@
 import prisma, { TournamentId, TransactionState, UserType, UserAge } from '@prisma/client';
-import { ErrorRequestHandler } from 'express';
-import Mail from 'nodemailer/lib/mailer';
-import { ParsedQs } from 'qs';
+import type { ErrorRequestHandler } from 'express';
+import type Mail from 'nodemailer/lib/mailer';
+import type { ParsedQs } from 'qs';
 import type { Mail as Email } from './services/email';
+
 /**
  * DISCLAMER: en environnement de développement, la modification de ce fichier ne sera peut-être pas prise en compte par le serveur de dev
  * Redémarrer le serveur dans ce cas là
@@ -59,6 +60,8 @@ export enum Permission {
   admin = 'admin',
 }
 
+export { TransactionState, UserAge, UserType, TournamentId, ItemCategory, Log } from '@prisma/client';
+
 /************************/
 /** Database extensions **/
 /************************/
@@ -100,6 +103,7 @@ export interface PrimitiveCartItem {
   forUserId: string;
 }
 
+export type RawUser = prisma.User;
 export type PrimitiveUser = prisma.User & {
   cartItems: (CartItem & {
     cart: Cart;
@@ -132,12 +136,16 @@ export type UserSearchQuery = {
   place: string;
 };
 
-export type Team = prisma.Team & {
+export type PrimitiveTeam = prisma.Team;
+
+export type Team = PrimitiveTeam & {
   users: undefined;
   players: User[];
   coaches: User[];
   askingUsers: User[];
 };
+
+export type PrimitiveTournament = prisma.Tournament;
 
 export type Tournament = prisma.Tournament & {
   lockedTeamsCount: number;

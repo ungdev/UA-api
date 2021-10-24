@@ -4,9 +4,8 @@ import { filterCartWithCartItemsAdmin } from '../../../utils/filters';
 import { notFound, success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
 import { fetchUser } from '../../../operations/user';
-import { Error, Permission } from '../../../types';
+import { Error, Permission, ItemCategory } from '../../../types';
 import { isPartnerSchool } from '../../../utils/helpers';
-import { ItemCategory } from '.prisma/client';
 
 export default [
   // Middlewares

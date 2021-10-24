@@ -1,9 +1,19 @@
 import userOperations from 'bcryptjs';
-import prisma, { TransactionState, UserAge, UserType } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
-import { Permission, PrimitiveUser, User, UserSearchQuery, UserWithTeam } from '../types';
+import {
+  Permission,
+  PrimitiveUser,
+  User,
+  UserSearchQuery,
+  UserWithTeam,
+  TransactionState,
+  UserAge,
+  UserType,
+  PrimitiveTeam,
+} from '../types';
 import { serializePermissions } from '../utils/helpers';
 
 export const userInclusions = {
@@ -32,7 +42,7 @@ export const formatUser = (user: PrimitiveUser): User => {
   };
 };
 
-export const formatUserWithTeam = (primitiveUser: PrimitiveUser & { team: prisma.Team }): UserWithTeam => {
+export const formatUserWithTeam = (primitiveUser: PrimitiveUser & { team: PrimitiveTeam }): UserWithTeam => {
   const user = formatUser(primitiveUser);
 
   return {
@@ -58,37 +68,40 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
  * along with count of entries matching the query.
  */
 export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<[UserWithTeam[], number]> => {
+  const filter: Omit<Prisma.UserFindManyArgs, 'select' | 'include'> = {
+    where: {
+      OR: [
+        { firstname: query.search ? { contains: query.search } : undefined },
+        { lastname: query.search ? { contains: query.search } : undefined },
+        { username: query.search ? { contains: query.search } : undefined },
+        { email: query.search ? { contains: query.search } : undefined },
+        {
+          team: {
+            name: query.search ? { contains: query.search } : undefined,
+          },
+        },
+        {
+          // Always true condition in order to avoid no result as OR filter
+          email: query.search ? undefined : { not: null },
+        },
+      ],
+
+      team: {
+        tournamentId: query.tournament || undefined,
+      },
+
+      id: query.userId || undefined,
+      type: query.type || undefined,
+      permissions: query.permission ? { contains: query.permission } : undefined,
+      place: query.place ? { startsWith: query.place } : undefined,
+
+      // Checks first if scanned exists, and then if it is true of false
+      scannedAt: query.scanned ? (query.scanned === 'true' ? { not: null } : null) : undefined,
+    },
+  };
   const [users, count] = await database.$transaction([
     database.user.findMany({
-      where: {
-        OR: [
-          { firstname: query.search ? { contains: query.search } : undefined },
-          { lastname: query.search ? { contains: query.search } : undefined },
-          { username: query.search ? { contains: query.search } : undefined },
-          { email: query.search ? { contains: query.search } : undefined },
-          {
-            team: {
-              name: query.search ? { contains: query.search } : undefined,
-            },
-          },
-          {
-            // Always true condition in order to avoid no result as OR filter
-            email: query.search ? undefined : { not: null },
-          },
-        ],
-
-        team: {
-          tournamentId: query.tournament || undefined,
-        },
-
-        id: query.userId || undefined,
-        type: query.type || undefined,
-        permissions: query.permission ? { contains: query.permission } : undefined,
-        place: query.place ? { startsWith: query.place } : undefined,
-
-        // Checks first if scanned exists, and then if it is true of false
-        scannedAt: query.scanned ? (query.scanned === 'true' ? { not: null } : null) : undefined,
-      },
+      ...filter,
       include: {
         ...userInclusions,
         team: true,
@@ -96,37 +109,7 @@ export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<
       skip: page * env.api.itemsPerPage,
       take: env.api.itemsPerPage,
     }),
-    database.user.count({
-      where: {
-        OR: [
-          { firstname: query.search ? { contains: query.search } : undefined },
-          { lastname: query.search ? { contains: query.search } : undefined },
-          { username: query.search ? { contains: query.search } : undefined },
-          { email: query.search ? { contains: query.search } : undefined },
-          {
-            team: {
-              name: query.search ? { contains: query.search } : undefined,
-            },
-          },
-          {
-            // Always true condition in order to avoid no result as OR filter
-            email: query.search ? undefined : { not: null },
-          },
-        ],
-
-        team: {
-          tournamentId: query.tournament || undefined,
-        },
-
-        id: query.userId || undefined,
-        type: query.type || undefined,
-        permissions: query.permission ? { contains: query.permission } : undefined,
-        place: query.place ? { startsWith: query.place } : undefined,
-
-        // Checks first if scanned exists, and then if it is true of false
-        scannedAt: query.scanned ? (query.scanned === 'true' ? { not: null } : null) : undefined,
-      },
-    }),
+    database.user.count(filter),
   ]);
 
   return [users.map(formatUserWithTeam), count];

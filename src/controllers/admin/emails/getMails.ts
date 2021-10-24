@@ -2,10 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
-import { User, MailQuery, Permission } from '../../../types';
+import { User, MailQuery, Permission, Log } from '../../../types';
 import { validateQuery } from '../../../middlewares/validation';
 import database from '../../../services/database';
-import { Log } from '.prisma/client';
 import env from '../../../utils/env';
 import { filterAdminAccount } from '../../../utils/filters';
 

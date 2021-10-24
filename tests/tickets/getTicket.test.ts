@@ -1,11 +1,10 @@
-import { TransactionState } from '@prisma/client';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as cartItemOperations from '../../src/operations/cartItem';
 import database from '../../src/services/database';
-import { CartItem, Error, User } from '../../src/types';
+import { CartItem, Error, User, TransactionState } from '../../src/types';
 import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { createCart, fetchCarts, updateCart } from '../../src/operations/carts';

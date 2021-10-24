@@ -1,9 +1,8 @@
-import { TransactionState } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import { fetchCart, updateCart } from '../../operations/carts';
 import { sendPaymentConfirmation } from '../../services/email';
 import * as etupay from '../../services/etupay';
-import { Error, EtupayError, EtupayResponse } from '../../types';
+import { Error, EtupayError, EtupayResponse, TransactionState } from '../../types';
 import env from '../../utils/env';
 import { decodeFromBase64 } from '../../utils/helpers';
 import { badRequest, forbidden, notFound, success } from '../../utils/responses';

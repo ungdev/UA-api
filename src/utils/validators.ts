@@ -1,6 +1,5 @@
 import Joi from 'joi';
-import { TournamentId, UserAge, UserType } from '@prisma/client';
-import { Permission, Error as ResponseError } from '../types';
+import { TournamentId, UserAge, UserType, Permission, Error as ResponseError } from '../types';
 
 // Matches with LoL EUW summoner name
 const usernameRegex = /^[0-9\p{L} _-]{3,16}$/u;
