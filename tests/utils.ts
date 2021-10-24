@@ -1,7 +1,6 @@
 import faker from 'faker';
-import prisma, { TournamentId, UserAge, UserType } from '@prisma/client';
 import { createUser, fetchUser, removeUserRegisterToken, setPermissions } from '../src/operations/user';
-import { Permission, User } from '../src/types';
+import { Permission, RawUser, User, TournamentId, UserAge, UserType } from '../src/types';
 import { createTeam, fetchTeam, joinTeam, lockTeam } from '../src/operations/team';
 import { forcePay } from '../src/operations/carts';
 import logger from '../src/utils/logger';
@@ -43,7 +42,7 @@ export const createFakeUser = async ({
   customMessage?: string;
   age?: UserAge;
 } = {}): Promise<User> => {
-  const user: prisma.User = await createUser({
+  const user: RawUser = await createUser({
     username,
     firstname,
     lastname,

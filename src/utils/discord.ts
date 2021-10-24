@@ -1,4 +1,3 @@
-import { TournamentId } from '.prisma/client';
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
 import { fetchTeams } from '../operations/team';
 import { createDiscordChannel, createDiscordRole, fetchGuildMembers, addMemberRole } from '../services/discord';
@@ -10,7 +9,7 @@ import {
   Snowflake,
 } from '../controllers/discord/discordApi';
 import database from '../services/database';
-import { Team, Tournament } from '../types';
+import { Team, Tournament, TournamentId } from '../types';
 import env from './env';
 import logger from './logger';
 

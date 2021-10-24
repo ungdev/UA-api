@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
@@ -6,6 +7,7 @@ import { Error, Permission, User } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
+import { fetchAllItems } from '../../../src/operations/item';
 
 describe('GET /admin/users/:userId/carts', () => {
   let user: User;
@@ -67,6 +69,9 @@ describe('GET /admin/users/:userId/carts', () => {
     const [cart] = carts;
     const [cartItem] = cart.cartItems;
 
+    const items = await fetchAllItems();
+    const item = items.find((findItem) => findItem.id === 'ethernet-5');
+
     await request(app)
       .get(`/admin/users/${user.id}/carts`)
       .set('Authorization', `Bearer ${adminToken}`)
@@ -77,12 +82,16 @@ describe('GET /admin/users/:userId/carts', () => {
           transactionState: cart.transactionState,
           paidAt: null,
           transactionId: null,
+          totalPrice: item.price,
           cartItems: [
             {
               id: cartItem.id,
               quantity: 1,
               cartId: cart.id,
-              itemId: 'ethernet-5',
+              item: {
+                name: item.name,
+                id: 'ethernet-5',
+              },
               forUser: {
                 id: user.id,
                 username: user.username,
@@ -91,5 +100,101 @@ describe('GET /admin/users/:userId/carts', () => {
           ],
         },
       ]);
+  });
+
+  it('should return a cart with only one discount', async () => {
+    // Delete previous carts
+    await database.cart.deleteMany();
+
+    // Create price-reduced account
+    const partnerSchoolUser = await createFakeUser({
+      email: 'someone@utt.fr',
+    });
+
+    // Create a cart, containing a reduced-price ticket, a full-price ticket and another
+    // random item
+    await cartOperations.createCart(partnerSchoolUser.id, [
+      {
+        itemId: 'ethernet-5',
+        quantity: 1,
+        forUserId: partnerSchoolUser.id,
+      },
+      {
+        itemId: 'ticket-player',
+        quantity: 1,
+        forUserId: partnerSchoolUser.id,
+      },
+      {
+        itemId: 'ticket-player',
+        quantity: 1,
+        forUserId: user.id,
+      },
+    ]);
+
+    // Retrieve cart from database
+    const [cart] = await cartOperations.fetchCarts(partnerSchoolUser.id);
+    const ethernetCable = cart.cartItems.find((item) => item.itemId === 'ethernet-5');
+    const ticketPartner = cart.cartItems.find(
+      (item) => item.forUserId === partnerSchoolUser.id && item.itemId === 'ticket-player',
+    );
+    const ticketRegular = cart.cartItems.find((item) => item.forUserId === user.id && item.itemId === 'ticket-player');
+
+    const items = await fetchAllItems();
+    const ethernetCableItem = items.find((findItem) => findItem.id === 'ethernet-5');
+    const ticketItem = items.find((findItem) => findItem.id === 'ticket-player');
+
+    // Send query and check result body
+    const result = await request(app)
+      .get(`/admin/users/${partnerSchoolUser.id}/carts`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    expect(result.body[0].id).to.be.equal(cart.id);
+    expect(result.body[0].userId).to.be.equal(partnerSchoolUser.id);
+    expect(result.body[0].transactionState).to.be.equal(cart.transactionState);
+    expect(result.body[0].paidAt).to.be.null;
+    expect(result.body[0].transactionId).to.be.null;
+    expect(result.body[0].totalPrice).to.be.equal(ethernetCableItem.price + ticketItem.reducedPrice + ticketItem.price);
+    expect(result.body[0].cartItems).to.have.lengthOf(3);
+    return expect(result.body[0].cartItems).to.deep.include.members([
+      {
+        id: ticketPartner.id,
+        quantity: 1,
+        cartId: cart.id,
+        item: {
+          name: ticketItem.name,
+          id: ticketItem.id,
+        },
+        forUser: {
+          id: partnerSchoolUser.id,
+          username: partnerSchoolUser.username,
+        },
+      },
+      {
+        id: ticketRegular.id,
+        quantity: 1,
+        cartId: cart.id,
+        item: {
+          name: ticketItem.name,
+          id: ticketItem.id,
+        },
+        forUser: {
+          id: user.id,
+          username: user.username,
+        },
+      },
+      {
+        id: ethernetCable.id,
+        quantity: 1,
+        cartId: cart.id,
+        item: {
+          name: ethernetCableItem.name,
+          id: ethernetCableItem.id,
+        },
+        forUser: {
+          id: partnerSchoolUser.id,
+          username: partnerSchoolUser.username,
+        },
+      },
+    ]);
   });
 });

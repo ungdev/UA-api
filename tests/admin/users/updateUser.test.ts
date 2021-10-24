@@ -3,12 +3,11 @@ import request from 'supertest';
 import app from '../../../src/app';
 import { createFakeTeam, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User } from '../../../src/types';
+import { Error, Permission, User, UserType } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { forcePay } from '../../../src/operations/carts';
-import { UserType } from '.prisma/client';
 
 describe('PATCH /admin/users/:userId', () => {
   let user: User;

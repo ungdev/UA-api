@@ -14,19 +14,16 @@ export default [
   ...hasPermission(Permission.entry, Permission.anim),
   validateQuery(
     Joi.object({
-      username: Joi.string(),
-      firstname: validators.firstname,
-      lastname: validators.lastname,
-      email: Joi.string(), // Only string because it starts with
-      place: Joi.string(),
-      type: validators.type,
-      team: validators.teamName,
-      tournament: validators.tournamentId,
-      locked: validators.stringBoolean,
-      scanned: validators.stringBoolean,
-      permission: validators.permission,
-      page: Joi.string().default('0'), // must be a string as it is in query
-    }),
+      userId: Joi.string().optional(),
+      search: Joi.string().optional(),
+      place: Joi.string().optional(),
+      type: validators.type.optional(),
+      tournament: validators.tournamentId.optional(),
+      locked: validators.stringBoolean.optional(),
+      scanned: validators.stringBoolean.optional(),
+      permission: validators.permission.optional(),
+      page: Joi.number().integer().min(0).default('0'),
+    }).required(),
   ),
 
   // Controller
@@ -34,15 +31,21 @@ export default [
     try {
       const userSearch = request.query as UserSearchQuery;
 
-      // Get the page from the params. Default to zero and put it in max to ensure there is no negative numbers
-      const page = Math.max(Number.parseInt(request.params.page) || 0, 0);
+      // Get the page from the query. Default to zero and put it in max to ensure there is no negative numbers
+      const pageNumber = request.query.page as string;
+      const page = Number.parseInt(pageNumber);
 
-      const users = await fetchUsers(userSearch, page);
+      // Fetch matching users and database entry count
+      const [users, userCount] = await fetchUsers(userSearch, page);
+
+      // Compute page count
+      const nbPages = Math.ceil(userCount / env.api.itemsPerPage);
+
       return success(response, {
         itemsPerPage: env.api.itemsPerPage,
         currentPage: page,
-        totalItems: 0,
-        totalPages: 0,
+        totalItems: userCount,
+        totalPages: nbPages,
         users: users.map((user) => ({
           ...filterUserWithTeam(user),
           customMessage: user.customMessage,

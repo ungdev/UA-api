@@ -1,10 +1,10 @@
-import { TournamentId } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { validateQuery } from '../../middlewares/validation';
 import { fetchTeams } from '../../operations/team';
 import { filterTeamRestricted } from '../../utils/filters';
 import { success } from '../../utils/responses';
+import { TournamentId } from '../../types';
 import * as validators from '../../utils/validators';
 
 export default [

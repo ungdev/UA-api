@@ -1,11 +1,10 @@
-import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { hasLinkedDiscordAccount } from '../../middlewares/oauth';
 import { noSpectator } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import { askJoinTeam, fetchTeam } from '../../operations/team';
-import { Error as ResponseError } from '../../types';
+import { Error as ResponseError, UserType } from '../../types';
 import { filterUser } from '../../utils/filters';
 import { forbidden, notFound, success } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';

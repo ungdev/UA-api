@@ -1,7 +1,15 @@
-import prisma, { TransactionState, UserType } from '@prisma/client';
+import {
+  TransactionState,
+  UserType,
+  Cart,
+  CartWithCartItems,
+  CartWithCartItemsAdmin,
+  DetailedCart,
+  PrimitiveCartItem,
+  RawUser,
+} from '../types';
 
 import database from '../services/database';
-import { Cart, CartWithCartItems, DetailedCart, PrimitiveCartItem } from '../types';
 import env from '../utils/env';
 import nanoid from '../utils/nanoid';
 
@@ -22,8 +30,18 @@ export const fetchCart = (cartId: string): Promise<Cart> =>
     },
   });
 
-export const fetchCarts = (userId: string): Promise<CartWithCartItems[]> =>
-  database.cart.findMany({
+/**
+ * Retrieves all carts created by a {@link prisma.User}
+ * @param userId the id of the user to fetch the carts of
+ * @param includeItem whether the result should include the {@link prisma.Item} in the {@link prisma.CartItem}
+ */
+export function fetchCarts(userId: string, includeItem: true): Promise<CartWithCartItemsAdmin[]>;
+export function fetchCarts(userId: string, includeItem?: false): Promise<CartWithCartItems[]>;
+export function fetchCarts(
+  userId: string,
+  includeItem = false,
+): Promise<CartWithCartItems[] | CartWithCartItemsAdmin[]> {
+  return database.cart.findMany({
     where: {
       userId,
     },
@@ -31,10 +49,12 @@ export const fetchCarts = (userId: string): Promise<CartWithCartItems[]> =>
       cartItems: {
         include: {
           forUser: true,
+          item: includeItem,
         },
       },
     },
   });
+}
 
 export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
   database.cart.create({
@@ -96,7 +116,7 @@ export const refundCart = (cartId: string): Promise<Cart> =>
     where: { id: cartId },
   });
 
-export const forcePay = (user: prisma.User) => {
+export const forcePay = (user: RawUser) => {
   let itemId;
 
   switch (user.type) {

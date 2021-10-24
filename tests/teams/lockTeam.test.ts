@@ -4,12 +4,11 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, User } from '../../src/types';
+import { Error, Team, User, UserType } from '../../src/types';
 import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchTournament } from '../../src/operations/tournament';
-import { UserType } from '.prisma/client';
 
 describe('POST /teams/current/lock', () => {
   let captain: User;

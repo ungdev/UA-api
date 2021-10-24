@@ -1,6 +1,5 @@
-import { TransactionState } from '@prisma/client';
 import database from '../services/database';
-import { Item, Team } from '../types';
+import { Item, Team, TransactionState } from '../types';
 
 export const fetchAllItems = async (): Promise<Item[]> => {
   // fetches the items

@@ -1,9 +1,8 @@
-import { UserType } from '.prisma/client';
 import { joinTeam } from '../src/operations/team';
 import { fetchTournaments } from '../src/operations/tournament';
 import * as settings from '../src/operations/settings';
 import database from '../src/services/database';
-import { Permission } from '../src/types';
+import { Permission, UserType } from '../src/types';
 import env from '../src/utils/env';
 import { createFakeTeam, createFakeUser } from './utils';
 

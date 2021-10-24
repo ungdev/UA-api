@@ -4,10 +4,9 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, User } from '../../src/types';
+import { Error, Team, User, UserType } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
-import { UserType } from '.prisma/client';
 import { updateAdminUser } from '../../src/operations/user';
 
 describe('POST /teams/:teamId/join-requests', () => {

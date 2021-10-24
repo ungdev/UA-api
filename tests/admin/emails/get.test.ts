@@ -1,6 +1,5 @@
 import request from 'supertest';
-import { UserType } from '.prisma/client';
-import { User, Error, Permission } from '../../../src/types';
+import { User, Error, Permission, UserType } from '../../../src/types';
 import database from '../../../src/services/database';
 import * as mailOperations from '../../../src/services/email';
 import { createFakeUser } from '../../utils';

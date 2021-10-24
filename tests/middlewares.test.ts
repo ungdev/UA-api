@@ -1,9 +1,8 @@
-import { UserType } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import request from 'supertest';
 import app from '../src/app';
 import database from '../src/services/database';
-import { Error } from '../src/types';
+import { Error, UserType } from '../src/types';
 import { generateToken } from '../src/utils/users';
 import { createFakeUser } from './utils';
 import env from '../src/utils/env';

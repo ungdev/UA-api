@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { beforeEach } from 'mocha';
-import { TournamentId, UserType } from '.prisma/client';
-import { User, Error, Permission } from '../../../src/types';
+import { User, Error, Permission, TournamentId, UserType } from '../../../src/types';
 import database from '../../../src/services/database';
 import * as mailOperations from '../../../src/services/email';
 import { createFakeTeam, createFakeUser } from '../../utils';

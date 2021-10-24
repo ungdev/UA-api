@@ -1,11 +1,10 @@
-import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
 import { forbidden, notFound, success } from '../../utils/responses';
 import { fetchTeam, joinTeam } from '../../operations/team';
 import { filterTeam } from '../../utils/filters';
 import { fetchUser } from '../../operations/user';
-import { Error } from '../../types';
+import { Error, UserType } from '../../types';
 import { fetchTournament } from '../../operations/tournament';
 import { getRequestInfo } from '../../utils/users';
 

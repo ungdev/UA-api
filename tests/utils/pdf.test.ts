@@ -1,11 +1,11 @@
 /* eslint-disable security/detect-non-literal-fs-filename */
 import fs from 'fs/promises';
-import { TournamentId, TransactionState } from '@prisma/client';
 import { createFakeTeam, createFakeUser } from '../utils';
 import { createCart, updateCart } from '../../src/operations/carts';
 import { generateTicket } from '../../src/utils/pdf';
 import { getCaptain } from '../../src/utils/teams';
 import database from '../../src/services/database';
+import { TournamentId, TransactionState } from '../../src/types';
 
 describe('Tests the PDF utils', () => {
   after(async () => {

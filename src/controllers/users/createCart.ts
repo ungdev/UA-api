@@ -1,4 +1,3 @@
-import { ItemCategory, UserType, UserAge, TransactionState } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import database from '../../services/database';
@@ -7,7 +6,15 @@ import { validateBody } from '../../middlewares/validation';
 import { createCart, dropStale } from '../../operations/carts';
 import { fetchUserItems } from '../../operations/item';
 import { createAttendant, deleteUser, fetchUser, formatUser } from '../../operations/user';
-import { Cart, Error as ResponseError, PrimitiveCartItem } from '../../types';
+import {
+  Cart,
+  Error as ResponseError,
+  PrimitiveCartItem,
+  ItemCategory,
+  UserType,
+  UserAge,
+  TransactionState,
+} from '../../types';
 import { encodeToBase64, isPartnerSchool, removeAccents } from '../../utils/helpers';
 import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';

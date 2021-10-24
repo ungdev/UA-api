@@ -1,9 +1,8 @@
 import request from 'supertest';
-import { TransactionState } from '@prisma/client';
 import app from '../../../src/app';
 import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Cart, Error, Permission, User } from '../../../src/types';
+import { Cart, Error, Permission, User, TransactionState } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
