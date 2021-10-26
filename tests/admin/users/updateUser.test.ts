@@ -267,4 +267,48 @@ describe('PATCH /admin/users/:userId', () => {
       .send({ type: user.type === UserType.player ? UserType.coach : UserType.player })
       .expect(403, { error: Error.CannotChangeType });
   });
+
+  it('should remove all permissions from the user', async () => {
+    const permissibleUser = await createFakeUser({ permission: Permission.stream });
+
+    const { body } = await request(app)
+      .patch(`/admin/users/${permissibleUser.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        permissions: [],
+      })
+      .expect(200);
+
+    const updatedUser = await userOperations.fetchUser(permissibleUser.id);
+
+    expect(body.permissions).to.have.lengthOf(0);
+    expect(updatedUser.permissions).to.have.lengthOf(0);
+    expect(body.discordId).to.be.equal(permissibleUser.discordId);
+    expect(body.place).to.be.equal(permissibleUser.place);
+    expect(body.type).to.be.equal(permissibleUser.type);
+    expect(body.age).to.be.equal(permissibleUser.age);
+    expect(body.customMessage).to.be.equal(permissibleUser.customMessage);
+  });
+
+  it('should add permissions to the user', async () => {
+    const permissibleUser = await createFakeUser();
+
+    const { body } = await request(app)
+      .patch(`/admin/users/${permissibleUser.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        permissions: [Permission.stream],
+      })
+      .expect(200);
+
+    const updatedUser = await userOperations.fetchUser(permissibleUser.id);
+
+    expect(body.permissions).to.include(Permission.stream);
+    expect(updatedUser.permissions).to.include(Permission.stream);
+    expect(body.discordId).to.be.equal(permissibleUser.discordId);
+    expect(body.place).to.be.equal(permissibleUser.place);
+    expect(body.type).to.be.equal(permissibleUser.type);
+    expect(body.age).to.be.equal(permissibleUser.age);
+    expect(body.customMessage).to.be.equal(permissibleUser.customMessage);
+  });
 });

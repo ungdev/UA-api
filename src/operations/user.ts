@@ -7,11 +7,9 @@ import {
   Permission,
   User,
   UserSearchQuery,
-  UserWithTeam,
   TransactionState,
   UserAge,
   UserType,
-  PrimitiveTeam,
   RawUserWithCartItems,
   RawUser,
   UserPatchBody,
@@ -58,15 +56,6 @@ export const formatUserWithTeamAndTournament = (
   };
 };
 
-export const formatUserWithTeam = (primitiveUser: RawUserWithCartItems & { team: PrimitiveTeam }): UserWithTeam => {
-  const user = formatUser(primitiveUser);
-
-  return {
-    ...user,
-    team: primitiveUser.team,
-  };
-};
-
 export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> => {
   const user = await database.user.findUnique({
     where: { [key]: parameterId },
@@ -92,13 +81,13 @@ export const fetchUsers = async (
       ...(query.search
         ? {
             OR: [
-              { firstname: query.search ? { contains: query.search } : undefined },
-              { lastname: query.search ? { contains: query.search } : undefined },
-              { username: query.search ? { contains: query.search } : undefined },
-              { email: query.search ? { contains: query.search } : undefined },
+              { firstname: { contains: query.search } },
+              { lastname: { contains: query.search } },
+              { username: { contains: query.search } },
+              { email: { contains: query.search } },
               {
                 team: {
-                  name: query.search ? { contains: query.search } : undefined,
+                  name: { contains: query.search },
                 },
               },
             ],

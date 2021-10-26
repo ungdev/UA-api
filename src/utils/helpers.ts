@@ -67,5 +67,5 @@ export const isPartnerSchool = (email: string) => env.email.partners.some((partn
 export const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min) + min);
 
 export const serializePermissions = (permissions: Permission[]) =>
-  !permissions?.length ? null : permissions?.join(',');
+  !permissions?.length ? null : permissions.join(',');
 export const deserializePermissions = (permissions: string) => (permissions?.split(',') ?? []) as Permission[];
