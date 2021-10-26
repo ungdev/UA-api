@@ -73,8 +73,8 @@
 /admin/emails:
   get:
     summary: Récupère tous les emails envoyés via cette route
-    description: Récupère les mails envoyés par les anims (& admins) via le `POST /admin/emails`<br/>
-      **Permission 'admin' requise.**
+    description: Récupère les mails envoyés par les admins via le `POST /admin/emails`<br/>
+      **Permission 'admin' ou 'anim' requise.**
     tags:
       - Admin
     security:
@@ -208,7 +208,7 @@
                 users:
                   type: array
                   items:
-                    $ref: '#/components/schemas/UserWithTeamAndMessage'
+                    $ref: '#/components/schemas/UserWithTeamAndMessageAndTournamentInfo'
       400:
         $ref: '#/components/responses/400Errored'
       401:
@@ -219,8 +219,11 @@
 /admin/users/{userId}:
   patch:
     summary: Modifie les informations d'un utilisateur
-    description: Modifie les informations d'un utilisateur.<br/>
-      **Permission 'admin' requise.**
+    description: |-
+      Modifie les informations d'un utilisateur.<br/>
+      **Permission 'admin' requise.**<br/><br/>
+      **Désambiguïsation:** le champ `permissions` écrase (si renseigné) complètement les anciennes permissions.
+      Pour cette raison, il ne faut pas oublier d'y ajouter également les permissions actuelles de l'utilisateur !
     tags:
       - Admin
     security:
@@ -243,21 +246,23 @@
                 type: array
                 items:
                   $ref: '#/components/schemas/Permission'
-                nullable: true
+                optional: true
               place:
                 type: string
                 example: A23
                 nullable: true
+                optional: true
               type:
                 $ref: '#/components/schemas/Type'
-                nullable: true
+                optional: true
               discordId:
                 type: string
                 example: '1420070400000'
+                optional: true
                 nullable: true
               age:
                 $ref: '#/components/schemas/Age'
-                nullable: true
+                optional: true
     responses:
       200:
         description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.

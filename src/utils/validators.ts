@@ -29,7 +29,7 @@ export const age = Joi.string()
 export const place = Joi.string().regex(placeRegex).error(new Error(ResponseError.InvalidPlace));
 export const permission = Joi.string()
   .valid(...Object.keys(Permission))
-  .error(new Error(ResponseError.NoPermission));
+  .error(new Error(ResponseError.InvalidPermission));
 export const stringBoolean = Joi.string().valid('true', 'false').error(new Error(ResponseError.stringBooleanError));
 
 // Team

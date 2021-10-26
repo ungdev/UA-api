@@ -8,12 +8,13 @@ Pour le réseau, pour l'instant inutile.
 
 ### Entry
 
-- Permet d'obtenir la liste des utilisateurs (route `GET /admin/users`)
-- Autorise l'utilisateur à scanner les QR codes à l'entrée de l'événement (route `POST /admin/scan`)
+- Permet d'obtenir la liste des utilisateurs (`GET /admin/users`)
+- Autorise l'utilisateur à scanner les QR codes à l'entrée de l'événement (`POST /admin/scan`)
 
 ### Anim
 
-- Permet d'obtenir la liste des utilisateurs (route `GET /admin/users`)
+- Permet d'obtenir la liste des utilisateurs (`GET /admin/users`)
+- Peut lire les mails qui ont été envoyés manuellement par des admins (`GET /admin/emails`)
 
 ### Admin
 

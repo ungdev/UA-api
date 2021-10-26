@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
-import { Permission, Error } from '../../../types';
+import { Permission, Error, UserPatchBody } from '../../../types';
 import { conflict, forbidden, notFound, success } from '../../../utils/responses';
 import { fetchUser, updateAdminUser } from '../../../operations/user';
 import { filterUser } from '../../../utils/filters';
@@ -16,9 +16,9 @@ export default [
     Joi.object({
       type: validators.type.optional(),
       age: validators.age.optional(),
-      permissions: Joi.array().optional().items(validators.permission.optional()),
-      place: validators.place.optional(),
-      discordId: validators.discordId.optional(),
+      permissions: Joi.array().optional().items(validators.permission),
+      place: validators.place.allow(null).optional(),
+      discordId: validators.discordId.allow(null).optional(),
       customMessage: Joi.string().optional(),
     }),
   ),
@@ -33,7 +33,7 @@ export default [
         return notFound(response, Error.UserNotFound);
       }
 
-      const { type, place, permissions, discordId, customMessage, age } = request.body;
+      const { type, place, permissions, discordId, customMessage, age } = request.body as UserPatchBody;
 
       // Check that the user type hasn't changed if the user is paid
       if (type && user.hasPaid && user.type !== type) {

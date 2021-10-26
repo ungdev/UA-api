@@ -2,11 +2,12 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
-import { User, MailQuery, Permission, Log } from '../../../types';
+import { MailQuery, Permission, Log, RawUser } from '../../../types';
 import { validateQuery } from '../../../middlewares/validation';
 import database from '../../../services/database';
 import env from '../../../utils/env';
 import { filterAdminAccount } from '../../../utils/filters';
+import { deserializePermissions } from '../../../utils/helpers';
 
 export default [
   // Middlewares
@@ -31,12 +32,15 @@ export default [
         },
       })) as (Log & {
         body: MailQuery;
-        user: User;
+        user: RawUser;
       })[];
       return success(
         response,
         logs.map((log) => ({
-          sender: filterAdminAccount(log.user),
+          sender: filterAdminAccount({
+            ...log.user,
+            permissions: deserializePermissions(log.user.permissions),
+          }),
           subject: log.body.subject,
           content: log.body.content,
           tournamentId: log.body.tournamentId,
