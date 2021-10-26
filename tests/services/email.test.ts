@@ -120,12 +120,8 @@ describe('Tests the email utils', () => {
   });
 
   it(`should generate a password reset template`, async () => {
-    let user = await createFakeUser();
-    user = {
-      ...(await generateResetToken(user.id)),
-      cartItems: [],
-      hasPaid: false,
-    };
+    const user = await createFakeUser();
+    user.resetToken = (await generateResetToken(user.id)).resetToken;
 
     const passwordResetEmail = await generatePasswordResetEmail(user);
 

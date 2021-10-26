@@ -109,7 +109,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
     ],
   });
 
-export const generateValidationEmail = (user: RawUser) =>
+export const generateValidationEmail = (user: Omit<RawUser, 'permissions'>) =>
   serialize({
     receiver: user.email,
     reason:
@@ -162,7 +162,7 @@ export const generateValidationEmail = (user: RawUser) =>
     ],
   });
 
-export const generatePasswordResetEmail = (user: RawUser) =>
+export const generatePasswordResetEmail = (user: Omit<RawUser, 'permissions'>) =>
   serialize({
     receiver: user.email,
     reason:

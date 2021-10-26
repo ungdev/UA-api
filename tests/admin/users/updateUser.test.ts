@@ -49,7 +49,7 @@ describe('PATCH /admin/users/:userId', () => {
       .patch(`/admin/users/${user.id}`)
       .send({ ...validBody, permissions: ['bonjour'] })
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(400, { error: Error.NoPermission }));
+      .expect(400, { error: Error.InvalidPermission }));
 
   it('should error as the user is not an administrator', () => {
     const userToken = generateToken(user);
