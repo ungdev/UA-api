@@ -59,10 +59,8 @@ export default [
 
       await replaceUser(user, targetUser, team);
 
-      // eslint-disable-next-line unicorn/no-unreadable-array-destructuring
-      const [, , updatedUser, updatedTargetUser] = await Promise.all([
+      const [, updatedUser, updatedTargetUser] = await Promise.all([
         removeDiscordRoles(user),
-        removeDiscordRoles(targetUser),
         fetchUser(request.params.userId),
         fetchUser(request.body.replacingUserId),
       ]);

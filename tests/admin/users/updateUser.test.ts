@@ -1,19 +1,23 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import nock from 'nock';
 import app from '../../../src/app';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeUser, generateFakeDiscordId } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
-import * as discordOperations from '../../../src/utils/discord';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { forcePay } from '../../../src/operations/carts';
+import { DiscordGuildMember } from '../../../src/controllers/discord/discordApi';
+import env from '../../../src/utils/env';
 
 describe('PATCH /admin/users/:userId', () => {
   let user: User;
   let admin: User;
   let adminToken: string;
+  const discordRoles: string[] = [];
+  const discordIdFromAccountThatLeftServer = generateFakeDiscordId();
 
   const validBody: {
     type: string;
@@ -29,9 +33,67 @@ describe('PATCH /admin/users/:userId', () => {
     user = await createFakeUser();
     admin = await createFakeUser({ permission: Permission.admin });
     adminToken = generateToken(admin);
+
+    let rateLimitRemain = 5;
+
+    env.discord.token = 'test-token';
+    env.discord.server = generateFakeDiscordId();
+
+    nock('https://discord.com/api/v9')
+      .persist()
+      .get(/\/guilds\/\d+\/members\/\d+/)
+      .reply((uri) => {
+        const discordMemberId = uri.match(/\d+$/)[0];
+        const rateLimitHeader = {
+          'X-RateLimit-Limit': 5,
+          'X-RateLimit-Remaining': rateLimitRemain < 0 ? (rateLimitRemain = 5) : rateLimitRemain--,
+          'x-Ratelimit-Reset-After': 0,
+        } as unknown as nock.ReplyHeaders;
+        return discordMemberId === discordIdFromAccountThatLeftServer
+          ? [
+              404,
+              {
+                code: 10007,
+                message: 'Unknown member',
+              },
+              rateLimitHeader,
+            ]
+          : [
+              200,
+              <DiscordGuildMember>{
+                avatar: '',
+                deaf: false,
+                is_pending: false,
+                mute: false,
+                pending: false,
+                premium_since: '',
+                roles: discordRoles,
+                user: {
+                  id: discordMemberId,
+                  username: '',
+                  avatar: '',
+                  discriminator: '',
+                  public_flags: 0,
+                },
+              },
+              rateLimitHeader,
+            ];
+      })
+      .delete(/\/guilds\/\d+\/members\/\d+\/roles\/\d+/)
+      .reply(() => {
+        const rateLimitHeader = {
+          'X-RateLimit-Limit': 5,
+          'X-RateLimit-Remaining': rateLimitRemain < 0 ? (rateLimitRemain = 5) : rateLimitRemain--,
+          'x-Ratelimit-Reset-After': 0,
+        } as unknown as nock.ReplyHeaders;
+        return [204, null, rateLimitHeader];
+      });
   });
 
   after(async () => {
+    nock.cleanAll();
+    delete env.discord.token;
+    delete env.discord.server;
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
@@ -98,10 +160,18 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should update the user and remove him from his team', async () => {
-    sandbox.stub(discordOperations, 'removeDiscordRoles').returns(null);
-
-    const team = await createFakeTeam({ members: 2 });
+    const team = await createFakeTeam({ members: 2, locked: true });
+    const tournamentDiscordRoleId = generateFakeDiscordId();
+    await database.tournament.update({
+      where: {
+        id: team.tournamentId,
+      },
+      data: {
+        discordRoleId: tournamentDiscordRoleId,
+      },
+    });
     const teamMember = team.players.find((member) => member.id !== team.captainId);
+    discordRoles.push(team.discordRoleId, tournamentDiscordRoleId);
 
     const { body } = await request(app)
       .patch(`/admin/users/${teamMember.id}`)
@@ -131,9 +201,7 @@ describe('PATCH /admin/users/:userId', () => {
     expect(body.type).to.be.equal(UserType.coach);
   });
 
-  it('should be able to update discordId only', async () => {
-    sandbox.stub(discordOperations, 'removeDiscordRoles').returns(null);
-
+  it('should be able to update discordId only (no team)', async () => {
     const { body } = await request(app)
       .patch(`/admin/users/${user.id}`)
       .send({
@@ -143,6 +211,59 @@ describe('PATCH /admin/users/:userId', () => {
       .expect(200);
 
     expect(body.discordId).to.be.equal('627536251278278');
+  });
+
+  it('should be able to update discordId only (team locked)', async () => {
+    const team = await createFakeTeam({ members: 1, locked: true });
+    // tournament id has already been given
+    const [teamMember] = team.players;
+    discordRoles.push(team.discordRoleId);
+
+    const { body } = await request(app)
+      .patch(`/admin/users/${teamMember.id}`)
+      .send({
+        discordId: '1111111111111111',
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.discordId).to.be.equal('1111111111111111');
+  });
+
+  it('should be able to update discordId only (team locked, left discord server)', async () => {
+    const team = await createFakeTeam({ members: 1, locked: true });
+    // tournament id has already been given
+    const [teamMember] = team.players;
+    await userOperations.updateAdminUser(teamMember.id, {
+      discordId: discordIdFromAccountThatLeftServer,
+    });
+    discordRoles.push(team.discordRoleId);
+
+    const { body } = await request(app)
+      .patch(`/admin/users/${teamMember.id}`)
+      .send({
+        discordId: '6253625367268999',
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.discordId).to.be.equal('6253625367268999');
+  });
+
+  it('should be able to update discordId only (team not locked)', async () => {
+    const team = await createFakeTeam({ members: 1 });
+    // tournament id has already been given
+    const [teamMember] = team.players;
+
+    const { body } = await request(app)
+      .patch(`/admin/users/${teamMember.id}`)
+      .send({
+        discordId: '14261728925819152',
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.discordId).to.be.equal('14261728925819152');
   });
 
   it('should be able to update customMessage only', async () => {

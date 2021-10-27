@@ -10,14 +10,7 @@ import { Error } from '../../src/types';
 import env from '../../src/utils/env';
 import database from '../../src/services/database';
 import { createFakeTeam, generateFakeDiscordId } from '../utils';
-import {
-  DiscordChannel,
-  DiscordCreateChannelRequest,
-  DiscordCreateRoleRequest,
-  DiscordGuildMember,
-  DiscordRole,
-} from '../../src/controllers/discord/discordApi';
-import { fetchTournament } from '../../src/operations/tournament';
+import { DiscordGuildMember } from '../../src/controllers/discord/discordApi';
 
 describe('POST /discord/sync-roles', () => {
   const token = env.discord.syncKey;
@@ -31,63 +24,61 @@ describe('POST /discord/sync-roles', () => {
       locked: true,
       paid: true,
       members: 5,
+      tournament: 'csgo',
     });
 
-    const tournament = await fetchTournament(team.tournamentId);
+    const team2 = await createFakeTeam({
+      locked: false,
+      members: 2,
+      tournament: 'csgo',
+    });
 
     env.discord.token = 'test-token';
     env.discord.server = generateFakeDiscordId();
 
-    const nocked = nock('https://discord.com/api/v9')
-      .persist()
-      .get(`/guilds/${env.discord.server}/members`)
-      .query(true)
-      .reply(
-        200,
-        <DiscordGuildMember[]>[...team.players, ...team.coaches].map((user) => ({
-          avatar: '',
-          deaf: false,
-          is_pending: false,
-          mute: false,
-          pending: false,
-          premium_since: '',
-          roles: [],
-          user: {
-            id: user.discordId,
-          },
-        })),
-        {
-          'X-RateLimit-Limit': 5,
-          'X-RateLimit-Remaining': rateLimitRemain--,
-          'X-RateLimit-Reset': Date.now() / 1000 + 60,
-        } as unknown as nock.ReplyHeaders,
-      )
-      .post(`/guilds/${env.discord.server}/roles`)
-      .reply(
-        201,
-        (...[, body]: [string, DiscordCreateRoleRequest]) =>
-          <DiscordRole>{
-            name: body.name,
-            color: body.color,
-            id: '1420070400000',
-          },
-      )
-      .post(`/guilds/${env.discord.server}/channels`)
-      .reply(
-        201,
-        (...[, body]: [string, DiscordCreateChannelRequest]) =>
-          <DiscordChannel>{
-            ...body,
-            id: '1420070400000',
-          },
-      );
+    await database.tournament.update({
+      where: {
+        id: 'csgo',
+      },
+      data: {
+        discordRoleId: generateFakeDiscordId(),
+      },
+    });
 
-    for (const member of [...team.players, ...team.coaches]) {
-      nocked.put(`/guilds/${env.discord.server}/members/${member.discordId}/roles/${team.discordRoleId}`).reply(204);
-      nocked
-        .put(`/guilds/${env.discord.server}/members/${member.discordId}/roles/${tournament.discordRoleId}`)
-        .reply(204);
-    }
+    nock('https://discord.com/api/v9')
+      .persist()
+      .get(/\/guilds\/\d+\/members/)
+      .query(true)
+      .reply(() => {
+        const rateLimitHeader = {
+          'X-RateLimit-Limit': 5,
+          'x-Ratelimit-Reset-After': 0,
+          'X-RateLimit-Remaining': rateLimitRemain < 0 ? (rateLimitRemain = 5) : rateLimitRemain--,
+        } as unknown as nock.ReplyHeaders;
+        return [200, <DiscordGuildMember[]>[...team.players.slice(1), ...team.coaches, team2.players[0]].map(
+            (user) => ({
+              avatar: '',
+              deaf: false,
+              is_pending: false,
+              mute: false,
+              pending: false,
+              premium_since: '',
+              roles: [],
+              user: {
+                id: user.discordId,
+              },
+            }),
+          ), rateLimitHeader];
+      })
+      .put(/\/guilds\/\d+\/members\/\d+\/roles\/\d+/)
+      .reply(() => {
+        const rateLimitHeader = {
+          'X-RateLimit-Limit': 5,
+          'x-Ratelimit-Reset-After': 0,
+          'X-RateLimit-Remaining': rateLimitRemain < 0 ? (rateLimitRemain = 5) : rateLimitRemain--,
+        } as unknown as nock.ReplyHeaders;
+        return [204, null, rateLimitHeader];
+      });
   });
 
   after(async () => {
