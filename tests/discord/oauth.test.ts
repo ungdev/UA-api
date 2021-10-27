@@ -9,6 +9,8 @@ import { User } from '../../src/types';
 import { encrypt } from '../../src/utils/helpers';
 import env from '../../src/utils/env';
 import { updateAdminUser } from '../../src/operations/user';
+import * as discordOperations from '../../src/utils/discord';
+import { sandbox } from '../setup';
 
 describe('GET /discord/oauth', () => {
   let user: User;
@@ -147,6 +149,8 @@ describe('GET /discord/oauth', () => {
       .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=2`));
 
   it('should indicate the linked account has been updated', () => {
+    sandbox.stub(discordOperations, 'removeDiscordRoles').returns(null);
+
     remoteUserId = '1420070400001';
     return request(app)
       .get('/discord/oauth')

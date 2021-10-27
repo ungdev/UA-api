@@ -5,6 +5,7 @@ import { createFakeTeam, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
+import * as discordOperations from '../../../src/utils/discord';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { forcePay } from '../../../src/operations/carts';
@@ -97,6 +98,8 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should update the user and remove him from his team', async () => {
+    sandbox.stub(discordOperations, 'removeDiscordRoles').returns(null);
+
     const team = await createFakeTeam({ members: 2 });
     const teamMember = team.players.find((member) => member.id !== team.captainId);
 
@@ -129,6 +132,8 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should be able to update discordId only', async () => {
+    sandbox.stub(discordOperations, 'removeDiscordRoles').returns(null);
+
     const { body } = await request(app)
       .patch(`/admin/users/${user.id}`)
       .send({

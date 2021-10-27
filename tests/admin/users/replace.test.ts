@@ -5,6 +5,7 @@ import { createFakeTeam, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import * as teamOperations from '../../../src/operations/team';
+import * as discordOperations from '../../../src/utils/discord';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { getCaptain } from '../../../src/utils/teams';
@@ -125,6 +126,8 @@ describe('POST /admin/users/:userId/replace', () => {
   });
 
   it('should replace the user', async () => {
+    sandbox.stub(discordOperations, 'removeDiscordRoles').returns(null);
+
     const { body } = await request(app)
       .post(`/admin/users/${user.id}/replace`)
       .set('Authorization', `Bearer ${adminToken}`)

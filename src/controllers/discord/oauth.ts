@@ -9,6 +9,7 @@ import { isLoginAllowed } from '../../middlewares/settings';
 import type { DiscordAuthorization } from './discordApi';
 import logger from '../../utils/logger';
 import { fetchDiscordUser, getToken } from '../../services/discord';
+import { removeDiscordRoles } from '../../utils/discord';
 
 const redirect = (response: Response, statusCode: DiscordFeedbackCode) => {
   response
@@ -63,7 +64,10 @@ export default [
       if (!user.discordId && updatedUser.discordId) return redirect(response, DiscordFeedbackCode.LINKED_NEW);
 
       // The id was updated (and was different from the one previously in database)
-      if (user.discordId !== updatedUser.discordId) return redirect(response, DiscordFeedbackCode.LINKED_UPDATED);
+      if (user.discordId !== updatedUser.discordId) {
+        await removeDiscordRoles(user);
+        return redirect(response, DiscordFeedbackCode.LINKED_UPDATED);
+      }
 
       // The id has not changed because the same discord account was used
       return redirect(response, DiscordFeedbackCode.NOT_MODIFIED);

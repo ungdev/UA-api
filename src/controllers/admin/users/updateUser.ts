@@ -7,6 +7,7 @@ import { fetchUser, updateAdminUser } from '../../../operations/user';
 import { filterUser } from '../../../utils/filters';
 import { validateBody } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
+import { removeDiscordRoles } from '../../../utils/discord';
 
 export default [
   // Middlewares
@@ -47,6 +48,14 @@ export default [
         customMessage,
         age,
       });
+
+      if (
+        updatedUser.discordId !== user.discordId ||
+        (updatedUser.type !== user.type &&
+          (updatedUser.type === 'spectator' || updatedUser.type === 'attendant') &&
+          (user.type === 'player' || user.type === 'coach'))
+      )
+        await removeDiscordRoles(updatedUser);
 
       return success(response, { ...filterUser(updatedUser), customMessage: updatedUser.customMessage });
     } catch (error) {
