@@ -261,16 +261,6 @@ export const scanUser = (userId: string) =>
     },
   });
 
-export const setPermissions = (userId: string, permissions: Permission[]) =>
-  database.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      permissions: permissions.join(','),
-    },
-  });
-
 export const changePassword = async (user: User, newPassword: string) => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
   const hashedPassword = await userOperations.hash(newPassword, salt);
