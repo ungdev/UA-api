@@ -23,7 +23,7 @@ describe('POST /admin/users/:userId/replace', () => {
     team = await createFakeTeam({ locked: true });
     user = getCaptain(team);
     targetUser = await createFakeUser({ paid: true });
-    admin = await createFakeUser({ permission: Permission.admin });
+    admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
 
     validBody = { replacingUserId: targetUser.id };

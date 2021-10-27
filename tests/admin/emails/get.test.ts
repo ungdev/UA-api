@@ -13,7 +13,7 @@ describe('GET /admin/emails', () => {
   let adminToken: string;
 
   before(async () => {
-    admin = await createFakeUser({ type: UserType.orga, permission: Permission.admin });
+    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
     nonAdminUser = await createFakeUser();
     adminToken = generateToken(admin);
   });

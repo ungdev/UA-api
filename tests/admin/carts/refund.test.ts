@@ -15,7 +15,7 @@ describe('POST /admin/carts/:cartId/refund', () => {
 
   before(async () => {
     user = await createFakeUser();
-    admin = await createFakeUser({ permission: Permission.admin });
+    admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
 
     cart = await cartOperations.createCart(user.id, [{ itemId: 'ticket-player', quantity: 1, forUserId: user.id }]);

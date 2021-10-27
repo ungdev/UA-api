@@ -66,21 +66,21 @@ import { createFakeTeam, createFakeUser } from './utils';
     password: defaultPassword,
     email: 'admin@ua.fr',
     type: UserType.orga,
-    permission: Permission.admin,
+    permissions: [Permission.admin],
   });
   await createFakeUser({
     username: 'ua_entry',
     password: defaultPassword,
     email: 'entry@ua.fr',
     type: UserType.orga,
-    permission: Permission.entry,
+    permissions: [Permission.entry],
   });
   await createFakeUser({
     username: 'ua_anim',
     password: defaultPassword,
     email: 'anim@ua.fr',
     type: UserType.orga,
-    permission: Permission.anim,
+    permissions: [Permission.anim],
   });
 
   // Set login and shop to allowed

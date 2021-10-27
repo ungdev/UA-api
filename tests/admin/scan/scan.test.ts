@@ -20,7 +20,7 @@ describe('POST /admin/scan/:qrcode', () => {
 
   before(async () => {
     user = await createFakeUser();
-    admin = await createFakeUser({ permission: Permission.entry });
+    admin = await createFakeUser({ permissions: [Permission.entry] });
     adminToken = generateToken(admin);
 
     cart = await forcePay(user);
