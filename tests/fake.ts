@@ -26,8 +26,8 @@ import { createFakeTeam, createFakeUser } from './utils';
 
   await Promise.all(
     tournaments.map(async (tournament) => {
-      // Create a fake team of 0 member, 1 member, 2...
-      for (let players = 0; players <= tournament.playersPerTeam; players += 1) {
+      // Create a fake team of 1 member, 2 members, 3...
+      for (let players = 1; players <= tournament.playersPerTeam; players += 1) {
         await createFakeTeam({
           members: players,
           locked: false,
