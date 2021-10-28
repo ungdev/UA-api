@@ -8,10 +8,12 @@ import { sendPasswordReset } from '../../services/email';
 import { noContent } from '../../utils/responses';
 import * as validators from '../../utils/validators';
 import logger from '../../utils/logger';
+import { logSuccessfulUpdates } from '../../middlewares/log';
 
 export default [
   // Middlewares
   ...isNotAuthenticated,
+  logSuccessfulUpdates,
   validateBody(
     Joi.object({
       email: validators.email.required(),
@@ -27,6 +29,9 @@ export default [
 
       // Always return a 204 even if the user doesn't exists to avoid address leakage
       if (user) {
+        // Log request (in user logs)
+        response.locals.user = user;
+
         // Use the updated user holding reset token
         const userWithToken = await generateResetToken(user.id);
         // Don't wait for mail to be sent as it could take time
@@ -34,7 +39,13 @@ export default [
         // reported through Sentry and staff may resend the email manually
         sendPasswordReset(userWithToken).catch((error) => {
           logger.error(error);
-          Sentry.captureException(error);
+          Sentry.captureException(error, {
+            user: {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+            },
+          });
         });
       }
 

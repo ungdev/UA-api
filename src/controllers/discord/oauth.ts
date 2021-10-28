@@ -42,6 +42,8 @@ export default [
       const [discordUserToken, user] = await Promise.all([getToken(code), userPromise]);
       // Attach sentry error log (if an error occurs) to the user
       Sentry.setUser({ id: user.id, username: user.username, email: user.email });
+      // Add extra details in sentry errors (involved discord ids)
+      Sentry.setExtra('currentDiscordId', user.discordId);
 
       // State is invalid ! User may have modified it on the fly
       // Or this is not the scope we asked access for => bad request
@@ -56,6 +58,9 @@ export default [
       // If id is not defined, it means the user refused the permission access grant
       if (!discordUser?.id) return redirect(response, DiscordFeedbackCode.ERR_OAUTH_DENIED);
 
+      // Add extra details in sentry errors (involved discord ids)
+      Sentry.setExtra('updatedDiscordId', discordUser.id);
+
       // Otherwise, we have the id and we can update the database
       const updatedUser = await database.user.update({
         data: { discordId: discordUser.id },
@@ -64,12 +69,14 @@ export default [
 
       // Add logging callback when the request is successful. This callback will
       // also generate logs for a NOT_MODIFIED result, to check request spamming
-      response.on('finish', async () => {
-        // Checks if the response was successful (is a 2xx response)
-        // (The discord role removal could fail)
-        if (Math.floor(response.statusCode / 100) === 2)
-          await createLog(request.method, request.originalUrl, user.id, request.body);
-      });
+      // We don't check role removal status as user has already been altered in the database
+      response.on('finish', () =>
+        // Discord ids wouldn't be logged if we were using `request.query` so we log custom data
+        createLog(request.method, request.originalUrl, user.id, {
+          from: user.discordId,
+          to: updatedUser.discordId,
+        }),
+      );
 
       // The user had no linked discord account before the operation ! We're gonna be gentle
       // with him/her and display him/her a feedback for team creation/joining
