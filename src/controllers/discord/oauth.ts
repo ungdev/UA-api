@@ -10,6 +10,7 @@ import type { DiscordAuthorization } from './discordApi';
 import logger from '../../utils/logger';
 import { fetchDiscordUser, getToken } from '../../services/discord';
 import { removeDiscordRoles } from '../../utils/discord';
+import { createLog } from '../../operations/log';
 
 const redirect = (response: Response, statusCode: DiscordFeedbackCode) => {
   response
@@ -39,6 +40,8 @@ export default [
 
       // Parallelize the request to the Discord API and the Database
       const [discordUserToken, user] = await Promise.all([getToken(code), userPromise]);
+      // Attach sentry error log (if an error occurs) to the user
+      Sentry.setUser({ id: user.id, username: user.username, email: user.email });
 
       // State is invalid ! User may have modified it on the fly
       // Or this is not the scope we asked access for => bad request
@@ -57,6 +60,15 @@ export default [
       const updatedUser = await database.user.update({
         data: { discordId: discordUser.id },
         where: { id: user.id },
+      });
+
+      // Add logging callback when the request is successful. This callback will
+      // also generate logs for a NOT_MODIFIED result, to check request spamming
+      response.on('finish', async () => {
+        // Checks if the response was successful (is a 2xx response)
+        // (The discord role removal could fail)
+        if (Math.floor(response.statusCode / 100) === 2)
+          await createLog(request.method, request.originalUrl, user.id, request.body);
       });
 
       // The user had no linked discord account before the operation ! We're gonna be gentle
