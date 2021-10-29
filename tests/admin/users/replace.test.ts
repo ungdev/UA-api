@@ -5,14 +5,15 @@ import { createFakeTeam, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import * as teamOperations from '../../../src/operations/team';
-import * as discordOperations from '../../../src/utils/discord';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { getCaptain } from '../../../src/utils/teams';
+import { registerMember, registerRole, resetFakeDiscord } from '../../discord';
 
 describe('POST /admin/users/:userId/replace', () => {
   let team: Team;
   let user: User;
+  let tournamentDiscordId: string;
   let targetUser: User;
   let admin: User;
   let adminToken: string;
@@ -21,15 +22,30 @@ describe('POST /admin/users/:userId/replace', () => {
 
   before(async () => {
     team = await createFakeTeam({ locked: true });
+    registerRole(team.discordRoleId);
     user = getCaptain(team);
     targetUser = await createFakeUser({ paid: true });
     admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
 
     validBody = { replacingUserId: targetUser.id };
+
+    tournamentDiscordId = (
+      await database.tournament.update({
+        where: {
+          id: team.tournamentId,
+        },
+        data: {
+          discordRoleId: registerRole(),
+        },
+      })
+    ).discordRoleId;
+
+    registerMember(user.discordId, [team.discordRoleId, tournamentDiscordId]);
   });
 
   after(async () => {
+    resetFakeDiscord();
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
@@ -126,8 +142,6 @@ describe('POST /admin/users/:userId/replace', () => {
   });
 
   it('should replace the user', async () => {
-    sandbox.stub(discordOperations, 'removeDiscordRoles').returns(null);
-
     const { body } = await request(app)
       .post(`/admin/users/${user.id}/replace`)
       .set('Authorization', `Bearer ${adminToken}`)

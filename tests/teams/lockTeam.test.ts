@@ -1,21 +1,15 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import nock from 'nock';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeTeam, createFakeUser, generateFakeDiscordId } from '../utils';
+import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchTournament } from '../../src/operations/tournament';
-import env from '../../src/utils/env';
-import {
-  DiscordCreateRoleRequest,
-  DiscordCreateChannelRequest,
-  DiscordChannel,
-} from '../../src/controllers/discord/discordApi';
+import { resetFakeDiscord } from '../discord';
 
 describe('POST /teams/current/lock', () => {
   let captain: User;
@@ -25,8 +19,6 @@ describe('POST /teams/current/lock', () => {
   let lolMaxPlayers: number;
 
   before(async () => {
-    let rateLimitRemain = 5;
-
     team = await createFakeTeam({ members: 5, paid: true, tournament: 'lolCompetitive' });
 
     captain = getCaptain(team);
@@ -34,51 +26,10 @@ describe('POST /teams/current/lock', () => {
 
     const lol = await fetchTournament('lolCompetitive');
     lolMaxPlayers = lol.maxPlayers;
-
-    env.discord.token = 'test-token';
-    env.discord.server = generateFakeDiscordId();
-
-    nock('https://discord.com/api/v9')
-      .persist()
-      .post(/\/guilds\/\d+\/roles/)
-      .reply((_, body) => {
-        const rateLimitHeader = {
-          'X-RateLimit-Limit': 5,
-          'X-RateLimit-Remaining': rateLimitRemain < 0 ? (rateLimitRemain = 5) : rateLimitRemain--,
-          'x-Ratelimit-Reset-After': 0,
-        } as unknown as nock.ReplyHeaders;
-        return [
-          201,
-          {
-            id: '1420070400000',
-            name: (<DiscordCreateRoleRequest>body).name,
-            color: (<DiscordCreateRoleRequest>body).color,
-          },
-          rateLimitHeader,
-        ];
-      })
-      .post(/\/guilds\/\d+\/channels/)
-      .reply((_, body) => {
-        const rateLimitHeader = {
-          'X-RateLimit-Limit': 5,
-          'X-RateLimit-Remaining': rateLimitRemain < 0 ? (rateLimitRemain = 5) : rateLimitRemain--,
-          'x-Ratelimit-Reset-After': 0,
-        } as unknown as nock.ReplyHeaders;
-        return [
-          201,
-          <DiscordChannel>{
-            ...(<DiscordCreateChannelRequest>body),
-            id: '1420070400000',
-          },
-          rateLimitHeader,
-        ];
-      });
   });
 
   after(async () => {
-    nock.cleanAll();
-    delete env.discord.token;
-    delete env.discord.server;
+    resetFakeDiscord();
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();

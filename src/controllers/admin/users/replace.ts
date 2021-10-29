@@ -59,6 +59,8 @@ export default [
 
       await replaceUser(user, targetUser, team);
 
+      // Discard discord roles from the replaced user
+      // This is parallelized with the user fetches
       const [, updatedUser, updatedTargetUser] = await Promise.all([
         removeDiscordRoles(user),
         fetchUser(request.params.userId),

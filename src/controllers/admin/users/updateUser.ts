@@ -49,13 +49,17 @@ export default [
         age,
       });
 
+      // Discard current team/tournament roles if the discordId has been updated
+      // This should also be done if the user type has been modified from a team
+      // related UserType (ie. player or coach) to an absolute one (ie. spectator
+      // or attendant - because the attendant is not represented as belonging to
+      // a team)
       if (
         updatedUser.discordId !== user.discordId ||
-        (updatedUser.type !== user.type &&
-          (updatedUser.type === 'spectator' || updatedUser.type === 'attendant') &&
+        ((updatedUser.type === 'spectator' || updatedUser.type === 'attendant') &&
           (user.type === 'player' || user.type === 'coach'))
       )
-        await removeDiscordRoles(updatedUser);
+        await removeDiscordRoles(user);
 
       return success(response, { ...filterUser(updatedUser), customMessage: updatedUser.customMessage });
     } catch (error) {

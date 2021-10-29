@@ -138,6 +138,11 @@ export const syncRoles = async () => {
  * @param fromUser the user to remove discord roles from
  */
 export const removeDiscordRoles = async (fromUser: User) => {
+  if (!env.discord.token) {
+    logger.warn('Discord token missing. It will skip discord calls');
+    return;
+  }
+
   // Abort while the user has neither linked discord account nor team
   if (!fromUser.discordId || !fromUser.teamId) return;
   const team = await fetchTeam(fromUser.teamId);

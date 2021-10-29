@@ -1,7 +1,5 @@
 /* eslint-disable arrow-body-style */
 import request from 'supertest';
-import nock from 'nock';
-import axios from 'axios';
 import { expect } from 'chai';
 import app from '../../src/app';
 import { sandbox } from '../setup';
@@ -9,82 +7,42 @@ import * as discordFunctions from '../../src/utils/discord';
 import { Error } from '../../src/types';
 import env from '../../src/utils/env';
 import database from '../../src/services/database';
-import { createFakeTeam, generateFakeDiscordId } from '../utils';
-import { DiscordGuildMember } from '../../src/controllers/discord/discordApi';
+import { createFakeTeam } from '../utils';
+import { registerMember, registerRole, resetFakeDiscord } from '../discord';
 
 describe('POST /discord/sync-roles', () => {
   const token = env.discord.syncKey;
-  // eslint-disable-next-line global-require
-  axios.defaults.adapter = require('axios/lib/adapters/http');
 
   before(async () => {
-    let rateLimitRemain = 5;
-
     const team = await createFakeTeam({
       locked: true,
       paid: true,
       members: 5,
       tournament: 'csgo',
     });
+    // We will test with one missing user (he may have left the server)
+    for (const user of [...team.players.slice(1), ...team.coaches]) registerMember(user.discordId);
+    registerRole(team.discordRoleId);
 
     const team2 = await createFakeTeam({
       locked: false,
       members: 2,
       tournament: 'csgo',
     });
-
-    env.discord.token = 'test-token';
-    env.discord.server = generateFakeDiscordId();
+    registerMember(team2.players[0].discordId);
 
     await database.tournament.update({
       where: {
         id: 'csgo',
       },
       data: {
-        discordRoleId: generateFakeDiscordId(),
+        discordRoleId: registerRole(),
       },
     });
-
-    nock('https://discord.com/api/v9')
-      .persist()
-      .get(/\/guilds\/\d+\/members/)
-      .query(true)
-      .reply(() => {
-        const rateLimitHeader = {
-          'X-RateLimit-Limit': 5,
-          'x-Ratelimit-Reset-After': 0,
-          'X-RateLimit-Remaining': rateLimitRemain < 0 ? (rateLimitRemain = 5) : rateLimitRemain--,
-        } as unknown as nock.ReplyHeaders;
-        return [200, <DiscordGuildMember[]>[...team.players.slice(1), ...team.coaches, team2.players[0]].map(
-            (user) => ({
-              avatar: '',
-              deaf: false,
-              is_pending: false,
-              mute: false,
-              pending: false,
-              premium_since: '',
-              roles: [],
-              user: {
-                id: user.discordId,
-              },
-            }),
-          ), rateLimitHeader];
-      })
-      .put(/\/guilds\/\d+\/members\/\d+\/roles\/\d+/)
-      .reply(() => {
-        const rateLimitHeader = {
-          'X-RateLimit-Limit': 5,
-          'x-Ratelimit-Reset-After': 0,
-          'X-RateLimit-Remaining': rateLimitRemain < 0 ? (rateLimitRemain = 5) : rateLimitRemain--,
-        } as unknown as nock.ReplyHeaders;
-        return [204, null, rateLimitHeader];
-      });
   });
 
   after(async () => {
-    nock.cleanAll();
-    delete env.discord.token;
-    delete env.discord.server;
+    resetFakeDiscord();
     await database.cart.deleteMany();
     await database.team.deleteMany();
     return database.user.deleteMany();
@@ -102,7 +60,12 @@ describe('POST /discord/sync-roles', () => {
     return stub.restore();
   });
 
-  it('should succesfully sync roles', async () => {
+  it('should successfully sync roles', async () => {
+    const { body } = await request(app).post('/discord/sync-roles').send({ token }).expect(200);
+    expect(Array.isArray(body.logs)).to.be.equal(true);
+  });
+
+  it('should be idempotent', async () => {
     const { body } = await request(app).post('/discord/sync-roles').send({ token }).expect(200);
     expect(Array.isArray(body.logs)).to.be.equal(true);
   });
