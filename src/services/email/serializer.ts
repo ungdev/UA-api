@@ -129,6 +129,7 @@ export const generateValidationEmail = (user: Omit<RawUser, 'permissions'>) =>
             name: 'Confirme ton adresse email',
             location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}`,
           },
+          `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}_`,
         ],
       },
       {
@@ -183,6 +184,7 @@ export const generatePasswordResetEmail = (user: Omit<RawUser, 'permissions'>) =
             location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}`,
             color: '#dc143c',
           },
+          `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}_`,
         ],
       },
     ],
