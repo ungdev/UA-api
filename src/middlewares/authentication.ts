@@ -3,7 +3,6 @@ import { getRequestInfo } from '../utils/users';
 import { forbidden, unauthenticated } from '../utils/responses';
 import { Error, Permission } from '../types';
 import { isLoginAllowed } from './settings';
-import { deserializePermissions } from '../utils/helpers';
 import { logSuccessfulUpdates } from './log';
 
 // Checks the user is authenticated. If not, it will return an error

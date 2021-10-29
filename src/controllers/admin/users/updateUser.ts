@@ -19,7 +19,7 @@ export default [
       permissions: Joi.array().optional().items(validators.permission),
       place: validators.place.allow(null).optional(),
       discordId: validators.discordId.allow(null).optional(),
-      customMessage: Joi.string().optional(),
+      customMessage: Joi.string().allow(null).optional(),
     }),
   ),
 

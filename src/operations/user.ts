@@ -4,7 +4,6 @@ import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
 import {
-  Permission,
   User,
   UserSearchQuery,
   TransactionState,

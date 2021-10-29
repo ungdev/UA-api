@@ -263,6 +263,10 @@
               age:
                 $ref: '#/components/schemas/Age'
                 optional: true
+              customMessage:
+                type: string
+                nullable: true
+                optional: true
     responses:
       200:
         description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.

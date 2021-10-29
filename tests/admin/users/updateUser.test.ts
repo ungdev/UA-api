@@ -269,7 +269,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should remove all permissions from the user', async () => {
-    const permissibleUser = await createFakeUser({ permission: Permission.stream });
+    const permissibleUser = await createFakeUser({ permissions: [Permission.stream] });
 
     const { body } = await request(app)
       .patch(`/admin/users/${permissibleUser.id}`)
