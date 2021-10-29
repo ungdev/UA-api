@@ -152,7 +152,19 @@ export type UserSearchQuery = {
 };
 
 export type UserPatchBody = Partial<
-  Pick<User, 'type' | 'place' | 'permissions' | 'discordId' | 'customMessage' | 'age'>
+  Pick<
+    User,
+    | 'type'
+    | 'place'
+    | 'permissions'
+    | 'discordId'
+    | 'customMessage'
+    | 'age'
+    | 'username'
+    | 'firstname'
+    | 'lastname'
+    | 'email'
+  >
 >;
 
 export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
@@ -292,6 +304,7 @@ export const enum Error {
   UsernameAlreadyExists = "Ce nom d'utilisateur est déjà utilisé",
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
   PlaceAlreadyAttributed = 'Cette place est déjà attribuée',
+  DiscordAccountAlreadyUsed = 'Ce compte discord est déjà lié à un compte',
 
   // 410
   // indicates that access to the target resource is no longer available at the server.

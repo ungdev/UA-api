@@ -221,9 +221,10 @@
     summary: Modifie les informations d'un utilisateur
     description: |-
       Modifie les informations d'un utilisateur.<br/>
-      **Permission 'admin' requise.**<br/><br/>
+      **Permission 'admin' ou 'anim' requise.**<br/><br/>
       **Désambiguïsation:** le champ `permissions` écrase (si renseigné) complètement les anciennes permissions.
       Pour cette raison, il ne faut pas oublier d'y ajouter également les permissions actuelles de l'utilisateur !
+      <br/>Les orgas qui ont uniquement la permission 'anim' **doivent omettre** ce champ dans la requête !
     tags:
       - Admin
     security:
@@ -266,6 +267,19 @@
               customMessage:
                 type: string
                 nullable: true
+                optional: true
+              email:
+                type: string
+                format: email
+                optional: true
+              username:
+                type: string
+                optional: true
+              firstname:
+                type: string
+                optional: true
+              lastname:
+                type: string
                 optional: true
     responses:
       200:

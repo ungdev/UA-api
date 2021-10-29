@@ -8,10 +8,11 @@ import { filterUser } from '../../../utils/filters';
 import { validateBody } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
 import { removeDiscordRoles } from '../../../utils/discord';
+import { getRequestInfo } from '../../../utils/users';
 
 export default [
   // Middlewares
-  ...hasPermission(Permission.admin),
+  ...hasPermission(Permission.anim),
   validateBody(
     Joi.object({
       type: validators.type.optional(),
@@ -20,6 +21,10 @@ export default [
       place: validators.place.allow(null).optional(),
       discordId: validators.discordId.allow(null).optional(),
       customMessage: Joi.string().allow(null).optional(),
+      username: validators.username.optional(),
+      lastname: validators.lastname.optional(),
+      firstname: validators.firstname.optional(),
+      email: validators.email.optional(),
     }),
   ),
 
@@ -33,11 +38,19 @@ export default [
         return notFound(response, Error.UserNotFound);
       }
 
-      const { type, place, permissions, discordId, customMessage, age } = request.body as UserPatchBody;
+      const { type, place, permissions, discordId, customMessage, age, email, username, firstname, lastname } =
+        request.body as UserPatchBody;
 
       // Check that the user type hasn't changed if the user is paid
       if (type && user.hasPaid && user.type !== type) {
         return forbidden(response, Error.CannotChangeType);
+      }
+
+      // Check that permissions are not in the request body or that the initiator
+      // is admin
+      const initiator = getRequestInfo(response).user;
+      if (permissions && !initiator.permissions.includes(Permission.admin)) {
+        return forbidden(response, Error.NoPermission);
       }
 
       const updatedUser = await updateAdminUser(user.id, {
@@ -47,6 +60,10 @@ export default [
         discordId,
         customMessage,
         age,
+        email,
+        username,
+        firstname,
+        lastname,
       });
 
       // Discard current team/tournament roles if the discordId has been updated
@@ -63,8 +80,19 @@ export default [
 
       return success(response, { ...filterUser(updatedUser), customMessage: updatedUser.customMessage });
     } catch (error) {
-      if (error.code === 'P2002' && error.meta && error.meta.target === 'users_place_key')
-        return conflict(response, Error.PlaceAlreadyAttributed);
+      if (error.code === 'P2002' && error.meta) {
+        // eslint-disable-next-line default-case
+        switch (error.meta.target) {
+          case 'users_place_key':
+            return conflict(response, Error.PlaceAlreadyAttributed);
+          case 'users_discordId_key':
+            return conflict(response, Error.DiscordAccountAlreadyUsed);
+          case 'users_email_key':
+            return conflict(response, Error.EmailAlreadyExists);
+          case 'users_username_key':
+            return conflict(response, Error.UsernameAlreadyExists);
+        }
+      }
 
       return next(error);
     }

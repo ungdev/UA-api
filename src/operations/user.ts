@@ -194,6 +194,10 @@ export const updateAdminUser = async (userId: string, updates: UserPatchBody): P
       discordId: updates.discordId,
       customMessage: updates.customMessage,
       age: updates.age,
+      email: updates.email,
+      firstname: updates.firstname,
+      lastname: updates.lastname,
+      username: updates.username,
       team:
         updates.type === UserType.spectator
           ? {
