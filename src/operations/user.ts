@@ -189,7 +189,7 @@ export const updateAdminUser = async (userId: string, updates: UserPatchBody): P
   const user = await database.user.update({
     data: {
       type: updates.type,
-      permissions: serializePermissions(updates.permissions),
+      permissions: updates.permissions ? serializePermissions(updates.permissions) : undefined,
       place: updates.place,
       discordId: updates.discordId,
       customMessage: updates.customMessage,
