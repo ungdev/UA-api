@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import qs from 'qs';
 import {
   DiscordAuthorizationData,
@@ -119,20 +119,54 @@ export const createDiscordRole = async (requestBody: DiscordCreateRoleRequest) =
   return response.data;
 };
 
-/**
- * Add a role to a discord membmer. Checks if the next request is about to be rate limited, in this case, sleep before ending function
- * @param userId the id of the {@link DiscordGuildMember} to set the roles to
- * @param role the role to add to the discord user
- */
-export const addMemberRole = async (userId: Snowflake, role: Snowflake) => {
-  const response = await bot.put<null>(`guilds/${env.discord.server}/members/${userId}/roles/${role}`);
+export const rateLimitedRequest = async <T>(handler: () => Promise<AxiosResponse<T>>): Promise<T> => {
+  try {
+    const response = await handler();
 
-  if (response.headers['x-ratelimit-remaining'] <= 2) {
-    const resetAfter = Number(response.headers['x-ratelimit-reset-after']);
-    logger.warn(`Wait ${resetAfter} seconds to avoid rate limit`);
-    await sleep(resetAfter);
+    if (response.headers['x-ratelimit-remaining'] <= 2) {
+      const resetAfter = Number(response.headers['x-ratelimit-reset-after']);
+      logger.warn(`Wait ${resetAfter} seconds to avoid rate limit (success)`);
+      await sleep(resetAfter);
+    }
+
+    return response.data;
+  } catch (error) {
+    if ((<AxiosError>error).response?.status === 429) {
+      const resetAfter = Number(error.response.headers['x-ratelimit-reset-after']);
+      logger.warn(`Wait ${resetAfter} seconds to avoid rate limit (retry)`);
+      await sleep(resetAfter);
+      return rateLimitedRequest(handler);
+    }
+    throw error;
   }
 };
+
+/**
+ * Fetches a single {@link DiscordGuildMember}. Checks if the next request is about to be rate limited,
+ * in this case, sleep before ending function
+ * @param userId the id of the {@link DiscordGuildMember} to fetch
+ * @returns a promise resolving to the fetched {@link DiscordGuildMember}
+ */
+export const fetchGuildMember = (userId: Snowflake) =>
+  rateLimitedRequest<DiscordGuildMember>(() => bot.get(`guilds/${env.discord.server}/members/${userId}`));
+
+/**
+ * Add a role to a discord guild member. Checks if the next request is about to be rate limited,
+ * in this case, sleep before ending function
+ * @param userId the id of the {@link DiscordGuildMember} to add the role to
+ * @param role the role to add to the discord user
+ */
+export const addMemberRole = (userId: Snowflake, role: Snowflake) =>
+  rateLimitedRequest<void>(() => bot.put(`guilds/${env.discord.server}/members/${userId}/roles/${role}`));
+
+/**
+ * Removes a role from a discord guild member. Checks if the next request is about to be rate limited,
+ * in this case, sleep before ending function
+ * @param userId the id of the {@link DiscordGuildMember} to remove the role from
+ * @param role the role to remove from the discord user
+ */
+export const removeMemberRole = (userId: Snowflake, role: Snowflake) =>
+  rateLimitedRequest<void>(() => bot.delete(`guilds/${env.discord.server}/members/${userId}/roles/${role}`));
 
 /**
  * Fetches all of the {@link DiscordGuildMember} connected to the server.

@@ -26,8 +26,8 @@ import { createFakeTeam, createFakeUser } from './utils';
 
   await Promise.all(
     tournaments.map(async (tournament) => {
-      // Create a fake team of 0 member, 1 member, 2...
-      for (let players = 0; players <= tournament.playersPerTeam; players += 1) {
+      // Create a fake team of 1 member, 2 members, 3...
+      for (let players = 1; players <= tournament.playersPerTeam; players += 1) {
         await createFakeTeam({
           members: players,
           locked: false,
@@ -66,21 +66,21 @@ import { createFakeTeam, createFakeUser } from './utils';
     password: defaultPassword,
     email: 'admin@ua.fr',
     type: UserType.orga,
-    permission: Permission.admin,
+    permissions: [Permission.admin],
   });
   await createFakeUser({
     username: 'ua_entry',
     password: defaultPassword,
     email: 'entry@ua.fr',
     type: UserType.orga,
-    permission: Permission.entry,
+    permissions: [Permission.entry],
   });
   await createFakeUser({
     username: 'ua_anim',
     password: defaultPassword,
     email: 'anim@ua.fr',
     type: UserType.orga,
-    permission: Permission.anim,
+    permissions: [Permission.anim],
   });
 
   // Set login and shop to allowed

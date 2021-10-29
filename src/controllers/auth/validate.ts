@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import * as Sentry from '@sentry/node';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { fetchUser, removeUserRegisterToken } from '../../operations/user';
 import { Error } from '../../types';
@@ -20,6 +21,13 @@ export default [
       if (!user) {
         return badRequest(response, Error.InvalidParameters);
       }
+
+      // Attach user to (potential) uncaught error
+      Sentry.setUser({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      });
 
       await removeUserRegisterToken(user.id);
 

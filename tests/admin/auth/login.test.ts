@@ -14,7 +14,7 @@ describe('POST /admin/auth/login', () => {
 
   before(async () => {
     user = await createFakeUser();
-    admin = await createFakeUser({ permission: Permission.admin });
+    admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = userUtils.generateToken(admin);
   });
 

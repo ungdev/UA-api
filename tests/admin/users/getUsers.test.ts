@@ -27,7 +27,7 @@ describe('GET /admin/users', () => {
       email: 'admin@gmail.com',
       username: 'admin',
       type: UserType.orga,
-      permission: Permission.admin,
+      permissions: [Permission.admin],
     });
     adminToken = generateToken(admin);
   });

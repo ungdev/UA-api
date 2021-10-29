@@ -1,6 +1,13 @@
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
-import { fetchTeams } from '../operations/team';
-import { createDiscordChannel, createDiscordRole, fetchGuildMembers, addMemberRole } from '../services/discord';
+import { fetchTeam, fetchTeams } from '../operations/team';
+import {
+  createDiscordChannel,
+  createDiscordRole,
+  fetchGuildMembers,
+  addMemberRole,
+  fetchGuildMember,
+  removeMemberRole,
+} from '../services/discord';
 import {
   DiscordChannelPermission,
   DiscordChannelPermissionType,
@@ -9,7 +16,7 @@ import {
   Snowflake,
 } from '../controllers/discord/discordApi';
 import database from '../services/database';
-import { Team, Tournament, TournamentId } from '../types';
+import { Team, Tournament, TournamentId, User } from '../types';
 import env from './env';
 import logger from './logger';
 
@@ -122,5 +129,40 @@ export const syncRoles = async () => {
         }
       }
     }
+  }
+};
+
+/**
+ * Removes {@link Team#discordRoleId} and {@link Tournament#discordRoleId}
+ * from a given {@link User}
+ * @param fromUser the user to remove discord roles from
+ */
+export const removeDiscordRoles = async (fromUser: User) => {
+  if (!env.discord.token) {
+    logger.warn('Discord token missing. It will skip discord calls');
+    return;
+  }
+
+  // Abort while the user has neither linked discord account nor team
+  if (!fromUser.discordId || !fromUser.teamId) return;
+  const team = await fetchTeam(fromUser.teamId);
+  // Abort while the team is unlocked or detached from any tournament
+  if (!team.tournamentId || !team.lockedAt) return;
+  const tournament = await fetchTournament(team.tournamentId);
+
+  // We have all roles here. Fetch the roles of the DiscordGuildMember
+  // before trying to remove them (as it is a different route, we won't
+  // increase the role rate limits)
+  try {
+    const discordGuildMember = await fetchGuildMember(fromUser.discordId);
+    if (team.discordRoleId && discordGuildMember.roles.includes(team.discordRoleId))
+      await removeMemberRole(fromUser.discordId, team.discordRoleId);
+    if (tournament.discordRoleId && discordGuildMember.roles.includes(tournament.discordRoleId))
+      await removeMemberRole(fromUser.discordId, tournament.discordRoleId);
+  } catch (error) {
+    if (!error.response || error.response.status !== 404) throw error;
+    // Uh uh... It seems the discord member doesn't exist
+    // Or the role has been deleted - but don't care as we wanted to remove it
+    // You have left the server. How dare you ?!
   }
 };

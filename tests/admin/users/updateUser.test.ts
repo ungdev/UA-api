@@ -8,11 +8,13 @@ import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { forcePay } from '../../../src/operations/carts';
+import { deleteRole, kickMember, registerMember, registerRole, resetFakeDiscord } from '../../discord';
 
 describe('PATCH /admin/users/:userId', () => {
   let user: User;
   let admin: User;
   let adminToken: string;
+  let tournamentDiscordId: string;
 
   const validBody: {
     type: string;
@@ -26,12 +28,14 @@ describe('PATCH /admin/users/:userId', () => {
 
   before(async () => {
     user = await createFakeUser();
-    admin = await createFakeUser({ permission: Permission.admin });
+    registerMember(user.discordId);
+    admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
   });
 
   after(async () => {
     // Delete the user created
+    resetFakeDiscord();
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
@@ -97,8 +101,21 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should update the user and remove him from his team', async () => {
-    const team = await createFakeTeam({ members: 2 });
+    const team = await createFakeTeam({ members: 2, locked: true });
+    registerRole(team.discordRoleId);
+
+    tournamentDiscordId = registerRole();
+
+    await database.tournament.update({
+      where: {
+        id: team.tournamentId,
+      },
+      data: {
+        discordRoleId: tournamentDiscordId,
+      },
+    });
     const teamMember = team.players.find((member) => member.id !== team.captainId);
+    registerMember(teamMember.discordId, [team.discordRoleId, tournamentDiscordId]);
 
     const { body } = await request(app)
       .patch(`/admin/users/${teamMember.id}`)
@@ -128,16 +145,98 @@ describe('PATCH /admin/users/:userId', () => {
     expect(body.type).to.be.equal(UserType.coach);
   });
 
-  it('should be able to update discordId only', async () => {
+  it('should be able to update discordId only (no team)', async () => {
+    const fakeGuildMemberId = registerMember();
     const { body } = await request(app)
       .patch(`/admin/users/${user.id}`)
       .send({
-        discordId: '627536251278278',
+        discordId: fakeGuildMemberId,
       })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal('627536251278278');
+    expect(body.discordId).to.be.equal(fakeGuildMemberId);
+    kickMember(fakeGuildMemberId);
+  });
+
+  it('should be able to update discordId only (team locked)', async () => {
+    const team = await createFakeTeam({ members: 1, locked: true });
+    // tournament id has already been given
+    const [teamMember] = team.players;
+    registerRole(team.discordRoleId);
+    registerMember(teamMember.discordId, [team.discordRoleId, tournamentDiscordId]);
+
+    const newAccount = registerMember();
+
+    const { body } = await request(app)
+      .patch(`/admin/users/${teamMember.id}`)
+      .send({
+        discordId: newAccount,
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.discordId).to.be.equal(newAccount);
+    deleteRole(team.discordRoleId);
+  });
+
+  it('should be able to update discordId only (team locked, was not synced)', async () => {
+    const team = await createFakeTeam({ members: 1, locked: true });
+    // tournament id has already been given
+    const [teamMember] = team.players;
+    registerRole(team.discordRoleId);
+    registerMember(teamMember.discordId);
+
+    const newAccount = registerMember();
+
+    const { body } = await request(app)
+      .patch(`/admin/users/${teamMember.id}`)
+      .send({
+        discordId: newAccount,
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.discordId).to.be.equal(newAccount);
+    deleteRole(team.discordRoleId);
+  });
+
+  it('should be able to update discordId only (team locked, left discord server)', async () => {
+    const team = await createFakeTeam({ members: 1, locked: true });
+    // tournament id has already been given
+    const [teamMember] = team.players;
+    kickMember(teamMember.discordId);
+    registerRole(team.discordRoleId);
+
+    const newDiscordId = registerMember();
+
+    const { body } = await request(app)
+      .patch(`/admin/users/${teamMember.id}`)
+      .send({
+        discordId: newDiscordId,
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.discordId).to.be.equal(newDiscordId);
+  });
+
+  it('should be able to update discordId only (team not locked)', async () => {
+    const team = await createFakeTeam({ members: 1 });
+    // tournament id has already been given
+    const [teamMember] = team.players;
+    registerMember(teamMember.id);
+    const newDiscordId = registerMember();
+
+    const { body } = await request(app)
+      .patch(`/admin/users/${teamMember.id}`)
+      .send({
+        discordId: newDiscordId,
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.discordId).to.be.equal(newDiscordId);
   });
 
   it('should be able to update customMessage only', async () => {

@@ -8,6 +8,7 @@ import { validateBody } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
 import { fetchTeam, replaceUser } from '../../../operations/team';
 import { filterUser } from '../../../utils/filters';
+import { removeDiscordRoles } from '../../../utils/discord';
 
 export default [
   // Middlewares
@@ -58,8 +59,13 @@ export default [
 
       await replaceUser(user, targetUser, team);
 
-      const updatedUser = await fetchUser(request.params.userId);
-      const updatedTargetUser = await fetchUser(request.body.replacingUserId);
+      // Discard discord roles from the replaced user
+      // This is parallelized with the user fetches
+      const [, updatedUser, updatedTargetUser] = await Promise.all([
+        removeDiscordRoles(user),
+        fetchUser(request.params.userId),
+        fetchUser(request.body.replacingUserId),
+      ]);
 
       return success(response, { replacedUser: filterUser(updatedUser), replacingUser: filterUser(updatedTargetUser) });
     } catch (error) {
