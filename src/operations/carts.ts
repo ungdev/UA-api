@@ -116,7 +116,7 @@ export const refundCart = (cartId: string): Promise<Cart> =>
     where: { id: cartId },
   });
 
-export const forcePay = (user: RawUser) => {
+export const forcePay = (user: Pick<RawUser, 'type' | 'id'>) => {
   let itemId;
 
   switch (user.type) {

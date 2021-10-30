@@ -68,33 +68,35 @@ export { TransactionState, UserAge, UserType, TournamentId, ItemCategory, Log } 
 
 // We define all the type here, even if we dont extend them to avoid importing @prisma/client in files and mix both types to avoid potential errors
 
-export type Item = prisma.Item & {
+export type Setting = prisma.Setting;
+export type CartItem = prisma.CartItem;
+export type RawUser = prisma.User;
+export type Cart = prisma.Cart;
+export type RawItem = prisma.Item;
+export type PrimitiveTeam = prisma.Team;
+export type PrimitiveTournament = prisma.Tournament;
+
+export type Item = RawItem & {
   left?: number;
 };
 
-export type Setting = prisma.Setting;
-
-export type CartItem = prisma.CartItem;
-
 export type DetailedCartItem = CartItem & {
-  item: prisma.Item;
-  forUser: prisma.User;
+  item: RawItem;
+  forUser: RawUser;
 };
 
-export type Cart = prisma.Cart;
-
 export type CartWithCartItems = Cart & {
-  cartItems: (CartItem & { forUser: prisma.User })[];
+  cartItems: (CartItem & { forUser: RawUser })[];
 };
 
 export interface CartWithCartItemsAdmin extends CartWithCartItems {
   totalPrice?: number;
-  cartItems: (DetailedCartItem & { forUser: prisma.User; item: prisma.Item })[];
+  cartItems: (DetailedCartItem & { forUser: RawUser; item: RawItem })[];
 }
 
 export type DetailedCart = Cart & {
   cartItems: DetailedCartItem[];
-  user: prisma.User;
+  user: RawUser;
 };
 
 export interface PrimitiveCartItem {
@@ -103,12 +105,17 @@ export interface PrimitiveCartItem {
   forUserId: string;
 }
 
-export type RawUser = prisma.User;
-export type PrimitiveUser = prisma.User & {
+export type ParsedPermissionsHolder<T extends RawUser> = Omit<T, 'permissions'> & {
+  permissions: Permission[];
+};
+
+export type PrimitiveUser = ParsedPermissionsHolder<RawUser> & {
   cartItems: (CartItem & {
     cart: Cart;
   })[];
 };
+
+export type RawUserWithCartItems = Pick<PrimitiveUser, 'cartItems'> & RawUser;
 
 export type User = PrimitiveUser & {
   hasPaid: boolean;
@@ -122,8 +129,16 @@ export type User = PrimitiveUser & {
 };
 
 export type UserWithTeam = User & {
-  team: prisma.Team;
+  team: PrimitiveTeam;
 };
+
+export type PrimitiveTeamWithPartialTournament = PrimitiveTeam & {
+  tournament: Pick<PrimitiveTournament, 'id' | 'name'>;
+};
+
+export type RawUserWithTeamAndTournamentInfo = RawUserWithCartItems & { team: PrimitiveTeamWithPartialTournament };
+
+export type UserWithTeamAndTournamentInfo = UserWithTeam & { team: PrimitiveTeamWithPartialTournament };
 
 // We need to use here a type instead of an interface as it is used for a casting that wouldn't work on an interface
 export type UserSearchQuery = {
@@ -136,7 +151,26 @@ export type UserSearchQuery = {
   place: string;
 };
 
-export type PrimitiveTeam = prisma.Team;
+export type UserPatchBody = Partial<
+  Pick<
+    User,
+    | 'type'
+    | 'place'
+    | 'permissions'
+    | 'discordId'
+    | 'customMessage'
+    | 'age'
+    | 'username'
+    | 'firstname'
+    | 'lastname'
+    | 'email'
+  >
+>;
+
+export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
+  users: RawUserWithCartItems[];
+  askingUsers: RawUserWithCartItems[];
+};
 
 export type Team = PrimitiveTeam & {
   users: undefined;
@@ -145,9 +179,7 @@ export type Team = PrimitiveTeam & {
   askingUsers: User[];
 };
 
-export type PrimitiveTournament = prisma.Tournament;
-
-export type Tournament = prisma.Tournament & {
+export type Tournament = PrimitiveTournament & {
   lockedTeamsCount: number;
   placesLeft: number;
   teams: Team[];
@@ -190,6 +222,7 @@ export const enum Error {
   InvalidAge = 'Tu dois préciser si tu êtes majeur ou mineur',
   InvalidUserType = "Type d'utilisateur invalide",
   InvalidPlace = 'Numéro de place invalide',
+  InvalidPermission = "Ces permissions n'existent pas",
   stringBooleanError = "Ce n'est pas du texte",
 
   InvalidTeamName = "Nom d'équipe invalide !",
@@ -271,6 +304,7 @@ export const enum Error {
   UsernameAlreadyExists = "Ce nom d'utilisateur est déjà utilisé",
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
   PlaceAlreadyAttributed = 'Cette place est déjà attribuée',
+  DiscordAccountAlreadyUsed = 'Ce compte discord est déjà lié à un compte',
 
   // 410
   // indicates that access to the target resource is no longer available at the server.

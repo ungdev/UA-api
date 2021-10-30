@@ -4,17 +4,18 @@ import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
 import {
-  Permission,
-  PrimitiveUser,
   User,
   UserSearchQuery,
-  UserWithTeam,
   TransactionState,
   UserAge,
   UserType,
-  PrimitiveTeam,
+  RawUserWithCartItems,
+  RawUser,
+  UserPatchBody,
+  RawUserWithTeamAndTournamentInfo,
+  UserWithTeamAndTournamentInfo,
 } from '../types';
-import { serializePermissions } from '../utils/helpers';
+import { deserializePermissions, serializePermissions } from '../utils/helpers';
 
 export const userInclusions = {
   cartItems: {
@@ -26,7 +27,7 @@ export const userInclusions = {
   attended: true,
 };
 
-export const formatUser = (user: PrimitiveUser): User => {
+export const formatUser = (user: RawUserWithCartItems): User => {
   if (!user) return null;
 
   if (user.cartItems.some((cartItem) => cartItem.forUserId !== user.id))
@@ -39,10 +40,13 @@ export const formatUser = (user: PrimitiveUser): User => {
   return {
     ...user,
     hasPaid,
+    permissions: deserializePermissions(user.permissions),
   };
 };
 
-export const formatUserWithTeam = (primitiveUser: PrimitiveUser & { team: PrimitiveTeam }): UserWithTeam => {
+export const formatUserWithTeamAndTournament = (
+  primitiveUser: RawUserWithTeamAndTournamentInfo,
+): UserWithTeamAndTournamentInfo => {
   const user = formatUser(primitiveUser);
 
   return {
@@ -67,24 +71,27 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
  * @returns {Promise<[UserWithTeam[], number]>} the entries corresponding to the page,
  * along with count of entries matching the query.
  */
-export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<[UserWithTeam[], number]> => {
+export const fetchUsers = async (
+  query: UserSearchQuery,
+  page: number,
+): Promise<[UserWithTeamAndTournamentInfo[], number]> => {
   const filter: Omit<Prisma.UserFindManyArgs, 'select' | 'include'> = {
     where: {
-      OR: [
-        { firstname: query.search ? { contains: query.search } : undefined },
-        { lastname: query.search ? { contains: query.search } : undefined },
-        { username: query.search ? { contains: query.search } : undefined },
-        { email: query.search ? { contains: query.search } : undefined },
-        {
-          team: {
-            name: query.search ? { contains: query.search } : undefined,
-          },
-        },
-        {
-          // Always true condition in order to avoid no result as OR filter
-          email: query.search ? undefined : { not: null },
-        },
-      ],
+      ...(query.search
+        ? {
+            OR: [
+              { firstname: { contains: query.search } },
+              { lastname: { contains: query.search } },
+              { username: { contains: query.search } },
+              { email: { contains: query.search } },
+              {
+                team: {
+                  name: { contains: query.search },
+                },
+              },
+            ],
+          }
+        : {}),
 
       team: {
         tournamentId: query.tournament || undefined,
@@ -104,7 +111,16 @@ export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<
       ...filter,
       include: {
         ...userInclusions,
-        team: true,
+        team: {
+          include: {
+            tournament: {
+              select: {
+                name: true,
+                id: true,
+              },
+            },
+          },
+        },
       },
       skip: page * env.api.itemsPerPage,
       take: env.api.itemsPerPage,
@@ -112,7 +128,7 @@ export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<
     database.user.count(filter),
   ]);
 
-  return [users.map(formatUserWithTeam), count];
+  return [users.map(formatUserWithTeamAndTournament), count];
 };
 
 export const createUser = async (user: {
@@ -125,7 +141,7 @@ export const createUser = async (user: {
   discordId?: string;
   type?: UserType;
   customMessage?: string;
-}) => {
+}): Promise<RawUser> => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
   const hashedPassword = await userOperations.hash(user.password, salt);
   return database.user.create({
@@ -169,25 +185,19 @@ export const updateUser = async (
   return formatUser(user);
 };
 
-export const updateAdminUser = async (
-  userId: string,
-  updates: {
-    type?: UserType;
-    permissions?: Permission[];
-    place?: string;
-    discordId?: string;
-    customMessage?: string;
-    age?: UserAge;
-  },
-): Promise<User> => {
+export const updateAdminUser = async (userId: string, updates: UserPatchBody): Promise<User> => {
   const user = await database.user.update({
     data: {
       type: updates.type,
-      permissions: serializePermissions(updates.permissions),
+      permissions: updates.permissions ? serializePermissions(updates.permissions) : undefined,
       place: updates.place,
       discordId: updates.discordId,
       customMessage: updates.customMessage,
       age: updates.age,
+      email: updates.email,
+      firstname: updates.firstname,
+      lastname: updates.lastname,
+      username: updates.username,
       team:
         updates.type === UserType.spectator
           ? {
@@ -202,7 +212,11 @@ export const updateAdminUser = async (
   return formatUser(user);
 };
 
-export const createAttendant = (referrerId: string, firstname: string, lastname: string) =>
+export const createAttendant = (
+  referrerId: string,
+  firstname: string,
+  lastname: string,
+): Promise<RawUserWithCartItems> =>
   database.user.update({
     data: {
       attendant: {
@@ -221,7 +235,7 @@ export const createAttendant = (referrerId: string, firstname: string, lastname:
     include: userInclusions,
   });
 
-export const removeUserRegisterToken = (userId: string) =>
+export const removeUserRegisterToken = (userId: string): Promise<RawUser> =>
   database.user.update({
     data: {
       registerToken: null,
@@ -231,7 +245,7 @@ export const removeUserRegisterToken = (userId: string) =>
     },
   });
 
-export const removeUserResetToken = (userId: string) =>
+export const removeUserResetToken = (userId: string): Promise<RawUser> =>
   database.user.update({
     data: {
       resetToken: null,
@@ -241,7 +255,7 @@ export const removeUserResetToken = (userId: string) =>
     },
   });
 
-export const generateResetToken = (userId: string) =>
+export const generateResetToken = (userId: string): Promise<RawUser> =>
   database.user.update({
     data: {
       resetToken: nanoid(),
@@ -251,7 +265,7 @@ export const generateResetToken = (userId: string) =>
     },
   });
 
-export const scanUser = (userId: string) =>
+export const scanUser = (userId: string): Promise<RawUser> =>
   database.user.update({
     data: {
       scannedAt: new Date(),
@@ -275,7 +289,7 @@ export const changePassword = async (user: User, newPassword: string) => {
   });
 };
 
-export const deleteUser = (id: string) => database.user.delete({ where: { id } });
+export const deleteUser = (id: string): Promise<RawUser> => database.user.delete({ where: { id } });
 
 /**
  * Counts the coaches in a chosen team. If team is not specified,

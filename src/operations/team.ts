@@ -1,6 +1,15 @@
 import type { PrismaPromise } from '@prisma/client';
 import database from '../services/database';
-import { PrimitiveUser, Team, User, TournamentId, UserType, PrimitiveTeam, RawUser } from '../types';
+import {
+  Team,
+  User,
+  TournamentId,
+  UserType,
+  PrimitiveTeam,
+  RawUser,
+  RawUserWithCartItems,
+  PrimitiveTeamWithPrimitiveUsers,
+} from '../types';
 import nanoid from '../utils/nanoid';
 import { countCoaches, formatUser, userInclusions } from './user';
 
@@ -15,7 +24,9 @@ const teamInclusions = {
   },
 };
 
-export const formatTeam = (team: PrimitiveTeam & { users: PrimitiveUser[]; askingUsers: PrimitiveUser[] }): Team => {
+export const formatTeam = (
+  team: PrimitiveTeam & { users: RawUserWithCartItems[]; askingUsers: RawUserWithCartItems[] },
+): Team => {
   if (!team) return null;
 
   const players = team.users.filter((player) => player.type === 'player');
@@ -145,7 +156,7 @@ export const askJoinTeam = async (teamId: string, userId: string, userType: User
   return formatUser(updatedUser);
 };
 
-export const deleteTeamRequest = (userId: string) =>
+export const deleteTeamRequest = (userId: string): PrismaPromise<RawUser> =>
   // Warning: for this version of prisma, this method is not idempotent. It will throw an error if there is no asking team. It should be solved in the next versions
   // Please correct this if this issue is closed and merged https://github.com/prisma/prisma/issues/3069
   database.user.update({
@@ -160,7 +171,7 @@ export const deleteTeamRequest = (userId: string) =>
     },
   });
 
-export const kickUser = (userId: string) =>
+export const kickUser = (userId: string): PrismaPromise<RawUser> =>
   // Warning: for this version of prisma, this method is not idempotent. It will throw an error if there is no asking team. It should be solved in the next versions
   // Please correct this if this issue is closed and merged https://github.com/prisma/prisma/issues/3069
   database.user.update({
@@ -175,7 +186,7 @@ export const kickUser = (userId: string) =>
     },
   });
 
-export const promoteUser = (teamId: string, newCaptainId: string) =>
+export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise<PrimitiveTeamWithPrimitiveUsers> =>
   database.team.update({
     data: {
       captain: {
@@ -188,7 +199,7 @@ export const promoteUser = (teamId: string, newCaptainId: string) =>
     include: teamInclusions,
   });
 
-export const joinTeam = (teamId: string, user: User, newUserType?: UserType) =>
+export const joinTeam = (teamId: string, user: User, newUserType?: UserType): PrismaPromise<RawUser> =>
   database.user.update({
     data: {
       team: {
@@ -206,12 +217,17 @@ export const joinTeam = (teamId: string, user: User, newUserType?: UserType) =>
     },
   });
 
-export const replaceUser = (user: User, targetUser: User, team: Team) => {
+export const replaceUser = (
+  user: User,
+  targetUser: User,
+  team: Team,
+): Promise<[RawUser, RawUser, PrimitiveTeamWithPrimitiveUsers?]> => {
   // Create the first transaction to replace the user
-  const transactions: PrismaPromise<RawUser | PrimitiveTeam>[] = [
-    kickUser(user.id),
-    joinTeam(team.id, targetUser, user.type),
-  ];
+  const transactions: [
+    PrismaPromise<RawUser>,
+    PrismaPromise<RawUser>,
+    PrismaPromise<PrimitiveTeamWithPrimitiveUsers>?,
+  ] = [kickUser(user.id), joinTeam(team.id, targetUser, user.type)];
 
   // If he is the captain, change the captain
   if (team.captainId === user.id) {

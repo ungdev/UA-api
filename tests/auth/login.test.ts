@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app';
 import * as userUtils from '../../src/utils/users';
-import { Error, RawUser, UserType } from '../../src/types';
+import { Error, User, UserType } from '../../src/types';
 import { setLoginAllowed } from '../../src/operations/settings';
 import database from '../../src/services/database';
 import { sandbox } from '../setup';
@@ -10,7 +10,7 @@ import { createFakeUser } from '../utils';
 
 describe('POST /auth/login', () => {
   const password = 'bonjour123456';
-  let user: RawUser;
+  let user: User;
 
   before(async () => {
     user = await createFakeUser({ password });

@@ -2,14 +2,14 @@ import request from 'supertest';
 import app from '../../src/app';
 import database from '../../src/services/database';
 import * as userOperations from '../../src/operations/user';
-import { Error, RawUser } from '../../src/types';
+import { Error, User } from '../../src/types';
 import { setLoginAllowed } from '../../src/operations/settings';
 import { sandbox } from '../setup';
 import { createFakeUser } from '../utils';
 
 describe('POST /auth/validate/{token}', () => {
   const password = 'yolo59';
-  let user: RawUser;
+  let user: User;
 
   before(async () => {
     // Creates a fake user not confirmed

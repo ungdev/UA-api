@@ -3,7 +3,6 @@ import { getRequestInfo } from '../utils/users';
 import { forbidden, unauthenticated } from '../utils/responses';
 import { Error, Permission } from '../types';
 import { isLoginAllowed } from './settings';
-import { deserializePermissions } from '../utils/helpers';
 import { logSuccessfulUpdates } from './log';
 
 // Checks the user is authenticated. If not, it will return an error
@@ -44,16 +43,14 @@ export const hasPermission = (...permissions: Permission[]) => [
 
     if (!user.permissions) return forbidden(response, Error.NoPermission);
 
-    const userPermissions = deserializePermissions(user.permissions);
-
     // If user is admin
-    if (userPermissions.includes(Permission.admin)) {
+    if (user.permissions.includes(Permission.admin)) {
       return next();
     }
 
     // If the user has the permission of one permission required
     for (const permission of permissions) {
-      if (userPermissions.includes(permission)) return next();
+      if (user.permissions.includes(permission)) return next();
     }
 
     return forbidden(response, Error.NoPermission);

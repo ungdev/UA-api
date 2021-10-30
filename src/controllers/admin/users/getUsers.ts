@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-import { filterUserWithTeam } from '../../../utils/filters';
+import { filterUserWithTeamAndTournamentInfo } from '../../../utils/filters';
 import { success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
 import { fetchUsers } from '../../../operations/user';
@@ -29,10 +29,10 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const userSearch = request.query as UserSearchQuery;
+      const userSearch = request.query as UserSearchQuery & { page?: string };
 
-      // Get the page from the query. Default to zero and put it in max to ensure there is no negative numbers
-      const pageNumber = request.query.page as string;
+      // Get the page from the query. Default to zero
+      const pageNumber = userSearch.page;
       const page = Number.parseInt(pageNumber);
 
       // Fetch matching users and database entry count
@@ -46,10 +46,7 @@ export default [
         currentPage: page,
         totalItems: userCount,
         totalPages: nbPages,
-        users: users.map((user) => ({
-          ...filterUserWithTeam(user),
-          customMessage: user.customMessage,
-        })),
+        users: users.map(filterUserWithTeamAndTournamentInfo),
       });
     } catch (error) {
       return next(error);

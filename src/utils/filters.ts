@@ -4,10 +4,12 @@ import {
   CartWithCartItems,
   CartWithCartItemsAdmin,
   Item,
+  ParsedPermissionsHolder,
+  RawUser,
   Team,
   Tournament,
   User,
-  UserWithTeam,
+  UserWithTeamAndTournamentInfo,
 } from '../types';
 
 export const filterUserRestricted = (user: User) => pick(user, ['id', 'username', 'type', 'hasPaid']);
@@ -33,15 +35,18 @@ export const filterUser = (user: User) =>
     'attendant.id',
   ]);
 
-export const filterAdminAccount = (user: User) =>
+export const filterAdminAccount = (user: ParsedPermissionsHolder<RawUser>) =>
   pick(user, ['id', 'type', 'username', 'firstname', 'lastname', 'email', 'permissions']);
 
-export const filterUserWithTeam = (user: UserWithTeam) => {
+export const filterUserWithTeamAndTournamentInfo = (user: UserWithTeamAndTournamentInfo) => {
   const filteredUser = filterUser(user);
-  const filteredTeam = user.team ? pick(user.team, ['id', 'name', 'tournamentId', 'captainId', 'lockedAt']) : undefined;
+  const filteredTeam = user.team
+    ? pick(user.team, ['id', 'name', 'captainId', 'lockedAt', 'tournament.id', 'tournament.name'])
+    : undefined;
 
   return {
     ...filteredUser,
+    customMessage: user.customMessage,
     team: filteredTeam,
   };
 };

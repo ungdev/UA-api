@@ -249,8 +249,9 @@ components:
               format: email
               nullable: true
             permissions:
-              type: string
-              nullable: true
+              type: array
+              items:
+                $ref: '#/components/schemas/Permission'
             place:
               type: string
               nullable: true
@@ -295,8 +296,9 @@ components:
           format: email
           nullable: true
         permissions:
-          $ref: '#/components/schemas/Permission'
-          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
 
     Team:
       type: object
@@ -372,6 +374,38 @@ components:
           properties:
             customMessage:
               type: string
+
+    UserWithTeamAndMessageAndTournamentInfo:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            customMessage:
+              type: string
+            team:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: Z5jdHi
+                name:
+                  type: string
+                tournament:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: League of Legends Compétitif
+                    id:
+                      type: string
+                      example: lolCompetitive
+                captainId:
+                  type: string
+                  example: XiHGta
+                locked:
+                  type: string
+                  format: date-time
+                  nullable: true
 
     Cart:
       type: object

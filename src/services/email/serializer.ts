@@ -109,7 +109,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
     ],
   });
 
-export const generateValidationEmail = (user: RawUser) =>
+export const generateValidationEmail = (user: Omit<RawUser, 'permissions'>) =>
   serialize({
     receiver: user.email,
     reason:
@@ -129,6 +129,7 @@ export const generateValidationEmail = (user: RawUser) =>
             name: 'Confirme ton adresse email',
             location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}`,
           },
+          `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}_`,
         ],
       },
       {
@@ -162,7 +163,7 @@ export const generateValidationEmail = (user: RawUser) =>
     ],
   });
 
-export const generatePasswordResetEmail = (user: RawUser) =>
+export const generatePasswordResetEmail = (user: Omit<RawUser, 'permissions'>) =>
   serialize({
     receiver: user.email,
     reason:
@@ -183,6 +184,7 @@ export const generatePasswordResetEmail = (user: RawUser) =>
             location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}`,
             color: '#dc143c',
           },
+          `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}_`,
         ],
       },
     ],
