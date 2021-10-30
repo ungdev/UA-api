@@ -1,7 +1,6 @@
 import { PrismaPromise } from '.prisma/client';
-import { Log } from '../types';
+import { Log, LogSearchQuery } from '../types';
 import database from '../services/database';
-import { LogSearchQuery } from '../types';
 import env from '../utils/env';
 import nanoid from '../utils/nanoid';
 
@@ -38,7 +37,7 @@ export const fetchLogs = (query: LogSearchQuery) =>
           ? {
               OR: {
                 userId: query.userId ?? undefined,
-                user: query.teamId === null ? undefined : { teamId: query.teamId },
+                user: { teamId: query.teamId },
               },
             }
           : undefined,
@@ -54,7 +53,7 @@ export const fetchLogs = (query: LogSearchQuery) =>
           ? {
               OR: {
                 userId: query.userId ?? undefined,
-                user: query.teamId === null ? undefined : { teamId: query.teamId },
+                user: { teamId: query.teamId },
               },
             }
           : undefined,
