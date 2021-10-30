@@ -2,6 +2,7 @@ import { PrismaPromise } from '.prisma/client';
 import { Log } from '../types';
 import database from '../services/database';
 import { LogSearchQuery } from '../types';
+import env from '../utils/env';
 import nanoid from '../utils/nanoid';
 
 export const createLog = (
@@ -32,15 +33,30 @@ export const createLog = (
 export const fetchLogs = (query: LogSearchQuery) =>
   database.$transaction([
     database.log.findMany({
-      where: {
-        OR: { userId: query.userId ?? undefined, user: query.teamId === null ? undefined : { teamId: query.teamId } },
+      where:
+        query.teamId || query.userId
+          ? {
+              OR: {
+                userId: query.userId ?? undefined,
+                user: query.teamId === null ? undefined : { teamId: query.teamId },
+              },
+            }
+          : undefined,
+      take: env.api.itemsPerPage,
+      skip: query.page * env.api.itemsPerPage,
+      orderBy: {
+        createdAt: 'desc',
       },
-      take: 100,
-      skip: query.page * 100,
     }),
     database.log.count({
-      where: {
-        OR: { userId: query.userId ?? undefined, user: query.teamId === null ? undefined : { teamId: query.teamId } },
-      },
+      where:
+        query.teamId || query.userId
+          ? {
+              OR: {
+                userId: query.userId ?? undefined,
+                user: query.teamId === null ? undefined : { teamId: query.teamId },
+              },
+            }
+          : undefined,
     }),
   ]);

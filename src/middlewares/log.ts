@@ -4,7 +4,10 @@ import { getRequestInfo } from '../utils/users';
 
 export const logSuccessfulUpdates = (request: Request, response: Response, next: NextFunction) => {
   // Logs the request if it makes modifications
-  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
+  if (!response.locals.logging && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
+    // Prevent from generating logs twice
+    response.locals.logging = true;
+
     // Wait the response to be ended
     response.on('finish', async () => {
       // Retreives the user

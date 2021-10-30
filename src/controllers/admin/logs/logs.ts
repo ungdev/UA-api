@@ -6,6 +6,7 @@ import { LogSearchQuery, Permission } from '../../../types';
 import { fetchLogs } from '../../../operations/log';
 import { validateQuery } from '../../../middlewares/validation';
 import { id } from '../../../utils/validators';
+import env from '../../../utils/env';
 
 export default [
   // Middlewares
@@ -18,7 +19,12 @@ export default [
       const logSearch = request.query as LogSearchQuery;
       const [logs, count] = await fetchLogs(logSearch);
 
-      return success(response, { logs, pageIndex: logSearch.page, maxPages: Math.ceil(count) });
+      return success(response, {
+        logs,
+        pageIndex: logSearch.page,
+        count,
+        pageCount: Math.ceil(count / env.api.itemsPerPage),
+      });
     } catch (error) {
       return next(error);
     }

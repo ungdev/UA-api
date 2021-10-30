@@ -374,9 +374,14 @@
                 pageIndex:
                   type: number
                   example: 1
-                maxPages:
+                pageCount:
                   type: number
                   example: 5
+                  description: Le nombre de pages disponibles
+                count:
+                  type: number
+                  example: 128
+                  description: Le nombre d'entrées correspondantes
       400:
         $ref: '#/components/responses/400Errored'
       401:
