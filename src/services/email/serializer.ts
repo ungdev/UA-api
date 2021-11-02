@@ -1,7 +1,6 @@
-import { User, ItemCategory } from '@prisma/client';
 import { readFile } from 'fs/promises';
 import { render } from 'mustache';
-import { ActionFeedback, DetailedCart } from '../../types';
+import { ActionFeedback, DetailedCart, RawUser, ItemCategory } from '../../types';
 import { escapeText, inflate, style } from './components';
 import env from '../../utils/env';
 import { formatPrice } from '../../utils/helpers';
@@ -11,7 +10,7 @@ import type { Mail, SerializedMail, Component } from '.';
  * Applied {@link Mail} content in the template
  * @throws an error when an unknwon component is in the {@link Mail#sections#components}
  */
-const serialize = async (content: Mail) => {
+export const serialize = async (content: Mail) => {
   const template = await readFile('assets/email/template.html', 'utf8');
   const year = new Date().getFullYear();
   return <SerializedMail>{
@@ -110,7 +109,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
     ],
   });
 
-export const generateValidationEmail = (user: User) =>
+export const generateValidationEmail = (user: Omit<RawUser, 'permissions'>) =>
   serialize({
     receiver: user.email,
     reason:
@@ -130,6 +129,7 @@ export const generateValidationEmail = (user: User) =>
             name: 'Confirme ton adresse email',
             location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}`,
           },
+          `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}_`,
         ],
       },
       {
@@ -163,7 +163,7 @@ export const generateValidationEmail = (user: User) =>
     ],
   });
 
-export const generatePasswordResetEmail = (user: User) =>
+export const generatePasswordResetEmail = (user: Omit<RawUser, 'permissions'>) =>
   serialize({
     receiver: user.email,
     reason:
@@ -184,6 +184,7 @@ export const generatePasswordResetEmail = (user: User) =>
             location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}`,
             color: '#dc143c',
           },
+          `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}_`,
         ],
       },
     ],

@@ -4,12 +4,12 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, User } from '../../src/types';
+import { Error, Team, User, UserType } from '../../src/types';
 import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchTournament } from '../../src/operations/tournament';
-import { UserType } from '.prisma/client';
+import { resetFakeDiscord } from '../discord';
 
 describe('POST /teams/current/lock', () => {
   let captain: User;
@@ -19,7 +19,7 @@ describe('POST /teams/current/lock', () => {
   let lolMaxPlayers: number;
 
   before(async () => {
-    team = await createFakeTeam({ members: 5, paid: true });
+    team = await createFakeTeam({ members: 5, paid: true, tournament: 'lolCompetitive' });
 
     captain = getCaptain(team);
     captainToken = generateToken(captain);
@@ -29,11 +29,12 @@ describe('POST /teams/current/lock', () => {
   });
 
   after(async () => {
+    resetFakeDiscord();
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
 
-    await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lolCompetitive' } });
+    return database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lolCompetitive' } });
   });
 
   it('should error as the token is missing', () =>
@@ -83,7 +84,7 @@ describe('POST /teams/current/lock', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should lock the team', async () => {
+  it('should lock the team (non solo)', async () => {
     const { body } = await request(app)
       .post('/teams/current/lock')
       .set('Authorization', `Bearer ${captainToken}`)
@@ -96,6 +97,21 @@ describe('POST /teams/current/lock', () => {
 
     // Check if the object was filtered
     return expect(body.updatedAt).to.be.undefined;
+  });
+
+  it('should lock the team (solo)', async () => {
+    const soloTeam = await createFakeTeam({ tournament: 'open', paid: true, members: 1 });
+    const user = soloTeam.players[0];
+    const token = generateToken(user);
+
+    const { body } = await request(app).post('/teams/current/lock').set('Authorization', `Bearer ${token}`).expect(200);
+
+    const updatedTeam = await teamOperations.fetchTeam(soloTeam.id);
+    expect(updatedTeam.lockedAt).to.be.not.null;
+    expect(body.lockedAt).to.be.not.null;
+
+    // Check if the object was filtered
+    expect(body.updatedAt).to.be.undefined;
   });
 
   it('should error as the team is already locked', () =>

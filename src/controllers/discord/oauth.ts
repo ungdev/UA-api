@@ -9,6 +9,8 @@ import { isLoginAllowed } from '../../middlewares/settings';
 import type { DiscordAuthorization } from './discordApi';
 import logger from '../../utils/logger';
 import { fetchDiscordUser, getToken } from '../../services/discord';
+import { removeDiscordRoles } from '../../utils/discord';
+import { createLog } from '../../operations/log';
 
 const redirect = (response: Response, statusCode: DiscordFeedbackCode) => {
   response
@@ -38,6 +40,10 @@ export default [
 
       // Parallelize the request to the Discord API and the Database
       const [discordUserToken, user] = await Promise.all([getToken(code), userPromise]);
+      // Attach sentry error log (if an error occurs) to the user
+      Sentry.setUser({ id: user.id, username: user.username, email: user.email });
+      // Add extra details in sentry errors (involved discord ids)
+      Sentry.setExtra('currentDiscordId', user.discordId);
 
       // State is invalid ! User may have modified it on the fly
       // Or this is not the scope we asked access for => bad request
@@ -52,18 +58,35 @@ export default [
       // If id is not defined, it means the user refused the permission access grant
       if (!discordUser?.id) return redirect(response, DiscordFeedbackCode.ERR_OAUTH_DENIED);
 
+      // Add extra details in sentry errors (involved discord ids)
+      Sentry.setExtra('updatedDiscordId', discordUser.id);
+
       // Otherwise, we have the id and we can update the database
       const updatedUser = await database.user.update({
         data: { discordId: discordUser.id },
         where: { id: user.id },
       });
 
+      // Add logging callback when the request is successful. This callback will
+      // also generate logs for a NOT_MODIFIED result, to check request spamming
+      // We don't check role removal status as user has already been altered in the database
+      response.on('finish', () =>
+        // Discord ids wouldn't be logged if we were using `request.query` so we log custom data
+        createLog(request.method, request.originalUrl, user.id, {
+          from: user.discordId,
+          to: updatedUser.discordId,
+        }),
+      );
+
       // The user had no linked discord account before the operation ! We're gonna be gentle
       // with him/her and display him/her a feedback for team creation/joining
       if (!user.discordId && updatedUser.discordId) return redirect(response, DiscordFeedbackCode.LINKED_NEW);
 
       // The id was updated (and was different from the one previously in database)
-      if (user.discordId !== updatedUser.discordId) return redirect(response, DiscordFeedbackCode.LINKED_UPDATED);
+      if (user.discordId !== updatedUser.discordId) {
+        await removeDiscordRoles(user);
+        return redirect(response, DiscordFeedbackCode.LINKED_UPDATED);
+      }
 
       // The id has not changed because the same discord account was used
       return redirect(response, DiscordFeedbackCode.NOT_MODIFIED);

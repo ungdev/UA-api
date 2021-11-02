@@ -1,10 +1,13 @@
+import { PrismaPromise } from '@prisma/client';
 import database from '../services/database';
+import { Setting } from '../types';
 
-export const fetchSettings = () => database.setting.findMany();
+export const fetchSettings = (): PrismaPromise<Setting[]> => database.setting.findMany();
 
-export const fetchSetting = (id: 'login' | 'shop') => database.setting.findUnique({ where: { id } });
+export const fetchSetting = (id: 'login' | 'shop'): PrismaPromise<Setting> =>
+  database.setting.findUnique({ where: { id } });
 
-const setSettingAllowed = (id: string, allowed: boolean) =>
+const setSettingAllowed = (id: string, allowed: boolean): PrismaPromise<Setting> =>
   database.setting.update({
     where: {
       id,
@@ -14,5 +17,5 @@ const setSettingAllowed = (id: string, allowed: boolean) =>
     },
   });
 
-export const setLoginAllowed = (allowed: boolean) => setSettingAllowed('login', allowed);
-export const setShopAllowed = (allowed: boolean) => setSettingAllowed('shop', allowed);
+export const setLoginAllowed = (allowed: boolean): PrismaPromise<Setting> => setSettingAllowed('login', allowed);
+export const setShopAllowed = (allowed: boolean): PrismaPromise<Setting> => setSettingAllowed('shop', allowed);

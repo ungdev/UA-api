@@ -1,18 +1,19 @@
-import { UserType } from '@prisma/client';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../../src/app';
 import { createFakeTeam, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, Team, User } from '../../../src/types';
+import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import * as teamOperations from '../../../src/operations/team';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { getCaptain } from '../../../src/utils/teams';
+import { registerMember, registerRole, resetFakeDiscord } from '../../discord';
 
 describe('POST /admin/users/:userId/replace', () => {
   let team: Team;
   let user: User;
+  let tournamentDiscordId: string;
   let targetUser: User;
   let admin: User;
   let adminToken: string;
@@ -21,15 +22,30 @@ describe('POST /admin/users/:userId/replace', () => {
 
   before(async () => {
     team = await createFakeTeam({ locked: true });
+    registerRole(team.discordRoleId);
     user = getCaptain(team);
     targetUser = await createFakeUser({ paid: true });
-    admin = await createFakeUser({ permission: Permission.admin });
+    admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
 
     validBody = { replacingUserId: targetUser.id };
+
+    tournamentDiscordId = (
+      await database.tournament.update({
+        where: {
+          id: team.tournamentId,
+        },
+        data: {
+          discordRoleId: registerRole(),
+        },
+      })
+    ).discordRoleId;
+
+    registerMember(user.discordId, [team.discordRoleId, tournamentDiscordId]);
   });
 
   after(async () => {
+    resetFakeDiscord();
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();

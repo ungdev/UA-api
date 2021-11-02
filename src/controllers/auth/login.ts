@@ -1,13 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import bcrpyt from 'bcryptjs';
-import { UserType } from '@prisma/client';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { validateBody } from '../../middlewares/validation';
 import { filterUser } from '../../utils/filters';
 import { forbidden, success, unauthenticated } from '../../utils/responses';
 import { generateToken } from '../../utils/users';
-import { Error as ResponseError } from '../../types';
+import { Error as ResponseError, UserType } from '../../types';
 import { fetchUser } from '../../operations/user';
 import * as validators from '../../utils/validators';
 

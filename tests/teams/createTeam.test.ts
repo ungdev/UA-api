@@ -6,10 +6,9 @@ import * as teamOperations from '../../src/operations/team';
 import * as tournamentOperations from '../../src/operations/tournament';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
-import { Error, User } from '../../src/types';
+import { Error, User, TournamentId, UserType } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
-import { TournamentId, UserType } from '.prisma/client';
 
 describe('POST /teams', () => {
   let user: User;

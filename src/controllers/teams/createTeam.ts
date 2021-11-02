@@ -1,4 +1,3 @@
-import { UserType } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { hasLinkedDiscordAccount } from '../../middlewares/oauth';
@@ -7,7 +6,7 @@ import { validateBody } from '../../middlewares/validation';
 import whitelist from '../../middlewares/whitelist';
 import { createTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
-import { Error as ResponseError } from '../../types';
+import { Error as ResponseError, UserType } from '../../types';
 import { filterTeam } from '../../utils/filters';
 import { conflict, created, gone } from '../../utils/responses';
 import * as validators from '../../utils/validators';

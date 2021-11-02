@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { UserType } from '.prisma/client';
-import { Error } from '../types';
+import { Error, UserType } from '../types';
 import { forbidden } from '../utils/responses';
 import { getRequestInfo } from '../utils/users';
 import { isAuthenticated } from './authentication';

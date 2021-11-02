@@ -8,7 +8,7 @@ import { filterUser } from '../../../utils/filters';
 
 export default [
   // Middlewares
-  ...hasPermission(Permission.admin),
+  ...hasPermission(Permission.entry),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {

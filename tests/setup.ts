@@ -8,6 +8,7 @@ import sinon from 'sinon';
 import database from '../src/services/database';
 import { setLoginAllowed, setShopAllowed } from '../src/operations/settings';
 import { transporter } from '../src/services/email';
+import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 
 export const sandbox = sinon.createSandbox();
 
@@ -20,6 +21,8 @@ before(async () => {
   await database.cart.deleteMany();
   await database.team.deleteMany();
   await database.user.deleteMany();
+
+  enableFakeDiscordApi();
 });
 
 afterEach('Restore the sandbox after every tests', () => {
@@ -27,6 +30,8 @@ afterEach('Restore the sandbox after every tests', () => {
 });
 
 after(async () => {
+  disableFakeDiscordApi();
+
   // Reset the database at it was
   await setLoginAllowed(false);
   await setShopAllowed(false);

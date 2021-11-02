@@ -71,11 +71,31 @@
               error: Aucun panier n'est associé à cet identifiant
 
 /admin/emails:
+  get:
+    summary: Récupère tous les emails envoyés via cette route
+    description: Récupère les mails envoyés par les admins via le `POST /admin/emails`<br/>
+      **Permission 'admin' ou 'anim' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Les mails déjà envoyés par des admins
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Mail'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
   post:
     summary: Envoie un mail d'information
     description: |-
-      Envoie un mail d'information à tous les joueurs, coachs et accompagnateurs en fonction des filtres sélectionnés.
-      Envoie également une copie à arena@utt.fr.<br/>
+      Envoie un mail d'information à tous les joueurs, coachs et accompagnateurs en fonction des filtres sélectionnés.<br/>
       **Permission 'admin' requise.**
     tags:
       - Admin
@@ -86,27 +106,21 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              locked:
-                type: boolean
-                description: Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non
-              tournamentId:
-                type: string
-                example: lol-pro
-                description: |-
-                  Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.
-                  Le champ 'locked' doit être non nul.
-                nullable: true
-              subject:
-                type: string
-                description: Sujet du mail
-              content:
-                type: string
-                description: Contenu du mail
+            $ref: '#/components/schemas/MailQuery'
     responses:
-      204:
+      201:
         description: Le mail a été envoyé avec succès
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                malformed:
+                  type: integer
+                delivered:
+                  type: integer
+                undelivered:
+                  type: integer
       400:
         $ref: '#/components/responses/400Errored'
       401:
@@ -126,68 +140,55 @@
       - BearerAuth: []
     parameters:
       - in: query
-        name: username
-        description: Recherche par nom d'utilisateur
+        name: search
+        description: Recherche par nom d'utilisateur, prénom, nom, adresse email, nom d'équipe
         schema:
           type: string
-      - in: query
-        name: firstname
-        description: Recherche par prénom
-        schema:
-          type: string
-      - in: query
-        name: lastname
-        description: Recherche par nom
-        schema:
-          type: string
-      - in: query
-        name: email
-        description: Recherche par adresse email
-        schema:
-          type: string
-      - in: query
-        name: team
-        description: Recherche par nom d'équipe
-        schema:
-          type: string
+        optional: true
       - in: query
         name: place
         description: Recherche par place
         schema:
           type: string
+        optional: true
       - in: query
         name: type
         description: Filtre les utilisateurs par leur type
         schema:
           $ref: '#/components/schemas/Type'
+        optional: true
       - in: query
         name: tournament
         description: Filtre les utilisateurs en fonction de l'identifiant de leur tournoi
         schema:
-          type: integer
-          minimum: 0
+          type: string
+        optional: true
       - in: query
         name: locked
         description: Filtre les utilisateurs en fonction de s'ils sont dans une équipe verrouillée ou non
         schema:
           type: boolean
+        optional: true
       - in: query
         name: permission
         description: Filtre les utilisateurs en fonction de leurs permissions
         schema:
           $ref: '#/components/schemas/Permission'
+        optional: true
       - in: query
         name: scanned
         description: Filtre les utilisateurs en fonction de s'ils ont été scannés ou non
         schema:
           type: boolean
+        optional: true
       - in: query
         name: page
         description: '(Pagination) Indice de la page'
         schema:
           type: integer
           minimum: 0
-        required: true
+        optional: true
+        default: 0
     responses:
       200:
         description: La liste de tous les utilisateurs filtrés est renvoyée
@@ -207,7 +208,7 @@
                 users:
                   type: array
                   items:
-                    $ref: '#/components/schemas/UserWithTeamAndMessage'
+                    $ref: '#/components/schemas/UserWithTeamAndMessageAndTournamentInfo'
       400:
         $ref: '#/components/responses/400Errored'
       401:
@@ -218,8 +219,12 @@
 /admin/users/{userId}:
   patch:
     summary: Modifie les informations d'un utilisateur
-    description: Modifie les informations d'un utilisateur.<br/>
-      **Permission 'admin' requise.**
+    description: |-
+      Modifie les informations d'un utilisateur.<br/>
+      **Permission 'admin' ou 'anim' requise.**<br/><br/>
+      **Désambiguïsation:** le champ `permissions` écrase (si renseigné) complètement les anciennes permissions.
+      Pour cette raison, il ne faut pas oublier d'y ajouter également les permissions actuelles de l'utilisateur !
+      <br/>Les orgas qui ont uniquement la permission 'anim' **doivent omettre** ce champ dans la requête !
     tags:
       - Admin
     security:
@@ -242,21 +247,40 @@
                 type: array
                 items:
                   $ref: '#/components/schemas/Permission'
-                nullable: true
+                optional: true
               place:
                 type: string
                 example: A23
                 nullable: true
+                optional: true
               type:
                 $ref: '#/components/schemas/Type'
-                nullable: true
+                optional: true
               discordId:
                 type: string
                 example: '1420070400000'
+                optional: true
                 nullable: true
               age:
                 $ref: '#/components/schemas/Age'
+                optional: true
+              customMessage:
+                type: string
                 nullable: true
+                optional: true
+              email:
+                type: string
+                format: email
+                optional: true
+              username:
+                type: string
+                optional: true
+              firstname:
+                type: string
+                optional: true
+              lastname:
+                type: string
+                optional: true
     responses:
       200:
         description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.
@@ -298,7 +322,7 @@
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/CartWithCartItems'
+                $ref: '#/components/schemas/CartWithCartItemsAdmin'
       400:
         $ref: '#/components/responses/400Errored'
       401:
@@ -336,7 +360,8 @@
 
     responses:
       200:
-        description: Un tableau de logs
+        description: Un tableau de logs<br/>
+          **Permission 'admin' requise.**
         content:
           application/json:
             schema:
@@ -349,9 +374,14 @@
                 pageIndex:
                   type: number
                   example: 1
-                maxPages:
+                pageCount:
                   type: number
                   example: 5
+                  description: Le nombre de pages disponibles
+                count:
+                  type: number
+                  example: 128
+                  description: Le nombre d'entrées correspondantes
       400:
         $ref: '#/components/responses/400Errored'
       401:

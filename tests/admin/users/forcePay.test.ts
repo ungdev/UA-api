@@ -15,7 +15,7 @@ describe('POST /admin/users/:userId/force-pay', () => {
 
   before(async () => {
     user = await createFakeUser();
-    admin = await createFakeUser({ permission: Permission.admin });
+    admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
   });
 

@@ -1,9 +1,8 @@
-import prisma, { TournamentId } from '@prisma/client';
 import database from '../services/database';
-import { Tournament } from '../types';
+import { PrimitiveTournament, Tournament, TournamentId } from '../types';
 import { fetchTeams } from './team';
 
-export const formatTournament = async (tournament: prisma.Tournament): Promise<Tournament> => {
+export const formatTournament = async (tournament: PrimitiveTournament): Promise<Tournament> => {
   if (!tournament) return null;
 
   const lockedTeamsCount = await database.team.count({

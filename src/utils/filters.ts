@@ -1,5 +1,16 @@
 import { pick } from 'lodash';
-import { CartItem, CartWithCartItems, Item, Team, Tournament, User, UserWithTeam } from '../types';
+import {
+  CartItem,
+  CartWithCartItems,
+  CartWithCartItemsAdmin,
+  Item,
+  ParsedPermissionsHolder,
+  RawUser,
+  Team,
+  Tournament,
+  User,
+  UserWithTeamAndTournamentInfo,
+} from '../types';
 
 export const filterUserRestricted = (user: User) => pick(user, ['id', 'username', 'type', 'hasPaid']);
 
@@ -24,12 +35,18 @@ export const filterUser = (user: User) =>
     'attendant.id',
   ]);
 
-export const filterUserWithTeam = (user: UserWithTeam) => {
+export const filterAdminAccount = (user: ParsedPermissionsHolder<RawUser>) =>
+  pick(user, ['id', 'type', 'username', 'firstname', 'lastname', 'email', 'permissions']);
+
+export const filterUserWithTeamAndTournamentInfo = (user: UserWithTeamAndTournamentInfo) => {
   const filteredUser = filterUser(user);
-  const filteredTeam = user.team ? pick(user.team, ['id', 'name', 'tournamentId', 'captainId', 'lockedAt']) : undefined;
+  const filteredTeam = user.team
+    ? pick(user.team, ['id', 'name', 'captainId', 'lockedAt', 'tournament.id', 'tournament.name'])
+    : undefined;
 
   return {
     ...filteredUser,
+    customMessage: user.customMessage,
     team: filteredTeam,
   };
 };
@@ -46,6 +63,18 @@ export const filterCartWithCartItems = (cart: CartWithCartItems) => {
   return {
     ...filteredCart,
     cartItems: cart.cartItems.map(filterCartItem),
+  };
+};
+
+export const filterCartItemAdmin = (cartItem: CartItem) =>
+  pick(cartItem, ['id', 'quantity', 'cartId', 'item.id', 'item.name', 'forUser.id', 'forUser.username']);
+
+export const filterCartWithCartItemsAdmin = (cart: CartWithCartItemsAdmin) => {
+  const filteredCart = pick(cart, ['id', 'userId', 'transactionState', 'transactionId', 'paidAt', 'totalPrice']);
+
+  return {
+    ...filteredCart,
+    cartItems: cart.cartItems.map(filterCartItemAdmin),
   };
 };
 

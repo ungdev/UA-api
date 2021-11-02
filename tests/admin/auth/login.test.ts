@@ -1,10 +1,9 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import { UserType } from '@prisma/client';
 import app from '../../../src/app';
 import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User } from '../../../src/types';
+import { Error, Permission, User, UserType } from '../../../src/types';
 import * as userUtils from '../../../src/utils/users';
 import { sandbox } from '../../setup';
 
@@ -15,7 +14,7 @@ describe('POST /admin/auth/login', () => {
 
   before(async () => {
     user = await createFakeUser();
-    admin = await createFakeUser({ permission: Permission.admin });
+    admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = userUtils.generateToken(admin);
   });
 

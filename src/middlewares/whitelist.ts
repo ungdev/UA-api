@@ -12,7 +12,7 @@ export default [
     const { tournamentId } = request.body;
 
     if (tournamentId in whitelist) {
-      if (whitelist[<keyof typeof whitelist>tournamentId].includes(user.email)) return next();
+      if (whitelist[<keyof typeof whitelist>tournamentId].includes(user.email.toLowerCase())) return next();
       return forbidden(response, Error.NotWhitelisted);
     }
     return next();

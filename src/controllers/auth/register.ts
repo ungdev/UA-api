@@ -43,7 +43,13 @@ export default [
       // If the mail is not sent, the error will be reported through Sentry
       // and staff may resend it manually
       sendValidationCode(registeredUser).catch((error) => {
-        Sentry.captureException(error);
+        Sentry.captureException(error, {
+          user: {
+            id: registeredUser.id,
+            username: registeredUser.username,
+            email: registeredUser.email,
+          },
+        });
         logger.warn(error);
       });
     } catch (error) {

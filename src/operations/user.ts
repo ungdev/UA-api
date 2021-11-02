@@ -1,10 +1,21 @@
 import userOperations from 'bcryptjs';
-import prisma, { TransactionState, UserAge, UserType } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
-import { Permission, PrimitiveUser, User, UserSearchQuery, UserWithTeam } from '../types';
-import { serializePermissions } from '../utils/helpers';
+import {
+  User,
+  UserSearchQuery,
+  TransactionState,
+  UserAge,
+  UserType,
+  RawUserWithCartItems,
+  RawUser,
+  UserPatchBody,
+  RawUserWithTeamAndTournamentInfo,
+  UserWithTeamAndTournamentInfo,
+} from '../types';
+import { deserializePermissions, serializePermissions } from '../utils/helpers';
 
 export const userInclusions = {
   cartItems: {
@@ -16,7 +27,7 @@ export const userInclusions = {
   attended: true,
 };
 
-export const formatUser = (user: PrimitiveUser): User => {
+export const formatUser = (user: RawUserWithCartItems): User => {
   if (!user) return null;
 
   if (user.cartItems.some((cartItem) => cartItem.forUserId !== user.id))
@@ -29,10 +40,13 @@ export const formatUser = (user: PrimitiveUser): User => {
   return {
     ...user,
     hasPaid,
+    permissions: deserializePermissions(user.permissions),
   };
 };
 
-export const formatUserWithTeam = (primitiveUser: PrimitiveUser & { team: prisma.Team }): UserWithTeam => {
+export const formatUserWithTeamAndTournament = (
+  primitiveUser: RawUserWithTeamAndTournamentInfo,
+): UserWithTeamAndTournamentInfo => {
   const user = formatUser(primitiveUser);
 
   return {
@@ -50,34 +64,71 @@ export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> 
   return formatUser(user);
 };
 
-export const fetchUsers = async (query: UserSearchQuery, page: number): Promise<UserWithTeam[]> => {
-  const users = await database.user.findMany({
+/**
+ * Fetches {@link User Users}. These {@link User users} objects include their {@link prisma.Team team}.
+ * @param query the query to search users against
+ * @param page the number of the requested page
+ * @returns {Promise<[UserWithTeam[], number]>} the entries corresponding to the page,
+ * along with count of entries matching the query.
+ */
+export const fetchUsers = async (
+  query: UserSearchQuery,
+  page: number,
+): Promise<[UserWithTeamAndTournamentInfo[], number]> => {
+  const filter: Omit<Prisma.UserFindManyArgs, 'select' | 'include'> = {
     where: {
-      firstname: query.firstname ? { startsWith: query.firstname } : undefined,
-      lastname: query.lastname ? { startsWith: query.lastname } : undefined,
-      username: query.username ? { startsWith: query.username } : undefined,
-      email: query.email ? { startsWith: query.email } : undefined,
+      ...(query.search
+        ? {
+            OR: [
+              { firstname: { contains: query.search } },
+              { lastname: { contains: query.search } },
+              { username: { contains: query.search } },
+              { email: { contains: query.search } },
+              {
+                team: {
+                  name: { contains: query.search },
+                },
+              },
+            ],
+          }
+        : {}),
+
+      team: {
+        tournamentId: query.tournament || undefined,
+      },
+
+      id: query.userId || undefined,
       type: query.type || undefined,
       permissions: query.permission ? { contains: query.permission } : undefined,
       place: query.place ? { startsWith: query.place } : undefined,
 
       // Checks first if scanned exists, and then if it is true of false
       scannedAt: query.scanned ? (query.scanned === 'true' ? { not: null } : null) : undefined,
-
-      team: {
-        name: query.team ? { startsWith: query.team } : undefined,
-        tournamentId: query.tournament || undefined,
+    },
+  };
+  const [users, count] = await database.$transaction([
+    database.user.findMany({
+      ...filter,
+      include: {
+        ...userInclusions,
+        team: {
+          include: {
+            tournament: {
+              select: {
+                name: true,
+                id: true,
+              },
+            },
+          },
+        },
       },
-    },
-    skip: env.api.itemsPerPage * page,
-    take: env.api.itemsPerPage,
-    include: {
-      ...userInclusions,
-      team: true,
-    },
-  });
+      skip: page * env.api.itemsPerPage,
+      take: env.api.itemsPerPage,
+    }),
+    database.user.count(filter),
+  ]);
 
-  return users.map(formatUserWithTeam);
+  return [users.map(formatUserWithTeamAndTournament), count];
 };
 
 export const createUser = async (user: {
@@ -90,7 +141,7 @@ export const createUser = async (user: {
   discordId?: string;
   type?: UserType;
   customMessage?: string;
-}) => {
+}): Promise<RawUser> => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
   const hashedPassword = await userOperations.hash(user.password, salt);
   return database.user.create({
@@ -134,25 +185,19 @@ export const updateUser = async (
   return formatUser(user);
 };
 
-export const updateAdminUser = async (
-  userId: string,
-  updates: {
-    type?: UserType;
-    permissions?: Permission[];
-    place?: string;
-    discordId?: string;
-    customMessage?: string;
-    age?: UserAge;
-  },
-): Promise<User> => {
+export const updateAdminUser = async (userId: string, updates: UserPatchBody): Promise<User> => {
   const user = await database.user.update({
     data: {
       type: updates.type,
-      permissions: serializePermissions(updates.permissions),
+      permissions: updates.permissions ? serializePermissions(updates.permissions) : undefined,
       place: updates.place,
       discordId: updates.discordId,
       customMessage: updates.customMessage,
       age: updates.age,
+      email: updates.email,
+      firstname: updates.firstname,
+      lastname: updates.lastname,
+      username: updates.username,
       team:
         updates.type === UserType.spectator
           ? {
@@ -167,7 +212,11 @@ export const updateAdminUser = async (
   return formatUser(user);
 };
 
-export const createAttendant = (referrerId: string, firstname: string, lastname: string) =>
+export const createAttendant = (
+  referrerId: string,
+  firstname: string,
+  lastname: string,
+): Promise<RawUserWithCartItems> =>
   database.user.update({
     data: {
       attendant: {
@@ -186,7 +235,7 @@ export const createAttendant = (referrerId: string, firstname: string, lastname:
     include: userInclusions,
   });
 
-export const removeUserRegisterToken = (userId: string) =>
+export const removeUserRegisterToken = (userId: string): Promise<RawUser> =>
   database.user.update({
     data: {
       registerToken: null,
@@ -196,7 +245,7 @@ export const removeUserRegisterToken = (userId: string) =>
     },
   });
 
-export const removeUserResetToken = (userId: string) =>
+export const removeUserResetToken = (userId: string): Promise<RawUser> =>
   database.user.update({
     data: {
       resetToken: null,
@@ -206,7 +255,7 @@ export const removeUserResetToken = (userId: string) =>
     },
   });
 
-export const generateResetToken = (userId: string) =>
+export const generateResetToken = (userId: string): Promise<RawUser> =>
   database.user.update({
     data: {
       resetToken: nanoid(),
@@ -216,23 +265,13 @@ export const generateResetToken = (userId: string) =>
     },
   });
 
-export const scanUser = (userId: string) =>
+export const scanUser = (userId: string): Promise<RawUser> =>
   database.user.update({
     data: {
       scannedAt: new Date(),
     },
     where: {
       id: userId,
-    },
-  });
-
-export const setPermissions = (userId: string, permissions: Permission[]) =>
-  database.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      permissions: permissions.join(','),
     },
   });
 
@@ -250,7 +289,7 @@ export const changePassword = async (user: User, newPassword: string) => {
   });
 };
 
-export const deleteUser = (id: string) => database.user.delete({ where: { id } });
+export const deleteUser = (id: string): Promise<RawUser> => database.user.delete({ where: { id } });
 
 /**
  * Counts the coaches in a chosen team. If team is not specified,
