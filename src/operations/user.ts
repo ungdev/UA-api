@@ -124,6 +124,30 @@ export const fetchUsers = async (
       },
       skip: page * env.api.itemsPerPage,
       take: env.api.itemsPerPage,
+      orderBy: [
+        // Users not in a team will be returned before because NULL is considered as
+        // inferior to any other value
+        // In sql, this can be done using `CASE` but prisma doesn't support it for now
+        // cf. https://github.com/prisma/prisma/issues/4368 (that states postgresql syntax)
+        {
+          team: {
+            tournamentId: 'asc',
+          },
+        },
+        {
+          team: {
+            createdAt: 'asc',
+          },
+        },
+        {
+          team: {
+            id: 'asc',
+          },
+        },
+        {
+          type: 'asc',
+        },
+      ],
     }),
     database.user.count(filter),
   ]);
