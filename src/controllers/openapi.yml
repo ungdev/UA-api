@@ -186,9 +186,16 @@ components:
               description: Le titre écrit en très gros en tout début de mail, en dessous du logo
         content:
           type: array
-          items:
-            $ref: '#/components/schemas/MailSection'
           description: Contenu du mail
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              components:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MailSection'
         sentAt:
           type: string
           format: date-time
