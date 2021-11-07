@@ -56,6 +56,10 @@ describe('POST /admin/emails', () => {
         .post(`/admin/emails`)
         .send({
           subject: 'Test',
+          highlight: {
+            intro: 'Is this a',
+            title: 'Test ?',
+          },
           content: [
             {
               title: 'Section',
@@ -75,6 +79,10 @@ describe('POST /admin/emails', () => {
         .post(`/admin/emails`)
         .send({
           subject: 'Test',
+          highlight: {
+            intro: 'Is this a',
+            title: 'Test ?',
+          },
           content: [
             {
               title: 'Section',
@@ -92,6 +100,10 @@ describe('POST /admin/emails', () => {
         .post(`/admin/emails`)
         .send({
           subject: 'Test',
+          highlight: {
+            intro: 'Is this a',
+            title: 'Test ?',
+          },
           content: [
             {
               title: 'Section',
@@ -107,12 +119,17 @@ describe('POST /admin/emails', () => {
   describe('Test mail recipient filters', () => {
     const validMailBody = {
       subject: "Tomorrow's tournament cancelled due to extreme weather conditions",
+      highlight: {
+        intro: 'Is this a',
+        title: 'Test ?',
+      },
       content: [
         {
           title: 'Why did we choose to cancel the tournament ?',
           components: ["There was definitely no reason for that. We're just too lazy. _That's it_"],
         },
       ],
+      reason: 'You should not have received this email as it has been generated for test purposes...',
     };
 
     it('should successfully send a valid preview mail to the sender (only)', () =>

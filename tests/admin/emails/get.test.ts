@@ -42,6 +42,10 @@ describe('GET /admin/emails', () => {
   it('should fetch one mail', async () => {
     const mailContent = {
       subject: 'Very important news&nbsp;!',
+      highlight: {
+        intro: 'Hi, are you ready to',
+        title: 'Save the date ?',
+      },
       content: [
         {
           title: 'Save the date&nbsp;!',
@@ -92,6 +96,10 @@ describe('GET /admin/emails', () => {
     await database.log.deleteMany();
     const mailContent = {
       subject: 'Very important news&nbsp;!',
+      highlight: {
+        intro: 'Hi, are you ready to',
+        title: 'Save the date ?',
+      },
       content: [
         {
           title: 'Save the date&nbsp;!',
