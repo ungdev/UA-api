@@ -4,6 +4,7 @@ import PDFkit from 'pdfkit';
 import { encrypt } from './helpers';
 import { fetchTeam } from '../operations/team';
 import { DetailedCartItem, EmailAttachement, TournamentId } from '../types';
+import { Team } from '.prisma/client';
 
 const loadImage = (tournamentId: string) =>
   `data:image/jpg;base64,${readFileSync(`assets/email/backgrounds/${tournamentId}.jpg`, 'base64')}`;
@@ -21,7 +22,8 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
   // Define the parameters for the function
   const fontFamily = 'assets/email/font.ttf';
   const fontSize = 140;
-  const qrCodeSize = 260;
+  const qrCodeSize = 600;
+  const bottomLine = 1550;
 
   const user = cartItem.forUser;
   const fullName = `${user.firstname} ${user.lastname}`;
@@ -29,8 +31,9 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
   let background: string;
 
   // If the user is in a team, use an appropriate background
+  let team: Team;
   if (user.teamId) {
-    const team = await fetchTeam(user.teamId);
+    team = await fetchTeam(user.teamId);
     background = tournamentBackgrounds.find((tournament) => tournament.name === team.tournamentId).background;
   }
   // Otherwise, use thenot in team background
@@ -54,13 +57,33 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
 
     // Define a text format
     const textFormat = document.font(fontFamily).fill('white').fontSize(fontSize);
+    const textHeight = textFormat.heightOfString(user.username);
 
     // Place the name to the right
-    const textWidth = textFormat.widthOfString(fullName);
-    textFormat.text(fullName, document.page.width - textWidth - 100, 1665);
+    let textWidth = textFormat.widthOfString(fullName);
+    textFormat.text(fullName, document.page.width - textWidth - 100, bottomLine);
+
+    // Place the username to the right
+    textWidth = textFormat.widthOfString(user.username);
+    textFormat.text(user.username, document.page.width - textWidth - 100, bottomLine - textHeight);
+
+    // Place the teamName to the right if not solo-tournament
+    if (team && team.name.search(/-solo-team$/) === -1) {
+      textWidth = textFormat.widthOfString(team.name);
+      textFormat.text(team.name, document.page.width - textWidth - 100, bottomLine - 2 * textHeight);
+    }
+
+    // Place the place if necessary
+    let qrCodeY;
+    if (user.place) {
+      textFormat.text(user.place, 100, bottomLine);
+      qrCodeY = bottomLine - qrCodeSize - 40;
+    } else {
+      qrCodeY = bottomLine - qrCodeSize + 150;
+    }
 
     // Place the QR Code
-    document.image(qrcode, 120, 1000, { width: qrCodeSize });
+    document.image(qrcode, 100, qrCodeY, { width: qrCodeSize });
 
     // Stop the document stream
     document.end();
