@@ -94,6 +94,7 @@
     "lint": "eslint src/ tests/ --ext .ts --max-warnings 0",
     "lint:fix": "eslint --fix src/ tests/ --ext .ts --max-warnings 0",
     "test": "mocha",
-    "test:coverage": "nyc yarn test"
+    "test:coverage": "nyc yarn test",
+    "compumsa": "ts-node src/scripts/seed_compumsa_codes.ts"
   }
 }
