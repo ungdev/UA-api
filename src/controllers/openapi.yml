@@ -367,14 +367,6 @@ components:
             customMessage:
               type: string
 
-    UserWithTeamAndMessage:
-      allOf:
-        - $ref: '#/components/schemas/UserWithTeam'
-        - type: object
-          properties:
-            customMessage:
-              type: string
-
     UserWithTeamAndMessageAndTournamentInfo:
       allOf:
         - $ref: '#/components/schemas/User'

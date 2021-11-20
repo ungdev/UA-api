@@ -517,7 +517,7 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserWithTeamAndMessage'
+              $ref: '#/components/schemas/UserWithTeamAndMessageAndTournamentInfo'
       400:
         $ref: '#/components/responses/400Errored'
       401:

@@ -259,7 +259,7 @@ describe('GET /admin/users', () => {
     it('should return one scanned user', async () => {
       await database.user.update({ data: { scannedAt: new Date() }, where: { id: user.id } });
       const { body } = await request(app)
-        .get(`/admin/users?scanned=true`)
+        .get(`/admin/users?scan=true`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
       expect(body.users.length).to.be.equal(1);
@@ -268,7 +268,7 @@ describe('GET /admin/users', () => {
     it('should return two non scanned user (including the admin)', async () => {
       await database.user.update({ data: { scannedAt: null }, where: { id: user.id } });
       const { body } = await request(app)
-        .get(`/admin/users?scanned=false`)
+        .get(`/admin/users?scan=false`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
       expect(body.users.length).to.be.equal(2);
