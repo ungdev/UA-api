@@ -147,7 +147,9 @@ export type UserSearchQuery = {
   type: UserType;
   permission: Permission;
   tournament: TournamentId;
-  scanned: string;
+  locked: string;
+  payment: string;
+  scan: string;
   place: string;
 };
 
