@@ -3,7 +3,7 @@ import { UserType } from '.prisma/client';
 import { fetchTeams } from '../operations/team';
 import { fetchTournaments } from '../operations/tournament';
 import { fetchUsers, updateCompumsaCode } from '../operations/user';
-import { UserSearchQuery } from '../types';
+import { RawUser, UserSearchQuery } from '../types';
 import logger from '../utils/logger';
 
 (async () => {
@@ -16,6 +16,7 @@ import logger from '../utils/logger';
 
   // get all users in locked teams
   const tournaments = await fetchTournaments();
+  const pendingUpdates: Array<Promise<RawUser>> = [];
   for (const tournament of tournaments) {
     const teams = await fetchTeams(tournament.id);
     const lockedTeams = teams.filter((team) => team.lockedAt);
@@ -26,13 +27,10 @@ import logger from '../utils/logger';
       } as UserSearchQuery & { page?: string };
       const [players] = await fetchUsers(userSearch, 0);
       // seed the code
-      for (const player of players) {
-        updateCompumsaCode(player.id, codes[index++]);
-        // eslint-disable-next-line no-console
-        console.log(player.team.tournament.id, player.team.name, player.username, codes[index - 1]);
-      }
+      for (const player of players) pendingUpdates.push(updateCompumsaCode(player.id, codes[index++]));
     }
   }
+  await Promise.all(pendingUpdates);
 })().catch((error) => {
   logger.error(error);
 });
