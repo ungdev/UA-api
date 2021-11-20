@@ -67,4 +67,18 @@ describe('POST /admin/users/:userId/force-pay', () => {
       .post(`/admin/users/${user.id}/force-pay`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(403, { error: Error.AlreadyPaid }));
+
+  it('should force pay the user and scan his ticket at the same time', async () => {
+    const otherUser = await createFakeUser();
+    const { body } = await request(app)
+      .post(`/admin/users/${otherUser.id}/force-pay`)
+      .send({
+        consume: true,
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.hasPaid).to.be.true;
+    expect(body.scannedAt).not.to.be.null;
+  });
 });

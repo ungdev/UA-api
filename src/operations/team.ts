@@ -9,6 +9,7 @@ import {
   RawUser,
   RawUserWithCartItems,
   PrimitiveTeamWithPrimitiveUsers,
+  PrimitiveTeamWithPartialTournament,
 } from '../types';
 import nanoid from '../utils/nanoid';
 import { countCoaches, formatUser, userInclusions } from './user';
@@ -46,6 +47,19 @@ export const fetchTeam = async (id: string): Promise<Team> => {
 
   return formatTeam(team);
 };
+
+export const fetchTeamWithTournament = (id: string): Promise<PrimitiveTeamWithPartialTournament> =>
+  database.team.findUnique({
+    where: { id },
+    include: {
+      tournament: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+    },
+  });
 
 export const fetchTeams = async (tournamentId: TournamentId): Promise<Team[]> => {
   const teams = await database.team.findMany({
