@@ -170,11 +170,32 @@ components:
         subject:
           type: string
           description: Sujet du mail
+        reason:
+          type: string
+          description: La raison de l'envoi du mail. Cette information apparaîtra dans le pied de page du mail
+          optional: true
+        highlight:
+          type: object
+          description: L'entête au début de chaque mail (en dessous de la partie noire avec le logo)
+          properties:
+            intro:
+              type: string
+              description: Le message écrit avec une petite police, juste avant le `hightlight.title`
+            title:
+              type: string
+              description: Le titre écrit en très gros en tout début de mail, en dessous du logo
         content:
           type: array
-          items:
-            $ref: '#/components/schemas/MailSection'
           description: Contenu du mail
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              components:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MailSection'
         sentAt:
           type: string
           format: date-time
@@ -192,7 +213,6 @@ components:
             Autrement, si elle vaut `false`, seuls les joueurs **membres d'équipes non validées** recevront le mail.
             Sinon, si elle vaut `true`, seuls les joueurs **membres d'équipes validées** recevront le mail.
           optional: true
-          nullable: true
         tournamentId:
           type: string
           example: lolCompetitive
@@ -201,22 +221,44 @@ components:
             *Cette propriété **peut** être utilisée avec `locked` pour envoyer un mail aux équipes non validées d'un certain
             tournoi (par exemple s'il y a moins de places disponibles que d'équipes crées).*
           optional: true
-          nullable: true
         preview:
           type: boolean
           description: Permet de n'envoyer le mail qu'à l'utilisateur actuel, afin de vérifier la mise en page
             et le contenu.
           default: false
           optional: true
-          nullable: true
         subject:
           type: string
           description: Sujet du mail
           required: true
+        reason:
+          type: string
+          description: La raison de l'envoi du mail. Cette information apparaîtra dans le pied de page du mail
+          optional: true
+        highlight:
+          type: object
+          description: L'entête au début de chaque mail (en dessous de la partie noire avec le logo)
+          required: true
+          properties:
+            intro:
+              type: string
+              description: Le message écrit avec une petite police, juste avant le `hightlight.title`
+              required: true
+            title:
+              type: string
+              description: Le titre écrit en très gros en tout début de mail, en dessous du logo
+              required: true
         content:
           type: array
           items:
-            $ref: '#/components/schemas/MailSection'
+            type: object
+            properties:
+              title:
+                type: string
+              components:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MailSection'
           description: Contenu du mail
           required: true
 
