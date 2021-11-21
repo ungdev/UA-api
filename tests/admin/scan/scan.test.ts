@@ -119,7 +119,7 @@ describe('POST /admin/scan/:qrcode', () => {
     const spectator = await createFakeUser({
       type: UserType.spectator,
     });
-    cart = await forcePay(spectator);
+    await forcePay(spectator);
     const body = {
       qrcode: encrypt(spectator.id).toString('base64'),
     };
@@ -130,6 +130,22 @@ describe('POST /admin/scan/:qrcode', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
     expect(userData.body.customMessage).to.be.equal(spectator.customMessage);
+    return expect(userData.body.scannedAt).not.to.be.equal(null);
+  });
+
+  it('should scan a user with his id only', async () => {
+    const scannableUser = await createFakeUser();
+    await forcePay(scannableUser);
+    const body = {
+      userId: scannableUser.id,
+    };
+
+    const userData = await request(app)
+      .post('/admin/scan')
+      .send(body)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    expect(userData.body.customMessage).to.be.equal(scannableUser.customMessage);
     return expect(userData.body.scannedAt).not.to.be.equal(null);
   });
 

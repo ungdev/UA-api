@@ -511,6 +511,10 @@
               qrcode:
                 type: string
                 description: Contenu du QR code présent sur le billet chiffré
+              userId:
+                type: string
+                description: Peut remplacer le QR code si la lecture est trop longue/compliquée.
+                  Cette propriété ne peut pas être envoyée en même temps que `qrcode`
     responses:
       200:
         description: Renvoie les informations de l'utilisateur et son équipe

@@ -7,6 +7,7 @@ import { decrypt } from '../../../utils/helpers';
 import logger from '../../../utils/logger';
 import { fetchUser, scanUser } from '../../../operations/user';
 import { validateBody } from '../../../middlewares/validation';
+import { id } from '../../../utils/validators';
 import { filterUserWithTeamAndTournamentInfo } from '../../../utils/filters';
 import { fetchTeamWithTournament } from '../../../operations/team';
 
@@ -15,27 +16,32 @@ export default [
   ...hasPermission(Permission.entry),
   validateBody(
     Joi.object({
-      qrcode: Joi.string().required().error(new Error(ResponseError.NoQRCode)),
-    }),
+      qrcode: Joi.string(),
+      userId: id,
+    })
+      .xor('qrcode', 'userId')
+      .error(new Error(ResponseError.NoQRCode)),
   ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       // Retrieves the encoded qrcode in base64
-      const { qrcode } = request.body;
+      const { qrcode, userId: inputUserId } = request.body;
 
-      let userId;
+      let userId = inputUserId;
 
-      try {
-        // Decode the base64 qrcode
-        const decodedQrcode = Buffer.from(qrcode, 'base64');
+      if (!inputUserId) {
+        try {
+          // Decode the base64 qrcode
+          const decodedQrcode = Buffer.from(qrcode, 'base64');
 
-        // Tries to decrypt the qrcode
-        userId = decrypt(decodedQrcode);
-      } catch (error) {
-        logger.error(error);
-        return badRequest(response, ResponseError.InvalidQRCode);
+          // Tries to decrypt the qrcode
+          userId = decrypt(decodedQrcode);
+        } catch (error) {
+          logger.error(error);
+          return badRequest(response, ResponseError.InvalidQRCode);
+        }
       }
 
       // Retrieve the user from the QR Code
