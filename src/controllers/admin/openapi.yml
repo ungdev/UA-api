@@ -176,8 +176,14 @@
           $ref: '#/components/schemas/Permission'
         optional: true
       - in: query
-        name: scanned
+        name: scan
         description: Filtre les utilisateurs en fonction de s'ils ont été scannés ou non
+        schema:
+          type: boolean
+        optional: true
+      - in: query
+        name: payment
+        description: Filtre les utilisateurs en fonction de s'ils ont payé ou non
         schema:
           type: boolean
         optional: true
