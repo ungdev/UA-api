@@ -176,8 +176,14 @@
           $ref: '#/components/schemas/Permission'
         optional: true
       - in: query
-        name: scanned
+        name: scan
         description: Filtre les utilisateurs en fonction de s'ils ont été scannés ou non
+        schema:
+          type: boolean
+        optional: true
+      - in: query
+        name: payment
+        description: Filtre les utilisateurs en fonction de s'ils ont payé ou non
         schema:
           type: boolean
         optional: true
@@ -408,6 +414,19 @@
         schema:
           type: string
         required: true
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              consume:
+                type: boolean
+                default: false
+                optional: true
+                description: Indique si le paiement doit également consommer le ticket
+                  (dans le cas d'un paiement lors de l'entrée)
     responses:
       200:
         description: L'utilisateur est bien marqué comme ayant payé sa place.
@@ -498,13 +517,17 @@
               qrcode:
                 type: string
                 description: Contenu du QR code présent sur le billet chiffré
+              userId:
+                type: string
+                description: Peut remplacer le QR code si la lecture est trop longue/compliquée.
+                  Cette propriété ne peut pas être envoyée en même temps que `qrcode`
     responses:
       200:
         description: Renvoie les informations de l'utilisateur et son équipe
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserWithTeamAndMessage'
+              $ref: '#/components/schemas/UserWithTeamAndMessageAndTournamentInfo'
       400:
         $ref: '#/components/responses/400Errored'
       401:
