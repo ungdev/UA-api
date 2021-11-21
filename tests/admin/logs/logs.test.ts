@@ -7,6 +7,7 @@ import { Error, Permission, User, TournamentId, UserType } from '../../../src/ty
 import * as userUtils from '../../../src/utils/users';
 import { sandbox } from '../../setup';
 import * as logOperations from '../../../src/operations/log';
+import { sleep } from '../../../src/utils/helpers';
 
 describe('GET /admin/logs', () => {
   let admin: User;
@@ -84,6 +85,8 @@ describe('GET /admin/logs', () => {
       .get(`/admin/logs?page=0&teamId=${team.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
+
+    await sleep(0.1);
 
     expect(response.logs).to.have.lengthOf(2);
     expect(response.count).to.be.equal(2);

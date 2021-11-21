@@ -26,7 +26,7 @@ export const filterUser = (user: User) =>
     'email',
     'permissions',
     'place',
-    'scanned',
+    'scannedAt',
     'discordId',
     'teamId',
     'askingTeamId',
