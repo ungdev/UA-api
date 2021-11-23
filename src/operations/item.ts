@@ -24,7 +24,7 @@ export const fetchAllItems = async (): Promise<Item[]> => {
       let left;
 
       // If the item contains stocks, computes the left variables
-      if (item.stock) {
+      if (typeof item.stock === 'number') {
         // Fetches all the cart items related to the item
         const cartItems = await database.cartItem.findMany({
           where: {

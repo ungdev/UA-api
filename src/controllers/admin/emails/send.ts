@@ -20,6 +20,11 @@ export default [
       locked: Joi.boolean().optional(),
       tournamentId: validators.tournamentId.optional(),
       subject: Joi.string().required(),
+      highlight: Joi.object({
+        title: Joi.string().required(),
+        intro: Joi.string().required(),
+      }).required(),
+      reason: Joi.string().optional(),
       content: Joi.array()
         .items(
           Joi.object({
@@ -29,7 +34,10 @@ export default [
         )
         .required()
         .error(new Error(ApiError.MalformedMailBody)),
-    }),
+    }).error(
+      (errors) =>
+        errors.find((error) => error.message === ApiError.MalformedMailBody) ?? new Error(ApiError.InvalidMailOptions),
+    ),
   ),
 
   // Controller
@@ -41,24 +49,30 @@ export default [
       // Find mail adresses to send the mail to
       const mails = await database.user
         .findMany({
-          where: mail.preview
-            ? {
-                id: user.id,
-              }
-            : {
-                team: {
-                  ...(mail.locked
-                    ? {
-                        NOT: {
-                          lockedAt: null,
-                        },
-                      }
-                    : mail.locked === false
-                    ? { lockedAt: null }
-                    : {}),
-                  tournamentId: mail.tournamentId,
-                },
-              },
+          where: {
+            registerToken: null,
+            email: {
+              not: null,
+            },
+            ...(mail.preview
+              ? {
+                  id: user.id,
+                }
+              : {
+                  team: {
+                    ...(mail.locked
+                      ? {
+                          NOT: {
+                            lockedAt: null,
+                          },
+                        }
+                      : mail.locked === false
+                      ? { lockedAt: null }
+                      : {}),
+                    tournamentId: mail.tournamentId,
+                  },
+                }),
+          },
           select: {
             email: true,
           },
@@ -77,11 +91,11 @@ export default [
           try {
             mailContent = await serialize({
               sections: mail.content,
-              reason: null,
+              reason: mail.reason,
               title: {
                 banner: mail.subject,
-                highlight: mail.subject,
-                short: mail.subject,
+                highlight: mail.highlight.title,
+                short: mail.highlight.intro,
                 topic: mail.preview ? `[PREVIEW]: ${mail.subject}` : mail.subject,
               },
               receiver: adress,

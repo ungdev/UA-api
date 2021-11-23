@@ -26,13 +26,14 @@ export const filterUser = (user: User) =>
     'email',
     'permissions',
     'place',
-    'scanned',
+    'scannedAt',
     'discordId',
     'teamId',
     'askingTeamId',
     'attendant.firstname',
     'attendant.lastname',
     'attendant.id',
+    'compumsaCode',
   ]);
 
 export const filterAdminAccount = (user: ParsedPermissionsHolder<RawUser>) =>

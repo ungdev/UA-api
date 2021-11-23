@@ -95,7 +95,47 @@ export const fetchUsers = async (
 
       team: {
         tournamentId: query.tournament || undefined,
+        ...(query.locked
+          ? {
+              lockedAt: query.locked === 'true' ? { not: null } : null,
+            }
+          : {}),
       },
+
+      ...(query.payment === 'true'
+        ? {
+            cartItems: {
+              some: {
+                cart: {
+                  transactionState: 'paid',
+                },
+                itemId: {
+                  startsWith: 'ticket-',
+                },
+                quantity: {
+                  gt: 0,
+                },
+              },
+            },
+          }
+        : // eslint-disable-next-line unicorn/no-nested-ternary
+        query.payment === 'false'
+        ? {
+            cartItems: {
+              none: {
+                cart: {
+                  transactionState: 'paid',
+                },
+                itemId: {
+                  startsWith: 'ticket-',
+                },
+                quantity: {
+                  gt: 0,
+                },
+              },
+            },
+          }
+        : {}),
 
       id: query.userId || undefined,
       type: query.type || undefined,
@@ -103,7 +143,7 @@ export const fetchUsers = async (
       place: query.place ? { startsWith: query.place } : undefined,
 
       // Checks first if scanned exists, and then if it is true of false
-      scannedAt: query.scanned ? (query.scanned === 'true' ? { not: null } : null) : undefined,
+      scannedAt: query.scan ? (query.scan === 'true' ? { not: null } : null) : undefined,
     },
   };
   const [users, count] = await database.$transaction([
@@ -339,5 +379,15 @@ export const countCoaches = (teamId: string) =>
           ],
         },
       ],
+    },
+  });
+
+export const updateCompumsaCode = (userId: string, code: number): Promise<RawUser> =>
+  database.user.update({
+    data: {
+      compumsaCode: code,
+    },
+    where: {
+      id: userId,
     },
   });

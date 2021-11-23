@@ -20,6 +20,7 @@ describe('GET /admin/users', () => {
       lastname: 'lastname',
       email: 'email@gmail.com',
       username: 'username',
+      paid: true,
     });
     admin = await createFakeUser({
       firstname: 'admin',
@@ -84,8 +85,10 @@ describe('GET /admin/users', () => {
       discordId: user.discordId,
       type: user.type,
       age: user.age,
+      scannedAt: null,
+      compumsaCode: null,
       username: user.username,
-      hasPaid: false,
+      hasPaid: user.hasPaid,
       customMessage: null,
     });
   });
@@ -132,6 +135,8 @@ describe('GET /admin/users', () => {
       discordId: placedUser.discordId,
       type: placedUser.type,
       age: placedUser.age,
+      scannedAt: null,
+      compumsaCode: null,
       username: placedUser.username,
       hasPaid: false,
       customMessage: null,
@@ -226,6 +231,88 @@ describe('GET /admin/users', () => {
     });
   });
 
+  describe('Test locked field', () => {
+    let lockedTeamMember: User;
+    let unlockedTeamMember: User;
+
+    before(async () => {
+      const team = await createFakeTeam({
+        members: 1,
+        paid: true,
+        locked: true,
+      });
+      [lockedTeamMember] = team.players;
+      const unlockedTeam = await createFakeTeam({
+        members: 1,
+        paid: true,
+        locked: false,
+      });
+      [unlockedTeamMember] = unlockedTeam.players;
+    });
+
+    after(async () => {
+      await database.team.deleteMany({
+        where: {
+          id: {
+            in: [lockedTeamMember.teamId, unlockedTeamMember.teamId],
+          },
+        },
+      });
+      await database.cart.deleteMany({
+        where: {
+          userId: {
+            in: [lockedTeamMember.id, unlockedTeamMember.id],
+          },
+        },
+      });
+      return database.user.deleteMany({
+        where: {
+          id: {
+            in: [lockedTeamMember.id, unlockedTeamMember.id],
+          },
+        },
+      });
+    });
+
+    it(`should fetch locked users`, async () => {
+      const { body } = await request(app)
+        .get(`/admin/users?locked=true`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(body.users.length).to.be.equal(1);
+    });
+
+    it(`should fetch unlocked users`, async () => {
+      const { body } = await request(app)
+        .get(`/admin/users?locked=false`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(body.users.length).to.be.equal(1);
+    });
+  });
+
+  describe('Test payment field', () => {
+    it(`should fetch paid users`, async () => {
+      const { body } = await request(app)
+        .get(`/admin/users?payment=true`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(body.users.length).to.be.equal(1);
+    });
+
+    it(`should fetch unpaid users`, async () => {
+      const { body } = await request(app)
+        .get(`/admin/users?payment=false`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(body.users.length).to.be.equal(1);
+    });
+  });
+
   describe('Test tournament field', () => {
     let team: Team;
 
@@ -257,7 +344,7 @@ describe('GET /admin/users', () => {
     it('should return one scanned user', async () => {
       await database.user.update({ data: { scannedAt: new Date() }, where: { id: user.id } });
       const { body } = await request(app)
-        .get(`/admin/users?scanned=true`)
+        .get(`/admin/users?scan=true`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
       expect(body.users.length).to.be.equal(1);
@@ -266,7 +353,7 @@ describe('GET /admin/users', () => {
     it('should return two non scanned user (including the admin)', async () => {
       await database.user.update({ data: { scannedAt: null }, where: { id: user.id } });
       const { body } = await request(app)
-        .get(`/admin/users?scanned=false`)
+        .get(`/admin/users?scan=false`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
       expect(body.users.length).to.be.equal(2);

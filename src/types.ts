@@ -43,6 +43,11 @@ export type MailQuery = ParsedQs & {
   readonly tournamentId?: TournamentId;
   readonly preview: boolean;
   readonly subject: string;
+  readonly highlight: {
+    readonly title: string;
+    readonly intro: string;
+  };
+  readonly reason?: string;
   readonly content: Email['sections'];
 };
 
@@ -147,7 +152,9 @@ export type UserSearchQuery = {
   type: UserType;
   permission: Permission;
   tournament: TournamentId;
-  scanned: string;
+  locked: string;
+  payment: string;
+  scan: string;
   place: string;
 };
 
@@ -239,7 +246,9 @@ export const enum Error {
 
   InvalidCart = 'Le contenu de la commande est invalide',
   EmptyLogin = "Le nom d'utilisateur ne peut pas être vide",
+
   MalformedMailBody = 'Structure du mail incorrecte',
+  InvalidMailOptions = "Paramètres d'envoi incorrects",
 
   // 401
   // The user credentials were refused or not provided

@@ -43,6 +43,8 @@ export default [
           }),
           subject: log.body.subject,
           content: log.body.content,
+          highlight: log.body.highlight,
+          reason: log.body.reason,
           tournamentId: log.body.tournamentId,
           locked: log.body.locked,
           sentAt: log.createdAt,
