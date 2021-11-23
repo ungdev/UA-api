@@ -3,8 +3,7 @@ import QRCode from 'qrcode';
 import PDFkit from 'pdfkit';
 import { encrypt } from './helpers';
 import { fetchTeam } from '../operations/team';
-import { DetailedCartItem, EmailAttachement, TournamentId } from '../types';
-import { Team } from '.prisma/client';
+import { DetailedCartItem, EmailAttachement, TournamentId, Team } from '../types';
 
 const loadImage = (tournamentId: string) =>
   `data:image/jpg;base64,${readFileSync(`assets/email/backgrounds/${tournamentId}.jpg`, 'base64')}`;
