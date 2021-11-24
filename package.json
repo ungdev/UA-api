@@ -95,6 +95,7 @@
     "lint:fix": "eslint --fix src/ tests/ --ext .ts --max-warnings 0",
     "test": "mocha",
     "test:coverage": "nyc yarn test",
-    "generate:compumsa": "node build/src/scripts/seedCompumsaCodes.js"
+    "generate:compumsa": "node build/src/scripts/seedCompumsaCodes.js",
+    "send:mail:discord": "node build/src/scripts/sendDiscordMails.js"
   }
 }
