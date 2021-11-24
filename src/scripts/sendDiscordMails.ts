@@ -3,6 +3,7 @@ import database from '../services/database';
 import { fetchGuildMembers } from '../services/discord';
 import { sendEmail } from '../services/email';
 import { serialize } from '../services/email/serializer';
+import logger from '../utils/logger';
 
 (async () => {
   const [members, users] = await Promise.all([
@@ -50,14 +51,25 @@ import { serialize } from '../services/email/serializer';
     recipients.map(async (recipient) => {
       try {
         const mailContent = await serialize({
-          sections: [],
+          sections: [
+            {
+              title:
+                "Il semblerait que tu ne sois pas sur le serveur, il faut cependant que tu le rejoignes car c'est notre principal outil de communication avec toi",
+              components: [
+                {
+                  name: 'Rejoindre le serveur Discord',
+                  location: 'https://discord.gg/WhxZwKU',
+                },
+              ],
+            },
+          ],
           reason:
             "Tu as reçu ce mail car tu es inscrit à l'UTT Arena et que tu n'a pas rejoint le serveur discord de l'évènement",
           title: {
-            banner: '',
-            highlight: '',
+            banner: "Rejoins le discord de l'UTT Arena",
+            highlight: `Cher ${recipient.firstname}`,
             short: '',
-            topic: '',
+            topic: 'Rejoins notre discord',
           },
           receiver: recipient.email,
         });
@@ -86,4 +98,6 @@ import { serialize } from '../services/email/serializer';
 
   // eslint-disable-next-line no-console
   console.info(`\tMails envoyés: ${results.delivered}\n\tMails non envoyés: ${results.undelivered}`);
-})();
+})().catch((error) => {
+  logger.error(error);
+});
