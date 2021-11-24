@@ -159,6 +159,8 @@ model User {
   askingTeamId  String?
   askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
 
+  compumsaCode  Int?       @unique
+
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @default(now()) @updatedAt
 

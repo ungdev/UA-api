@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { isAuthenticated } from '../../middlewares/authentication';
 import { fetchCartItem } from '../../operations/cartItem';
 import { fetchCart } from '../../operations/carts';
+import { fetchTeam } from '../../operations/team';
 import { fetchUser } from '../../operations/user';
 import { Error, ItemCategory, TransactionState } from '../../types';
 import { generateTicket } from '../../utils/pdf';
@@ -17,6 +18,7 @@ export default [
     try {
       const { cartItemId } = request.params;
       const { user } = getRequestInfo(response);
+      const team = user.teamId && (await fetchTeam(user.teamId));
 
       // Retrieves the cart item
       const ticket = await fetchCartItem(
@@ -39,6 +41,9 @@ export default [
 
       // Check that the cart is paid
       if (cart.transactionState !== TransactionState.paid) return forbidden(response, Error.NotPaid);
+
+      // Check that the team is locked
+      if (team && !team.lockedAt) return forbidden(response, Error.TeamNotLocked);
 
       // Generate the pdf
       const pdf = await generateTicket(ticket);
