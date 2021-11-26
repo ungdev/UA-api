@@ -125,9 +125,8 @@ export const forcePay = (user: Pick<RawUser, 'type' | 'id'>) => {
     case UserType.spectator:
       itemId = `ticket-${user.type}`;
       break;
-    default: {
-      throw new Error(`Can't pay for ${user.type}`);
-    }
+    default:
+      itemId = `ticket-${UserType.spectator}`;
   }
 
   return database.cart.create({
