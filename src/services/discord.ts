@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import qs from 'qs';
-import {
+import type {
   DiscordAuthorizationData,
   DiscordAuthorizationRequest,
   DiscordToken,
@@ -123,7 +123,7 @@ export const rateLimitedRequest = async <T>(handler: () => Promise<AxiosResponse
   try {
     const response = await handler();
 
-    if (response.headers['x-ratelimit-remaining'] <= 2) {
+    if (Number(response.headers['x-ratelimit-remaining']) <= 2) {
       const resetAfter = Number(response.headers['x-ratelimit-reset-after']);
       logger.warn(`Wait ${resetAfter} seconds to avoid rate limit (success)`);
       await sleep(resetAfter);

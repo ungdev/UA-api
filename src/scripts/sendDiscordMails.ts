@@ -79,7 +79,7 @@ import logger from '../utils/logger';
         });
         return sendEmail(mailContent);
       } catch {
-        return Promise.reject(recipient.email);
+        throw recipient.email;
       }
     }),
   );

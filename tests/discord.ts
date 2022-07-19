@@ -1,7 +1,7 @@
 import axios from 'axios';
 import nock from 'nock';
 import { decode } from 'querystring';
-import {
+import type {
   DiscordAuthorizationData,
   DiscordChannel,
   DiscordCreateChannelRequest,

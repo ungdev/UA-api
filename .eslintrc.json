@@ -39,6 +39,8 @@
     "require-await": "warn",
     "spaced-comment": ["warn", "always", { "exceptions": ["*"] }],
     "no-continue": "off",
+    "no-promise-executor-return": "off",
+    "default-param-last": "off",
 
     // Typescript
     "@typescript-eslint/ban-ts-comment": "off",
@@ -79,6 +81,10 @@
     "unicorn/prefer-object-from-entries": "off",
     "unicorn/prefer-node-protocol": "off",
     "unicorn/prefer-module": "off",
+    "unicorn/no-await-expression-member": "off",
+    "unicorn/prefer-top-level-await": "off",
+    "unicorn/prefer-logical-operator-over-ternary": "off",
+    "unicorn/text-encoding-identifier-case": "off",
     "unicorn/prevent-abbreviations": [
       "error",
       {
