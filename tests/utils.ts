@@ -67,6 +67,7 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
                   id: nanoid(),
                   itemId: `ticket-${userType}`,
                   quantity: 1,
+                  price: 0,
                   forUserId: userId,
                 },
               ],

@@ -1,5 +1,7 @@
 import database from '../services/database';
-import { Item, Team, TransactionState } from '../types';
+import { Item, Team, TransactionState, User } from '../types';
+import { applyPartnerDiscount } from '../utils/carts';
+import { isPartnerSchool } from '../utils/helpers';
 
 export const fetchAllItems = async (): Promise<Item[]> => {
   // fetches the items
@@ -52,8 +54,13 @@ export const fetchAllItems = async (): Promise<Item[]> => {
   );
 };
 
-export const fetchUserItems = async (team: Team) => {
+export const fetchUserItems = async (team: Team, user?: User) => {
   let items = await fetchAllItems();
+  if (user && isPartnerSchool(user.email)) {
+    applyPartnerDiscount(items);
+  } else {
+    for (const item of items) item.reducedPrice = null;
+  }
 
   // Check if user is not in SSBU tournament
   if (!team || team.tournamentId !== 'ssbu') {

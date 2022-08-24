@@ -107,6 +107,8 @@ export type DetailedCart = Cart & {
 export interface PrimitiveCartItem {
   itemId: string;
   quantity: number;
+  price: number;
+  reducedPrice?: number;
   forUserId: string;
 }
 
@@ -271,6 +273,7 @@ export const enum Error {
   NotCaptain = "Tu dois être le capitaine de l'équipe pour modifier cette ressource",
   NotSelf = 'Tu ne peux pas modifier les information de cette personne',
   NotInTeam = "Tu n'es pas dans une équipe",
+  NotInSameTeam = "Tu n'est pas dans la même équipe que le joueur spécifié",
   LoginAsAttendant = "Tu ne peux pas te connecter en tant qu'accompagnateur",
   AlreadyAuthenticated = 'Tu es déjà identifié',
   NotplayerOrCoach = "L'utilisateur doit être un joueur ou un coach",

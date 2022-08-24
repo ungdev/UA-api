@@ -91,16 +91,34 @@ describe('Tests the email utils', () => {
     const supplements = items.filter((item) => item.category === ItemCategory.supplement);
 
     // Generate a cart item for each supplement
-    const supplementsCartItems: PrimitiveCartItem[] = supplements.map((supplement) => ({
-      itemId: supplement.id,
-      quantity: randomInt(1, 5),
-      forUserId: user.id,
-    }));
+    const supplementsCartItems: PrimitiveCartItem[] = await Promise.all(
+      supplements.map(async (supplement) => ({
+        itemId: supplement.id,
+        quantity: randomInt(1, 5),
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        forUserId: user.id,
+      })),
+    );
 
     const createdCart = await createCart(user.id, [
-      { itemId: 'ticket-player', quantity: 1, forUserId: user.id },
-      { itemId: 'ticket-spectator', quantity: 1, forUserId: spectator.id },
-      { itemId: 'ticket-coach', quantity: 1, forUserId: coach.id },
+      {
+        itemId: 'ticket-player',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        forUserId: user.id,
+      },
+      {
+        itemId: 'ticket-spectator',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-spectator').price,
+        forUserId: spectator.id,
+      },
+      {
+        itemId: 'ticket-coach',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-coach').price,
+        forUserId: coach.id,
+      },
       ...supplementsCartItems,
     ]);
 

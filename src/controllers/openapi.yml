@@ -469,6 +469,10 @@ components:
           example: wS6p0t
         quantity:
           type: integer
+        price:
+          type: integer
+        reducedPrice:
+          type: integer
         cartId:
           type: string
           example: 8MF1b0

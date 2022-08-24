@@ -6,6 +6,7 @@ import database from '../../src/services/database';
 import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
+import { fetchAllItems } from '../../src/operations/item';
 
 describe('POST /users/current/carts', () => {
   let user: User;
@@ -44,6 +45,7 @@ describe('POST /users/current/carts', () => {
       {
         itemId: 'ethernet-5',
         quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-5').price,
         forUserId: user.id,
       },
     ]);
@@ -68,6 +70,8 @@ describe('POST /users/current/carts', () => {
               quantity: 1,
               cartId: cart.id,
               itemId: 'ethernet-5',
+              price: 700,
+              reducedPrice: null,
               forUser: {
                 id: user.id,
                 username: user.username,

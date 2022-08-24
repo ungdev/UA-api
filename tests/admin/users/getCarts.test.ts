@@ -61,6 +61,7 @@ describe('GET /admin/users/:userId/carts', () => {
       {
         itemId: 'ethernet-5',
         quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-5').price,
         forUserId: user.id,
       },
     ]);
@@ -117,16 +118,19 @@ describe('GET /admin/users/:userId/carts', () => {
       {
         itemId: 'ethernet-5',
         quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-5').price,
         forUserId: partnerSchoolUser.id,
       },
       {
         itemId: 'ticket-player',
         quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').reducedPrice,
         forUserId: partnerSchoolUser.id,
       },
       {
         itemId: 'ticket-player',
         quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
         forUserId: user.id,
       },
     ]);

@@ -75,6 +75,8 @@ export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
             },
           },
           quantity: cartItem.quantity,
+          price: cartItem.price,
+          reducedPrice: cartItem.reducedPrice,
           forUser: {
             connect: {
               id: cartItem.forUserId,
@@ -142,6 +144,7 @@ export const forcePay = (user: Pick<RawUser, 'type' | 'id'>) => {
           {
             id: nanoid(),
             itemId,
+            price: 0,
             quantity: 1,
             forUserId: user.id,
           },

@@ -362,14 +362,14 @@ describe('POST /users/current/carts', () => {
     expect(users).to.have.lengthOf(8);
 
     expect(cartItems.filter((cartItem) => cartItem.forUserId === user.id)).to.have.lengthOf(2);
-    expect(cartItems.filter((cartItem) => cartItem.forUserId === coach.id)).to.have.lengthOf(1);
-    expect(cartItems.filter((cartItem) => cartItem.forUserId === attendant.id)).to.have.lengthOf(1);
-    expect(cartItems.filter((cartItem) => cartItem.forUserId === spectator.id)).to.have.lengthOf(1);
+    expect(cartItems.filter((cartItem) => cartItem.forUserId === coach?.id)).to.have.lengthOf(1);
+    expect(cartItems.filter((cartItem) => cartItem.forUserId === attendant?.id)).to.have.lengthOf(1);
+    expect(cartItems.filter((cartItem) => cartItem.forUserId === spectator?.id)).to.have.lengthOf(1);
 
-    expect(supplement.quantity).to.be.equal(validCart.supplements[0].quantity);
+    expect(supplement?.quantity).to.be.equal(validCart.supplements[0].quantity);
 
-    expect(attendant.firstname).to.be.equal(validCart.tickets.attendant.firstname);
-    expect(attendant.lastname).to.be.equal(validCart.tickets.attendant.lastname);
+    expect(attendant?.firstname).to.be.equal(validCart.tickets.attendant?.firstname);
+    expect(attendant?.lastname).to.be.equal(validCart.tickets.attendant?.lastname);
   });
 
   it('should successfuly create a cart even with the ssbu discount', async () => {
@@ -406,7 +406,7 @@ describe('POST /users/current/carts', () => {
 
     expect(cartItems.filter((cartItem) => cartItem.forUserId === userWithSwitchDiscount.id)).to.have.lengthOf(2);
 
-    expect(supplement.quantity).to.be.equal(validCartWithSwitchDiscount.supplements[0].quantity);
+    expect(supplement?.quantity).to.be.equal(validCartWithSwitchDiscount.supplements[0].quantity);
   });
 
   it('should send an error as ssbu discount is already applied', async () => {
@@ -435,7 +435,7 @@ describe('POST /users/current/carts', () => {
 
   it('should fail as the item is no longer available', async () => {
     const items = await itemOperations.fetchAllItems();
-    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator').stock;
+    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator')?.stock;
 
     await database.item.update({
       data: { stock: 1 },
@@ -465,7 +465,7 @@ describe('POST /users/current/carts', () => {
     await database.cart.deleteMany();
 
     const items = await itemOperations.fetchAllItems();
-    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator').stock;
+    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator')?.stock;
 
     await database.item.update({
       data: { stock: 1 },
@@ -499,7 +499,7 @@ describe('POST /users/current/carts', () => {
 
     // We retrieve ticket-spectator stock to reset it at the end of the test
     const items = await itemOperations.fetchAllItems();
-    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator').stock;
+    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator')?.stock;
 
     // We set stock for the ticket to 1 unit
     await database.item.update({
