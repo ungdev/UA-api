@@ -23,9 +23,6 @@ export default [
 
       const adminCarts = carts.map((cart) => ({
         ...cart,
-        // Compute the price of each cart. In order to do so, we check whether
-        // the bought item is a `ItemCategory.ticket` and whether the recipient
-        // is eligible for a discount
         totalPrice: cart.cartItems.reduce((previous, current) => previous + current.price, 0),
       }));
 

@@ -32,6 +32,7 @@ model CartItem {
   quantity     Int
   price        Int
   reducedPrice Int?
+  forcePaid    Boolean  @default(false)
   forUserId    String
   cartId       String
   createdAt    DateTime @default(now())

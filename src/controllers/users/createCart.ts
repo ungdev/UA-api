@@ -165,6 +165,7 @@ export default [
           itemId: supplement.itemId,
           quantity: supplement.quantity,
           price: items.find((item) => item.id === supplement.itemId).price,
+          reducedPrice: items.find((item) => item.id === supplement.itemId).reducedPrice,
           forUserId: user.id,
         });
       }
@@ -252,7 +253,7 @@ export default [
         const item = items.find((findItem) => findItem.id === cartItem.itemId);
 
         // Add the item to the etupay basket
-        basket.addItem(removeAccents(item.name), cartItem.price, cartItem.quantity);
+        basket.addItem(removeAccents(item.name), cartItem.reducedPrice ?? cartItem.price, cartItem.quantity);
       }
 
       if (basket.getPrice() < 0) {

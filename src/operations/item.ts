@@ -1,6 +1,5 @@
 import database from '../services/database';
 import { Item, Team, TransactionState, User } from '../types';
-import { applyPartnerDiscount } from '../utils/carts';
 import { isPartnerSchool } from '../utils/helpers';
 
 export const fetchAllItems = async (): Promise<Item[]> => {
@@ -54,11 +53,9 @@ export const fetchAllItems = async (): Promise<Item[]> => {
   );
 };
 
-export const fetchUserItems = async (team: Team, user?: User) => {
+export const fetchUserItems = async (team?: Team, user?: User) => {
   let items = await fetchAllItems();
-  if (user && isPartnerSchool(user.email)) {
-    applyPartnerDiscount(items);
-  } else {
+  if (user && !isPartnerSchool(user.email)) {
     for (const item of items) item.reducedPrice = null;
   }
 
