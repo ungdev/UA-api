@@ -8,6 +8,7 @@ import { CartItem, Error, User, TransactionState } from '../../src/types';
 import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { createCart, fetchCarts, updateCart } from '../../src/operations/carts';
+import { fetchAllItems } from '../../src/operations/item';
 
 describe('POST /users/:userId/carts', () => {
   let user: User;
@@ -24,10 +25,12 @@ describe('POST /users/:userId/carts', () => {
       {
         itemId: 'ticket-player',
         quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
         forUserId: user.id,
       },
       {
         itemId: 'ethernet-5',
+        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-5').price,
         quantity: 1,
         forUserId: user.id,
       },

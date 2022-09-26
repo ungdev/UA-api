@@ -6,12 +6,13 @@ import {
   CartWithCartItemsAdmin,
   DetailedCart,
   PrimitiveCartItem,
-  RawUser,
+  User,
 } from '../types';
 
 import database from '../services/database';
 import env from '../utils/env';
 import nanoid from '../utils/nanoid';
+import { fetchUserItems } from './item';
 
 export const dropStale = () =>
   database.cart.deleteMany({
@@ -75,6 +76,8 @@ export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
             },
           },
           quantity: cartItem.quantity,
+          price: cartItem.price,
+          reducedPrice: cartItem.reducedPrice,
           forUser: {
             connect: {
               id: cartItem.forUserId,
@@ -116,8 +119,10 @@ export const refundCart = (cartId: string): Promise<Cart> =>
     where: { id: cartId },
   });
 
-export const forcePay = (user: Pick<RawUser, 'type' | 'id'>) => {
-  let itemId;
+export const forcePay = async (user: User) => {
+  let itemId: string;
+
+  const items = await fetchUserItems(undefined, user);
 
   switch (user.type) {
     case UserType.player:
@@ -142,6 +147,9 @@ export const forcePay = (user: Pick<RawUser, 'type' | 'id'>) => {
           {
             id: nanoid(),
             itemId,
+            price: items.find((item) => item.id === itemId).price,
+            reducedPrice: items.find((item) => item.id === itemId).reducedPrice,
+            forcePaid: true,
             quantity: 1,
             forUserId: user.id,
           },

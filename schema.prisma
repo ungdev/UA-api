@@ -27,16 +27,19 @@ model Cart {
 }
 
 model CartItem {
-  id        String   @id
-  itemId    String
-  quantity  Int
-  forUserId String
-  cartId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  forUser   User     @relation(fields: [forUserId], references: [id])
-  item      Item     @relation(fields: [itemId], references: [id])
+  id           String   @id
+  itemId       String
+  quantity     Int
+  price        Int
+  reducedPrice Int?
+  forcePaid    Boolean  @default(false)
+  forUserId    String
+  cartId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  cart         Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  forUser      User     @relation(fields: [forUserId], references: [id])
+  item         Item     @relation(fields: [itemId], references: [id])
 
   @@index([cartId], map: "cartitems_cartId_fkey")
   @@index([forUserId], map: "cartitems_forUserId_fkey")
@@ -67,18 +70,18 @@ model Setting {
 }
 
 model Team {
-  id            String             @id
+  id            String       @id
   name          String
   tournamentId  TournamentId
-  captainId     String             @unique
+  captainId     String       @unique
   lockedAt      DateTime?
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @default(now()) @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @default(now()) @updatedAt
   discordRoleId String?
-  captain       User               @relation(fields: [captainId], references: [id])
-  tournament    Tournament         @relation(fields: [tournamentId], references: [id])
-  askingUsers   User[]             @relation("teamAskingUsers")
-  users         User[]             @relation("teamUsers")
+  captain       User         @relation(fields: [captainId], references: [id])
+  tournament    Tournament   @relation(fields: [tournamentId], references: [id])
+  askingUsers   User[]       @relation("teamAskingUsers")
+  users         User[]       @relation("teamUsers")
 
   @@unique([name, tournamentId])
   @@index([id])
