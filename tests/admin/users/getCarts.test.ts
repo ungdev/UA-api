@@ -178,7 +178,8 @@ describe('GET /admin/users/:userId/carts', () => {
         forcePaid: false,
         price: 700,
         reducedPrice: null,
-      }, {
+      },
+      {
         id: ticketPartner.id,
         quantity: 1,
         cartId: cart.id,
@@ -193,7 +194,8 @@ describe('GET /admin/users/:userId/carts', () => {
         forcePaid: false,
         price: 1500,
         reducedPrice: null,
-      }, {
+      },
+      {
         id: ticketRegular.id,
         quantity: 1,
         cartId: cart.id,
@@ -208,7 +210,7 @@ describe('GET /admin/users/:userId/carts', () => {
         forcePaid: false,
         price: 2000,
         reducedPrice: null,
-      }
+      },
     ]);
   });
 });

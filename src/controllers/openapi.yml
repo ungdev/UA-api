@@ -474,6 +474,9 @@ components:
         reducedPrice:
           type: integer
           description: Si une réduction s'applique pour un joueur alors un prix est affiché. Sinon le champ est nul
+        forcePaid:
+          type: boolean
+          description: Vrai si les administrateurs ont forcés le paiement de l'item
         cartId:
           type: string
           example: 8MF1b0
