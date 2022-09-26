@@ -88,6 +88,9 @@ describe('GET /admin/users/:userId/carts', () => {
             {
               id: cartItem.id,
               quantity: 1,
+              price: 700,
+              reducedPrice: null,
+              forcePaid: false,
               cartId: cart.id,
               item: {
                 name: item.name,
@@ -161,32 +164,6 @@ describe('GET /admin/users/:userId/carts', () => {
     expect(result.body[0].cartItems).to.have.lengthOf(3);
     return expect(result.body[0].cartItems).to.deep.include.members([
       {
-        id: ticketPartner.id,
-        quantity: 1,
-        cartId: cart.id,
-        item: {
-          name: ticketItem.name,
-          id: ticketItem.id,
-        },
-        forUser: {
-          id: partnerSchoolUser.id,
-          username: partnerSchoolUser.username,
-        },
-      },
-      {
-        id: ticketRegular.id,
-        quantity: 1,
-        cartId: cart.id,
-        item: {
-          name: ticketItem.name,
-          id: ticketItem.id,
-        },
-        forUser: {
-          id: user.id,
-          username: user.username,
-        },
-      },
-      {
         id: ethernetCable.id,
         quantity: 1,
         cartId: cart.id,
@@ -198,7 +175,40 @@ describe('GET /admin/users/:userId/carts', () => {
           id: partnerSchoolUser.id,
           username: partnerSchoolUser.username,
         },
-      },
+        forcePaid: false,
+        price: 700,
+        reducedPrice: null,
+      }, {
+        id: ticketPartner.id,
+        quantity: 1,
+        cartId: cart.id,
+        item: {
+          name: ticketItem.name,
+          id: ticketItem.id,
+        },
+        forUser: {
+          username: partnerSchoolUser.username,
+          id: partnerSchoolUser.id,
+        },
+        forcePaid: false,
+        price: 1500,
+        reducedPrice: null,
+      }, {
+        id: ticketRegular.id,
+        quantity: 1,
+        cartId: cart.id,
+        item: {
+          name: ticketItem.name,
+          id: ticketItem.id,
+        },
+        forUser: {
+          id: user.id,
+          username: user.username,
+        },
+        forcePaid: false,
+        price: 2000,
+        reducedPrice: null,
+      }
     ]);
   });
 });

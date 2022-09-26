@@ -72,6 +72,7 @@ describe('POST /users/current/carts', () => {
               itemId: 'ethernet-5',
               price: 700,
               reducedPrice: null,
+              forcePaid: false,
               forUser: {
                 id: user.id,
                 username: user.username,
