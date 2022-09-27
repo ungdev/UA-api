@@ -115,24 +115,6 @@ describe('POST /admin/scan/:qrcode', () => {
     return expect(userData.body.scannedAt).not.to.be.equal(null);
   });
 
-  it('should scan the ticket and return the updated spectator (with no team)', async () => {
-    const spectator = await createFakeUser({
-      type: UserType.spectator,
-    });
-    await forcePay(spectator);
-    const body = {
-      qrcode: encrypt(spectator.id).toString('base64'),
-    };
-
-    const userData = await request(app)
-      .post('/admin/scan')
-      .send(body)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200);
-    expect(userData.body.customMessage).to.be.equal(spectator.customMessage);
-    return expect(userData.body.scannedAt).not.to.be.equal(null);
-  });
-
   it('should scan a user with his id only', async () => {
     const scannableUser = await createFakeUser();
     await forcePay(scannableUser);

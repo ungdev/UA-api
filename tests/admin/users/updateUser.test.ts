@@ -129,38 +129,6 @@ describe('PATCH /admin/users/:userId', () => {
     expect(body.discordId).to.be.equal(updatedUser.discordId);
   });
 
-  it('should update the user and remove him from his team', async () => {
-    const team = await createFakeTeam({ members: 2, locked: true });
-    registerRole(team.discordRoleId);
-
-    tournamentDiscordId = registerRole();
-
-    await database.tournament.update({
-      where: {
-        id: team.tournamentId,
-      },
-      data: {
-        discordRoleId: tournamentDiscordId,
-      },
-    });
-    const teamMember = team.players.find((member) => member.id !== team.captainId);
-    registerMember(teamMember.discordId, [team.discordRoleId, tournamentDiscordId]);
-
-    const { body } = await request(app)
-      .patch(`/admin/users/${teamMember.id}`)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send({
-        type: UserType.spectator,
-      })
-      .expect(200);
-
-    const updatedUser = await userOperations.fetchUser(teamMember.id);
-
-    expect(body.type).to.be.equal(UserType.spectator);
-    expect(body.type).to.be.equal(updatedUser.type);
-    expect(body.teamId).to.be.equal(updatedUser.teamId);
-  });
-
   it('should work if body is incomplete', async () => {
     const { body } = await request(app)
       .patch(`/admin/users/${user.id}`)

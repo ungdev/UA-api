@@ -16,18 +16,13 @@ import logger from '../utils/logger';
         email: {
           not: null,
         },
-        OR: [
-          {
-            team: {
-              lockedAt: {
-                not: null,
-              },
-            },
+
+        team: {
+          lockedAt: {
+            not: null,
           },
-          {
-            type: UserType.spectator,
-          },
-        ],
+        },
+
         cartItems: {
           some: {
             itemId: {

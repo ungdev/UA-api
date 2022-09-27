@@ -262,12 +262,6 @@ export const updateAdminUser = async (userId: string, updates: UserPatchBody): P
       firstname: updates.firstname,
       lastname: updates.lastname,
       username: updates.username,
-      team:
-        updates.type === UserType.spectator
-          ? {
-              disconnect: true,
-            }
-          : undefined,
     },
     where: { id: userId },
     include: userInclusions,
