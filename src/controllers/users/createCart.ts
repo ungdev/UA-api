@@ -110,11 +110,10 @@ export default [
         switch (ticketUser.type) {
           case UserType.player:
           case UserType.coach:
-          case UserType.spectator:
             itemId = `ticket-${ticketUser.type}`;
             break;
           default:
-            return forbidden(response, ResponseError.NotPlayerOrCoachOrSpectator);
+            return forbidden(response, ResponseError.NotPlayerOrCoach);
         }
 
         const item = (await fetchUserItems(team, ticketUser)).find((currentItem) => currentItem.id === itemId);
