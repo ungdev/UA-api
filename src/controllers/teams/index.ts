@@ -17,7 +17,6 @@ import leaveTeam from './leaveTeam';
 const router = Router();
 
 router.get('/', getTeams);
-router.get('/:teamId', getIndividualTeam);
 router.post('/', createTeam);
 router.get('/current', getTeam);
 router.put('/current', updateTeam);
@@ -32,5 +31,7 @@ router.delete('/current/join-requests/:userId', refuseTeamRequest);
 router.post('/current/join-requests/:userId', acceptRequest);
 
 router.post('/current/lock', lockTeam);
+
+router.get('/:teamId', getIndividualTeam);
 
 export default router;

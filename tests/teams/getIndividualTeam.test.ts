@@ -35,6 +35,13 @@ describe('GET /teams/:teamId', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
+  it('should not found the team', async () => {
+    await request(app)
+      .get(`/teams/abcdef`)
+      .set('Authorization', `Bearer ${captainToken}`)
+      .expect(404, { error: Error.TeamNotFound });
+  });
+
   it('should succeed as the captain', async () => {
     const { body } = await request(app)
       .get(`/teams/${team.id}`)

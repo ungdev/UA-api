@@ -89,7 +89,49 @@
         description: Le nom de l'équipe existe déjà
       410:
         description: Le tournoi est plein
-
+/teams/{teamId}:
+  get:
+    summary: Renvoie une équipe
+    description: Renvoie les informations publiques d'une équipe grâce à son id.
+    tags:
+      - Teams
+    parameters:
+      - in: path
+        name: teamId
+        description: Identifiant de l'équipe
+        schema:
+          type: string
+        required: true
+    responses:
+      200:
+        description: Renvoie les informations publiques d'une équipe
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Team'
+                - type: object
+                  properties:
+                    players:
+                      type: array
+                      description: Liste des noms d'utilisateurs des joueurs de l'équipe
+                      items:
+                        type: string
+                    coachs:
+                      type: array
+                      description: Liste des noms d'utilisateurs des coachs de l'équipe
+                      items:
+                        type: string
+      400:
+        $ref: '#/components/responses/400Errored'
+      404:
+        description: Aucune équipe associée à cet identifiant
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Aucune équipe associée à cet identifiant
 /teams/current:
   delete:
     summary: Détruit l'équipe
