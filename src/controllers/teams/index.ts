@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import getTeams from './getTeams';
 import getTeam from './getTeam';
+import getIndividualTeam from './getIndividualTeam';
 import createTeam from './createTeam';
 import updateTeam from './updateTeam';
 import deleteTeam from './deleteTeam';
@@ -30,5 +31,7 @@ router.delete('/current/join-requests/:userId', refuseTeamRequest);
 router.post('/current/join-requests/:userId', acceptRequest);
 
 router.post('/current/lock', lockTeam);
+
+router.get('/:teamId', getIndividualTeam);
 
 export default router;
