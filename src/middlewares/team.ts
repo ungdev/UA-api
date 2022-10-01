@@ -3,6 +3,7 @@ import { Error, UserType } from '../types';
 import { forbidden } from '../utils/responses';
 import { getRequestInfo } from '../utils/users';
 import { isAuthenticated } from './authentication';
+import { hasLinkedDiscordAccount } from './oauth';
 
 // Checks if the user is the captain of his team. If not, it will return an error.
 export const isCaptain = [
@@ -39,6 +40,7 @@ export const isNotInATeam = [
 // Checks the user's team. If he's not in one, it will return an error.
 export const isInATeam = [
   ...isAuthenticated,
+  hasLinkedDiscordAccount,
   (request: Request, response: Response, next: NextFunction): void => {
     const { user } = getRequestInfo(response);
 

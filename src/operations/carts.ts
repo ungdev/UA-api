@@ -13,6 +13,7 @@ import database from '../services/database';
 import env from '../utils/env';
 import nanoid from '../utils/nanoid';
 import { fetchUserItems } from './item';
+import { fetchTeam } from './team';
 
 export const dropStale = () =>
   database.cart.deleteMany({
@@ -122,7 +123,10 @@ export const refundCart = (cartId: string): Promise<Cart> =>
 export const forcePay = async (user: User) => {
   let itemId: string;
 
-  const items = await fetchUserItems(undefined, user);
+  // Fetch user team (if in a team)
+  const team = user.teamId ? await fetchTeam(user.teamId) : undefined;
+
+  const items = await fetchUserItems(team, user);
 
   switch (user.type) {
     case UserType.player:

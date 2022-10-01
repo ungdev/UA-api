@@ -69,7 +69,7 @@
               tournamentId:
                 description: Identifiant du tournoi
                 type: string
-                example: lolCompetitive
+                example: lol
               userType:
                 description: Type d'utilisateur
                 type: string

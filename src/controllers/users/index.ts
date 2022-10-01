@@ -4,6 +4,7 @@ import getCarts from './getCarts';
 import updateUser from './updateUser';
 import getUser from './getUser';
 import { become, leave } from './spectate';
+import { fetchRemoteTicket } from './getRemoteTicket';
 
 const router = Router();
 
@@ -15,5 +16,7 @@ router.get('/current/carts', getCarts);
 
 router.post('/current/spectate', become);
 router.delete('/current/spectate', leave);
+
+router.get('/:userId/ticket', fetchRemoteTicket);
 
 export default router;
