@@ -180,11 +180,12 @@ enum UserAge {
 }
 
 enum TournamentId {
-  lolCompetitive
-  lolLeisure
-  csgo
+  lol
   ssbu
+  csgo
+  valorant
   rl
   osu
+  tft
   open
 }

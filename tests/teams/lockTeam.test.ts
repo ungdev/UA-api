@@ -19,12 +19,12 @@ describe('POST /teams/current/lock', () => {
   let lolMaxPlayers: number;
 
   before(async () => {
-    team = await createFakeTeam({ members: 5, paid: true, tournament: 'lolCompetitive' });
+    team = await createFakeTeam({ members: 5, paid: true, tournament: 'lol' });
 
     captain = getCaptain(team);
     captainToken = generateToken(captain);
 
-    const lol = await fetchTournament('lolCompetitive');
+    const lol = await fetchTournament('lol');
     lolMaxPlayers = lol.maxPlayers;
   });
 
@@ -34,7 +34,7 @@ describe('POST /teams/current/lock', () => {
     await database.team.deleteMany();
     await database.user.deleteMany();
 
-    return database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lolCompetitive' } });
+    return database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lol' } });
   });
 
   it('should error as the token is missing', () =>
@@ -131,7 +131,7 @@ describe('POST /teams/current/lock', () => {
         maxPlayers: 5,
       },
       where: {
-        id: 'lolCompetitive',
+        id: 'lol',
       },
     });
 

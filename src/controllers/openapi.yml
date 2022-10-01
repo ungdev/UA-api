@@ -79,7 +79,7 @@ components:
       properties:
         id:
           type: string
-          example: lolCompetitive
+          example: lol
         name:
           type: string
         shortName:
@@ -159,7 +159,7 @@ components:
           description: Filtre les utilisateurs qui recevront le mail en fonction de s'ils sont dans une équipe verrouillée ou non
         tournamentId:
           type: string
-          example: lolCompetitive
+          example: lol
           description: |-
             Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.
             Le champ 'locked' doit être non nul.
@@ -215,7 +215,7 @@ components:
           optional: true
         tournamentId:
           type: string
-          example: lolCompetitive
+          example: lol
           description: |-
             Filtre les utilisateurs qui recevront le mail en fonction de l'identifiant de leur tournoi.<br />
             *Cette propriété **peut** être utilisée avec `locked` pour envoyer un mail aux équipes non validées d'un certain
@@ -352,7 +352,7 @@ components:
           type: string
         tournamentId:
           type: string
-          example: lolCompetitive
+          example: lol
         captainId:
           type: string
           example: XiHGta
@@ -432,7 +432,7 @@ components:
                       example: League of Legends Compétitif
                     id:
                       type: string
-                      example: lolCompetitive
+                      example: lol
                 captainId:
                   type: string
                   example: XiHGta
@@ -602,7 +602,7 @@ components:
           type: object
         tournamentId:
           type: string
-          example: lolCompetitive
+          example: lol
         locked:
           type: boolean
         sentAt:

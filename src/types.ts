@@ -265,6 +265,7 @@ export const enum Error {
   // The server understood the request but refuses to authorize it
   UserAlreadyScanned = "L'utilisateur a déjà scanné son billet",
   NotPaid = "Le billet n'a pas été payé",
+  IsOrga = "L'utilisateur est un organisateur",
   TeamNotPaid = "Tous les membres de l'équipe n'ont pas payé",
   LoginNotAllowed = 'Tu ne peux pas te connecter actuellement',
   ShopNotAllowed = 'La billetterie est fermée',

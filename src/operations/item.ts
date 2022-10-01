@@ -55,7 +55,7 @@ export const fetchAllItems = async (): Promise<Item[]> => {
 
 export const fetchUserItems = async (team?: Team, user?: User) => {
   let items = await fetchAllItems();
-  if (user && !isPartnerSchool(user.email)) {
+  if (!user || !isPartnerSchool(user.email)) {
     for (const item of items) item.reducedPrice = null;
   }
 
@@ -64,6 +64,17 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
     // Remove the SSBU discount
     items = items.filter((element) => element.id !== 'discount-switch-ssbu');
   }
+
+  const currentTicket =
+    items.find((item) => item.id === `ticket-player-${team?.tournamentId}`) ??
+    items.find((item) => item.id === 'ticket-player');
+  items = [
+    ...items.filter((item) => !item.id.startsWith('ticket-player')),
+    {
+      ...currentTicket,
+      id: 'ticket-player',
+    },
+  ];
 
   return items;
 };
