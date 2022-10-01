@@ -5,7 +5,7 @@ import { sandbox } from '../setup';
 import * as responses from '../../src/utils/responses';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
-import { createFakeTeam, createFakeUser } from '../utils';
+import { createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
@@ -30,14 +30,14 @@ describe('GET /teams/:teamId', () => {
     sandbox.stub(responses, 'success').throws('Unknown error');
 
     await request(app)
-      .get(`/teams/` + team.id)
+      .get(`/teams/${team.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
 
   it('should succeed as the captain', async () => {
     const { body } = await request(app)
-      .get(`/teams/` + team.id)
+      .get(`/teams/${team.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(200);
 

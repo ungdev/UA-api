@@ -3,7 +3,6 @@ import { fetchTeam } from '../../operations/team';
 import { notFound, success } from '../../utils/responses';
 import { Error as ResponseError } from '../../types';
 import { filterTeam } from '../../utils/filters';
-import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Controller
