@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import getTeams from './getTeams';
 import getTeam from './getTeam';
+import getIndividualTeam from './getIndividualTeam';
 import createTeam from './createTeam';
 import updateTeam from './updateTeam';
 import deleteTeam from './deleteTeam';
@@ -16,6 +17,7 @@ import leaveTeam from './leaveTeam';
 const router = Router();
 
 router.get('/', getTeams);
+router.get('/:teamId', getIndividualTeam);
 router.post('/', createTeam);
 router.get('/current', getTeam);
 router.put('/current', updateTeam);
