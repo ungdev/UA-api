@@ -192,7 +192,7 @@ describe('GET /admin/users/:userId/carts', () => {
           id: partnerSchoolUser.id,
         },
         forcePaid: false,
-        price: 1500,
+        price: 2000,
         reducedPrice: null,
       },
       {
@@ -208,7 +208,7 @@ describe('GET /admin/users/:userId/carts', () => {
           username: user.username,
         },
         forcePaid: false,
-        price: 2000,
+        price: 2500,
         reducedPrice: null,
       },
     ]);

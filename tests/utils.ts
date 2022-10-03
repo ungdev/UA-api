@@ -96,7 +96,7 @@ export const createFakeUser = async (userData: FakeUserData = {}): Promise<User>
  */
 export const createFakeTeam = async ({
   members = 1,
-  tournament = TournamentId.lolCompetitive,
+  tournament = TournamentId.lol,
   paid = false,
   locked = false,
   name = faker.internet.userName(),

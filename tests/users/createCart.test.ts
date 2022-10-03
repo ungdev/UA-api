@@ -111,7 +111,7 @@ describe('POST /users/current/carts', () => {
     tokenWithSwitchDiscount = generateToken(userWithSwitchDiscount);
     validCartWithSwitchDiscount.tickets.userIds.push(userWithSwitchDiscount.id);
 
-    notValidTeamWithSwitchDiscount = await createFakeTeam({ tournament: 'lolCompetitive' });
+    notValidTeamWithSwitchDiscount = await createFakeTeam({ tournament: 'lol' });
     notValidUserWithSwitchDiscount = getCaptain(notValidTeamWithSwitchDiscount);
     notValidTokenWithSwitchDiscount = generateToken(notValidUserWithSwitchDiscount);
     notValidCartWithSwitchDiscount.tickets.userIds.push(notValidUserWithSwitchDiscount.id);
@@ -395,8 +395,8 @@ describe('POST /users/current/carts', () => {
 
     expect(body.url).to.startWith(env.etupay.url);
 
-    // player place - 1 * discount-ssbu
-    expect(body.price).to.be.equal(2000 - 300);
+    // player place (ssbu) - 1 * discount-ssbu
+    expect(body.price).to.be.equal(2200 - 300);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(2);

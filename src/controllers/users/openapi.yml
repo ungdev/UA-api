@@ -224,3 +224,23 @@
               $ref: '#/components/schemas/User'
       403:
         $ref: '#/components/responses/403Unauthorized'
+
+/users/{userId}/ticket:
+  get:
+    summary: Récupère le ticket d'un autre utilisateur
+    description: L'utilisateur ciblé (userId) doit être dans la même équipe que l'utilisateur qui effectue cette requête
+    tags:
+      - Users
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Le ticket de l'utilisateur ciblé (et son prix !)
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'

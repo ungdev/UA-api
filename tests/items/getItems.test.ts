@@ -24,7 +24,7 @@ describe('GET /items', () => {
     captainToken = generateToken(captain);
 
     // This user shouldn't have the ssbu discount
-    otherTeam = await createFakeTeam({ tournament: 'lolCompetitive' });
+    otherTeam = await createFakeTeam({ tournament: 'lol' });
     otherCaptain = getCaptain(otherTeam);
     otherCaptainToken = generateToken(otherCaptain);
   });
@@ -44,24 +44,24 @@ describe('GET /items', () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').expect(200);
 
-    // without the "discount-switch-ssbu" item
-    expect(response.body).to.have.lengthOf(items.length - 1);
+    // without the "discount-switch-ssbu" item and the "ticket-player-ssbu"
+    expect(response.body).to.have.lengthOf(items.length - 2);
   });
 
   it('should return 200 with an array of items with the "discount-switch-ssbu" item', async () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${captainToken}`).expect(200);
 
-    // with the "discount-switch-ssbu" item
-    expect(response.body).to.have.lengthOf(items.length);
+    // with the "discount-switch-ssbu" item but without the legacy "ticket-player"
+    expect(response.body).to.have.lengthOf(items.length - 1);
   });
 
   it('should return 200 with an array of items without the "discount-switch-ssbu" item', async () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${otherCaptainToken}`).expect(200);
 
-    // without the "discount-switch-ssbu" item
-    expect(response.body).to.have.lengthOf(items.length - 1);
+    // without the "discount-switch-ssbu" item and the "ticket-player-ssbu"
+    expect(response.body).to.have.lengthOf(items.length - 2);
   });
 
   it('should return items with their stock', async () => {
