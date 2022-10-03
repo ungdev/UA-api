@@ -18,7 +18,7 @@ export default [
       userType: Joi.string()
         .valid(UserType.player, UserType.coach)
         .required()
-        .error(new Error(ResponseError.NotplayerOrCoach)),
+        .error(new Error(ResponseError.NotPlayerOrCoach)),
     }),
   ),
 

@@ -279,7 +279,7 @@ describe('POST /users/current/carts', () => {
         tickets: { userIds: [orga.id] },
         supplements: [],
       })
-      .expect(403, { error: Error.NotplayerOrCoach });
+      .expect(403, { error: Error.NotPlayerOrCoach });
 
     // Delete the user to not make the results wrong for the success test
     await database.user.delete({ where: { id: orga.id } });
@@ -432,27 +432,27 @@ describe('POST /users/current/carts', () => {
 
   it('should fail as the item is no longer available', async () => {
     const items = await itemOperations.fetchAllItems();
-    const currentAttendantStock = items.find((item) => item.id === 'ticket-attendant')?.stock;
+    const currentCoachStock = items.find((item) => item.id === 'ticket-coach')?.stock;
 
     await database.item.update({
       data: { stock: 1 },
-      where: { id: 'ticket-attendant' },
+      where: { id: 'ticket-coach' },
     });
 
-    const attendant = await createFakeUser({ type: UserType.attendant });
+    const coach = await createFakeUser({ type: UserType.coach });
 
     await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: [attendant.id] },
+        tickets: { userIds: [coach.id] },
         supplements: [],
       })
       .expect(410, { error: Error.ItemOutOfStock });
 
     return database.item.update({
-      data: { stock: currentAttendantStock },
-      where: { id: 'ticket-attendant' },
+      data: { stock: currentCoachStock },
+      where: { id: 'ticket-coach' },
     });
   });
 
@@ -462,20 +462,20 @@ describe('POST /users/current/carts', () => {
     await database.cart.deleteMany();
 
     const items = await itemOperations.fetchAllItems();
-    const currentAttendantStock = items.find((item) => item.id === 'ticket-attendant')?.stock;
+    const currentCoachStock = items.find((item) => item.id === 'ticket-coach')?.stock;
 
     await database.item.update({
       data: { stock: 1 },
-      where: { id: 'ticket-attendant' },
+      where: { id: 'ticket-coach' },
     });
 
-    const attendant = await createFakeUser({ type: UserType.attendant });
+    const coach = await createFakeUser({ type: UserType.coach });
 
     const { body } = await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: [attendant.id] },
+        tickets: { userIds: [coach.id] },
         supplements: [],
       })
       .expect(201);
@@ -484,8 +484,8 @@ describe('POST /users/current/carts', () => {
     expect(body.price).to.be.equal(1200);
 
     return database.item.update({
-      data: { stock: currentAttendantStock },
-      where: { id: 'ticket-attendant' },
+      data: { stock: currentCoachStock },
+      where: { id: 'ticket-coach' },
     });
   });
 
@@ -494,22 +494,22 @@ describe('POST /users/current/carts', () => {
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
 
-    // We retrieve ticket-attendant stock to reset it at the end of the test
+    // We retrieve ticket-coach stock to reset it at the end of the test
     const items = await itemOperations.fetchAllItems();
-    const currentAttendantStock = items.find((item) => item.id === 'ticket-attendant')?.stock;
+    const currentCoachStock = items.find((item) => item.id === 'ticket-coach')?.stock;
 
     // We set stock for the ticket to 1 unit
     await database.item.update({
       data: { stock: 1 },
-      where: { id: 'ticket-attendant' },
+      where: { id: 'ticket-coach' },
     });
 
-    // We use that unit for a attendant and force-stale his cart
-    const staleAttendant = await createFakeUser({ type: UserType.attendant });
-    const staleAttendantCart = await cartOperations.forcePay(staleAttendant);
+    // We use that unit for a coach and force-stale his cart
+    const staleCoach = await createFakeUser({ type: UserType.coach });
+    const staleCoachCart = await cartOperations.forcePay(staleCoach);
     await database.cart.update({
       where: {
-        id: staleAttendantCart.id,
+        id: staleCoachCart.id,
       },
       data: {
         createdAt: new Date(Date.now() - 6e6),
@@ -527,15 +527,15 @@ describe('POST /users/current/carts', () => {
       },
     });
 
-    // We create another attendant who will try to buy a attendant ticket
+    // We create another coach who will try to buy a coach ticket
     // This operation should succeed.
-    const attendant = await createFakeUser({ type: UserType.attendant });
+    const coach = await createFakeUser({ type: UserType.coach });
 
     const { body } = await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: [attendant.id] },
+        tickets: { userIds: [coach.id] },
         supplements: [],
       })
       .expect(201);
@@ -544,21 +544,21 @@ describe('POST /users/current/carts', () => {
     expect(body.price).to.be.equal(1200);
 
     // Check that the stale cart has been deleted
-    const staleAttendantCarts = await cartOperations.fetchCarts(staleAttendant.id);
-    expect(staleAttendantCarts).to.have.lengthOf(0);
+    const staleCoachCarts = await cartOperations.fetchCarts(staleCoach.id);
+    expect(staleCoachCarts).to.have.lengthOf(0);
 
-    const attendantTickets = await database.cartItem.findMany({
+    const coachTickets = await database.cartItem.findMany({
       where: {
-        itemId: 'ticket-attendant',
+        itemId: 'ticket-coach',
       },
     });
-    expect(attendantTickets).to.have.lengthOf(1);
-    expect(attendantTickets[0].forUserId).to.be.equal(attendant.id);
+    expect(coachTickets).to.have.lengthOf(1);
+    expect(coachTickets[0].forUserId).to.be.equal(coach.id);
 
     // Restore actual stock
     return database.item.update({
-      data: { stock: currentAttendantStock },
-      where: { id: 'ticket-attendant' },
+      data: { stock: currentCoachStock },
+      where: { id: 'ticket-coach' },
     });
   });
 });
