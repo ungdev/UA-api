@@ -16,6 +16,7 @@ import {
   UserWithTeamAndTournamentInfo,
 } from '../types';
 import { deserializePermissions, serializePermissions } from '../utils/helpers';
+import { fetchAllItems } from './item';
 
 export const userInclusions = {
   cartItems: {
@@ -53,6 +54,22 @@ export const formatUserWithTeamAndTournament = (
     ...user,
     team: primitiveUser.team,
   };
+};
+
+export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentId: string, userType: UserType) => {
+  const currentTickets = user.cartItems.filter(
+    (cartItem) =>
+      cartItem.cart.transactionState === 'paid' &&
+      cartItem.itemId.startsWith('ticket-') &&
+      cartItem.itemId !== 'ticket-attendant',
+  );
+  const tickets = (await fetchAllItems()).filter((item) => item.category === 'ticket');
+  const requiredTicket =
+    tickets.find((ticket) => ticket.id === `ticket-${userType}-${tournamentId}`) ??
+    tickets.find((ticket) => ticket.id === `ticket-${userType}`);
+  return (
+    currentTickets.length > 0 && !currentTickets.some((currentTicket) => currentTicket.itemId === requiredTicket.id)
+  );
 };
 
 export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> => {

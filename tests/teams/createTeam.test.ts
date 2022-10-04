@@ -31,6 +31,8 @@ describe('POST /teams', () => {
   });
 
   after(async () => {
+    await database.cartItem.deleteMany();
+    await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
 
@@ -150,6 +152,36 @@ describe('POST /teams', () => {
 
     // Check if the object was filtered
     expect(body.updatedAt).to.be.undefined;
+  });
+
+  it('should fail to create a team because user as already paid another ticket', async () => {
+    const ssbuUser = await createFakeUser({ paid: true });
+    const ssbuUserToken = generateToken(ssbuUser);
+
+    return request(app)
+      .post('/teams')
+      .send({
+        name: 'SSBU-SOLO-TEAM',
+        tournamentId: 'ssbu',
+        userType: UserType.player,
+      })
+      .set('Authorization', `Bearer ${ssbuUserToken}`)
+      .expect(403, { error: Error.HasAlreadyPaidForAnotherTicket });
+  });
+
+  it('should fail to create a team because user as already paid another ticket type', async () => {
+    const coach = await createFakeUser({ type: UserType.coach, paid: true });
+    const coachToken = generateToken(coach);
+
+    return request(app)
+      .post('/teams')
+      .send({
+        name: 'lol-team',
+        tournamentId: 'lol',
+        userType: UserType.player,
+      })
+      .set('Authorization', `Bearer ${coachToken}`)
+      .expect(403, { error: Error.HasAlreadyPaidForAnotherTicket });
   });
 
   it('should error as the tournament is full', async () => {
