@@ -301,7 +301,7 @@ export const enum Error {
   AlreadyAppliedDiscountSSBU = 'Tu as déjà profité de la promotion !',
   NotPlayerDiscountSSBU = 'Seul les joueurs peuvent profiter de la promotion !',
   NotWhitelisted = "Tu n'es pas qualifié pour ce tournoi",
-  HasAlreadyPaidForAnotherTicket = 'Tu as déjà été payé un ticket vendu à un prix différent. Pour changer de tournoi, contacte nous !',
+  HasAlreadyPaidForAnotherTicket = 'Tu as déjà payé un ticket vendu à un prix différent. Pour changer de tournoi, contacte nous !',
 
   // 404
   // The server can't find the requested resource

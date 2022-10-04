@@ -44,7 +44,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
       highlight: "Bienvenue à l'UTT Arena&nbsp;🔥&nbsp;!",
     },
     reason:
-      "Tu as reçu cet email car tu es inscrit à l'UTT Arena 2021. Si ce n'est pas le cas, contacte-nous et change le mot de passe de ta boîte mail.",
+      "Tu reçois ce mail car tu es inscrit à l'UTT Arena 2022. Si ce n'est pas le cas, contacte-nous et change le mot de passe de ta boîte mail.",
     receiver: cart.user.email,
     sections: [
       {
@@ -182,7 +182,7 @@ export const generatePasswordResetEmail = (user: Omit<RawUser, 'permissions'>) =
           {
             name: 'Réinitialise ton mot de passe',
             location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}`,
-            color: '#dc143c',
+            color: '#8767AA',
           },
           `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}_`,
         ],

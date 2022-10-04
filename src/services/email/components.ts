@@ -4,18 +4,18 @@ import type { Component } from './types';
 export const style = {
   text: {
     color: '#202020',
-    font: 'Nunito,Roboto,Arial,sans-serif',
+    font: "'Kanit regular',Roboto,Arial,sans-serif",
   },
   title: {
-    color: '#006492',
-    font: 'Montserrat,Roboto,Arial,sans-serif',
+    color: '#8767AA',
+    font: "'Lemon milk',Roboto,Arial,sans-serif",
   },
   button: {
-    background: '#f1737f',
+    background: '#8767AA',
     font: '#fff',
   },
   sep: {
-    color: '#fbb464',
+    color: '#8767AA',
   },
 };
 
@@ -36,13 +36,13 @@ export const escapeText = (text: string) =>
     .replace(/\*([^*<>]+)\*/gi, '<strong>$1</strong>');
 
 const inflateButton = (item: Component.Button) =>
-  `<td style="background-color:${
-    item.color ? item.color : style.button.background
-  };border-radius:2px;padding:3px 6px 2px"><a target="_blank" href="${escapeText(
+  `<a target="_blank" href="${escapeText(
     item.location,
-  )}" style="border:none;text-decoration:none;color:${style.button.font};user-select:none;font-family:${
+  )}" style="border:none;text-decoration:none;user-select:none"><button style="background-color:${
+    item.color ? item.color : style.button.background
+  };border-radius:6px;padding:9px 18px 8px;margin:5px 7px;font-family:${
     style.text.font
-  }">${item.name}</a></td>`;
+  };outline:none;border:none;color:${style.button.font};cursor:pointer">${item.name}</button></a>`;
 
 const inflateButtonWrapper = (item: Component.Button | Component.Button[]) =>
   `<tr><td><table style="border:none;border-spacing:5px"><tbody><tr>${
