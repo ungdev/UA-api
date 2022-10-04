@@ -4,6 +4,7 @@ import { hasLinkedDiscordAccount } from '../../middlewares/oauth';
 import { isNotInATeam } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import { askJoinTeam, fetchTeam } from '../../operations/team';
+import { hasUserAlreadyPaidForAnotherTicket } from '../../operations/user';
 import { Error as ResponseError, UserType } from '../../types';
 import { filterUser } from '../../utils/filters';
 import { forbidden, notFound, success } from '../../utils/responses';
@@ -37,6 +38,10 @@ export default [
 
       // Check if the user is already asking for a team
       if (user.askingTeamId) return forbidden(response, ResponseError.AlreadyAskedATeam);
+
+      // Check whether the user has already paid for another ticket
+      if (await hasUserAlreadyPaidForAnotherTicket(user, team.tournamentId, request.body.userType))
+        return forbidden(response, ResponseError.HasAlreadyPaidForAnotherTicket);
 
       const updatedUser = await askJoinTeam(team.id, user.id, request.body.userType);
 
