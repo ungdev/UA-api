@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { hasLinkedDiscordAccount } from '../../middlewares/oauth';
-import { noSpectator } from '../../middlewares/team';
+import { isNotInATeam } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import whitelist from '../../middlewares/whitelist';
 import { createTeam } from '../../operations/team';
@@ -13,7 +13,7 @@ import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
-  ...noSpectator,
+  ...isNotInATeam,
   ...whitelist,
   hasLinkedDiscordAccount,
   validateBody(

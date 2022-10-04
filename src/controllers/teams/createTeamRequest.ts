@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { hasLinkedDiscordAccount } from '../../middlewares/oauth';
-import { noSpectator } from '../../middlewares/team';
+import { isNotInATeam } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import { askJoinTeam, fetchTeam } from '../../operations/team';
 import { Error as ResponseError, UserType } from '../../types';
@@ -11,14 +11,14 @@ import { getRequestInfo } from '../../utils/users';
 
 export default [
   // Middlewares
-  ...noSpectator,
+  ...isNotInATeam,
   hasLinkedDiscordAccount,
   validateBody(
     Joi.object({
       userType: Joi.string()
         .valid(UserType.player, UserType.coach)
         .required()
-        .error(new Error(ResponseError.NotplayerOrCoach)),
+        .error(new Error(ResponseError.NotPlayerOrCoach)),
     }),
   ),
 

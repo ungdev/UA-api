@@ -1,4 +1,4 @@
-import { UserType, TransactionState } from '../types';
+import { TransactionState } from '../types';
 import database from '../services/database';
 import { fetchGuildMembers } from '../services/discord';
 import { sendEmail } from '../services/email';
@@ -16,18 +16,13 @@ import logger from '../utils/logger';
         email: {
           not: null,
         },
-        OR: [
-          {
-            team: {
-              lockedAt: {
-                not: null,
-              },
-            },
+
+        team: {
+          lockedAt: {
+            not: null,
           },
-          {
-            type: UserType.spectator,
-          },
-        ],
+        },
+
         cartItems: {
           some: {
             itemId: {

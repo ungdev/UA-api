@@ -131,11 +131,10 @@ export const forcePay = async (user: User) => {
   switch (user.type) {
     case UserType.player:
     case UserType.coach:
-    case UserType.spectator:
       itemId = `ticket-${user.type}`;
       break;
     default:
-      itemId = `ticket-${UserType.spectator}`;
+      itemId = `ticket-${UserType.player}`;
   }
 
   return database.cart.create({
