@@ -68,7 +68,7 @@ export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentI
     tickets.find((ticket) => ticket.id === `ticket-${userType}-${tournamentId}`) ??
     tickets.find((ticket) => ticket.id === `ticket-${userType}`);
   return (
-    currentTickets.length > 0 && !currentTickets.some((currentTicket) => currentTicket.itemId === requiredTicket.id)
+    currentTickets.length > 0 && !currentTickets.some((currentTicket) => currentTicket.price === requiredTicket.price)
   );
 };
 
