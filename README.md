@@ -16,7 +16,7 @@ API web à destination des services de l'UTT Arena
 ## Installation
 
 ```
-git clone git@github.com:ungdev/UA-api.git
+git clone git@github.com:ungdev/UA-api.git 
 # or
 git clone https://github.com/ungdev/UA-api.git
 
