@@ -1,4 +1,4 @@
-import { PrismaPromise } from '.prisma/client';
+import { PrismaPromise } from '@prisma/client';
 import { Log, LogSearchQuery } from '../types';
 import database from '../services/database';
 import env from '../utils/env';

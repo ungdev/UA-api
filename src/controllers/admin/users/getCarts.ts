@@ -4,8 +4,7 @@ import { filterCartWithCartItemsAdmin } from '../../../utils/filters';
 import { notFound, success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
 import { fetchUser } from '../../../operations/user';
-import { Error, Permission, ItemCategory } from '../../../types';
-import { isPartnerSchool } from '../../../utils/helpers';
+import { Error, Permission } from '../../../types';
 
 export default [
   // Middlewares
@@ -24,19 +23,7 @@ export default [
 
       const adminCarts = carts.map((cart) => ({
         ...cart,
-        // Compute the price of each cart. In order to do so, we check whether
-        // the bought item is a `ItemCategory.ticket` and whether the recipient
-        // is eligible for a discount
-        totalPrice: cart.cartItems
-          .map(
-            (cartItem) =>
-              (cartItem.item.category === ItemCategory.ticket &&
-              cartItem.item.reducedPrice &&
-              isPartnerSchool(cartItem.forUser.email)
-                ? cartItem.item.reducedPrice
-                : cartItem.item.price) * cartItem.quantity,
-          )
-          .reduce((price1, price2) => price1 + price2, 0),
+        totalPrice: cart.cartItems.reduce((previous, current) => previous + current.price, 0),
       }));
 
       // Then we filter the object to reduce output

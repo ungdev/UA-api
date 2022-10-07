@@ -59,8 +59,9 @@ describe('GET /admin/users/:userId/carts', () => {
   it('should return a pending cart', async () => {
     await cartOperations.createCart(user.id, [
       {
-        itemId: 'ethernet-5',
+        itemId: 'ethernet-7',
         quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-7').price,
         forUserId: user.id,
       },
     ]);
@@ -70,7 +71,7 @@ describe('GET /admin/users/:userId/carts', () => {
     const [cartItem] = cart.cartItems;
 
     const items = await fetchAllItems();
-    const item = items.find((findItem) => findItem.id === 'ethernet-5');
+    const item = items.find((findItem) => findItem.id === 'ethernet-7');
 
     await request(app)
       .get(`/admin/users/${user.id}/carts`)
@@ -87,10 +88,13 @@ describe('GET /admin/users/:userId/carts', () => {
             {
               id: cartItem.id,
               quantity: 1,
+              price: 1000,
+              reducedPrice: null,
+              forcePaid: false,
               cartId: cart.id,
               item: {
                 name: item.name,
-                id: 'ethernet-5',
+                id: 'ethernet-7',
               },
               forUser: {
                 id: user.id,
@@ -115,32 +119,35 @@ describe('GET /admin/users/:userId/carts', () => {
     // random item
     await cartOperations.createCart(partnerSchoolUser.id, [
       {
-        itemId: 'ethernet-5',
+        itemId: 'ethernet-7',
         quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-7').price,
         forUserId: partnerSchoolUser.id,
       },
       {
         itemId: 'ticket-player',
         quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').reducedPrice,
         forUserId: partnerSchoolUser.id,
       },
       {
         itemId: 'ticket-player',
         quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
         forUserId: user.id,
       },
     ]);
 
     // Retrieve cart from database
     const [cart] = await cartOperations.fetchCarts(partnerSchoolUser.id);
-    const ethernetCable = cart.cartItems.find((item) => item.itemId === 'ethernet-5');
+    const ethernetCable = cart.cartItems.find((item) => item.itemId === 'ethernet-7');
     const ticketPartner = cart.cartItems.find(
       (item) => item.forUserId === partnerSchoolUser.id && item.itemId === 'ticket-player',
     );
     const ticketRegular = cart.cartItems.find((item) => item.forUserId === user.id && item.itemId === 'ticket-player');
 
     const items = await fetchAllItems();
-    const ethernetCableItem = items.find((findItem) => findItem.id === 'ethernet-5');
+    const ethernetCableItem = items.find((findItem) => findItem.id === 'ethernet-7');
     const ticketItem = items.find((findItem) => findItem.id === 'ticket-player');
 
     // Send query and check result body
@@ -157,6 +164,22 @@ describe('GET /admin/users/:userId/carts', () => {
     expect(result.body[0].cartItems).to.have.lengthOf(3);
     return expect(result.body[0].cartItems).to.deep.include.members([
       {
+        id: ethernetCable.id,
+        quantity: 1,
+        cartId: cart.id,
+        item: {
+          name: ethernetCableItem.name,
+          id: ethernetCableItem.id,
+        },
+        forUser: {
+          id: partnerSchoolUser.id,
+          username: partnerSchoolUser.username,
+        },
+        forcePaid: false,
+        price: 1000,
+        reducedPrice: null,
+      },
+      {
         id: ticketPartner.id,
         quantity: 1,
         cartId: cart.id,
@@ -165,9 +188,12 @@ describe('GET /admin/users/:userId/carts', () => {
           id: ticketItem.id,
         },
         forUser: {
-          id: partnerSchoolUser.id,
           username: partnerSchoolUser.username,
+          id: partnerSchoolUser.id,
         },
+        forcePaid: false,
+        price: 2000,
+        reducedPrice: null,
       },
       {
         id: ticketRegular.id,
@@ -181,19 +207,9 @@ describe('GET /admin/users/:userId/carts', () => {
           id: user.id,
           username: user.username,
         },
-      },
-      {
-        id: ethernetCable.id,
-        quantity: 1,
-        cartId: cart.id,
-        item: {
-          name: ethernetCableItem.name,
-          id: ethernetCableItem.id,
-        },
-        forUser: {
-          id: partnerSchoolUser.id,
-          username: partnerSchoolUser.username,
-        },
+        forcePaid: false,
+        price: 2500,
+        reducedPrice: null,
       },
     ]);
   });

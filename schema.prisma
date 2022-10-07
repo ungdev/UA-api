@@ -14,51 +14,48 @@ datasource db {
 model Cart {
   id               String           @id
   userId           String
-  user             User             @relation(fields: [userId], references: [id])
-
   transactionState TransactionState @default(pending)
   transactionId    Int?
-
   paidAt           DateTime?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now()) @updatedAt
-
+  user             User             @relation(fields: [userId], references: [id])
   cartItems        CartItem[]
 
+  @@index([userId], map: "carts_userId_fkey")
   @@map("carts")
 }
 
 model CartItem {
-  id        String   @id
+  id           String   @id
+  itemId       String
+  quantity     Int
+  price        Int
+  reducedPrice Int?
+  forcePaid    Boolean  @default(false)
+  forUserId    String
+  cartId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  cart         Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  forUser      User     @relation(fields: [forUserId], references: [id])
+  item         Item     @relation(fields: [itemId], references: [id])
 
-  itemId    String
-  item      Item     @relation(fields: [itemId], references: [id])
-  quantity  Int
-
-  forUserId String
-  forUser   User     @relation(fields: [forUserId], references: [id])
-
-  cartId    String
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
+  @@index([cartId], map: "cartitems_cartId_fkey")
+  @@index([forUserId], map: "cartitems_forUserId_fkey")
+  @@index([itemId], map: "cartitems_itemId_fkey")
   @@map("cartitems")
 }
 
 model Item {
   id           String       @id
   name         String
-
   category     ItemCategory
   attribute    String?
   price        Int
   reducedPrice Int?
-
   infos        String?
   image        String?
-
   stock        Int?
   cartItems    CartItem[]
 
@@ -73,59 +70,48 @@ model Setting {
 }
 
 model Team {
-  id               String       @id
-  name             String
-
-  tournamentId     TournamentId
-  tournament       Tournament   @relation(fields: [tournamentId], references: [id])
-
-  captainId        String       @unique
-  captain          User         @relation(fields: [captainId], references: [id])
-
-  lockedAt         DateTime?
-
-  discordRoleId    String?
-
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @default(now()) @updatedAt
-
-  askingUsers      User[]       @relation("teamAskingUsers")
-  users            User[]       @relation("teamUsers")
+  id            String       @id
+  name          String
+  tournamentId  TournamentId
+  captainId     String       @unique
+  lockedAt      DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @default(now()) @updatedAt
+  discordRoleId String?
+  captain       User         @relation(fields: [captainId], references: [id])
+  tournament    Tournament   @relation(fields: [tournamentId], references: [id])
+  askingUsers   User[]       @relation("teamAskingUsers")
+  users         User[]       @relation("teamUsers")
 
   @@unique([name, tournamentId])
   @@index([id])
+  @@index([tournamentId], map: "teams_tournamentId_fkey")
   @@map("teams")
 }
 
 model Tournament {
   id                     TournamentId @id
   name                   String       @unique
-
   maxPlayers             Int
   playersPerTeam         Int
-  teams                  Team[]
-
   discordRoleId          String?
   discordRespoRoleId     String?
   discordTextCategoryId  String?
   discordVocalCategoryId String?
+  teams                  Team[]
 
   @@map("tournaments")
 }
 
 model Log {
   id        String   @id
-
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   method    String
   path      String
   body      Json?
-
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // We create an index on the userId as the search most of the time used with a userId
   @@index([userId])
   @@map("logs")
 }
@@ -140,36 +126,30 @@ model User {
   type          UserType?
   age           UserAge
   discordId     String?    @unique
-
   permissions   String?
-
   registerToken String?    @unique
   resetToken    String?    @unique
-
   place         String?    @unique
   customMessage String?
   scannedAt     DateTime?
-
   attendantId   String?    @unique
-  attendant     User?      @relation("attendantUser", fields: [attendantId], references: [id])
-  attended      User?      @relation("attendantUser")
-
   teamId        String?
-  team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
   askingTeamId  String?
-  askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
-
-  compumsaCode  Int?       @unique
-
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @default(now()) @updatedAt
-
-  captainTeam   Team?
+  compumsaCode  Int?       @unique
+  askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
+  attendant     User?      @relation("attendantUser", fields: [attendantId], references: [id])
+  team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
   cartItems     CartItem[]
   carts         Cart[]
   logs          Log[]
+  captainTeam   Team?
+  attended      User?      @relation("attendantUser")
 
   @@index([id])
+  @@index([askingTeamId], map: "users_askingTeamId_fkey")
+  @@index([teamId], map: "users_teamId_fkey")
   @@map("users")
 }
 
@@ -190,7 +170,6 @@ enum UserType {
   player
   orga
   coach
-  spectator
   attendant
 }
 
@@ -200,11 +179,12 @@ enum UserAge {
 }
 
 enum TournamentId {
-  lolCompetitive
-  lolLeisure
-  csgo
+  lol
   ssbu
+  csgo
+  valorant
   rl
   osu
+  tft
   open
 }

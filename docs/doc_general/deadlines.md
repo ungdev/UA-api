@@ -1,16 +1,16 @@
 # Deadlines (seuils du trépas)
 
-## Nouveau site - 15 septembre
+## Nouveau site - 12 septembre
 
-- Contenu ✔️
+- Contenu 
 
-- Title ✔️
+- Title 
 
-## Billetterie - Equipe billetterie - 8 Octobre
+## Billetterie - Equipe billetterie - 1 Octobre
 
-- API : 26 Septembre ✔️
+- API : 18 Septembre 
 
-- Front 3 Octobre
+- Front 25 Septembre
 
 Principalement du front à faire
 

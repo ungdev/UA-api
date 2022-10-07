@@ -21,6 +21,8 @@ describe('POST /teams/:teamId/join-requests', () => {
   });
 
   after(async () => {
+    await database.cartItem.deleteMany();
+    await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
   });
@@ -85,17 +87,6 @@ describe('POST /teams/:teamId/join-requests', () => {
       .expect(403, { error: Error.TeamMaxCoachReached });
   });
 
-  it('should fail because the user is a spectator', async () => {
-    const spectator = await createFakeUser({ type: UserType.spectator });
-    const spectatorToken = generateToken(spectator);
-
-    return request(app)
-      .post(`/teams/${team.id}/join-requests`)
-      .send({ userType: UserType.player })
-      .set('Authorization', `Bearer ${spectatorToken}`)
-      .expect(403, { error: Error.NoSpectator });
-  });
-
   it('should fail with an internal server error', async () => {
     sandbox.stub(teamOperations, 'askJoinTeam').throws('Unexpected error');
     await request(app)
@@ -152,6 +143,17 @@ describe('POST /teams/:teamId/join-requests', () => {
 
     // Check if the object was filtered
     expect(body.updatedAt).to.be.undefined;
+  });
+
+  it('should fail to join a team because user as already paid another ticket type', async () => {
+    const coach = await createFakeUser({ type: UserType.coach, paid: true });
+    const coachToken = generateToken(coach);
+
+    return request(app)
+      .post(`/teams/${team.id}/join-requests`)
+      .send({ userType: UserType.player })
+      .set('Authorization', `Bearer ${coachToken}`)
+      .expect(403, { error: Error.HasAlreadyPaidForAnotherTicket });
   });
 
   it('should fail as we already asked for the same team', async () => {

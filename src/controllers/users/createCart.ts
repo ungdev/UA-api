@@ -15,7 +15,7 @@ import {
   UserAge,
   TransactionState,
 } from '../../types';
-import { encodeToBase64, isPartnerSchool, removeAccents } from '../../utils/helpers';
+import { encodeToBase64, removeAccents } from '../../utils/helpers';
 import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
@@ -73,7 +73,7 @@ export default [
       let { user } = requestInfo;
       const { team } = requestInfo;
 
-      const items = await fetchUserItems(team);
+      const items = await fetchUserItems(team, user);
 
       const cartItems: PrimitiveCartItem[] = [];
 
@@ -84,6 +84,11 @@ export default [
 
         if (!ticketUser) {
           return notFound(response, ResponseError.UserNotFound);
+        }
+
+        // Checks if the buyer and the user are in the same team
+        if (ticketUser.teamId !== user.teamId) {
+          return forbidden(response, ResponseError.NotInSameTeam);
         }
 
         // Checks if the user has already paid
@@ -100,22 +105,25 @@ export default [
           return forbidden(response, ResponseError.AttendantAlreadyRegistered);
 
         // Defines the ticket id to be either a player or a coach
-        let itemId;
+        let itemId: string;
 
         switch (ticketUser.type) {
           case UserType.player:
           case UserType.coach:
-          case UserType.spectator:
             itemId = `ticket-${ticketUser.type}`;
             break;
           default:
-            return forbidden(response, ResponseError.NotPlayerOrCoachOrSpectator);
+            return forbidden(response, ResponseError.NotPlayerOrCoach);
         }
+
+        const item = (await fetchUserItems(team, ticketUser)).find((currentItem) => currentItem.id === itemId);
 
         // Adds the item to the basket
         cartItems.push({
           itemId,
           quantity: 1,
+          price: item.price,
+          reducedPrice: item.reducedPrice,
           forUserId: ticketUser.id,
         });
       }
@@ -155,6 +163,8 @@ export default [
         cartItems.push({
           itemId: supplement.itemId,
           quantity: supplement.quantity,
+          price: items.find((item) => item.id === supplement.itemId).price,
+          reducedPrice: items.find((item) => item.id === supplement.itemId).reducedPrice,
           forUserId: user.id,
         });
       }
@@ -173,7 +183,7 @@ export default [
       // Check if rows (ie. carts) were updated
       if (droppedCartsCount > 0) {
         // Update fetched items
-        const refetchedItems = await fetchUserItems(team);
+        const refetchedItems = await fetchUserItems(team, user);
         for (const item of itemsWithStock)
           item.left = refetchedItems.find((fetchedItem) => fetchedItem.id === item.id).left;
       }
@@ -211,6 +221,8 @@ export default [
           cartItems.push({
             itemId: 'ticket-attendant',
             quantity: 1,
+            price: items.find((item) => item.id === 'ticket-attendant').price,
+            reducedPrice: items.find((item) => item.id === 'ticket-attendant').reducedPrice,
             forUserId: user.attendantId,
           });
         }
@@ -239,22 +251,8 @@ export default [
         // Finds the item associated with the cartitem
         const item = items.find((findItem) => findItem.id === cartItem.itemId);
 
-        // Retreives the price of the item
-        let itemPrice = item.price;
-
-        // Checks if the category is a ticket and the reduce price exists
-        if (item.category === ItemCategory.ticket && item.reducedPrice) {
-          // Fetch the user who will get the ticket
-          const forUser = await fetchUser(cartItem.forUserId);
-
-          // If the ticket is a partner school, set the price to the reduced price
-          if (isPartnerSchool(forUser.email)) {
-            itemPrice = item.reducedPrice;
-          }
-        }
-
         // Add the item to the etupay basket
-        basket.addItem(removeAccents(item.name), itemPrice, cartItem.quantity);
+        basket.addItem(removeAccents(item.name), cartItem.reducedPrice ?? cartItem.price, cartItem.quantity);
       }
 
       if (basket.getPrice() < 0) {

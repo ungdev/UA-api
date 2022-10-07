@@ -18,7 +18,7 @@ describe('POST /teams', () => {
 
   const teamBody = {
     name: 'ZeBest',
-    tournamentId: 'lolCompetitive',
+    tournamentId: 'lol',
     userType: UserType.player,
   };
 
@@ -26,15 +26,17 @@ describe('POST /teams', () => {
     user = await createFakeUser();
     token = generateToken(user);
 
-    const lol = await tournamentOperations.fetchTournament('lolCompetitive');
+    const lol = await tournamentOperations.fetchTournament('lol');
     lolMaxPlayers = lol.maxPlayers;
   });
 
   after(async () => {
+    await database.cartItem.deleteMany();
+    await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
 
-    await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lolCompetitive' } });
+    await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lol' } });
   });
 
   it('should fail because the token is not provided', () =>
@@ -51,17 +53,6 @@ describe('POST /teams', () => {
       .send(teamBody)
       .set('Authorization', `Bearer ${localToken}`)
       .expect(403, { error: Error.AlreadyInTeam });
-  });
-
-  it('should fail because the user is a spectator', async () => {
-    const spectator = await createFakeUser({ type: UserType.spectator });
-    const spectatorToken = generateToken(spectator);
-
-    return request(app)
-      .post('/teams')
-      .send(teamBody)
-      .set('Authorization', `Bearer ${spectatorToken}`)
-      .expect(403, { error: Error.NoSpectator });
   });
 
   it('should fail because the body is incorrect', () =>
@@ -163,6 +154,36 @@ describe('POST /teams', () => {
     expect(body.updatedAt).to.be.undefined;
   });
 
+  it('should fail to create a team because user as already paid another ticket', async () => {
+    const ssbuUser = await createFakeUser({ paid: true });
+    const ssbuUserToken = generateToken(ssbuUser);
+
+    return request(app)
+      .post('/teams')
+      .send({
+        name: 'SSBU-SOLO-TEAM',
+        tournamentId: 'ssbu',
+        userType: UserType.player,
+      })
+      .set('Authorization', `Bearer ${ssbuUserToken}`)
+      .expect(403, { error: Error.HasAlreadyPaidForAnotherTicket });
+  });
+
+  it('should fail to create a team because user as already paid another ticket type', async () => {
+    const coach = await createFakeUser({ type: UserType.coach, paid: true });
+    const coachToken = generateToken(coach);
+
+    return request(app)
+      .post('/teams')
+      .send({
+        name: 'lol-team',
+        tournamentId: 'lol',
+        userType: UserType.player,
+      })
+      .set('Authorization', `Bearer ${coachToken}`)
+      .expect(403, { error: Error.HasAlreadyPaidForAnotherTicket });
+  });
+
   it('should error as the tournament is full', async () => {
     await createFakeTeam({ members: 5, locked: true });
     const otherUser = await createFakeUser();
@@ -174,7 +195,7 @@ describe('POST /teams', () => {
         maxPlayers: 5,
       },
       where: {
-        id: 'lolCompetitive',
+        id: 'lol',
       },
     });
 

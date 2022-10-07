@@ -75,7 +75,7 @@ describe('GET /admin/logs', () => {
       .post('/teams')
       .send({
         name: 'fake-team',
-        tournamentId: TournamentId.lolCompetitive,
+        tournamentId: TournamentId.lol,
         userType: UserType.player,
       })
       .set('Authorization', `Bearer ${userUtils.generateToken(user)}`)

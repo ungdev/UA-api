@@ -107,6 +107,8 @@ export type DetailedCart = Cart & {
 export interface PrimitiveCartItem {
   itemId: string;
   quantity: number;
+  price: number;
+  reducedPrice?: number;
   forUserId: string;
 }
 
@@ -263,6 +265,7 @@ export const enum Error {
   // The server understood the request but refuses to authorize it
   UserAlreadyScanned = "L'utilisateur a déjà scanné son billet",
   NotPaid = "Le billet n'a pas été payé",
+  IsOrga = "L'utilisateur est un organisateur",
   TeamNotPaid = "Tous les membres de l'équipe n'ont pas payé",
   LoginNotAllowed = 'Tu ne peux pas te connecter actuellement',
   ShopNotAllowed = 'La billetterie est fermée',
@@ -271,10 +274,10 @@ export const enum Error {
   NotCaptain = "Tu dois être le capitaine de l'équipe pour modifier cette ressource",
   NotSelf = 'Tu ne peux pas modifier les information de cette personne',
   NotInTeam = "Tu n'es pas dans une équipe",
+  NotInSameTeam = "Tu n'est pas dans la même équipe que le joueur spécifié",
   LoginAsAttendant = "Tu ne peux pas te connecter en tant qu'accompagnateur",
   AlreadyAuthenticated = 'Tu es déjà identifié',
-  NotplayerOrCoach = "L'utilisateur doit être un joueur ou un coach",
-  NotPlayerOrCoachOrSpectator = "L'utilisateur n'est ni un joueur, ni un coach, ni un spectateur",
+  NotPlayerOrCoach = "L'utilisateur doit être un joueur ou un coach",
   AlreadyPaid = 'Le joueur possède déjà une place',
   AlreadyErrored = 'Tu ne peux pas valider une transaction échouée',
   TeamLocked = "L'équipe est verrouillée",
@@ -295,10 +298,10 @@ export const enum Error {
   AttendantAlreadyRegistered = "Tu ne peux pas avoir plus d'un accompagnateur",
   CannotSpectate = 'Tu dois quitter ton équipe pour devenir spectateur',
   CannotUnSpectate = "Tu n'es pas spectateur",
-  NoSpectator = "Les spectateurs n'ont pas accès à cette ressource",
   AlreadyAppliedDiscountSSBU = 'Tu as déjà profité de la promotion !',
   NotPlayerDiscountSSBU = 'Seul les joueurs peuvent profiter de la promotion !',
   NotWhitelisted = "Tu n'es pas qualifié pour ce tournoi",
+  HasAlreadyPaidForAnotherTicket = 'Tu as déjà payé un ticket vendu à un prix différent. Pour changer de tournoi, contacte nous !',
 
   // 404
   // The server can't find the requested resource

@@ -12,6 +12,7 @@ import { createFakeUser } from '../utils';
 import env from '../../src/utils/env';
 import { encodeToBase64, randomInt } from '../../src/utils/helpers';
 import * as emailOperations from '../../src/services/email';
+import { fetchAllItems } from '../../src/operations/item';
 
 const createEtupayPayload = (etupayBody: object) => {
   // Strinigifies the etupay body
@@ -59,7 +60,14 @@ describe('GET /etupay/callback', () => {
     const user = await createFakeUser();
 
     // Create a fake cart
-    cart = await cartOperations.createCart(user.id, [{ itemId: 'ticket-player', quantity: 1, forUserId: user.id }]);
+    cart = await cartOperations.createCart(user.id, [
+      {
+        itemId: 'ticket-player',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        forUserId: user.id,
+      },
+    ]);
 
     // This is the data format how it is encrypted in the payload
     const etupayBody = {
@@ -78,7 +86,12 @@ describe('GET /etupay/callback', () => {
 
     // Create a refused payload
     const failedCart = await cartOperations.createCart(user.id, [
-      { itemId: 'ticket-player', quantity: 1, forUserId: user.id },
+      {
+        itemId: 'ticket-player',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        forUserId: user.id,
+      },
     ]);
     etupayBody.step = 'REFUSED';
     etupayBody.service_data = encodeToBase64({ cartId: failedCart.id });

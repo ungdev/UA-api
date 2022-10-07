@@ -1,4 +1,4 @@
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
 import { fetchUser } from '../src/operations/user';
 import { Permission, RawUser, User, TournamentId, UserAge, UserType, TransactionState } from '../src/types';
@@ -41,7 +41,7 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
      * to a random lastname. Numbers, dots or underscores may be inserted between
      * these elements (or as a string padding). Result neither contains single
      * quotes nor regular spaces. See the [complete process here](
-     * https://github.com/Marak/faker.js/blob/master/lib/internet.js#L76)
+     * https://github.com/faker-js/faker/blob/main/src/modules/internet/index.ts#L129)
      * We update the result to match our username regular expression:
      * replace dots with dashes and remove trailing chars */
     username: data.username || faker.internet.userName().replace(/\./g, '-').slice(0, 16),
@@ -67,6 +67,7 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
                   id: nanoid(),
                   itemId: `ticket-${userType}`,
                   quantity: 1,
+                  price: 0,
                   forUserId: userId,
                 },
               ],
@@ -95,7 +96,7 @@ export const createFakeUser = async (userData: FakeUserData = {}): Promise<User>
  */
 export const createFakeTeam = async ({
   members = 1,
-  tournament = TournamentId.lolCompetitive,
+  tournament = TournamentId.lol,
   paid = false,
   locked = false,
   name = faker.internet.userName(),

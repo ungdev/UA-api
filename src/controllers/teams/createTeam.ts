@@ -1,19 +1,21 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { hasLinkedDiscordAccount } from '../../middlewares/oauth';
-import { noSpectator } from '../../middlewares/team';
+import { isNotInATeam } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import whitelist from '../../middlewares/whitelist';
 import { createTeam } from '../../operations/team';
 import { fetchTournament } from '../../operations/tournament';
+import { hasUserAlreadyPaidForAnotherTicket } from '../../operations/user';
 import { Error as ResponseError, UserType } from '../../types';
 import { filterTeam } from '../../utils/filters';
-import { conflict, created, gone } from '../../utils/responses';
+import { conflict, created, forbidden, gone } from '../../utils/responses';
+import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
-  ...noSpectator,
+  ...isNotInATeam,
   ...whitelist,
   hasLinkedDiscordAccount,
   validateBody(
@@ -31,6 +33,7 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const { name, tournamentId, userType } = request.body;
+      const { user } = getRequestInfo(response);
 
       const tournament = await fetchTournament(tournamentId);
 
@@ -38,6 +41,10 @@ export default [
       if (tournament.placesLeft === 0) {
         return gone(response, ResponseError.TournamentFull);
       }
+
+      // Check whether the user has already paid for another ticket
+      if (await hasUserAlreadyPaidForAnotherTicket(user, tournamentId, userType))
+        return forbidden(response, ResponseError.HasAlreadyPaidForAnotherTicket);
 
       try {
         const team = await createTeam(name, tournamentId, response.locals.user.id, userType);

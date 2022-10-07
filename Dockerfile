@@ -1,5 +1,4 @@
-# The normal version is used to debug easily
-FROM node:15
+FROM node:16
 
 ENV NODE_ENV=production
 WORKDIR /srv/app

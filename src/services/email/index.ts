@@ -5,6 +5,7 @@ import logger from '../../utils/logger';
 import { generateTicketsEmail, generateValidationEmail, generatePasswordResetEmail } from './serializer';
 import type { SerializedMail } from './types';
 
+// eslint-disable-next-line import/no-unresolved
 export type { Component, Mail, SerializedMail } from './types';
 
 export const transporter = nodemailer.createTransport(env.email.uri);

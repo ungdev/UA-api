@@ -101,7 +101,7 @@ export default [
               receiver: adress,
             });
           } catch {
-            return Promise.reject(ApiError.MalformedMailBody);
+            throw ApiError.MalformedMailBody;
           }
           return sendEmail(mailContent);
         }),

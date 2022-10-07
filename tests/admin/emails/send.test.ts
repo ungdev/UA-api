@@ -16,7 +16,7 @@ describe('POST /admin/emails', () => {
   before(async () => {
     admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
     await createFakeTeam({ members: 4, tournament: TournamentId.csgo });
-    await createFakeTeam({ members: 2, tournament: TournamentId.lolLeisure });
+    await createFakeTeam({ members: 2, tournament: TournamentId.lol });
     [nonAdminUser] = (await createFakeTeam({ members: 5, tournament: TournamentId.csgo, locked: true })).players;
     adminToken = generateToken(admin);
   });

@@ -6,6 +6,7 @@ import { generateTicket } from '../../src/utils/pdf';
 import { getCaptain } from '../../src/utils/teams';
 import database from '../../src/services/database';
 import { TournamentId, TransactionState } from '../../src/types';
+import { fetchAllItems } from '../../src/operations/item';
 
 describe('Tests the PDF utils', () => {
   after(async () => {
@@ -20,7 +21,14 @@ describe('Tests the PDF utils', () => {
       const team = await createFakeTeam({ tournament: tournamentId as TournamentId });
       const user = getCaptain(team);
 
-      const createdCart = await createCart(user.id, [{ itemId: 'ticket-player', quantity: 1, forUserId: user.id }]);
+      const createdCart = await createCart(user.id, [
+        {
+          itemId: 'ticket-player',
+          quantity: 1,
+          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          forUserId: user.id,
+        },
+      ]);
 
       const detailedCart = await updateCart(createdCart.id, 123, TransactionState.paid);
 
@@ -36,7 +44,14 @@ describe('Tests the PDF utils', () => {
     // Create a fake user and add it in a random team
     const user = await createFakeUser();
 
-    const createdCart = await createCart(user.id, [{ itemId: 'ticket-player', quantity: 1, forUserId: user.id }]);
+    const createdCart = await createCart(user.id, [
+      {
+        itemId: 'ticket-player',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        forUserId: user.id,
+      },
+    ]);
 
     const detailedCart = await updateCart(createdCart.id, 123, TransactionState.paid);
 

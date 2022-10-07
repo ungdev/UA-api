@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { UserType } from '.prisma/client';
+import { UserType } from '@prisma/client';
 import { fetchTeams } from '../operations/team';
 import { fetchTournaments } from '../operations/tournament';
 import { fetchUsers, updateCompumsaCode } from '../operations/user';
