@@ -54,7 +54,12 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
   if (
     !team ||
     team.tournamentId !== 'ssbu' ||
-    user.cartItems.some((cartItem) => cartItem.itemId === 'discount-switch-ssbu')
+    user.cartItems.some(
+      (cartItem) =>
+        cartItem.itemId === 'discount-switch-ssbu' &&
+        (cartItem.cart.transactionState === TransactionState.paid ||
+          cartItem.cart.transactionState === TransactionState.pending),
+    )
   ) {
     // Remove the SSBU discount
     items = items.filter((element) => element.id !== 'discount-switch-ssbu');
