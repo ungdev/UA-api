@@ -51,7 +51,11 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
   }
 
   // Check if user is not in SSBU tournament
-  if (!team || team.tournamentId !== 'ssbu') {
+  if (
+    !team ||
+    team.tournamentId !== 'ssbu' ||
+    user.cartItems.some((cartItem) => cartItem.itemId === 'discount-switch-ssbu')
+  ) {
     // Remove the SSBU discount
     items = items.filter((element) => element.id !== 'discount-switch-ssbu');
   }
