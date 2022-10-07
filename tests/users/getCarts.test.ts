@@ -43,9 +43,9 @@ describe('POST /users/current/carts', () => {
   it('should return a pending cart', async () => {
     await cartOperations.createCart(user.id, [
       {
-        itemId: 'ethernet-5',
+        itemId: 'ethernet-7',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-5').price,
+        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-7').price,
         forUserId: user.id,
       },
     ]);
@@ -69,8 +69,8 @@ describe('POST /users/current/carts', () => {
               id: cartItem.id,
               quantity: 1,
               cartId: cart.id,
-              itemId: 'ethernet-5',
-              price: 700,
+              itemId: 'ethernet-7',
+              price: 1000,
               reducedPrice: null,
               forcePaid: false,
               forUser: {

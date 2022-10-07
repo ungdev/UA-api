@@ -53,7 +53,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
           'Voilà les dernières informations importantes nécessaires au bon déroulement de la compétition&nbsp;:',
           [
             'Il est nécessaire que *tous les joueurs* de *toutes les équipes* soient présents sur notre Discord',
-            'Tous les tournois débutent samedi à 10h, il faudra donc être présent *à partir de 9h30* pour un check-in de toutes les équipes et joueurs',
+            'Tous les tournois débutent samedi à 10h, il faudra donc être présent *à partir de 9h00* pour un check-in de toutes les équipes et joueurs',
             "N'hésite pas à contacter un membre du staff sur Discord si tu as une question ou que tu rencontres un quelconque problème 😉",
           ],
           {

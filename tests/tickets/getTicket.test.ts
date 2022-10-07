@@ -29,8 +29,8 @@ describe('POST /users/:userId/carts', () => {
         forUserId: user.id,
       },
       {
-        itemId: 'ethernet-5',
-        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-5').price,
+        itemId: 'ethernet-7',
+        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-7').price,
         quantity: 1,
         forUserId: user.id,
       },
@@ -41,7 +41,7 @@ describe('POST /users/:userId/carts', () => {
     const [cart] = carts;
 
     ticket = cart.cartItems.find((cartItem) => cartItem.itemId === 'ticket-player');
-    supplement = cart.cartItems.find((cartItem) => cartItem.itemId === 'ethernet-5');
+    supplement = cart.cartItems.find((cartItem) => cartItem.itemId === 'ethernet-7');
   });
 
   after(async () => {
