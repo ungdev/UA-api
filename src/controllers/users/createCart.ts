@@ -121,6 +121,7 @@ export default [
 
       // Manage the supplement part. For now, the user can only buy supplements for himself
       for (const supplement of body.supplements) {
+        // User cannot buy this item, either because he is not allowed to, or because the item doesn't exist
         if (!items.some((item) => item.id === supplement.itemId && item.category === ItemCategory.supplement)) {
           if (supplement.itemId === 'discount-switch-ssbu') {
             if (user.type !== UserType.player) {
@@ -131,6 +132,11 @@ export default [
             }
           }
           return notFound(response, ResponseError.ItemNotFound);
+        }
+
+        // In case user asked for multiple discounts
+        if (supplement.itemId === 'discount-switch-ssbu') {
+          supplement.quantity = 1;
         }
 
         // Push the supplement to the basket

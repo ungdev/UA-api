@@ -96,6 +96,22 @@ describe('POST /users/current/carts', () => {
     ],
   };
 
+  const cartWithMultipleSwitchDiscounts: PayBody = {
+    tickets: {
+      userIds: [],
+    },
+    supplements: [
+      {
+        itemId: 'ethernet-7',
+        quantity: 4,
+      },
+      {
+        itemId: 'discount-switch-ssbu',
+        quantity: 2,
+      },
+    ],
+  };
+
   before(async () => {
     user = await createFakeUser();
     token = generateToken(user);
@@ -428,6 +444,21 @@ describe('POST /users/current/carts', () => {
       .set('Authorization', `Bearer ${annoyingTokenWithSwitchDiscount}`)
       .send(annoyingCartWithSwitchDiscount)
       .expect(403, { error: Error.BasketCannotBeNegative });
+  });
+
+  it('should only apply 1 ssbu discount as user cannot order more than 1 ssbu reduction', async () => {
+    await database.cartItem.deleteMany({
+      where: { itemId: 'discount-switch-ssbu', forUserId: userWithSwitchDiscount.id },
+    });
+    await request(app)
+      .post('/users/current/carts')
+      .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
+      .send(cartWithMultipleSwitchDiscounts)
+      .expect(201);
+    const discountCartItem = await database.cartItem.findFirst({
+      where: { itemId: 'discount-switch-ssbu', forUserId: userWithSwitchDiscount.id },
+    });
+    expect(discountCartItem?.quantity).to.be.equal(1);
   });
 
   it('should fail as the item is no longer available', async () => {
