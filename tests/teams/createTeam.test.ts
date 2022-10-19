@@ -55,6 +55,17 @@ describe('POST /teams', () => {
       .expect(403, { error: Error.AlreadyInTeam });
   });
 
+  it('should fail because the user is a spectator', async () => {
+    const spectator = await createFakeUser({ type: UserType.spectator });
+    const spectatorToken = generateToken(spectator);
+
+    return request(app)
+      .post('/teams')
+      .send(teamBody)
+      .set('Authorization', `Bearer ${spectatorToken}`)
+      .expect(403, { error: Error.NoSpectator });
+  });
+
   it('should fail because the body is incorrect', () =>
     request(app)
       .post('/teams')

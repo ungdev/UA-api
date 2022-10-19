@@ -64,7 +64,7 @@ components:
 
     Type:
       type: string
-      enum: [player, orga, coach, attendant]
+      enum: [player, orga, coach, spectator, attendant]
 
     Permission:
       type: string
