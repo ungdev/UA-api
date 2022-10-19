@@ -132,6 +132,27 @@
       403:
         $ref: '#/components/responses/403Unauthorized'
 
+/admin/items/:itemId:
+  patch:
+    summary: Change le stock disponible de l'item.
+    description: Change le stock disponible de l'item. via le `PATCH admin/items/:itemId`<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Change le stock disponible de l'item.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Mail'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
 /admin/logs:
   get:
     summary: Récupère les actions effectués par les utilisateurs

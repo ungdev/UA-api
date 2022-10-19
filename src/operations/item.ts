@@ -29,7 +29,7 @@ export const fetchAllItems = async (): Promise<Item[]> => {
           },
         });
 
-        // Calculates how many items where ordered by adding all the quantity ordered
+        // Calculates how many items were ordered by adding all the quantity ordered
         const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
 
         // Returns the stock minus the count. The max 0 is used in case of negative number, which should never happen
@@ -68,4 +68,22 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
   ];
 
   return items;
+};
+
+export const updateAdminItemStock = async (itemId: string, newStock: number) => {
+  const item = await database.item.update({ data: { stock: newStock }, where: { id: itemId } });
+  const cartItems = await database.cartItem.findMany({
+    where: {
+      itemId: item.id,
+      cart: {
+        transactionState: {
+          in: [TransactionState.paid, TransactionState.pending],
+        },
+      },
+    },
+  });
+
+  // Calculates how many items were ordered by adding all the quantity ordered
+  const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
+  return { ...item, left: newStock - count };
 };

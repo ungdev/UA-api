@@ -568,6 +568,35 @@ components:
           description: La quantité disponible de cet Item. Si l'item n'est pas limité,
             cette valeur est omise (et vaudra donc undefined en javascript)
           optional: true
+    AdminItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+          enum: [ticket, item]
+        attribute:
+          type: string
+          nullable: true
+        price:
+          type: integer
+        infos:
+          type: string
+          nullable: true
+        image:
+          type: string
+          nullable: true
+        left:
+          type: integer
+          description: La quantité disponible de cet Item. Si l'item n'est pas limité,
+            cette valeur est omise (et vaudra donc undefined en javascript)
+          optional: true
+        stock:
+          type: integer
+          description: Le stock total de l'item.
 
     Log:
       type: object
