@@ -6,7 +6,7 @@ import * as userOperations from '../../src/operations/user';
 import * as itemOperations from '../../src/operations/item';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
-import { Error, User, Team, UserAge, UserType } from '../../src/types';
+import { Error, User, Team, UserAge, UserType, TransactionState } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { PayBody } from '../../src/controllers/users/createCart';
@@ -422,12 +422,40 @@ describe('POST /users/current/carts', () => {
     expect(supplement?.quantity).to.be.equal(validCartWithSwitchDiscount.supplements[0].quantity);
   });
 
-  it('should send an error as ssbu discount is already applied', async () => {
+  it('should send an error as ssbu discount is already in a pending cart', async () => {
+    await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
+      .send(validCartWithSwitchDiscountWithoutTicket)
+      .expect(403, { error: Error.AlreadyHasPendingCartWithDiscountSSBU });
+    const carts = await database.cart.findMany({
+      where: {
+        userId: userWithSwitchDiscount.id,
+      },
+    });
+    // We verify no cart has been created
+    expect(carts).to.have.lengthOf(1);
+  });
+
+  it('should send an error as ssbu discount is already in a paid cart', async () => {
+    const cartWithDiscountId = (
+      await database.cartItem.findFirstOrThrow({
+        where: { forUserId: userWithSwitchDiscount.id, itemId: 'discount-switch-ssbu' },
+      })
+    ).cartId;
+    await cartOperations.updateCart(cartWithDiscountId, 123, TransactionState.paid);
     await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
       .send(validCartWithSwitchDiscountWithoutTicket)
       .expect(403, { error: Error.AlreadyAppliedDiscountSSBU });
+    const carts = await database.cart.findMany({
+      where: {
+        userId: userWithSwitchDiscount.id,
+      },
+    });
+    // We verify no cart has been created
+    expect(carts).to.have.lengthOf(1);
   });
 
   it('should not create a cart as not in the ssbu team', async () => {

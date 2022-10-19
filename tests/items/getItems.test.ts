@@ -5,7 +5,7 @@ import { sandbox } from '../setup';
 import * as itemOperations from '../../src/operations/item';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
-import { Error, User, Team, TransactionState, Cart } from '../../src/types';
+import { Error, User, Team, TransactionState, Cart, Item } from '../../src/types';
 import { createFakeTeam } from '../utils';
 import { getCaptain } from '../../src/utils/teams';
 import { generateToken } from '../../src/utils/users';
@@ -70,20 +70,23 @@ describe('GET /items', () => {
     expect(response.body).to.have.lengthOf(items.length - 1);
   });
 
-  describe('should return 200 with an array of items without the "discount-switch-ssbu" item because user has already bought it or is buying it', () => {
-    for (const transactionState of [TransactionState.paid, TransactionState.pending]) {
-      it(`should return 200 with an array of items without the "discount-switch-ssbu" item because user has a ${transactionState} cart containing it`, async () => {
-        await cartOperations.updateCart(thirdCaptainCart.id, 123, transactionState);
-        const items = await database.item.findMany();
-        const response = await request(app)
-          .get('/items')
-          .set('Authorization', `Bearer ${thirdCaptainToken}`)
-          .expect(200);
+  it(`should return 200 with an array of items with the "discount-switch-ssbu" and a quantity of -1 item because user has a pending cart containing it`, async () => {
+    await cartOperations.updateCart(thirdCaptainCart.id, 123, TransactionState.pending);
+    const items = await database.item.findMany();
+    const response = await request(app).get('/items').set('Authorization', `Bearer ${thirdCaptainToken}`).expect(200);
 
-        // without the "discount-switch-ssbu" item and the legacy "ticket-player"
-        expect(response.body).to.have.lengthOf(items.length - 2);
-      });
-    }
+    // without the legacy "ticket-player"
+    expect(response.body).to.have.lengthOf(items.length - 1);
+    expect(response.body.find((item: Item) => item.id === 'discount-switch-ssbu').left).to.be.equal(-1);
+  });
+
+  it(`should return 200 with an array of items without the "discount-switch-ssbu" item because user has a paid cart containing it`, async () => {
+    await cartOperations.updateCart(thirdCaptainCart.id, 123, TransactionState.paid);
+    const items = await database.item.findMany();
+    const response = await request(app).get('/items').set('Authorization', `Bearer ${thirdCaptainToken}`).expect(200);
+
+    // without the "discount-switch-ssbu" item and the legacy "ticket-player"
+    expect(response.body).to.have.lengthOf(items.length - 2);
   });
 
   describe('should return 200 with an array of items with the "discount-switch-ssbu" item because user has a cart containing it, but it was not paid nor it is pending', () => {
@@ -103,7 +106,7 @@ describe('GET /items', () => {
     }
   });
 
-  it('should return 200 with an array of items without the "discount-switch-ssbu" item', async () => {
+  it('should return 200 with an array of items with the "discount-switch-ssbu" with a quantity of 1', async () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${otherCaptainToken}`).expect(200);
 

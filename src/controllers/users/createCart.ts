@@ -121,8 +121,11 @@ export default [
 
       // Manage the supplement part. For now, the user can only buy supplements for himself
       for (const supplement of body.supplements) {
+        const currentItem = items.find(
+          (item) => item.id === supplement.itemId && item.category === ItemCategory.supplement,
+        );
         // User cannot buy this item, either because he is not allowed to, or because the item doesn't exist
-        if (!items.some((item) => item.id === supplement.itemId && item.category === ItemCategory.supplement)) {
+        if (!currentItem) {
           if (supplement.itemId === 'discount-switch-ssbu') {
             if (user.type !== UserType.player) {
               return forbidden(response, ResponseError.NotPlayerDiscountSSBU);
@@ -132,6 +135,9 @@ export default [
             }
           }
           return notFound(response, ResponseError.ItemNotFound);
+        }
+        if (supplement.itemId === 'discount-switch-ssbu' && currentItem.left === -1) {
+          return forbidden(response, ResponseError.AlreadyHasPendingCartWithDiscountSSBU);
         }
 
         // In case user asked for multiple discounts
