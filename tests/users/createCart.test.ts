@@ -371,7 +371,7 @@ describe('POST /users/current/carts', () => {
     expect(body.url).to.startWith(env.etupay.url);
 
     // player place + player reduced price + coach place + attendant place + spectator place + 4 * ethernet-7
-    expect(body.price).to.be.equal(2500 + 2000 + 1500 + 1500 + 1200 + 4 * 1000);
+    expect(body.price).to.be.equal(2500 + 2000 + 1500 + 1500 + 1500 + 4 * 1000);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(6);
@@ -543,7 +543,7 @@ describe('POST /users/current/carts', () => {
       .expect(201);
 
     expect(body.url).to.startWith(env.etupay.url);
-    expect(body.price).to.be.equal(1200);
+    expect(body.price).to.be.equal(1500);
 
     return database.item.update({
       data: { stock: currentSpectatorStock },
@@ -603,7 +603,7 @@ describe('POST /users/current/carts', () => {
       .expect(201);
 
     expect(body.url).to.startWith(env.etupay.url);
-    expect(body.price).to.be.equal(1200);
+    expect(body.price).to.be.equal(1500);
 
     // Check that the stale cart has been deleted
     const staleSpectatorCarts = await cartOperations.fetchCarts(staleSpectator.id);
