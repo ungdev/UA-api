@@ -300,6 +300,7 @@ export const enum Error {
   CannotUnSpectate = "Tu n'es pas spectateur",
   AlreadyAppliedDiscountSSBU = 'Tu as déjà profité de la promotion !',
   NotPlayerDiscountSSBU = 'Seul les joueurs peuvent profiter de la promotion !',
+  AlreadyHasPendingCartWithDiscountSSBU = "Tu as déjà un panier en attente de paiement avec une réduction SSBU. Ce panier expirera au bout d'une heure, tu pourras alors rajouter l'item à ton panier",
   NotWhitelisted = "Tu n'es pas qualifié pour ce tournoi",
   HasAlreadyPaidForAnotherTicket = 'Tu as déjà payé un ticket vendu à un prix différent. Pour changer de tournoi, contacte nous !',
 

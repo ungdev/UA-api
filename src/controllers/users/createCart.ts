@@ -1,20 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-import database from '../../services/database';
 import { Basket } from '../../services/etupay';
 import { validateBody } from '../../middlewares/validation';
 import { createCart, dropStale } from '../../operations/carts';
 import { fetchUserItems } from '../../operations/item';
 import { createAttendant, deleteUser, fetchUser, formatUser } from '../../operations/user';
-import {
-  Cart,
-  Error as ResponseError,
-  PrimitiveCartItem,
-  ItemCategory,
-  UserType,
-  UserAge,
-  TransactionState,
-} from '../../types';
+import { Cart, Error as ResponseError, PrimitiveCartItem, ItemCategory, UserType, UserAge } from '../../types';
 import { encodeToBase64, removeAccents } from '../../utils/helpers';
 import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
@@ -130,33 +121,28 @@ export default [
 
       // Manage the supplement part. For now, the user can only buy supplements for himself
       for (const supplement of body.supplements) {
-        if (!items.some((item) => item.id === supplement.itemId && item.category === ItemCategory.supplement)) {
+        const currentItem = items.find(
+          (item) => item.id === supplement.itemId && item.category === ItemCategory.supplement,
+        );
+        // User cannot buy this item, either because he is not allowed to, or because the item doesn't exist
+        if (!currentItem) {
+          if (supplement.itemId === 'discount-switch-ssbu') {
+            if (user.type !== UserType.player) {
+              return forbidden(response, ResponseError.NotPlayerDiscountSSBU);
+            }
+            if (team.tournamentId === 'ssbu') {
+              return forbidden(response, ResponseError.AlreadyAppliedDiscountSSBU);
+            }
+          }
           return notFound(response, ResponseError.ItemNotFound);
         }
+        if (supplement.itemId === 'discount-switch-ssbu' && currentItem.left === -1) {
+          return forbidden(response, ResponseError.AlreadyHasPendingCartWithDiscountSSBU);
+        }
 
-        if (supplement.itemId === `discount-switch-ssbu`) {
+        // In case user asked for multiple discounts
+        if (supplement.itemId === 'discount-switch-ssbu') {
           supplement.quantity = 1;
-
-          // Test if SSBU discount already applied
-          const itemsDiscountSSBU = await database.cartItem.findMany({
-            where: {
-              itemId: `discount-switch-ssbu`,
-              forUserId: user.id,
-              cart: {
-                transactionState: {
-                  in: [TransactionState.paid, TransactionState.pending],
-                },
-              },
-            },
-          });
-
-          if (itemsDiscountSSBU.length > 0) {
-            return forbidden(response, ResponseError.AlreadyAppliedDiscountSSBU);
-          }
-
-          if (user.type !== UserType.player) {
-            return forbidden(response, ResponseError.NotPlayerDiscountSSBU);
-          }
         }
 
         // Push the supplement to the basket
