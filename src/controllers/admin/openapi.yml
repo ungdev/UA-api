@@ -141,13 +141,43 @@
       - Admin
     security:
       - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: Object
+            properties:
+              newStock:
+                type: integer
+                description: Le nouveau stock disponible de l'item
     responses:
       200:
         description: Change le stock disponible de l'item.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Mail'
+              $ref: '#/components/schemas/AdminItem'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+        
+  get:
+    summary: Renvoie l'item de la base de données.
+    description: Renvoie les propriétés de l'item comme vu dans la base de données `GET admin/items/:itemId`<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Renvoie l'item ainsi que son stock restant.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminItem'
       401:
         $ref: '#/components/responses/401Unauthenticated'
       403:

@@ -70,6 +70,22 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
   return items;
 };
 
+export const findAdminItem = async (itemId: string) => {
+  const item = await database.item.findUnique({ where: { id: itemId } });
+  const cartItems = await database.cartItem.findMany({
+    where: {
+      itemId: item.id,
+      cart: {
+        transactionState: {
+          in: [TransactionState.paid, TransactionState.pending],
+        },
+      },
+    },
+  });
+  const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
+  return { ...item, left: item.stock - count };
+};
+
 export const updateAdminItemStock = async (itemId: string, newStock: number) => {
   const item = await database.item.update({ data: { stock: newStock }, where: { id: itemId } });
   const cartItems = await database.cartItem.findMany({
