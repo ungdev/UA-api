@@ -132,6 +132,29 @@
       403:
         $ref: '#/components/responses/403Unauthorized'
 
+/admin/items:
+  get:
+    summary: Renvoie tous les items de la base de données.
+    description: Renvoie toutes les propriétés des items en incluant la valeur left `GET admin/items<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Renvoie tous les items dans la base de données.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AdminItem'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
 /admin/items/:itemId:
   patch:
     summary: Change le stock disponible de l'item.
@@ -162,7 +185,7 @@
         $ref: '#/components/responses/401Unauthenticated'
       403:
         $ref: '#/components/responses/403Unauthorized'
-        
+
   get:
     summary: Renvoie l'item de la base de données.
     description: Renvoie les propriétés de l'item comme vu dans la base de données `GET admin/items/:itemId`<br/>

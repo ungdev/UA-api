@@ -598,6 +598,7 @@ components:
         stock:
           type: integer
           description: Le stock total de l'item.
+          nullable: true
 
     Log:
       type: object
