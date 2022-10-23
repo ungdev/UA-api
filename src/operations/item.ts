@@ -50,10 +50,21 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
     for (const item of items) item.reducedPrice = null;
   }
 
+  const alreadyExistingDiscount = user?.cartItems.find(
+    (cartItem) =>
+      cartItem.itemId === 'discount-switch-ssbu' &&
+      (cartItem.cart.transactionState === TransactionState.paid ||
+        cartItem.cart.transactionState === TransactionState.pending),
+  );
+
   // Check if user is not in SSBU tournament
-  if (!team || team.tournamentId !== 'ssbu') {
+  if (!team || team.tournamentId !== 'ssbu' || alreadyExistingDiscount?.cart.transactionState === 'paid') {
     // Remove the SSBU discount
     items = items.filter((element) => element.id !== 'discount-switch-ssbu');
+  } else if (!team || team.tournamentId !== 'ssbu' || alreadyExistingDiscount?.cart.transactionState === 'pending') {
+    // The user then has a pending cart with a SSBU discount
+    // Before being able to add it to his cart again, he needs to wait an hour for the cart to expire (and not pay it during that time)
+    items.find((element) => element.id === 'discount-switch-ssbu').left = -1;
   }
 
   const currentTicket =
