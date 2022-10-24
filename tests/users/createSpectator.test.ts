@@ -19,6 +19,7 @@ describe('POST /users/current/spectate', () => {
 
   after(async () => {
     // Delete the user created
+    await database.cart.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -41,6 +42,24 @@ describe('POST /users/current/spectate', () => {
       .send()
       .set('Authorization', `Bearer ${token}`)
       .expect(500, { error: Error.InternalServerError });
+  });
+
+  it('should fail as user as already paid ticket at another price', async () => {
+    const otherUser = await createFakeUser({
+      type: UserType.player,
+      paid: true,
+    });
+    const otherToken = generateToken(otherUser);
+
+    await userOperations.updateAdminUser(otherUser.id, {
+      type: null,
+    });
+
+    return request(app)
+      .post(`/users/current/spectate`)
+      .send()
+      .set('Authorization', `Bearer ${otherToken}`)
+      .expect(403, { error: Error.HasAlreadyPaidForAnotherTicket });
   });
 
   it('should return the new spectator user', async () => {
