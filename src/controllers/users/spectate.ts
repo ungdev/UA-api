@@ -5,7 +5,7 @@ import { validateBody } from '../../middlewares/validation';
 import { getRequestInfo } from '../../utils/users';
 import { forbidden, success } from '../../utils/responses';
 import { Error, UserType } from '../../types';
-import { fetchUser, updateAdminUser } from '../../operations/user';
+import { fetchUser, hasUserAlreadyPaidForAnotherTicket, updateAdminUser } from '../../operations/user';
 
 export const become = [
   // Middlewares
@@ -22,6 +22,10 @@ export const become = [
     // IMPORTANT NOTE: becoming a {@link UserType#spectator} doesn't
     // ensure you to get a spectator ticket
     if (user.type) return forbidden(response, Error.CannotSpectate);
+
+    // Check whether the user has already paid for another ticket
+    if (await hasUserAlreadyPaidForAnotherTicket(user, null, UserType.spectator))
+      return forbidden(response, Error.HasAlreadyPaidForAnotherTicket);
 
     try {
       const updatedUser = await updateAdminUser(user.id, {
