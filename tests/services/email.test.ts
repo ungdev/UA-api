@@ -84,6 +84,7 @@ describe('Tests the email utils', () => {
   it(`should generate a payment template`, async () => {
     // Create a fake user and add it in a random team
     const user = await createFakeUser();
+    const spectator = await createFakeUser({ type: UserType.spectator });
     const coach = await createFakeUser({ type: UserType.coach });
 
     const items = await fetchAllItems();
@@ -105,6 +106,12 @@ describe('Tests the email utils', () => {
         quantity: 1,
         price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
         forUserId: user.id,
+      },
+      {
+        itemId: 'ticket-spectator',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-spectator').price,
+        forUserId: spectator.id,
       },
       {
         itemId: 'ticket-coach',

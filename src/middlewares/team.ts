@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Error } from '../types';
+import { Error, UserType } from '../types';
 import { forbidden } from '../utils/responses';
 import { getRequestInfo } from '../utils/users';
 import { isAuthenticated } from './authentication';
@@ -46,6 +46,20 @@ export const isInATeam = [
 
     if (!user.teamId) {
       return forbidden(response, Error.NotInTeam);
+    }
+
+    return next();
+  },
+];
+
+// Checks the user is not a team and not a spectator
+export const noSpectator = [
+  ...isNotInATeam,
+  (request: Request, response: Response, next: NextFunction): void => {
+    const { user } = getRequestInfo(response);
+
+    if (user.type === UserType.spectator) {
+      return forbidden(response, Error.NoSpectator);
     }
 
     return next();

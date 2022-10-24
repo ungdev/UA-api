@@ -170,6 +170,7 @@ enum UserType {
   player
   orga
   coach
+  spectator
   attendant
 }
 

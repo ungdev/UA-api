@@ -109,6 +109,15 @@ Un utilisateur peut rejoindre une équipe _(ou créer un équipe)_ en tant que j
 
 Note: la requête `POST /teams/current/join-requests/{userId}` ne modifie **PAS** le `userType`.
 
+## `UserType.spectator`
+
+Un spectateur n'a pas besoin de rejoindre une team _(et ne doit pas le faire !)_. Ce cas spécial est donc géré par une autre route de l'API: `/users/current/spectate`.
+
+Pour devenir spectateur, il faut ne pas être dans un équipe et d'avoir un `userType` qui vaut `null`.
+
+Devenir spectateur: `POST /users/current/spectate` \
+Ne plus être spectateur: `DELETE /users/current/spectate`
+
 ## `UserType.attendant`
 
 Les accompagnateurs sont des utilisateurs un peu spéciaux puisqu'ils ne possèdent pas de compte UA à proprement parler. Ils sont créés par des mineurs (un accompagnateur max par mineur) et n'ont d'enregistré que peu d'informations: le nom et le prénom (`firstname` et `lastname`).
