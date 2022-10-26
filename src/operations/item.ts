@@ -29,7 +29,7 @@ export const fetchAllItems = async (): Promise<Item[]> => {
           },
         });
 
-        // Calculates how many items where ordered by adding all the quantity ordered
+        // Calculates how many items were ordered by adding all the quantity ordered
         const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
 
         // Returns the stock minus the count. The max 0 is used in case of negative number, which should never happen
@@ -50,10 +50,21 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
     for (const item of items) item.reducedPrice = null;
   }
 
+  const alreadyExistingDiscount = user?.cartItems.find(
+    (cartItem) =>
+      cartItem.itemId === 'discount-switch-ssbu' &&
+      (cartItem.cart.transactionState === TransactionState.paid ||
+        cartItem.cart.transactionState === TransactionState.pending),
+  );
+
   // Check if user is not in SSBU tournament
-  if (!team || team.tournamentId !== 'ssbu') {
+  if (!team || team.tournamentId !== 'ssbu' || alreadyExistingDiscount?.cart.transactionState === 'paid') {
     // Remove the SSBU discount
     items = items.filter((element) => element.id !== 'discount-switch-ssbu');
+  } else if (!team || team.tournamentId !== 'ssbu' || alreadyExistingDiscount?.cart.transactionState === 'pending') {
+    // The user then has a pending cart with a SSBU discount
+    // Before being able to add it to his cart again, he needs to wait an hour for the cart to expire (and not pay it during that time)
+    items.find((element) => element.id === 'discount-switch-ssbu').left = -1;
   }
 
   const currentTicket =
@@ -68,4 +79,38 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
   ];
 
   return items;
+};
+
+export const findAdminItem = async (itemId: string) => {
+  const item = await database.item.findUnique({ where: { id: itemId } });
+  const cartItems = await database.cartItem.findMany({
+    where: {
+      itemId: item.id,
+      cart: {
+        transactionState: {
+          in: [TransactionState.paid, TransactionState.pending],
+        },
+      },
+    },
+  });
+  const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
+  return { ...item, left: item.stock - count };
+};
+
+export const updateAdminItemStock = async (itemId: string, newStock: number) => {
+  const item = await database.item.update({ data: { stock: newStock }, where: { id: itemId } });
+  const cartItems = await database.cartItem.findMany({
+    where: {
+      itemId: item.id,
+      cart: {
+        transactionState: {
+          in: [TransactionState.paid, TransactionState.pending],
+        },
+      },
+    },
+  });
+
+  // Calculates how many items were ordered by adding all the quantity ordered
+  const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
+  return { ...item, left: newStock - count };
 };

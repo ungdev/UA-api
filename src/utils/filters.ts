@@ -52,6 +52,9 @@ export const filterUserWithTeamAndTournamentInfo = (user: UserWithTeamAndTournam
   };
 };
 
+export const filterAdminItem = (item: Item) =>
+  pick(item, ['id', 'name', 'category', 'attribute', 'price', 'reducedPrice', 'infos', 'image', 'left', 'stock']);
+
 export const filterItem = (item: Item) =>
   pick(item, ['id', 'name', 'category', 'attribute', 'price', 'reducedPrice', 'infos', 'image', 'left']);
 
