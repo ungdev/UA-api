@@ -11,7 +11,8 @@ INSERT INTO `items` (`id`, `name`, `category`, `attribute`, `price`, `reducedPri
 ('tshirt-s', 'T-shirt UA 2022 (Unixese)', 'supplement', 's', 1500, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', 30),
 ('tshirt-m', 'T-shirt UA 2022 (Unixese)', 'supplement', 'm', 1500, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', 30),
 ('tshirt-l', 'T-shirt UA 2022 (Unixese)', 'supplement', 'l', 1500, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', 30),
-('tshirt-xl', 'T-shirt UA 2022 (Unixese)', 'supplement', 'xl', 1500, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', 30);
+('tshirt-xl', 'T-shirt UA 2022 (Unixese)', 'supplement', 'xl', 1500, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', 30)
+('pc', 'Location de PC', 'rent', NULL, 14000, NULL, 'Location de PC si tu ne peux pas amener le tien pendant l\'UTT Arena. L\'un des PC suivants sera mis à ta disposition :->AMD Ryzen 5 2600,16GB RAM SSD 500G° et 2060 ou 6600XT->INTEL I5 8500 16GB RAM SSD 500G° et 2060 ou 6600XT->AMD RYZEN 5 5600X 500G° SSD et 2060 ou 6600XT', NULL, 7);
 
 INSERT INTO `settings` (`id`, `value`) VALUES
 ('login', 0),

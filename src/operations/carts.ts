@@ -16,14 +16,31 @@ import { fetchUserItems } from './item';
 import { fetchTeam } from './team';
 
 export const dropStale = () =>
-  database.cart.deleteMany({
-    where: {
-      createdAt: {
-        lt: new Date(Date.now() - env.api.cartLifespan),
+  database.$transaction([
+    database.user.deleteMany({
+      where: {
+        type: UserType.attendant,
+        cartItems: {
+          some: {
+            cart: {
+              transactionState: TransactionState.pending,
+              createdAt: {
+                lt: new Date(Date.now() - env.api.cartLifespan),
+              },
+            },
+          },
+        },
       },
-      transactionState: 'pending',
-    },
-  });
+    }),
+    database.cart.deleteMany({
+      where: {
+        createdAt: {
+          lt: new Date(Date.now() - env.api.cartLifespan),
+        },
+        transactionState: 'pending',
+      },
+    }),
+  ]);
 
 export const fetchCart = (cartId: string): Promise<Cart> =>
   database.cart.findUnique({
