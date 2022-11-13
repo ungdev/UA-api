@@ -100,7 +100,7 @@ describe('GET /items', () => {
           .set('Authorization', `Bearer ${thirdCaptainToken}`)
           .expect(200);
 
-        // with the "discount-switch-ssbu" item but without the legaycy "ticket-player" and without "pc" (in rent category)
+        // with the "discount-switch-ssbu" item but without the legacy "ticket-player" and without "pc" (in rent category)
         expect(response.body).to.have.lengthOf(items.length - 2);
       });
     }
