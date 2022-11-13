@@ -427,11 +427,11 @@ describe('POST /users/current/carts', () => {
 
   it('should error as spectator cannot rent a pc', async () => {
     const spectator = await createFakeUser({ type: UserType.spectator });
-    const token = generateToken(spectator);
+    const specToken = generateToken(spectator);
 
     return request(app)
       .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${specToken}`)
       .send({
         tickets: {
           userIds: [],
@@ -447,11 +447,11 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should sucessfully create a cart with a rental pc', async () => {
-    const token = generateToken(notValidUserWithSwitchDiscount);
+    const userToken = generateToken(notValidUserWithSwitchDiscount);
 
     const { body } = await request(app)
       .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${userToken}`)
       .send({
         tickets: {
           userIds: [],
