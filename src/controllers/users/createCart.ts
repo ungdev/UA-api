@@ -123,7 +123,9 @@ export default [
       // Manage the supplement part. For now, the user can only buy supplements for himself
       for (const supplement of body.supplements) {
         const currentItem = items.find(
-          (item) => item.id === supplement.itemId && item.category === ItemCategory.supplement,
+          (item) =>
+            item.id === supplement.itemId &&
+            (item.category === ItemCategory.supplement || item.category === ItemCategory.rent),
         );
         // User cannot buy this item, either because he is not allowed to, or because the item doesn't exist
         if (!currentItem) {
@@ -166,7 +168,7 @@ export default [
       const itemsWithStock = items.filter((item) => item.left !== undefined);
 
       // Wait for sql delete query to end (if not already ended)
-      const { count: droppedCartsCount } = await dropOperation;
+      const [, { count: droppedCartsCount }] = await dropOperation;
       // Check if rows (ie. carts) were updated
       if (droppedCartsCount > 0) {
         // Update fetched items

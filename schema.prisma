@@ -54,7 +54,7 @@ model Item {
   attribute    String?
   price        Int
   reducedPrice Int?
-  infos        String?
+  infos        String?      @db.VarChar(300)
   image        String?
   stock        Int?
   cartItems    CartItem[]
@@ -164,6 +164,7 @@ enum TransactionState {
 enum ItemCategory {
   ticket
   supplement
+  rent
 }
 
 enum UserType {

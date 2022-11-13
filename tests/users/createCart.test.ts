@@ -425,6 +425,49 @@ describe('POST /users/current/carts', () => {
     expect(supplement?.quantity).to.be.equal(validCartWithSwitchDiscount.supplements[0].quantity);
   });
 
+  it('should error as spectator cannot rent a pc', async () => {
+    const spectator = await createFakeUser({ type: UserType.spectator });
+    const specToken = generateToken(spectator);
+
+    return request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${specToken}`)
+      .send({
+        tickets: {
+          userIds: [],
+        },
+        supplements: [
+          {
+            itemId: 'pc',
+            quantity: 1,
+          },
+        ],
+      })
+      .expect(404, { error: Error.ItemNotFound });
+  });
+
+  it('should sucessfully create a cart with a rental pc', async () => {
+    const userToken = generateToken(notValidUserWithSwitchDiscount);
+
+    const { body } = await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        tickets: {
+          userIds: [],
+        },
+        supplements: [
+          {
+            itemId: 'pc',
+            quantity: 1,
+          },
+        ],
+      })
+      .expect(201);
+    expect(body.url).to.startWith(env.etupay.url);
+    expect(body.price).to.be.equal(14000);
+  });
+
   it('should send an error as ssbu discount is already in a pending cart', async () => {
     await request(app)
       .post(`/users/current/carts`)
