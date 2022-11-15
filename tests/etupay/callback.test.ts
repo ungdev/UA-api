@@ -7,10 +7,11 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
-import { Cart, Error } from '../../src/types';
+import { Cart, Error, TransactionState } from '../../src/types';
 import { createFakeUser } from '../utils';
 import env from '../../src/utils/env';
 import { encodeToBase64, randomInt } from '../../src/utils/helpers';
+import * as network from '../../src/utils/network';
 import * as emailOperations from '../../src/services/email';
 import { fetchAllItems } from '../../src/operations/item';
 
@@ -48,7 +49,117 @@ const createEtupayPayload = (etupayBody: object) => {
 };
 
 describe('POST /etupay/callback', () => {
-  it('should return a valid answer', () => request(app).post('/etupay/callback').expect(200, { api: 'ok' }));
+  let cart: Cart;
+  let paidPayload: string;
+  let refusedPayload: string;
+
+  before(async () => {
+    const user = await createFakeUser();
+
+    // Create a fake cart
+    cart = await cartOperations.createCart(user.id, [
+      {
+        itemId: 'ticket-player',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        forUserId: user.id,
+      },
+    ]);
+    cart = await cartOperations.updateCart(cart.id, randomInt(1e4, 1e5 - 1), TransactionState.authorization);
+
+    // This is the data format how it is encrypted in the payload
+    const etupayBody = {
+      // Create a random transaction id
+      transaction_id: cart.transactionId,
+      type: 'checkout',
+      // We bought a ticket for a player, so 15€ (the price doesn't matter now),
+      amount: 1500,
+      step: 'PAID',
+      // Create the service data as it is in the createCart controller. (It is already encoded in the data)
+      service_data: encodeToBase64({ cartId: cart.id }),
+    };
+
+    // Create a paid payload
+    paidPayload = createEtupayPayload(etupayBody);
+
+    // Create a refused payload
+    const failedCart = await cartOperations.createCart(user.id, [
+      {
+        itemId: 'ticket-player',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        forUserId: user.id,
+      },
+    ]);
+    await cartOperations.updateCart(failedCart.id, randomInt(1e4, 1e5 - 1), TransactionState.refused);
+    etupayBody.step = 'REFUSED';
+    etupayBody.service_data = encodeToBase64({ cartId: failedCart.id });
+    refusedPayload = createEtupayPayload(etupayBody);
+  });
+
+  after(async () => {
+    // Delete the user created
+    await database.cart.deleteMany();
+    await database.user.deleteMany();
+  });
+
+  it('should fail because the payload is missing', () =>
+    request(app).post('/etupay/callback').expect(400, { error: Error.InvalidQueryParameters }));
+
+  it('should fail because not accessed from etupay', () =>
+    request(app).post(`/etupay/callback?payload=${paidPayload}`).expect(403, { error: Error.EtupayNoAccess }));
+
+  it('should fail because the payload is invalid', () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    return request(app)
+      .post('/etupay/callback?payload=invalidPayload')
+      .expect(400, { error: Error.InvalidQueryParameters });
+  });
+
+  it("should fail because the cart wasn't found", async () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    // Update the cart id to make him not found
+    const savedCart = cart;
+
+    await database.cart.update({
+      data: { id: 'A1B2C3' },
+      where: { id: cart.id },
+    });
+
+    await request(app).post(`/etupay/callback?payload=${paidPayload}`).expect(404, { error: Error.CartNotFound });
+
+    // Reupdate the cart to make him having the previous id
+    await database.cart.update({
+      data: { id: savedCart.id },
+      where: { id: 'A1B2C3' },
+    });
+  });
+
+  it('should return an internal server error', async () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    sandbox.stub(cartOperations, 'fetchCart').throws('Unexpected error');
+    await request(app)
+      .post(`/etupay/callback?payload=${paidPayload}`)
+      .expect(500, { error: Error.InternalServerError });
+  });
+
+  it('should reject as the payment is not authorized', () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    return request(app).post(`/etupay/callback?payload=${refusedPayload}`).expect(403, { error: Error.AlreadyErrored });
+  });
+
+  it('should respond api ok', () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    // The function send email has been tested by a test unit. We skip it to not having to setup a fake SMTP server
+    sandbox.stub(emailOperations, 'sendEmail').resolves();
+
+    return request(app).post(`/etupay/callback?payload=${paidPayload}`).expect(200, { api: 'ok' });
+  });
+
+  it('should fail as the cart is already paid', () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    return request(app).post(`/etupay/callback?payload=${paidPayload}`).expect(403, { error: Error.AlreadyPaid });
+  });
 });
 
 describe('GET /etupay/callback', () => {
@@ -139,15 +250,8 @@ describe('GET /etupay/callback', () => {
   it('should reject as the payment is already errored', () =>
     request(app).get(`/etupay/callback?payload=${refusedPayload}`).expect(403, { error: Error.AlreadyErrored }));
 
-  it('should successfully redirect to the success url', () => {
-    // The function send email has been tested by a test unit. We skip it to not having to setup a fake SMTP server
-    sandbox.stub(emailOperations, 'sendEmail').resolves();
-
-    return request(app)
-      .get(`/etupay/callback?payload=${paidPayload}`)
-      .expect(302)
-      .expect('Location', env.etupay.successUrl);
-  });
+  it('should successfully redirect to the success url', () =>
+    request(app).get(`/etupay/callback?payload=${paidPayload}`).expect(302).expect('Location', env.etupay.successUrl));
 
   it('should fail as the cart is already paid', () =>
     request(app).get(`/etupay/callback?payload=${paidPayload}`).expect(403, { error: Error.AlreadyPaid }));

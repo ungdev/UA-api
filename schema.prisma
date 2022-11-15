@@ -159,6 +159,7 @@ enum TransactionState {
   canceled
   refused
   refunded
+  authorization
 }
 
 enum ItemCategory {
