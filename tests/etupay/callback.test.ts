@@ -143,8 +143,38 @@ describe('POST /etupay/callback', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should reject as the payment is not authorized', () => {
+  it('should respond api ok to update rejected payment', () => {
     sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    return request(app).post(`/etupay/callback?payload=${refusedPayload}`).expect(200, { api: 'ok' });
+  });
+
+  it('reject as the payment was not authorized', async () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+
+    const user = await createFakeUser();
+
+    // Create a refused payload
+    const failedCart = await cartOperations.createCart(user.id, [
+      {
+        itemId: 'ticket-player',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        forUserId: user.id,
+      },
+    ]);
+    await cartOperations.updateCart(failedCart.id, randomInt(1e4, 1e5 - 1), TransactionState.refused);
+    const etupayBody = {
+      // Create a random transaction id
+      transaction_id: cart.transactionId,
+      type: 'checkout',
+      // We bought a ticket for a player, so 15€ (the price doesn't matter now),
+      amount: 1500,
+      step: 'PAID',
+      // Create the service data as it is in the createCart controller. (It is already encoded in the data)
+      service_data: encodeToBase64({ cartId: failedCart.id }),
+    };
+    refusedPayload = createEtupayPayload(etupayBody);
+
     return request(app).post(`/etupay/callback?payload=${refusedPayload}`).expect(403, { error: Error.AlreadyErrored });
   });
 

@@ -105,7 +105,8 @@ export const bankCallback = [
       // If the transaction is already errored
       if (
         cart.transactionState !== TransactionState.authorization &&
-        cart.transactionState !== TransactionState.pending
+        cart.transactionState !== TransactionState.pending &&
+        etupayResponse.step === TransactionState.paid
       ) {
         return forbidden(response, Error.AlreadyErrored);
       }
@@ -113,8 +114,9 @@ export const bankCallback = [
       // Update the cart with the callback data
       const updatedCart = await updateCart(cartId, etupayResponse.transactionId, etupayResponse.step);
 
-      // Send the tickets to the user
-      await sendPaymentConfirmation(updatedCart);
+      if (updatedCart.transactionState === TransactionState.paid)
+        // Send the tickets to the user
+        await sendPaymentConfirmation(updatedCart);
 
       return success(response, { api: 'ok' });
     } catch (error) {
