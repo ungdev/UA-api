@@ -305,6 +305,7 @@ export const enum Error {
   AlreadyHasPendingCartWithDiscountSSBU = "Tu as déjà un panier en attente de paiement avec une réduction SSBU. Ce panier expirera au bout d'une heure, tu pourras alors rajouter l'item à ton panier",
   NotWhitelisted = "Tu n'es pas qualifié pour ce tournoi",
   HasAlreadyPaidForAnotherTicket = 'Tu as déjà payé un ticket vendu à un prix différent. Pour changer de tournoi, contacte nous !',
+  EtupayNoAccess = "Tu n'as pas accès à cette url",
 
   // 404
   // The server can't find the requested resource
