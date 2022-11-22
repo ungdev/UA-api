@@ -145,12 +145,39 @@ model User {
   carts         Cart[]
   logs          Log[]
   captainTeam   Team?
+  repoItems     RepoItem[] @relation("repoItemUser")
+  repoLogs      RepoLog[]  @relation("repoLogUser")
   attended      User?      @relation("attendantUser")
 
   @@index([id])
   @@index([askingTeamId], map: "users_askingTeamId_fkey")
   @@index([teamId], map: "users_teamId_fkey")
   @@map("users")
+}
+
+model RepoItem {
+  id        String       @id
+  type      RepoItemType
+  forUserId String
+  zone      String?
+  user      User         @relation("repoItemUser", fields: [forUserId], references: [id])
+  repoLogs RepoLog[]     @relation("repoLogItem")
+
+  @@index([id])
+  @@index([forUserId])
+}
+
+model RepoLog {
+  id        String        @id
+  itemId    String
+  action    RepoLogAction
+  timestamp DateTime      @default(now())
+  forUserId String
+  item      RepoItem      @relation("repoLogItem", fields: [itemId], references: [id])
+  user      User          @relation("repoLogUser", fields: [forUserId], references: [id])
+
+  @@index([id])
+  @@index([forUserId])
 }
 
 enum TransactionState {
@@ -190,4 +217,15 @@ enum TournamentId {
   osu
   tft
   open
+}
+
+enum RepoItemType {
+  computer
+  keyboard
+  mouse
+}
+
+enum RepoLogAction {
+  added
+  removed
 }

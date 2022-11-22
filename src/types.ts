@@ -63,9 +63,10 @@ export enum Permission {
   entry = 'entry',
   anim = 'anim',
   admin = 'admin',
+  repo = 'repo',
 }
 
-export { TransactionState, UserAge, UserType, TournamentId, ItemCategory, Log } from '@prisma/client';
+export { TransactionState, UserAge, UserType, TournamentId, ItemCategory, Log, RepoItemType } from '@prisma/client';
 
 /************************/
 /** Database extensions **/
@@ -80,6 +81,8 @@ export type Cart = prisma.Cart;
 export type RawItem = prisma.Item;
 export type PrimitiveTeam = prisma.Team;
 export type PrimitiveTournament = prisma.Tournament;
+export type RepoItem = prisma.RepoItem;
+export type RepoLog = prisma.RepoLog;
 
 export type Item = RawItem & {
   left?: number;
@@ -306,6 +309,7 @@ export const enum Error {
   NotWhitelisted = "Tu n'es pas qualifié pour ce tournoi",
   HasAlreadyPaidForAnotherTicket = 'Tu as déjà payé un ticket vendu à un prix différent. Pour changer de tournoi, contacte nous !',
   EtupayNoAccess = "Tu n'as pas accès à cette url",
+  NotYourItem = "Cet item n'est pas le tiens",
 
   // 404
   // The server can't find the requested resource
@@ -319,6 +323,10 @@ export const enum Error {
   TournamentNotFound = 'Le tournoi est introuvable',
   TicketNotFound = 'Le ticket est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
+
+  // 405
+  // The request method is known by the server but is not supported by the target resource
+  NotScannedOrLocked = "Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée",
 
   // 409
   // Indicates a request conflict with current state of the target resource
