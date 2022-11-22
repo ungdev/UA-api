@@ -165,6 +165,7 @@ model RepoItem {
 
   @@index([id])
   @@index([forUserId])
+  @@map("repoItem")
 }
 
 model RepoLog {
@@ -178,6 +179,7 @@ model RepoLog {
 
   @@index([id])
   @@index([forUserId])
+  @@map("repoLog")
 }
 
 enum TransactionState {
