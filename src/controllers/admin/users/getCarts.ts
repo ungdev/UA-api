@@ -23,7 +23,7 @@ export default [
 
       const adminCarts = carts.map((cart) => ({
         ...cart,
-        totalPrice: cart.cartItems.reduce((previous, current) => previous + current.price, 0),
+        totalPrice: cart.cartItems.reduce((previous, current) => previous + (current.reducedPrice ?? current.price), 0),
       }));
 
       // Then we filter the object to reduce output

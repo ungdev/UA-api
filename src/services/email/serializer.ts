@@ -83,7 +83,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
                 .map((ticket) => ({
                   name: `${ticket.forUser.firstname} ${ticket.forUser.lastname}`,
                   type: ticket.item.name,
-                  price: formatPrice(ticket.price),
+                  price: formatPrice(ticket.reducedPrice ?? ticket.price),
                 })),
             ],
           },
@@ -100,7 +100,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
                 .map((item) => ({
                   name: item.item.name,
                   amount: `${item.quantity}`,
-                  price: formatPrice(item.price),
+                  price: formatPrice(item.reducedPrice ?? item.price),
                 })),
             ],
           },
@@ -117,7 +117,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
                 .map((item) => ({
                   name: item.item.name,
                   amount: `${item.quantity}`,
-                  price: formatPrice(item.price),
+                  price: formatPrice(item.reducedPrice ?? item.price),
                 })),
             ],
           },
