@@ -3,7 +3,7 @@ import QRCode from 'qrcode';
 import PDFkit from 'pdfkit';
 import { encrypt } from './helpers';
 import { fetchTeamWithTournament } from '../operations/team';
-import { DetailedCartItem, EmailAttachement, Team, UserType } from '../types';
+import { DetailedCartItem, EmailAttachement, UserType } from '../types';
 
 const loadImage = () => `data:image/jpg;base64,${readFileSync(`assets/email/backgrounds/ticket.jpg`, 'base64')}`;
 
@@ -31,7 +31,7 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
       team.tournament.name.length > 20
         ? team.tournament.name
             .split(/[ -]/)
-            .map((str) => str[0])
+            .map((word) => word[0])
             .join('')
         : team.tournament.name
     }`;
