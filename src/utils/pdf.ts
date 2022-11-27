@@ -13,10 +13,11 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
   // Define the parameters for the function
   const fontFamily = 'assets/email/font.ttf';
   const fontSize = 50;
-  const qrCodeSize = 390;
-  const qrCodeX = 265;
-  const qrCodeY = 30;
+  const qrCodeSize = 397;
+  const qrCodeX = 263;
+  const qrCodeY = 29;
   const bottomLine = 800 - 220; // sponsors height substracted to ticket height
+  const lineSpaceCorrection = 20;
 
   const user = cartItem.forUser;
   const fullName = `${user.firstname} ${user.lastname}`;
@@ -60,14 +61,18 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
 
     // Place the tournament name under the qrCode with the same margin as the qrcode
     const textHeight = textFormat.heightOfString(tournoiText);
-    textFormat.text(tournoiText, qrCodeY, bottomLine);
+    textFormat.text(tournoiText, qrCodeY + lineSpaceCorrection, bottomLine - lineSpaceCorrection);
 
     // Place the full name of the user
     const nameHeight = textFormat.heightOfString(fullName);
-    textFormat.text(fullName, qrCodeY, bottomLine - textHeight - nameHeight);
+    textFormat.text(
+      fullName,
+      qrCodeY + lineSpaceCorrection,
+      bottomLine - textHeight - nameHeight + lineSpaceCorrection,
+    );
 
     // Place the text containing the seat
-    if (user.place) textFormat.text(`Place ${user.place}`, qrCodeY, bottomLine - textHeight);
+    if (user.place) textFormat.text(`Place ${user.place}`, qrCodeY + lineSpaceCorrection, bottomLine - textHeight);
 
     // Place the QR Code
     document.image(qrcode, qrCodeX, qrCodeY, { width: qrCodeSize });
