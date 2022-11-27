@@ -185,6 +185,7 @@ enum TournamentId {
   lol
   ssbu
   csgo
+  valorant
   rl
   osu
   tft
