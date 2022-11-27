@@ -25,4 +25,4 @@ INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`) VALUES
 ('rl', 'Rocket League', 48, 3),
 ('osu', 'Osu!', 48, 1),
 ('tft', 'Teamfight Tactics', 32, 1),
-('open', 'Tournoi Libre', 56, 1);
+('open', 'Libre', 56, 1);

@@ -2,10 +2,10 @@ import { readFileSync } from 'fs';
 import QRCode from 'qrcode';
 import PDFkit from 'pdfkit';
 import { encrypt } from './helpers';
-import { fetchTeam } from '../operations/team';
-import { DetailedCartItem, EmailAttachement, Team } from '../types';
+import { fetchTeamWithTournament } from '../operations/team';
+import { DetailedCartItem, EmailAttachement, Team, UserType } from '../types';
 
-const loadImage = () => `data:image/png;base64,${readFileSync(`assets/email/backgrounds/ticket.png`, 'base64')}`;
+const loadImage = () => `data:image/jpg;base64,${readFileSync(`assets/email/backgrounds/ticket.jpg`, 'base64')}`;
 
 const tournamentBackground = loadImage();
 
@@ -24,13 +24,21 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
   const background = tournamentBackground;
 
   // If the user is in a team, use an appropriate background
-  let team: Team;
   let tournoiText: string;
   if (user.teamId) {
-    team = await fetchTeam(user.teamId);
-    tournoiText = `Tournoi ${team.tournamentId.toUpperCase()}`;
+    const team = await fetchTeamWithTournament(user.teamId);
+    tournoiText = `Tournoi ${
+      team.tournament.name.length > 20
+        ? team.tournament.name
+            .split(/[ -]/)
+            .map((str) => str[0])
+            .join('')
+        : team.tournament.name
+    }`;
+  } else if (user.type === UserType.spectator) {
+    tournoiText = 'Spectateur';
   } else {
-    tournoiText = 'Aucune team';
+    tournoiText = ' ';
   }
 
   const encryptedUserId = encrypt(user.id);
@@ -38,7 +46,7 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
   const qrcode = await QRCode.toDataURL([{ data: encryptedUserId, mode: 'byte' }], {
     width: qrCodeSize,
     margin: 1,
-    color: { dark: '#212121ff', light: '#ffffffff' },
+    color: { dark: '#000', light: '#fff' },
     errorCorrectionLevel: 'low',
   });
 
@@ -48,7 +56,7 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
     document.image(background, 0, 0);
 
     // Define a text format
-    const textFormat = document.font(fontFamily).fill('white').fontSize(fontSize);
+    const textFormat = document.font(fontFamily).fill([239, 220, 235]).fontSize(fontSize);
 
     // Place the tournament name under the qrCode with the same margin as the qrcode
     const textHeight = textFormat.heightOfString(tournoiText);
@@ -59,8 +67,7 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
     textFormat.text(fullName, qrCodeY, bottomLine - textHeight - nameHeight);
 
     // Place the text containing the seat
-    textFormat.text(user.place, 100, bottomLine);
-    textFormat.text(`Place ${user.place}`, qrCodeY, bottomLine - textHeight);
+    if (user.place) textFormat.text(`Place ${user.place}`, qrCodeY, bottomLine - textHeight);
 
     // Place the QR Code
     document.image(qrcode, qrCodeX, qrCodeY, { width: qrCodeSize });
