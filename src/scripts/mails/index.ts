@@ -29,7 +29,7 @@ const goals: Array<MailGoal> = [discordGoal, minorGoal, ticketsGoal, unlockedPla
         records[user.email].attachments.push(...(await attachments(user)));
       } else {
         records[user.email] = {
-          sections,
+          sections: [...sections],
           user,
           attachments: await attachments(user),
         };
