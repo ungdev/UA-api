@@ -311,6 +311,7 @@ export const enum Error {
   EtupayNoAccess = "Tu n'as pas accès à cette url",
   NotYourItem = "Cet item n'est pas le tiens",
   AlreadyHaveComputer = 'Tu as déjà un ordinateur stocké',
+  AlreadyPickedUp = "L'objet a déjà été récupéré",
 
   // 404
   // The server can't find the requested resource
@@ -328,6 +329,7 @@ export const enum Error {
   // 405
   // The request method is known by the server but is not supported by the target resource
   NotScannedOrLocked = "Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée",
+  OnlyPlayersAllowed = 'Cette fonctionnalité est réservée aux joueurs et aux coachs/managers',
 
   // 409
   // Indicates a request conflict with current state of the target resource

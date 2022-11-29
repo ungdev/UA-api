@@ -113,16 +113,11 @@ describe('GET /admin/repo/user', () => {
     expect(response.body.repoItems[0].zone).to.be.equal('Zone 1');
   });
 
-  it('should sucessfully return an empty for a spectator', async () => {
+  it('should  fail as user is a spectator', async () => {
     await database.user.update({ where: { id: nonAdmin.id }, data: { type: 'spectator' } });
-    const response = await request(app)
+    return request(app)
       .get(`/admin/repo/user?id=${encodeURIComponent(encrypt(nonAdmin.id).toString('base64'))}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200);
-    expect(response.body.firstname).to.be.equal(nonAdmin.firstname);
-    expect(response.body.lastname).to.be.equal(nonAdmin.lastname);
-    expect(response.body.place).to.be.equal(nonAdmin.place);
-    expect(response.body.id).to.be.equal(nonAdmin.id);
-    expect(response.body.repoItems).to.have.length(0);
+      .expect(405, { error: Error.OnlyPlayersAllowed });
   });
 });

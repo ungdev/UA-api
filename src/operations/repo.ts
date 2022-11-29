@@ -4,32 +4,26 @@ import { RepoItem, RepoLog } from '../types';
 import nanoid from '../utils/nanoid';
 
 export const fetchRepoItems = (userId: string): Promise<RepoItem[]> =>
-  database.repoItem.findMany({ where: { forUserId: userId } });
+  database.repoItem.findMany({ where: { forUserId: userId, pickedUp: false } });
 
 export const fetchRepoItem = (itemId: string): Promise<RepoItem> =>
   database.repoItem.findUnique({ where: { id: itemId } });
 
-export const findPC = (userId: string): Promise<RepoItem> =>
-  database.repoItem.findFirst({ where: { forUserId: userId, type: 'computer', zone: { not: null } } });
+export const findItemOfType = (userId: string, type: RepoItemType): Promise<RepoItem> =>
+  database.repoItem.findFirst({ where: { forUserId: userId, type, pickedUp: false } });
 
-export const addRepoItem = async (userId: string, itemType: RepoItemType, itemZone: string) => {
-  const existingItem = await database.repoItem.findFirst({
-    where: { forUserId: userId, zone: null, type: itemType },
-  });
-  let id = existingItem?.id;
-  if (existingItem) {
-    await database.repoItem.update({ where: { id: existingItem.id }, data: { zone: itemZone } });
-  } else {
-    id = nanoid();
-    await database.repoItem.create({ data: { id, type: itemType, forUserId: userId, zone: itemZone } });
-  }
-  await database.repoLog.create({
-    data: { id: nanoid(), itemId: id, action: RepoLogAction.added, forUserId: userId },
-  });
+export const addRepoItem = (userId: string, itemType: RepoItemType, itemZone: string) => {
+  const id = nanoid();
+  return [
+    database.repoItem.create({ data: { id, type: itemType, forUserId: userId, zone: itemZone } }),
+    database.repoLog.create({
+      data: { id: nanoid(), itemId: id, action: RepoLogAction.added, forUserId: userId },
+    }),
+  ];
 };
 
 export const addRepoItems = async (userId: string, items: { itemType: RepoItemType; itemZone: string }[]) => {
-  await Promise.all(items.map((item) => addRepoItem(userId, item.itemType, item.itemZone)));
+  await database.$transaction(items.flatMap((item) => addRepoItem(userId, item.itemType, item.itemZone)));
 };
 
 export const setZoneOfItem = async (userId: string, itemId: string, zone: string) => {
@@ -38,7 +32,7 @@ export const setZoneOfItem = async (userId: string, itemId: string, zone: string
 };
 
 export const removeRepoItem = async (itemId: string, userId: string) => {
-  await database.repoItem.update({ where: { id: itemId }, data: { zone: null } });
+  await database.repoItem.update({ where: { id: itemId }, data: { pickedUp: true } });
   await database.repoLog.create({
     data: { id: nanoid(), itemId, action: RepoLogAction.removed, forUserId: userId },
   });

@@ -48,12 +48,15 @@ export default [
         if (!team?.lockedAt) {
           return methodNotSupported(response, ResponseError.NotScannedOrLocked);
         }
+      } else {
+        return methodNotSupported(response, ResponseError.OnlyPlayersAllowed);
       }
 
       const items = await fetchRepoItems(userId);
       return success(response, {
         firstname: user.firstname,
         lastname: user.lastname,
+        username: user.username,
         place: user.place,
         id: user.id,
         repoItems: items.map((item) => ({

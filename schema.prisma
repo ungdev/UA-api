@@ -159,7 +159,8 @@ model RepoItem {
   id        String       @id
   type      RepoItemType
   forUserId String
-  zone      String?
+  zone      String
+  pickedUp  Boolean      @default(false)
   user      User         @relation("repoItemUser", fields: [forUserId], references: [id])
   repoLogs RepoLog[]     @relation("repoLogItem")
 
@@ -223,8 +224,8 @@ enum TournamentId {
 
 enum RepoItemType {
   computer
-  keyboard
-  mouse
+  monitor
+  peripheral
 }
 
 enum RepoLogAction {

@@ -78,7 +78,7 @@ describe('GET /admin/repo/user/:userId/logs', () => {
 
   it('should successfully return a list of logs', async () => {
     await lockTeam(team.id);
-    await addRepoItem(captain.id, 'computer', 'Zone 1');
+    await database.$transaction(addRepoItem(captain.id, 'computer', 'Zone 1'));
     const response = await request(app)
       .get(`/admin/repo/user/${captain.id}/logs`)
       .set('Authorization', `Bearer ${adminToken}`)
@@ -92,12 +92,11 @@ describe('GET /admin/repo/user/:userId/logs', () => {
     expect(response.body.logs[0].agent?.lastname).to.be.equal(captain.lastname);
   });
 
-  it('should sucessfully return an empty for a spectator', async () => {
+  it('should fail as user is a spectator', async () => {
     await database.user.update({ where: { id: nonAdmin.id }, data: { type: 'spectator' } });
-    const response = await request(app)
+    return request(app)
       .get(`/admin/repo/user/${nonAdmin.id}/logs`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200);
-    expect(response.body.logs).to.have.length(0);
+      .expect(405, { error: Error.OnlyPlayersAllowed });
   });
 });

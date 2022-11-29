@@ -148,11 +148,6 @@ export default [
           supplement.quantity = 1;
         }
 
-        // In case user asked for multiple discounts
-        if (supplement.itemId === 'discount-switch-ssbu') {
-          supplement.quantity = 1;
-        }
-
         // Push the supplement to the basket
         cartItems.push({
           itemId: supplement.itemId,

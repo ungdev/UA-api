@@ -18,6 +18,9 @@ describe('POST /admin/repo/user/:userId/items', () => {
   let nonAdminToken: string;
   let team: Team;
   let captain: User;
+  const validBody = {
+    items: [{ type: 'computer', zone: 'Zone 1' }],
+  };
 
   before(async () => {
     admin = await createFakeUser({ permissions: [Permission.admin] });
@@ -36,13 +39,17 @@ describe('POST /admin/repo/user/:userId/items', () => {
   });
 
   it('should fail as user is not authenticated', async () => {
-    await request(app).post(`/admin/repo/user/${nonAdmin.id}/items`).expect(401, { error: Error.Unauthenticated });
+    await request(app)
+      .post(`/admin/repo/user/${nonAdmin.id}/items`)
+      .send(validBody)
+      .expect(401, { error: Error.Unauthenticated });
   });
 
   it("should fail as user isn't an admin", async () => {
     await request(app)
       .post(`/admin/repo/user/${nonAdmin.id}/items`)
       .set('Authorization', `Bearer ${nonAdminToken}`)
+      .send(validBody)
       .expect(403, { error: Error.NoPermission });
   });
 
@@ -50,6 +57,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
     await request(app)
       .post('/admin/repo/user/ABCDEF/items')
       .set('Authorization', `Bearer ${adminToken}`)
+      .send(validBody)
       .expect(404, { error: Error.UserNotFound });
   });
 
@@ -57,6 +65,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
     await request(app)
       .post(`/admin/repo/user/${captain.id}/items`)
       .set('Authorization', `Bearer ${adminToken}`)
+      .send(validBody)
       .expect(405, { error: Error.NotScannedOrLocked });
   });
 
@@ -65,6 +74,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
     await request(app)
       .post(`/admin/repo/user/${nonAdmin.id}/items`)
       .set('Authorization', `Bearer ${adminToken}`)
+      .send(validBody)
       .expect(405, { error: Error.NotScannedOrLocked });
   });
 
@@ -73,6 +83,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
     await request(app)
       .post(`/admin/repo/user/${captain.id}/items`)
       .set('Authorization', `Bearer ${adminToken}`)
+      .send(validBody)
       .expect(405, { error: Error.NotScannedOrLocked });
   });
 
@@ -94,7 +105,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
     await request(app)
       .post(`/admin/repo/user/${captain.id}/items`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ items: [{ type: 'computer', zone: 'Zone 1' }] })
+      .send(validBody)
       .expect(201);
     const item = await database.repoItem.findFirst({
       where: { forUserId: captain.id, type: 'computer', zone: 'Zone 1' },
@@ -112,7 +123,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
       where: { forUserId: captain.id, type: 'computer' },
     });
     if (!itemBefore) {
-      itemBefore = { forUserId: captain.id, id: nanoid(), type: 'computer', zone: 'Zone 1' };
+      itemBefore = { forUserId: captain.id, id: nanoid(), type: 'computer', zone: 'Zone 1', pickedUp: false };
       await database.repoItem.create({ data: itemBefore });
     }
     await removeRepoItem(itemBefore.id, captain.id);
@@ -122,31 +133,22 @@ describe('POST /admin/repo/user/:userId/items', () => {
       .send({ items: [{ type: 'computer', zone: 'Zone 1' }] })
       .expect(201);
     const itemAfter = await database.repoItem.findFirst({
-      where: { forUserId: captain.id, type: 'computer', zone: 'Zone 1' },
+      where: { forUserId: captain.id, type: 'computer', zone: 'Zone 1', pickedUp: false },
     });
-    expect(itemAfter).to.not.be.null;
+    expect(itemAfter?.id).to.not.be.null;
     const log = await database.repoLog.findFirst({
       where: { forUserId: captain.id, action: 'added', itemId: itemAfter?.id },
     });
     expect(log).to.not.be.null;
   });
 
-  it('should successfully add an item for a spectator', async () => {
+  it('should fail as user is a spectator', async () => {
     await database.user.update({ where: { id: nonAdmin.id }, data: { type: 'spectator' } });
     await request(app)
       .post(`/admin/repo/user/${nonAdmin.id}/items`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ items: [{ type: 'computer', zone: 'Zone 1' }] })
-      .expect(201);
-
-    const item = await database.repoItem.findFirst({
-      where: { forUserId: nonAdmin.id, type: 'computer', zone: 'Zone 1' },
-    });
-    expect(item).to.not.be.null;
-    const log = await database.repoLog.findFirst({
-      where: { forUserId: nonAdmin.id, action: 'added', itemId: item?.id },
-    });
-    expect(log).to.not.be.null;
+      .expect(405, { error: Error.OnlyPlayersAllowed });
   });
 
   it('should fail as user already have a computer', async () => {

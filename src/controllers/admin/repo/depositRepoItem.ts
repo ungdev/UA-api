@@ -1,14 +1,28 @@
 import { NextFunction, Request, Response } from 'express';
+import Joi from 'joi';
 import { hasPermission } from '../../../middlewares/authentication';
 import { fetchUser } from '../../../operations/user';
 import { created, methodNotSupported, notFound } from '../../../utils/responses';
 import { Permission, Error as ResponseError, UserType, RepoItemType } from '../../../types';
-import { addRepoItems, findPC } from '../../../operations/repo';
+import { addRepoItems, findItemOfType } from '../../../operations/repo';
 import { fetchTeam } from '../../../operations/team';
+import { validateBody } from '../../../middlewares/validation';
 
 export default [
   // Middlewares
   ...hasPermission(Permission.repo),
+  validateBody(
+    Joi.object({
+      items: Joi.array()
+        .items(
+          Joi.object({
+            type: Joi.valid(...Object.keys(RepoItemType)).required(),
+            zone: Joi.string().required(),
+          }),
+        )
+        .required(),
+    }).required(),
+  ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
@@ -32,20 +46,12 @@ export default [
         if (!team?.lockedAt) {
           return methodNotSupported(response, ResponseError.NotScannedOrLocked);
         }
+      } else {
+        return methodNotSupported(response, ResponseError.OnlyPlayersAllowed);
       }
 
-      let isStoringPC = !!(await findPC(user.id));
-      if (
-        items.some((item) => {
-          if (item.type === 'computer' && isStoringPC) {
-            return true;
-          }
-          if (item.type === 'computer') {
-            isStoringPC = true;
-          }
-          return false;
-        })
-      ) {
+      const isStoringPC = !!(await findItemOfType(user.id, RepoItemType.computer));
+      if ((isStoringPC ? 1 : 0) + items.filter((item) => item.type === RepoItemType.computer).length > 1) {
         return methodNotSupported(response, ResponseError.AlreadyHaveComputer);
       }
 

@@ -31,6 +31,8 @@ export default [
         if (!team?.lockedAt) {
           return methodNotSupported(response, ResponseError.NotScannedOrLocked);
         }
+      } else {
+        return methodNotSupported(response, ResponseError.OnlyPlayersAllowed);
       }
 
       const item = await fetchRepoItem(itemId);
@@ -39,6 +41,9 @@ export default [
       }
       if (item.forUserId !== userId) {
         return forbidden(response, ResponseError.NotYourItem);
+      }
+      if (item.pickedUp) {
+        return forbidden(response, ResponseError.AlreadyPickedUp);
       }
       await removeRepoItem(itemId, userId);
       return success(response, {});

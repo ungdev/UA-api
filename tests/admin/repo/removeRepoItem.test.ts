@@ -103,24 +103,19 @@ describe('DELETE /admin/repo/user/:userId/items/:itemId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
     const item = await database.repoItem.findUnique({ where: { id: 'GHIJKL' } });
-    expect(item?.zone).to.be.null;
+    expect(item?.zone).not.to.be.null;
+    expect(item?.pickedUp).to.be.true;
     const log = await database.repoLog.findFirst({
       where: { itemId: item?.id, action: RepoLogAction.removed, forUserId: captain.id },
     });
     expect(log).to.not.be.null;
   });
 
-  it('should sucessfully remove an item for a spectator', async () => {
+  it('should fail as user is a spectator', async () => {
     await database.user.update({ where: { id: nonAdmin.id }, data: { type: 'spectator' } });
-    await request(app)
+    return request(app)
       .delete(`/admin/repo/user/${nonAdmin.id}/items/ABCDEF`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200);
-    const item = await database.repoItem.findUnique({ where: { id: 'ABCDEF' } });
-    expect(item?.zone).to.be.equal(null);
-    const log = await database.repoLog.findFirst({
-      where: { itemId: item?.id, action: RepoLogAction.removed, forUserId: nonAdmin.id },
-    });
-    expect(log).to.not.be.null;
+      .expect(405, { error: Error.OnlyPlayersAllowed });
   });
 });

@@ -31,6 +31,8 @@ export default [
         if (!team?.lockedAt) {
           return methodNotSupported(response, ResponseError.NotScannedOrLocked);
         }
+      } else {
+        return methodNotSupported(response, ResponseError.OnlyPlayersAllowed);
       }
 
       const logs = await fetchRepoLogs(userId);
@@ -39,6 +41,7 @@ export default [
           itemType: log.item.type,
           itemId: log.itemId,
           action: log.action,
+          zone: log.item.zone,
           timestamp: log.timestamp,
           agent: {
             firstname: user.firstname,
