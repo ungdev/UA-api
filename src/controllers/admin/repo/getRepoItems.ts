@@ -15,7 +15,7 @@ export default [
   ...hasPermission(Permission.repo),
   validateQuery(
     Joi.object({
-      id: Joi.string().optional(),
+      id: Joi.string().required(),
     }).required(),
   ),
 
