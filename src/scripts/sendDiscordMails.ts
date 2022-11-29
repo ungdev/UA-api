@@ -42,10 +42,8 @@ import logger from '../utils/logger';
           },
         },
       },
-      select: {
-        email: true,
-        discordId: true,
-        firstname: true,
+      include: {
+        cartItems: true,
       },
     }),
   ]);
@@ -68,7 +66,7 @@ import logger from '../utils/logger';
             },
           ],
           reason:
-            "Tu as reçu ce mail car tu es inscrit à l'UTT Arena et que tu n'a pas rejoint le serveur discord de l'évènement",
+            "Tu as reçu ce mail car tu es inscrit à l'UTT Arena mais tu n'a pas rejoint le serveur discord de l'évènement",
           title: {
             banner: "Rejoins le discord de l'UTT Arena",
             highlight: `Cher ${recipient.firstname}`,
