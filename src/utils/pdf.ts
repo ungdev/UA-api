@@ -96,7 +96,7 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
   });
 
   return {
-    filename: `UA_${user.id}.pdf`,
+    filename: `UA_${user.username}.pdf`,
     content: pdf,
   };
 };
