@@ -82,7 +82,7 @@ export type RawItem = prisma.Item;
 export type PrimitiveTeam = prisma.Team;
 export type PrimitiveTournament = prisma.Tournament;
 export type RepoItem = prisma.RepoItem;
-export type RepoLog = prisma.RepoLog;
+export type RepoLog = prisma.RepoLog & { item: RepoItem };
 
 export type Item = RawItem & {
   left?: number;
@@ -310,6 +310,7 @@ export const enum Error {
   HasAlreadyPaidForAnotherTicket = 'Tu as déjà payé un ticket vendu à un prix différent. Pour changer de tournoi, contacte nous !',
   EtupayNoAccess = "Tu n'as pas accès à cette url",
   NotYourItem = "Cet item n'est pas le tiens",
+  AlreadyHaveComputer = 'Tu as déjà un ordinateur stocké',
 
   // 404
   // The server can't find the requested resource

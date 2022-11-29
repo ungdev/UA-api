@@ -6,7 +6,7 @@ import { fetchTeam } from '../../../operations/team';
 import { validateQuery } from '../../../middlewares/validation';
 import { decrypt } from '../../../utils/helpers';
 import logger from '../../../utils/logger';
-import { badRequest, methodNotSupported, success } from '../../../utils/responses';
+import { badRequest, methodNotSupported, notFound, success } from '../../../utils/responses';
 import { Permission, Error as ResponseError, UserSearchQuery, UserType } from '../../../types';
 import { fetchRepoItems } from '../../../operations/repo';
 
@@ -22,10 +22,9 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      let { userId } = request.query as UserSearchQuery & { id: string };
-
+      let userId = (request.query as UserSearchQuery & { id: string }).id;
       try {
-        const buffer = Buffer.from(userId);
+        const buffer = Buffer.from(userId, 'base64');
         // Tries to decrypt the qrcode
         userId = decrypt(buffer);
       } catch (error) {
@@ -34,14 +33,26 @@ export default [
       }
 
       const user = await fetchUser(userId);
-      const team = await fetchTeam(user.teamId);
-      if (!user.scannedAt || ((user.type === UserType.player || user.type === UserType.coach) && !team.lockedAt)) {
+      if (!user) {
+        return notFound(response, ResponseError.UserNotFound);
+      }
+      if (!user.scannedAt) {
         return methodNotSupported(response, ResponseError.NotScannedOrLocked);
+      }
+
+      if (user.type === UserType.player || user.type === UserType.coach) {
+        if (!user.teamId) {
+          return methodNotSupported(response, ResponseError.NotScannedOrLocked);
+        }
+        const team = await fetchTeam(user.teamId);
+        if (!team?.lockedAt) {
+          return methodNotSupported(response, ResponseError.NotScannedOrLocked);
+        }
       }
 
       const items = await fetchRepoItems(userId);
       return success(response, {
-        fistname: user.firstname,
+        firstname: user.firstname,
         lastname: user.lastname,
         place: user.place,
         id: user.id,

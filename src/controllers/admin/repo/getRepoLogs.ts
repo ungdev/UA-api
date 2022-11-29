@@ -4,34 +4,41 @@ import { hasPermission } from '../../../middlewares/authentication';
 import { fetchUser } from '../../../operations/user';
 import { fetchTeam } from '../../../operations/team';
 import { validateQuery } from '../../../middlewares/validation';
-import { methodNotSupported, success } from '../../../utils/responses';
+import { methodNotSupported, notFound, success } from '../../../utils/responses';
 import { Permission, Error as ResponseError, UserSearchQuery, UserType } from '../../../types';
 import { fetchRepoLogs } from '../../../operations/repo';
 
 export default [
   // Middlewares
   ...hasPermission(Permission.repo),
-  validateQuery(
-    Joi.object({
-      userId: Joi.string().required(),
-    }).required(),
-  ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      let { userId, itemId } = request.query as UserSearchQuery & { id: string; itemId: string };
+      let userId = request.params.userId;
 
       const user = await fetchUser(userId);
-
-      const team = await fetchTeam(user.teamId);
-      if (!user.scannedAt || ((user.type === UserType.player || user.type === UserType.coach) && !team.lockedAt)) {
+      if (!user) {
+        return notFound(response, ResponseError.UserNotFound);
+      }
+      if (!user.scannedAt) {
         return methodNotSupported(response, ResponseError.NotScannedOrLocked);
       }
 
-      const logs = await fetchRepoLogs(userId, itemId);
+      if (user.type === UserType.player || user.type === UserType.coach) {
+        if (!user.teamId) {
+          return methodNotSupported(response, ResponseError.NotScannedOrLocked);
+        }
+        const team = await fetchTeam(user.teamId);
+        if (!team?.lockedAt) {
+          return methodNotSupported(response, ResponseError.NotScannedOrLocked);
+        }
+      }
+
+      const logs = await fetchRepoLogs(userId);
       return success(response, {
         logs: logs.map((log) => ({
+          itemType: log.item.type,
           itemId: log.itemId,
           action: log.action,
           timestamp: log.timestamp,

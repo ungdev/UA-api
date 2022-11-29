@@ -620,3 +620,45 @@
         $ref: '#/components/responses/403Unauthorized'
       404:
         $ref: '#/components/responses/404UserNotFound'
+/admin/repo/user:
+  get:
+    summary: Retourne les items stockés de l'utilisateur
+    description: Retourne les items stockés de l'utilisateur<br />
+      **Permission 'repo' requise**<br />
+      *L'utilisateur doit avoir une place validée et son billet a dû être scanné*
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        description: Identifiant de l'utilisateur dont on cherche les items
+        schema:
+          type: string
+        required: true
+    responses:
+      200:
+        description: Les informations sur les items stockés, ainsi que quelques informations sur l'utilisateur, sont renvoyées.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId: string
+                firstname: string
+                lastname: string
+                place: string
+                repoItems: object
+                properties:
+                  id: string
+                  type: string
+                  zone: string
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
