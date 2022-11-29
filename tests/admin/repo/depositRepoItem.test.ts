@@ -1,19 +1,17 @@
+import request from 'supertest';
+import { expect } from 'chai';
+import { nanoid } from 'nanoid';
 import { scanUser } from '../../../src/operations/user';
 import database from '../../../src/services/database';
 import { Error, Permission, Team, User } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
 import { createFakeTeam, createFakeUser } from '../../utils';
-import request from 'supertest';
 import app from '../../../src/app';
 import { lockTeam } from '../../../src/operations/team';
-import { addRepoItem, removeRepoItem } from '../../../src/operations/repo';
-import { expect } from 'chai';
-import { RepoLogAction } from '@prisma/client';
-import moment from 'moment';
-import { nanoid } from 'nanoid';
+import { removeRepoItem } from '../../../src/operations/repo';
 
-describe('POST /admin/repo/user/:userId/items', async () => {
+describe('POST /admin/repo/user/:userId/items', () => {
   let admin: User;
   let adminToken: string;
   let nonAdmin: User;
@@ -29,6 +27,7 @@ describe('POST /admin/repo/user/:userId/items', async () => {
     team = await createFakeTeam();
     captain = getCaptain(team);
   });
+
   after(async () => {
     await database.repoLog.deleteMany();
     await database.repoItem.deleteMany();

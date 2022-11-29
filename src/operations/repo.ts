@@ -3,21 +3,14 @@ import database from '../services/database';
 import { RepoItem, RepoLog } from '../types';
 import nanoid from '../utils/nanoid';
 
-export const fetchRepoItems = (userId: string): Promise<RepoItem[]> => {
-  return database.repoItem.findMany({ where: { forUserId: userId } });
-};
+export const fetchRepoItems = (userId: string): Promise<RepoItem[]> =>
+  database.repoItem.findMany({ where: { forUserId: userId } });
 
-export const fetchRepoItem = (itemId: string): Promise<RepoItem> => {
-  return database.repoItem.findUnique({ where: { id: itemId } });
-};
+export const fetchRepoItem = (itemId: string): Promise<RepoItem> =>
+  database.repoItem.findUnique({ where: { id: itemId } });
 
-export const findPC = (userId: string): Promise<RepoItem> => {
-  return database.repoItem.findFirst({ where: { forUserId: userId, type: 'computer', zone: { not: null } } });
-};
-
-export const addRepoItems = async (userId: string, items: { itemType: RepoItemType; itemZone: string }[]) => {
-  await Promise.all(items.map((item) => addRepoItem(userId, item.itemType, item.itemZone)));
-};
+export const findPC = (userId: string): Promise<RepoItem> =>
+  database.repoItem.findFirst({ where: { forUserId: userId, type: 'computer', zone: { not: null } } });
 
 export const addRepoItem = async (userId: string, itemType: RepoItemType, itemZone: string) => {
   const existingItem = await database.repoItem.findFirst({
@@ -35,6 +28,10 @@ export const addRepoItem = async (userId: string, itemType: RepoItemType, itemZo
   });
 };
 
+export const addRepoItems = async (userId: string, items: { itemType: RepoItemType; itemZone: string }[]) => {
+  await Promise.all(items.map((item) => addRepoItem(userId, item.itemType, item.itemZone)));
+};
+
 export const setZoneOfItem = async (userId: string, itemId: string, zone: string) => {
   await database.repoItem.update({ where: { id: itemId }, data: { zone } });
   await database.repoLog.create({ data: { id: nanoid(), itemId, action: RepoLogAction.added, forUserId: userId } });
@@ -47,6 +44,5 @@ export const removeRepoItem = async (itemId: string, userId: string) => {
   });
 };
 
-export const fetchRepoLogs = (userId: string): Promise<RepoLog[]> => {
-  return database.repoLog.findMany({ where: { forUserId: userId }, include: { item: true } });
-};
+export const fetchRepoLogs = (userId: string): Promise<RepoLog[]> =>
+  database.repoLog.findMany({ where: { forUserId: userId }, include: { item: true } });

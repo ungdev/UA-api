@@ -3,18 +3,12 @@ import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeUser, createFakeTeam } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User, TournamentId, UserType } from '../../../src/types';
+import { Error, Permission, User, Team } from '../../../src/types';
 import * as userUtils from '../../../src/utils/users';
 import * as teamUtils from '../../../src/utils/teams';
-import { sandbox } from '../../setup';
-import * as logOperations from '../../../src/operations/log';
-import { encrypt, sleep } from '../../../src/utils/helpers';
-import { Team } from '../../../src/types';
-import createTeam from '../../../src/controllers/teams/createTeam';
-import { joinTeam, kickUser, lockTeam } from '../../../src/operations/team';
-import leaveTeam from '../../../src/controllers/teams/leaveTeam';
-import { scanUser, updateUser } from '../../../src/operations/user';
-import { addRepoItem } from '../../../src/operations/repo';
+import { encrypt } from '../../../src/utils/helpers';
+import { scanUser } from '../../../src/operations/user';
+import { lockTeam } from '../../../src/operations/team';
 
 describe('GET /admin/repo/user', () => {
   let admin: User;

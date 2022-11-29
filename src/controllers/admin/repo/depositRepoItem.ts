@@ -1,14 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import Joi from 'joi';
 import { hasPermission } from '../../../middlewares/authentication';
 import { fetchUser } from '../../../operations/user';
-import { validateBody, validateQuery } from '../../../middlewares/validation';
 import { created, methodNotSupported, notFound } from '../../../utils/responses';
-import { Permission, Error as ResponseError, UserSearchQuery, UserType, RepoItemType } from '../../../types';
-import { addRepoItem, addRepoItems, findPC } from '../../../operations/repo';
+import { Permission, Error as ResponseError, UserType, RepoItemType } from '../../../types';
+import { addRepoItems, findPC } from '../../../operations/repo';
 import { fetchTeam } from '../../../operations/team';
-import nanoid from '../../../utils/nanoid';
-import { type } from '../../../utils/validators';
 
 export default [
   // Middlewares
@@ -17,8 +13,8 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      let userId = request.params.userId;
-      const items: { type: RepoItemType; zone: string }[] = request.body.items;
+      const { userId } = request.params;
+      const { items }: { items: { type: RepoItemType; zone: string }[] } = request.body;
 
       const user = await fetchUser(userId);
       if (!user) {
@@ -41,9 +37,10 @@ export default [
       let isStoringPC = !!(await findPC(user.id));
       if (
         items.some((item) => {
-          if (item.type == 'computer' && isStoringPC) {
+          if (item.type === 'computer' && isStoringPC) {
             return true;
-          } else if (item.type == 'computer') {
+          }
+          if (item.type === 'computer') {
             isStoringPC = true;
           }
           return false;

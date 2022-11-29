@@ -1,11 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import Joi from 'joi';
 import { hasPermission } from '../../../middlewares/authentication';
 import { fetchUser } from '../../../operations/user';
 import { fetchTeam } from '../../../operations/team';
-import { validateQuery } from '../../../middlewares/validation';
 import { methodNotSupported, notFound, success } from '../../../utils/responses';
-import { Permission, Error as ResponseError, UserSearchQuery, UserType } from '../../../types';
+import { Permission, Error as ResponseError, UserType } from '../../../types';
 import { fetchRepoLogs } from '../../../operations/repo';
 
 export default [
@@ -15,7 +13,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      let userId = request.params.userId;
+      const { userId } = request.params;
 
       const user = await fetchUser(userId);
       if (!user) {

@@ -1,19 +1,16 @@
+import request from 'supertest';
+import { expect } from 'chai';
+import { RepoLogAction } from '@prisma/client';
 import { scanUser } from '../../../src/operations/user';
 import database from '../../../src/services/database';
 import { Error, Permission, Team, User } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
 import { createFakeTeam, createFakeUser } from '../../utils';
-import request from 'supertest';
 import app from '../../../src/app';
 import { lockTeam } from '../../../src/operations/team';
-import { addRepoItem } from '../../../src/operations/repo';
-import { assert, expect } from 'chai';
-import { RepoLogAction } from '@prisma/client';
-import { exec } from '@faker-js/faker/modules/unique/unique';
-import { expectCt } from 'helmet';
 
-describe('DELETE /admin/repo/user/:userId/items/:itemId', async () => {
+describe('DELETE /admin/repo/user/:userId/items/:itemId', () => {
   let admin: User;
   let adminToken: string;
   let nonAdmin: User;
@@ -115,7 +112,7 @@ describe('DELETE /admin/repo/user/:userId/items/:itemId', async () => {
 
   it('should sucessfully remove an item for a spectator', async () => {
     await database.user.update({ where: { id: nonAdmin.id }, data: { type: 'spectator' } });
-    const response = await request(app)
+    await request(app)
       .delete(`/admin/repo/user/${nonAdmin.id}/items/ABCDEF`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);

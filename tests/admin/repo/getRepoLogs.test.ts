@@ -1,6 +1,5 @@
 import { RepoLogAction } from '@prisma/client';
 import { expect } from 'chai';
-import moment, { now } from 'moment';
 import request from 'supertest';
 import app from '../../../src/app';
 import { addRepoItem } from '../../../src/operations/repo';
@@ -12,7 +11,7 @@ import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
 import { createFakeTeam, createFakeUser } from '../../utils';
 
-describe('GET /admin/repo/user/:userId/logs', async () => {
+describe('GET /admin/repo/user/:userId/logs', () => {
   let admin: User;
   let adminToken: string;
   let nonAdmin: User;
