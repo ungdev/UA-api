@@ -45,7 +45,7 @@ const goals: Array<MailGoal> = [discordGoal, minorGoal, ticketsGoal, unlockedPla
           sections: mail.sections,
           reason: 'Tu as reçu ce mail car tu as créé un compte sur arena.utt.fr',
           title: {
-            banner: 'J-3',
+            banner: "J-3 avant l'UTT Arena",
             highlight: `Cher ${mail.user.firstname}`,
             short: "L'UTT Arena arrive à grands pas 🔥",
             topic: "J-3 avant l'UTT Arena",
@@ -67,7 +67,7 @@ const goals: Array<MailGoal> = [discordGoal, minorGoal, ticketsGoal, unlockedPla
           ...result,
           delivered: result.delivered + 1,
         };
-      logger.info(`Impossible d'envoyer de mail à ${state.reason}`);
+      logger.error(`Impossible d'envoyer de mail à ${state.reason}`);
       return {
         ...result,
         undelivered: result.undelivered + 1,

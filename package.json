@@ -95,6 +95,7 @@
     "test": "mocha",
     "test:coverage": "nyc yarn test",
     "generate:compumsa": "node build/src/scripts/seedCompumsaCodes.js",
-    "send:mail:discord": "node build/src/scripts/sendDiscordMails.js"
+    "send:mail:discord": "node build/src/scripts/sendDiscordMails.js",
+    "send:mails": "node build/src/scripts/mails"
   }
 }
