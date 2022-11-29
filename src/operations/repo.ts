@@ -26,11 +26,6 @@ export const addRepoItems = async (userId: string, items: { itemType: RepoItemTy
   await database.$transaction(items.flatMap((item) => addRepoItem(userId, item.itemType, item.itemZone)));
 };
 
-export const setZoneOfItem = async (userId: string, itemId: string, zone: string) => {
-  await database.repoItem.update({ where: { id: itemId }, data: { zone } });
-  await database.repoLog.create({ data: { id: nanoid(), itemId, action: RepoLogAction.added, forUserId: userId } });
-};
-
 export const removeRepoItem = async (itemId: string, userId: string) => {
   await database.repoItem.update({ where: { id: itemId }, data: { pickedUp: true } });
   await database.repoLog.create({

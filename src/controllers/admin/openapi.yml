@@ -265,6 +265,193 @@
       404:
         $ref: '#/components/responses/404UserNotFound'
 
+/admin/repo/user:
+  get:
+    summary: Renvoie les items déposés par l'utilisateur scanné
+    description: Renvoie les items déposés par l'utilisateur scanné<br/>
+      **Permission 'repo' ou 'admin' requise.**<br/>
+      *L'utilisateur doit avoir payé, être lock, être du type `player` ou `coach` et avoir été scanné.*
+      *Le billet est passé dans la query chiffré et en base64*
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: query
+        name: id
+        schema:
+          type: string
+        description: Contenu du QR code présent sur le billet chiffré (encodé en base64)
+    responses:
+      200:
+        description: Renvoie les informations de l'utilisateur et son équipe
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepoItems'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+      405:
+        description: Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée
+
+/admin/repo/user/{userId}/items:
+  post:
+    summary: Notifie le dépot de matériel par un utilisateur
+    description: Notifie le dépot de matériel par un utilisateur<br/>
+      **Permission 'repo' ou 'admin' requise.**<br/>
+      *L'utilisateur doit avoir payé, être lock, être du type `player` ou `coach` et avoir été scanné.*
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        schema:
+          type: string
+          example: A1E4FD
+        description: L'id de l'utilisateur qui dépose le matériel
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                description: La liste des items à déposer
+                required: true
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [computer, monitor, peripheral]
+                      required: true
+                    zone:
+                      type: string
+                      example: A2
+                      required: true
+    responses:
+      201:
+        description: Le matériel a bien été déposé
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+      405:
+        description: Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée
+
+/admin/repo/user/{userId}/items/{itemId}:
+  delete:
+    summary: Notifie le retrait de matériel par un utilisateur
+    description: Notifie le retrait de matériel par un utilisateur<br/>
+      **Permission 'repo' ou 'admin' requise.**<br/>
+      *L'utilisateur doit avoir payé, être lock, être du type `player` ou `coach` et avoir été scanné.*
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        schema:
+          type: string
+          example: A1E4FD
+        description: L'id de l'utilisateur qui récupère le matériel
+      - in: path
+        name: itemId
+        schema:
+          type: string
+          example: XXXXX
+        description: L'id de l'item à récupérer. Cet id est obtenu via `/api/admin/repo/user`
+    responses:
+      200:
+        description: Le matériel a bien été récupéré
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+      405:
+        description: Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée
+
+/admin/repo/user/{userId}/logs:
+  get:
+    summary: Récupère toutes les modifications de status de dépôt du matériel d'un utilisateur
+    description: Récupère toutes les modifications de status de dépôt du matériel d'un utilisateur<br/>
+      **Permission 'repo' ou 'admin' requise.**<br/>
+      *L'utilisateur doit avoir payé, être lock, être du type `player` ou `coach` et avoir été scanné.*
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: userId
+        schema:
+          type: string
+          example: A1E4FD
+        description: L'id de l'utilisateur qui récupère le matériel
+    responses:
+      200:
+        description: Renvoie la liste des logs du matériel de l'utilisateur
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logs:
+                  $ref: '#/components/schemas/RepoLogList'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+      405:
+        description: Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée
+
 /admin/scan/:
   post:
     summary: Scanne le billet d'un utilisateur
@@ -612,48 +799,6 @@
                   $ref: '#/components/schemas/User'
                 replacingUser:
                   $ref: '#/components/schemas/User'
-      400:
-        $ref: '#/components/responses/400Errored'
-      401:
-        $ref: '#/components/responses/401Unauthenticated'
-      403:
-        $ref: '#/components/responses/403Unauthorized'
-      404:
-        $ref: '#/components/responses/404UserNotFound'
-/admin/repo/user:
-  get:
-    summary: Retourne les items stockés de l'utilisateur
-    description: Retourne les items stockés de l'utilisateur<br />
-      **Permission 'repo' requise**<br />
-      *L'utilisateur doit avoir une place validée et son billet a dû être scanné*
-    tags:
-      - Admin
-    security:
-      - BearerAuth: []
-    parameters:
-      - in: path
-        name: userId
-        description: Identifiant de l'utilisateur dont on cherche les items
-        schema:
-          type: string
-        required: true
-    responses:
-      200:
-        description: Les informations sur les items stockés, ainsi que quelques informations sur l'utilisateur, sont renvoyées.
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                userId: string
-                firstname: string
-                lastname: string
-                place: string
-                repoItems: object
-                properties:
-                  id: string
-                  type: string
-                  zone: string
       400:
         $ref: '#/components/responses/400Errored'
       401:

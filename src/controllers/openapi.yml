@@ -640,6 +640,64 @@ components:
           type: string
           format: date-time
 
+    RepoItems:
+      type: object
+      properties:
+        firstname:
+          type: string
+        lastname:
+          type: string
+        username:
+          type: string
+        place:
+          type: string
+          example: A01
+        id:
+          type: string
+          example: A1E4FD
+        repoItems:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [computer, monitor, peripheral]
+              id:
+                type: string
+                example: A1E4FD
+              zone:
+                type: string
+                example: A2
+
+    RepoLogList:
+      type: array
+      items:
+        type: object
+        properties:
+          itemType:
+            type: string
+            enum: [computer, monitor, peripheral]
+          itemId:
+            type: string
+            example: A1E4FD
+          action:
+            type: string
+            enum: [added, removed]
+          zone:
+            type: string
+            example: A2
+          timestamp:
+            type: string
+            format: date-time
+          agent:
+            type: object
+            properties:
+              firstname:
+                type: string
+              lastname:
+                type: string
+
   responses:
     400Errored:
       description: Requête erronée

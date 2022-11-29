@@ -111,6 +111,20 @@ describe('DELETE /admin/repo/user/:userId/items/:itemId', () => {
     expect(log).to.not.be.null;
   });
 
+  it('should fail as the item has already been picked up', async () => {
+    await database.repoItem.create({
+      data: { id: 'MNOPQR', type: 'computer', forUserId: captain.id, zone: 'Zone 1' },
+    });
+    await request(app)
+      .delete(`/admin/repo/user/${captain.id}/items/MNOPQR`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+    await request(app)
+      .delete(`/admin/repo/user/${captain.id}/items/MNOPQR`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(403, { error: Error.AlreadyPickedUp });
+  });
+
   it('should fail as user is a spectator', async () => {
     await database.user.update({ where: { id: nonAdmin.id }, data: { type: 'spectator' } });
     return request(app)
