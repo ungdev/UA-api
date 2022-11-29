@@ -32,6 +32,8 @@ export const forbidden = (response: Response, error: Error): void => respondErro
 
 export const notFound = (response: Response, error: Error): void => respondError(response, error, 404);
 
+export const methodNotSupported = (response: Response, error: Error): void => respondError(response, error, 405);
+
 export const conflict = (response: Response, error: Error): void => respondError(response, error, 409);
 
 export const gone = (response: Response, error: Error): void => respondError(response, error, 410);
