@@ -50,6 +50,12 @@ after(async () => {
   const cartItemCount = await database.cartItem.count();
   expect(cartItemCount).to.be.equal(0);
 
+  const repoItemCount = await database.repoItem.count();
+  expect(repoItemCount).to.be.equal(0);
+
+  const repoLogCount = await database.repoLog.count();
+  expect(repoLogCount).to.be.equal(0);
+
   await database.$disconnect();
   transporter.close();
 });

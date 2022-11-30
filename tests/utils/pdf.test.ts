@@ -7,6 +7,7 @@ import { getCaptain } from '../../src/utils/teams';
 import database from '../../src/services/database';
 import { TournamentId, TransactionState } from '../../src/types';
 import { fetchAllItems } from '../../src/operations/item';
+import { updateAdminUser } from '../../src/operations/user';
 
 describe('Tests the PDF utils', () => {
   after(async () => {
@@ -15,11 +16,16 @@ describe('Tests the PDF utils', () => {
     await database.user.deleteMany();
   });
 
+  let placeId = 0;
   for (const tournamentId in TournamentId) {
     it(`should generate a PDF ticket for ${tournamentId}`, async () => {
       // Create a fake user and add it in a random team
       const team = await createFakeTeam({ tournament: tournamentId as TournamentId });
       const user = getCaptain(team);
+
+      await updateAdminUser(user.id, {
+        place: `A0${++placeId}`,
+      });
 
       const createdCart = await createCart(user.id, [
         {

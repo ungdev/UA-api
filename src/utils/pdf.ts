@@ -2,42 +2,44 @@ import { readFileSync } from 'fs';
 import QRCode from 'qrcode';
 import PDFkit from 'pdfkit';
 import { encrypt } from './helpers';
-import { fetchTeam } from '../operations/team';
-import { DetailedCartItem, EmailAttachement, TournamentId, Team } from '../types';
+import { fetchTeamWithTournament } from '../operations/team';
+import { DetailedCartItem, EmailAttachement, UserType } from '../types';
 
-const loadImage = (tournamentId: string) =>
-  `data:image/jpg;base64,${readFileSync(`assets/email/backgrounds/${tournamentId}.jpg`, 'base64')}`;
+const loadImage = () => `data:image/jpg;base64,${readFileSync(`assets/email/backgrounds/ticket.jpg`, 'base64')}`;
 
-// Foreach tournament, load the image in the RAM
-const tournamentBackgrounds = Object.keys(TournamentId).map((tournamentId) => ({
-  // we need to cast as it is reconized as a string
-  name: tournamentId as TournamentId,
-  background: loadImage(tournamentId),
-}));
-
-const notInTeamBackground = loadImage('nonteam');
+const tournamentBackground = loadImage();
 
 export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailAttachement> => {
   // Define the parameters for the function
   const fontFamily = 'assets/email/font.ttf';
-  const fontSize = 140;
-  const qrCodeSize = 600;
-  const bottomLine = 1550;
+  const fontSize = 50;
+  const qrCodeSize = 397;
+  const qrCodeX = 263;
+  const qrCodeY = 29;
+  const bottomLine = 800 - 220; // sponsors height substracted to ticket height
+  const lineSpaceCorrection = 20;
 
   const user = cartItem.forUser;
   const fullName = `${user.firstname} ${user.lastname}`;
 
-  let background: string;
+  const background = tournamentBackground;
 
   // If the user is in a team, use an appropriate background
-  let team: Team;
+  let tournoiText: string;
   if (user.teamId) {
-    team = await fetchTeam(user.teamId);
-    background = tournamentBackgrounds.find((tournament) => tournament.name === team.tournamentId).background;
-  }
-  // Otherwise, use thenot in team background
-  else {
-    background = notInTeamBackground;
+    const team = await fetchTeamWithTournament(user.teamId);
+    tournoiText = `Tournoi ${
+      team.tournament.name.length > 20
+        ? team.tournament.name
+            .split(/[ -]/)
+            .map((word) => word[0])
+            .join('')
+        : team.tournament.name
+    }`;
+  } else if (user.type === UserType.spectator) {
+    tournoiText = 'Spectateur';
+  } else {
+    tournoiText = ' ';
   }
 
   const encryptedUserId = encrypt(user.id);
@@ -45,44 +47,35 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
   const qrcode = await QRCode.toDataURL([{ data: encryptedUserId, mode: 'byte' }], {
     width: qrCodeSize,
     margin: 1,
-    color: { dark: '#212121ff', light: '#ffffffff' },
+    color: { dark: '#000', light: '#fff' },
     errorCorrectionLevel: 'low',
   });
 
   const pdf = await new Promise<Buffer>((resolve, reject) => {
     // Create the document and the background
-    const document = new PDFkit({ size: [3508, 2480], margin: 0 });
+    const document = new PDFkit({ size: [2560, 800], margin: 0 });
     document.image(background, 0, 0);
 
     // Define a text format
-    const textFormat = document.font(fontFamily).fill('white').fontSize(fontSize);
-    const textHeight = textFormat.heightOfString(user.username);
+    const textFormat = document.font(fontFamily).fill([239, 220, 235]).fontSize(fontSize);
 
-    // Place the name to the right
-    let textWidth = textFormat.widthOfString(fullName);
-    textFormat.text(fullName, document.page.width - textWidth - 100, bottomLine);
+    // Place the tournament name under the qrCode with the same margin as the qrcode
+    const textHeight = textFormat.heightOfString(tournoiText);
+    textFormat.text(tournoiText, qrCodeY + lineSpaceCorrection, bottomLine - lineSpaceCorrection);
 
-    // Place the username to the right
-    textWidth = textFormat.widthOfString(user.username);
-    textFormat.text(user.username, document.page.width - textWidth - 100, bottomLine - textHeight);
+    // Place the full name of the user
+    const nameHeight = textFormat.heightOfString(fullName);
+    textFormat.text(
+      fullName,
+      qrCodeY + lineSpaceCorrection,
+      bottomLine - textHeight - nameHeight + lineSpaceCorrection,
+    );
 
-    // Place the teamName to the right if not solo-tournament
-    if (team && team.name.search(/-solo-team$/) === -1) {
-      textWidth = textFormat.widthOfString(team.name);
-      textFormat.text(team.name, document.page.width - textWidth - 100, bottomLine - 2 * textHeight);
-    }
-
-    // Place the place if necessary
-    let qrCodeY;
-    if (user.place) {
-      textFormat.text(user.place, 100, bottomLine);
-      qrCodeY = bottomLine - qrCodeSize - 40;
-    } else {
-      qrCodeY = bottomLine - qrCodeSize + 150;
-    }
+    // Place the text containing the seat
+    if (user.place) textFormat.text(`Place ${user.place}`, qrCodeY + lineSpaceCorrection, bottomLine - textHeight);
 
     // Place the QR Code
-    document.image(qrcode, 100, qrCodeY, { width: qrCodeSize });
+    document.image(qrcode, qrCodeX, qrCodeY, { width: qrCodeSize });
 
     // Stop the document stream
     document.end();
@@ -103,7 +96,7 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
   });
 
   return {
-    filename: `UA_${user.id}.pdf`,
+    filename: `UA_${user.username}.pdf`,
     content: pdf,
   };
 };
