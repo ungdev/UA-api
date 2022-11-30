@@ -41,5 +41,6 @@ export const minorGoal: MailGoal = {
       ],
     },
   ],
+  // eslint-disable-next-line require-await
   attachments: async () => [] as EmailAttachement[],
 };

@@ -1,6 +1,7 @@
 import { User } from '@prisma/client';
 import { sendEmail } from '../../services/email';
 import { serialize } from '../../services/email/serializer';
+// eslint-disable-next-line import/no-unresolved
 import { Mail } from '../../services/email/types';
 import { EmailAttachement } from '../../types';
 import logger from '../../utils/logger';

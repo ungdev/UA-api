@@ -41,5 +41,6 @@ export const unlockedPlayersGoal: MailGoal = {
       ],
     },
   ],
+  // eslint-disable-next-line require-await
   attachments: async () => [] as EmailAttachement[],
 };
