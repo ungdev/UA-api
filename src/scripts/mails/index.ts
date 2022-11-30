@@ -5,10 +5,10 @@ import { serialize } from '../../services/email/serializer';
 import { Mail } from '../../services/email/types';
 import { EmailAttachement } from '../../types';
 import logger from '../../utils/logger';
-import { discordGoal } from './discord';
-import { minorGoal } from './minor';
 import { ticketsGoal } from './tickets';
-import { unlockedPlayersGoal } from './unlocked';
+// import { discordGoal } from './discord';
+// import { minorGoal } from './minor';
+// import { unlockedPlayersGoal } from './unlocked';
 
 export type RecipientCollector = () => Promise<User[]>;
 export type MailGoal = {
@@ -17,7 +17,11 @@ export type MailGoal = {
   attachments: (user: User) => Promise<EmailAttachement[]>;
 };
 
-const goals: Array<MailGoal> = [discordGoal, minorGoal, ticketsGoal, unlockedPlayersGoal];
+const goals: Array<MailGoal> = [
+  // discordGoal, minorGoal,
+  ticketsGoal,
+  // unlockedPlayersGoal
+];
 
 (async () => {
   const records: { [key: string]: { sections: Mail['sections']; user: User; attachments: EmailAttachement[] } } = {};
@@ -49,7 +53,7 @@ const goals: Array<MailGoal> = [discordGoal, minorGoal, ticketsGoal, unlockedPla
             banner: "J-3 avant l'UTT Arena",
             highlight: `Cher ${mail.user.firstname}`,
             short: "L'UTT Arena arrive à grands pas 🔥",
-            topic: "J-3 avant l'UTT Arena",
+            topic: "Re: J-3 avant l'UTT Arena",
           },
           receiver: mail.user.email,
         });

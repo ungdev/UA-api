@@ -44,6 +44,7 @@ export const ticketsGoal: MailGoal = {
     {
       title: "Ton ticket pour l'UTT Arena",
       components: [
+        "*Suite à une erreur de notre côté, nous avons désactivé le billet que tu as reçu précédemment. Tu trouveras ci-joint le nouveau billet que tu devras présenter à l'UTT Arena.*",
         "Tu es bien inscrit à l'UTT Arena ! Tu trouveras ci-joint ton billet, que tu devras présenter à l'entrée de l'UTT Arena. Tu peux aussi le retrouver sur la billetterie, dans l'onglet \"Mon compte\" de ton Dashboard.",
         'Attention, tous les tournois débutent à 11h, *il faudra donc être présent dès 9h00 pour un check-in de toutes les équipes et joueurs.*',
         {
@@ -81,6 +82,7 @@ export const ticketsGoal: MailGoal = {
           transactionState: TransactionState.paid,
         },
         itemId: `ticket-${user.type}`,
+        forUserId: user.id,
       },
       include: { item: true, forUser: true },
     });
