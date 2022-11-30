@@ -32,7 +32,8 @@ export const unlockedPlayersGoal: MailGoal = {
     {
       title: "Ton inscription n'a pas été confirmée",
       components: [
-        'L\'UTT Arena arrive et tu n\'as pas encore confirmé ta participation. Il ne te reste plus qu\'à cliquer sur "Verrouiller mon équipe" ou "Verrouiller mon inscription". A partir du moment où tu le feras il ne te sera plus possible de changer de tournoi.',
+        'L\'UTT Arena arrive, et tu n\'as plus que *jusqu\'à vendredi 16h pour confirmer ta participation*. Il ne te reste plus qu\'à cliquer sur "*Verrouiller mon équipe*" puis à te rendre sur la page "Mon compte" pour avoir accès à ton billet !',
+        'Mais attention, une fois que tu seras verouillé, il sera impossible de changer de tournoi.',
         {
           location: 'https://arena.utt.fr/dashboard/team',
           name: 'Accéder à arena.utt.fr',

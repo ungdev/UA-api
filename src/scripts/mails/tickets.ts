@@ -44,8 +44,8 @@ export const ticketsGoal: MailGoal = {
     {
       title: "Ton ticket pour l'UTT Arena",
       components: [
-        "Tu es bien inscrit.e à l'UTT Arena ! Tu trouveras ce-joint ton ticket pour l'évènement. Tu peux aussi le retrouver sur la billetterie, dans l'onglet \"Mon compte\".",
-        'Pour rappel, tous les tournois débutent samedi à 10h, il faudra donc être présent *à partir de 9h00* pour un check-in de toutes les équipes et joueurs',
+        "Tu es bien inscrit à l'UTT Arena ! Tu trouveras ci-joint ton billet, que tu devras présenter à l'entrée de l'UTT Arena. Tu peux aussi le retrouver sur la billetterie, dans l'onglet \"Mon compte\" de ton Dashboard.",
+        'Attention, tous les tournois débutent à 11h, *il faudra donc être présent dès 9h00 pour un check-in de toutes les équipes et joueurs.*',
         {
           location: 'https://arena.utt.fr/dashboard/account',
           name: 'Accéder à arena.utt.fr',
@@ -57,17 +57,16 @@ export const ticketsGoal: MailGoal = {
       components: [
         "Pour rentrer à l'UTT Arena, tu auras besoin de",
         [
-          'ton billet (que tu trouveras en pièce jointe)',
-          "une pièce d'identité (type carte d'identité ou permis de conduire)",
+          'ton *billet* (que tu trouveras en pièce jointe, ou sur le site)',
+          "une *pièce d'identité* (type carte d'identité, titre de séjour ou permis de conduire)",
         ],
-        "Nous te conseillons d'emporter également",
+        "Nous te conseillerons d'emporter également",
         [
           'Une gourde *vide*',
-          'Un tupperware. _Apporter de la nourriture est interdit_',
-          "une multiprise puisque tu n'auras sinon qu'une prise pour brancher tout ton setup",
-          'un câble ethernet',
+          "une multiprise puisque tu n'auras *qu'une seule prise mise à ta disposition pour brancher tout ton setup*",
+          "un câble ethernet (d'environ 7m)",
           'ton setup',
-          'de quoi dormir si tu souhaites passer la nuit sur place _(par exemple un tapis de sol)_',
+          'de quoi dormir si tu souhaite passer la nuit sur place (tapis de sol, sac de couchage, etc.)',
         ],
       ],
     },

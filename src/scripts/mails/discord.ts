@@ -50,7 +50,8 @@ export const discordGoal: MailGoal = {
     {
       title: "Rejoins le serveur discord de l'UTT Arena !",
       components: [
-        "Tu n'est pas sur le serveur discord de l'UTT Arena. Il faut cependant que tu le rejoignes car c'est notre principal outil de communication avec toi. Sur ce serveur, tu pourras également discuter avec les autres joueurs ainsi qu'avec ton équipe ou poser des questions aux organisateurs de ton tournoi.",
+        "Tu n'es pas encore sur le serveur discord Arena, nous te conseillons fortement de le rejoindre car il s'agit de notre principal outil de communication avec toi et les autres joueurs.",
+        'Sur ce serveur, tu pourras également y discuter avec les autres joueurs, ou poser des questions aux organisateurs de ton tournoi.',
         {
           name: 'Rejoindre le serveur Discord',
           location: 'https://discord.gg/WhxZwKU',
