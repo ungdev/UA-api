@@ -59,7 +59,7 @@ export default [
         userId,
         items.map((item) => ({ itemType: item.type, itemZone: item.zone })),
       );
-      return created(response);
+      return created(response, {});
     } catch (error) {
       return next(error);
     }
