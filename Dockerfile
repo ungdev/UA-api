@@ -10,7 +10,7 @@ USER node
 # Node has the uid 1000
 COPY --chown=node:node package.json yarn.lock schema.prisma ./
 
-RUN yarn --frozen-lockfile --production=false
+RUN yarn --frozen-lockfile --production=false --network-timeout 1000000
 
 COPY --chown=node:node ./ ./
 
@@ -18,6 +18,6 @@ RUN yarn prisma generate
 RUN yarn build
 
 # Prunes devDependencies
-RUN yarn install --production --ignore-scripts --prefer-offline
+RUN yarn install --production --ignore-scripts --prefer-offline --network-timeout 1000000
 
 CMD yarn start
