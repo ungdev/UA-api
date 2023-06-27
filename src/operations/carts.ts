@@ -14,6 +14,7 @@ import env from '../utils/env';
 import nanoid from '../utils/nanoid';
 import { fetchUserItems } from './item';
 import { fetchTeam, lockTeam, unlockTeam } from './team';
+import { fetchTournament } from "./tournament";
 
 export const dropStale = () =>
   database.$transaction([
@@ -143,9 +144,14 @@ export const updateCart = async (
     if (!ticket.forUser.teamId) {
       continue;
     }
-    // Verify every player paid in the team
+    // Verify every player paid in the team, the team is full, and there are still places left in the tournament
     const team = await fetchTeam(ticket.forUser.teamId);
-    if (team.players.every((player) => player.hasPaid)) {
+    const tournament = await fetchTournament(team.tournamentId);
+    if (
+      tournament.placesLeft !== 0 &&
+      team.players.length === tournament.playersPerTeam &&
+      team.players.every((player) => player.hasPaid)
+    ) {
       await lockTeam(team.id);
     }
   }

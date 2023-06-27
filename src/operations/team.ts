@@ -13,6 +13,8 @@ import {
 } from '../types';
 import nanoid from '../utils/nanoid';
 import { countCoaches, formatUser, userInclusions } from './user';
+import { setupDiscordTeam } from "../utils/discord";
+import { formatTournament } from "./tournament";
 
 const teamMaxCoachCount = 2;
 
@@ -284,6 +286,12 @@ export const lockTeam = async (teamId: string) => {
     },
     include: teamInclusions,
   });
+
+  // Setup team on Discord
+  const formattedAndUpdatedTeam = formatTeam(updatedTeam);
+  const tournament = await database.tournament.findUnique({ where: { id: formattedAndUpdatedTeam.tournamentId } });
+  const formattedTournament = await formatTournament(tournament);
+  await setupDiscordTeam(formattedAndUpdatedTeam, formattedTournament);
 
   return formatTeam(updatedTeam);
 };
