@@ -287,3 +287,17 @@ export const lockTeam = async (teamId: string) => {
 
   return formatTeam(updatedTeam);
 };
+
+export const unlockTeam = async (teamId: string) => {
+  const updatedTeam = await database.team.update({
+    data: {
+      lockedAt: null,
+    },
+    where: {
+      id: teamId,
+    },
+    include: teamInclusions,
+  });
+
+  return formatTeam(updatedTeam);
+};

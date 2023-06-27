@@ -13,7 +13,7 @@ import database from '../services/database';
 import env from '../utils/env';
 import nanoid from '../utils/nanoid';
 import { fetchUserItems } from './item';
-import { fetchTeam } from './team';
+import { fetchTeam, lockTeam, unlockTeam } from './team';
 
 export const dropStale = () =>
   database.$transaction([
@@ -106,12 +106,12 @@ export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
     },
   });
 
-export const updateCart = (
+export const updateCart = async (
   cartId: string,
   transactionId: number,
   transactionState: TransactionState,
-): Promise<DetailedCart> =>
-  database.cart.update({
+): Promise<DetailedCart> => {
+  const cart = await database.cart.update({
     data: {
       transactionState,
       paidAt: new Date(),
@@ -131,11 +131,43 @@ export const updateCart = (
     },
   });
 
-export const refundCart = (cartId: string): Promise<Cart> =>
-  database.cart.update({
+  // Lock the team if all the players have paid
+  // First, verify the cart is now paid
+  if (cart.transactionState !== TransactionState.paid) {
+    return cart;
+  }
+  // Fetch player tickets from the cart
+  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.name === 'ticket-player');
+  for (const ticket of playerTickets) {
+    // If the user is not in a team, skip
+    if (!ticket.forUser.teamId) {
+      continue;
+    }
+    // Verify every player paid in the team
+    const team = await fetchTeam(ticket.forUser.teamId);
+    if (team.players.every((player) => player.hasPaid)) {
+      await lockTeam(team.id);
+    }
+  }
+  return cart;
+};
+
+export const refundCart = async (cartId: string): Promise<Cart> => {
+  const cart = await database.cart.update({
     data: { transactionState: TransactionState.refunded },
     where: { id: cartId },
+    include: { cartItems: { include: { item: true, forUser: { include: { team: true } } } } },
   });
+
+  // Unlock the teams of the players whose tickets were refunded
+  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.name === 'ticket-player');
+  for (const ticket of playerTickets) {
+    if (ticket.forUser.team) {
+      await unlockTeam(ticket.forUser.team.id);
+    }
+  }
+  return cart;
+};
 
 export const forcePay = async (user: User) => {
   let itemId: string;
@@ -155,6 +187,16 @@ export const forcePay = async (user: User) => {
     default: {
       itemId = `ticket-${UserType.spectator}`;
     }
+  }
+
+  // Verify the user is a player, that he has a team, and that every player in the team has paid
+  // (except for this one, but we know it's going to be paid just after this)
+  if (
+    user.type === UserType.player &&
+    team &&
+    team.players.every((player) => player.id === user.id || player.hasPaid)
+  ) {
+    await lockTeam(team.id);
   }
 
   return database.cart.create({
