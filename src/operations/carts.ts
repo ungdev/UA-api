@@ -162,7 +162,7 @@ export const refundCart = async (cartId: string): Promise<Cart> => {
   });
 
   // Unlock the teams of the players whose tickets were refunded
-  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.name === 'ticket-player');
+  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.id === 'ticket-player');
   for (const ticket of playerTickets) {
     if (ticket.forUser.team) {
       await unlockTeam(ticket.forUser.team.id);
