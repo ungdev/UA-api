@@ -1,9 +1,13 @@
 import request from 'supertest';
+import { expect } from 'chai';
 import app from '../../../src/app';
-import { createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Cart, Error, Permission, User, TransactionState } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
+import * as teamOperations from '../../../src/operations/team';
+import * as tournamentOperations from '../../../src/operations/tournament';
+import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 
@@ -81,7 +85,7 @@ describe('POST /admin/carts/:cartId/refund', () => {
 
   it('should refund the cart, but not unlock the team as the user was a coach', async () => {
     // Verify the team is locked (it should be, but that's for safety)
-    let team = await fetchTeam(user.teamId);
+    let team = await teamOperations.fetchTeam(user.teamId);
     expect(team.lockedAt).to.be.not.null;
     expect(team.enteredQueueAt).to.be.null;
 
@@ -97,7 +101,7 @@ describe('POST /admin/carts/:cartId/refund', () => {
       .expect(204);
 
     // Verify the team has been unlocked
-    team = await fetchTeam(user.teamId);
+    team = await teamOperations.fetchTeam(user.teamId);
     expect(team.lockedAt).to.be.not.null;
     expect(team.enteredQueueAt).to.be.null;
   });
@@ -114,7 +118,7 @@ describe('POST /admin/carts/:cartId/refund', () => {
       .expect(204);
 
     // Verify the team has been unlocked
-    const team = await fetchTeam(user.teamId);
+    const team = await teamOperations.fetchTeam(user.teamId);
     expect(team.lockedAt).to.be.null;
     expect(team.enteredQueueAt).to.be.null;
   });

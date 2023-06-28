@@ -14,7 +14,7 @@ import env from '../utils/env';
 import nanoid from '../utils/nanoid';
 import { fetchUserItems } from './item';
 import { fetchTeam, lockTeam, unlockTeam } from './team';
-import { fetchTournament } from "./tournament";
+import { fetchTournament } from './tournament';
 
 export const dropStale = () =>
   database.$transaction([

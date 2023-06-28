@@ -9,19 +9,17 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
-import { Cart, CartItem, Error, PrimitiveCartItem, Team, Tournament, TransactionState, User } from '../../src/types';
+import { Cart, Error, PrimitiveCartItem, Team, Tournament, TransactionState, User } from '../../src/types';
 import { createFakeTeam, createFakeUser } from '../utils';
 import env from '../../src/utils/env';
 import { encodeToBase64, randomInt } from '../../src/utils/helpers';
 import * as network from '../../src/utils/network';
 import * as emailOperations from '../../src/services/email';
 import { fetchAllItems } from '../../src/operations/item';
-import { generateToken } from '../../src/utils/users';
-import { fetchCart, forcePay } from "../../src/operations/carts";
+import { forcePay } from '../../src/operations/carts';
 import { fetchTournament, formatTournament } from '../../src/operations/tournament';
-import { deleteTeam, joinTeam, kickUser, lockTeam, unlockTeam } from '../../src/operations/team';
-import leaveTeam from '../../src/controllers/teams/leaveTeam';
-import { fetchUser, formatUser } from '../../src/operations/user';
+import { joinTeam, kickUser, lockTeam, unlockTeam } from '../../src/operations/team';
+import { fetchUser } from '../../src/operations/user';
 
 const createEtupayPayload = (etupayBody: object) => {
   // Strinigifies the etupay body
