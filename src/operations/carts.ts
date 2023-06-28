@@ -138,7 +138,7 @@ export const updateCart = async (
     return cart;
   }
   // Fetch player tickets from the cart
-  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.name === 'ticket-player');
+  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.id === 'ticket-player');
   for (const ticket of playerTickets) {
     // If the user is not in a team, skip
     if (!ticket.forUser.teamId) {
@@ -147,11 +147,7 @@ export const updateCart = async (
     // Verify every player paid in the team, the team is full, and there are still places left in the tournament
     const team = await fetchTeam(ticket.forUser.teamId);
     const tournament = await fetchTournament(team.tournamentId);
-    if (
-      tournament.placesLeft !== 0 &&
-      team.players.length === tournament.playersPerTeam &&
-      team.players.every((player) => player.hasPaid)
-    ) {
+    if (team.players.length === tournament.playersPerTeam && team.players.every((player) => player.hasPaid)) {
       await lockTeam(team.id);
     }
   }
