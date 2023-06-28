@@ -13,7 +13,7 @@ import {
 import nanoid from '../utils/nanoid';
 import { countCoaches, formatUser, userInclusions } from './user';
 import { setupDiscordTeam } from "../utils/discord";
-import { formatTournament } from "./tournament";
+import { fetchTournament, formatTournament } from "./tournament";
 
 const teamMaxCoachCount = 2;
 
@@ -276,21 +276,35 @@ export const lockTeam = async (teamId: string) => {
     ),
   );
 
-  const updatedTeam = await database.team.update({
-    data: {
-      lockedAt: new Date(),
-    },
-    where: {
-      id: teamId,
-    },
-    include: teamInclusions,
-  });
+  const team = await fetchTeam(teamId);
+  const tournament = await fetchTournament(team.tournamentId);
+  let updatedTeam: PrimitiveTeamWithPrimitiveUsers;
 
-  // Setup team on Discord
-  const formattedAndUpdatedTeam = formatTeam(updatedTeam);
-  const tournament = await database.tournament.findUnique({ where: { id: formattedAndUpdatedTeam.tournamentId } });
-  const formattedTournament = await formatTournament(tournament);
-  await setupDiscordTeam(formattedAndUpdatedTeam, formattedTournament);
+  if (tournament.placesLeft > 0) {
+    // Lock the team the usual way
+    updatedTeam = await database.team.update({
+      data: {
+        lockedAt: new Date(),
+      },
+      where: {
+        id: teamId,
+      },
+      include: teamInclusions,
+    });
+    // Setup team on Discord
+    await setupDiscordTeam(team, tournament);
+  } else {
+    // Put the team in the waiting list
+    updatedTeam = await database.team.update({
+      data: {
+        enteredQueueAt: new Date(),
+      },
+      where: {
+        id: teamId,
+      },
+      include: teamInclusions,
+    });
+  }
 
   return formatTeam(updatedTeam);
 };
@@ -299,12 +313,45 @@ export const unlockTeam = async (teamId: string) => {
   const updatedTeam = await database.team.update({
     data: {
       lockedAt: null,
+      enteredQueueAt: null,
     },
     where: {
       id: teamId,
     },
     include: teamInclusions,
   });
+
+  const tournament = await fetchTournament(updatedTeam.tournamentId);
+  // We freed a place, so there is at least one place left
+  // (except if the team was already in the queue, but then we want to skip the condition, so that's fine)
+  if (tournament.placesLeft === 1) {
+    // We unlock the first team in the queue
+    const firstTeamInQueue = await database.team.findFirst({
+      where: {
+        enteredQueueAt: {
+          not: null,
+        },
+      },
+      orderBy: {
+        enteredQueueAt: 'asc',
+      },
+    });
+
+    if (firstTeamInQueue) {
+      // The team is no longer in the queue
+      await database.team.update({
+        data: {
+          enteredQueueAt: null,
+        },
+        where: {
+          id: firstTeamInQueue.id,
+        },
+      });
+
+      // We lock the team
+      await lockTeam(firstTeamInQueue.id);
+    }
+  }
 
   return formatTeam(updatedTeam);
 };
