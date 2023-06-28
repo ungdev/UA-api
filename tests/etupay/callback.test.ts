@@ -315,7 +315,7 @@ describe('POST /etupay/callback', function () {
     expect(csgoTeamFromDatabase.enteredQueueAt).to.be.null;
   });
 
-  it('should response api ok, lock the csgo team but not and place the lol team in the queue', async () => {
+  it('should respond api ok, lock the csgo team but not and place the lol team in the queue', async () => {
     sandbox.stub(network, 'getIp').returns('10.0.0.0');
     sandbox.stub(emailOperations, 'sendEmail').resolves();
 
@@ -333,11 +333,11 @@ describe('POST /etupay/callback', function () {
       lolAndCsgoTicketsCart.transactionId,
       TransactionState.canceled,
     );
-    unlockTeam(lolTeam.id);
-    unlockTeam(csgoTeam.id);
+    await unlockTeam(lolTeam.id);
+    await unlockTeam(csgoTeam.id);
   });
 
-  it('should response api ok, and not lock the LOL team because the team is not full', async () => {
+  it('should respond api ok, and not lock the LOL team because the team is not full', async () => {
     sandbox.stub(network, 'getIp').returns('10.0.0.0');
     sandbox.stub(emailOperations, 'sendEmail').resolves();
 
@@ -398,7 +398,7 @@ describe('POST /etupay/callback', function () {
     );
   });
 
-  it('should response api ok, and lock the team because there is enough place in the tournament', async () => {
+  it('should respond api ok, and lock the team because there is enough place in the tournament', async () => {
     sandbox.stub(network, 'getIp').returns('10.0.0.0');
     sandbox.stub(emailOperations, 'sendEmail').resolves();
 
