@@ -12,8 +12,8 @@ import {
 } from '../types';
 import nanoid from '../utils/nanoid';
 import { countCoaches, formatUser, userInclusions } from './user';
-import { setupDiscordTeam } from "../utils/discord";
-import { fetchTournament, formatTournament } from "./tournament";
+import { setupDiscordTeam } from '../utils/discord';
+import { fetchTournament } from './tournament';
 
 const teamMaxCoachCount = 2;
 
