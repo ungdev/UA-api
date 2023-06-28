@@ -186,21 +186,6 @@ export const deleteTeamRequest = (userId: string): PrismaPromise<RawUser> =>
     },
   });
 
-export const kickUser = (userId: string): PrismaPromise<RawUser> =>
-  // Warning: for this version of prisma, this method is not idempotent. It will throw an error if there is no asking team. It should be solved in the next versions
-  // Please correct this if this issue is closed and merged https://github.com/prisma/prisma/issues/3069
-  database.user.update({
-    data: {
-      team: {
-        disconnect: true,
-      },
-      type: null,
-    },
-    where: {
-      id: userId,
-    },
-  });
-
 export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise<PrimitiveTeamWithPrimitiveUsers> =>
   database.team.update({
     data: {
@@ -213,44 +198,6 @@ export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise
     },
     include: teamInclusions,
   });
-
-export const joinTeam = (teamId: string, user: User, newUserType?: UserType): PrismaPromise<RawUser> =>
-  database.user.update({
-    data: {
-      team: {
-        connect: {
-          id: teamId,
-        },
-      },
-      askingTeam: {
-        disconnect: true,
-      },
-      type: newUserType,
-    },
-    where: {
-      id: user.id,
-    },
-  });
-
-export const replaceUser = (
-  user: User,
-  targetUser: User,
-  team: Team,
-): Promise<[RawUser, RawUser, PrimitiveTeamWithPrimitiveUsers?]> => {
-  // Create the first transaction to replace the user
-  const transactions: [
-    PrismaPromise<RawUser>,
-    PrismaPromise<RawUser>,
-    PrismaPromise<PrimitiveTeamWithPrimitiveUsers>?,
-  ] = [kickUser(user.id), joinTeam(team.id, targetUser, user.type)];
-
-  // If he is the captain, change the captain
-  if (team.captainId === user.id) {
-    transactions.push(promoteUser(team.id, targetUser.id));
-  }
-
-  return database.$transaction(transactions);
-};
 
 export const lockTeam = async (teamId: string) => {
   // We want to group all queries in one transaction. It is not possible currently, but keep being updated on prisma
@@ -354,4 +301,77 @@ export const unlockTeam = async (teamId: string) => {
   }
 
   return formatTeam(updatedTeam);
+};
+
+export const joinTeam = (teamId: string, user: User, newUserType?: UserType): PrismaPromise<RawUser> => {
+  const promise = database.user.update({
+    data: {
+      team: {
+        connect: {
+          id: teamId,
+        },
+      },
+      askingTeam: {
+        disconnect: true,
+      },
+      type: newUserType,
+    },
+    where: {
+      id: user.id,
+    },
+  });
+  promise.then(async () => {
+    // Check if we need to lock the team
+    // First, check the type of the user and that he has paid
+    if (newUserType !== 'player' || !user.hasPaid) {
+      return;
+    }
+    const team = await fetchTeam(teamId);
+    const tournament = await fetchTournament(team.tournamentId);
+    // Then, check if the team is full and that every player has paid
+    if (team.players.length !== tournament.maxPlayers || !team.players.every((player) => player.hasPaid)) {
+      return;
+    }
+    // If we are still there, we passed all the tests, so we can lock the team
+    await lockTeam(teamId);
+  });
+  return promise;
+};
+
+export const kickUser = (userId: string): PrismaPromise<RawUser> => {
+  // Warning: for this version of prisma, this method is not idempotent. It will throw an error if there is no asking team. It should be solved in the next versions
+  // Please correct this if this issue is closed and merged https://github.com/prisma/prisma/issues/3069
+  const promise = database.user.update({
+    data: {
+      team: {
+        disconnect: true,
+      },
+      type: null,
+    },
+    where: {
+      id: userId,
+    },
+  });
+  promise.then((user) => unlockTeam(user.teamId));
+  return promise;
+};
+
+export const replaceUser = (
+  user: User,
+  targetUser: User,
+  team: Team,
+): Promise<[RawUser, RawUser, PrimitiveTeamWithPrimitiveUsers?]> => {
+  // Create the first transaction to replace the user
+  const transactions: [
+    PrismaPromise<RawUser>,
+    PrismaPromise<RawUser>,
+    PrismaPromise<PrimitiveTeamWithPrimitiveUsers>?,
+  ] = [kickUser(user.id), joinTeam(team.id, targetUser, user.type)];
+
+  // If he is the captain, change the captain
+  if (team.captainId === user.id) {
+    transactions.push(promoteUser(team.id, targetUser.id));
+  }
+
+  return database.$transaction(transactions);
 };
