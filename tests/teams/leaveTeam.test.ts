@@ -8,7 +8,7 @@ import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
 import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
-import { fetchUser } from '../../src/operations/user';
+import * as userOperations from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
 describe('DELETE /teams/current/users/current', () => {
@@ -90,7 +90,7 @@ describe('DELETE /teams/current/users/current', () => {
     await request(app).delete('/teams/current/users/current').set('Authorization', `Bearer ${coachToken}`).expect(204);
 
     // Verify the user has been removed from the team
-    const removedUser = await fetchUser(coach.id);
+    const removedUser = await userOperations.fetchUser(coach.id);
     expect(removedUser.teamId).to.be.null;
     expect(removedUser.type).to.be.null;
 
@@ -108,7 +108,7 @@ describe('DELETE /teams/current/users/current', () => {
   it('should successfully quit the team and unlock the team, and lock the waiting team', async () => {
     await request(app).delete('/teams/current/users/current').set('Authorization', `Bearer ${token}`).expect(204);
 
-    const removedUser = await fetchUser(user.id);
+    const removedUser = await userOperations.fetchUser(user.id);
 
     expect(removedUser.teamId).to.be.null;
     expect(removedUser.type).to.be.null;
