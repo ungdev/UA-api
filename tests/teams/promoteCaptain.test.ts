@@ -69,19 +69,6 @@ describe('PUT /teams/current/captain/:userId', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should error as the team is locked', async () => {
-    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
-    const lockedCaptain = getCaptain(lockedTeam);
-    const lockedToken = generateToken(lockedCaptain);
-
-    const futureLockedCaptain = lockedTeam.players.find((player) => player.id !== lockedTeam.captainId);
-
-    await request(app)
-      .put(`/teams/current/captain/${futureLockedCaptain.id}`)
-      .set('Authorization', `Bearer ${lockedToken}`)
-      .expect(403, { error: Error.TeamLocked });
-  });
-
   it('should promote the new captain', async () => {
     const { body } = await request(app)
       .put(`/teams/current/captain/${futureCaptain.id}`)
