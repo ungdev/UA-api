@@ -303,8 +303,8 @@ export const unlockTeam = async (teamId: string) => {
   return formatTeam(updatedTeam);
 };
 
-export const joinTeam = (teamId: string, user: User, newUserType?: UserType): PrismaPromise<RawUser> => {
-  const promise = database.user.update({
+const prismaRequestJoinTeam = (teamId: string, user: User, newUserType?: UserType): PrismaPromise<RawUser> =>
+  database.user.update({
     data: {
       team: {
         connect: {
@@ -320,28 +320,28 @@ export const joinTeam = (teamId: string, user: User, newUserType?: UserType): Pr
       id: user.id,
     },
   });
-  promise.then(async () => {
-    // Check if we need to lock the team
-    // First, check the type of the user and that he has paid
-    if (newUserType !== 'player' || !user.hasPaid) {
-      return;
-    }
-    const team = await fetchTeam(teamId);
-    const tournament = await fetchTournament(team.tournamentId);
-    // Then, check if the team is full and that every player has paid
-    if (team.players.length !== tournament.maxPlayers || !team.players.every((player) => player.hasPaid)) {
-      return;
-    }
-    // If we are still there, we passed all the tests, so we can lock the team
-    await lockTeam(teamId);
-  });
-  return promise;
+
+export const joinTeam = async (teamId: string, user: User, newUserType?: UserType): Promise<RawUser> => {
+  const updatedUser = await prismaRequestJoinTeam(teamId, user, newUserType);
+  // Check if we need to lock the team
+  // First, check the type of the user and that he has paid
+  if (newUserType !== 'player' || !user.hasPaid) {
+    return updatedUser;
+  }
+  const team = await fetchTeam(teamId);
+  const tournament = await fetchTournament(team.tournamentId);
+  // Then, check if the team is full and that every player has paid
+  if (team.players.length !== tournament.playersPerTeam || !team.players.every((player) => player.hasPaid)) {
+    return updatedUser;
+  }
+  // If we are still there, we passed all the tests, so we can lock the team
+  await lockTeam(teamId);
+
+  return updatedUser;
 };
 
-export const kickUser = (user: User): PrismaPromise<RawUser> => {
-  // Warning: for this version of prisma, this method is not idempotent. It will throw an error if there is no asking team. It should be solved in the next versions
-  // Please correct this if this issue is closed and merged https://github.com/prisma/prisma/issues/3069
-  const promise = database.user.update({
+const prismaRequestKickUser = (user: User): PrismaPromise<RawUser> =>
+  database.user.update({
     data: {
       team: {
         disconnect: true,
@@ -352,8 +352,14 @@ export const kickUser = (user: User): PrismaPromise<RawUser> => {
       id: user.id,
     },
   });
-  promise.then(() => user.type === 'player' && unlockTeam(user.teamId));
-  return promise;
+
+export const kickUser = async (user: User): Promise<RawUser> => {
+  // Warning: for this version of prisma, this method is not idempotent. It will throw an error if there is no asking team. It should be solved in the next versions
+  // Please correct this if this issue is closed and merged https://github.com/prisma/prisma/issues/3069
+  if (user.type === 'player') {
+    await unlockTeam(user.teamId);
+  }
+  return prismaRequestKickUser(user);
 };
 
 export const replaceUser = (
@@ -366,7 +372,7 @@ export const replaceUser = (
     PrismaPromise<RawUser>,
     PrismaPromise<RawUser>,
     PrismaPromise<PrimitiveTeamWithPrimitiveUsers>?,
-  ] = [kickUser(user), joinTeam(team.id, targetUser, user.type)];
+  ] = [prismaRequestKickUser(user), prismaRequestJoinTeam(team.id, targetUser, user.type)];
 
   // If he is the captain, change the captain
   if (team.captainId === user.id) {
