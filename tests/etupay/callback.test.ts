@@ -341,7 +341,7 @@ describe('POST /etupay/callback', function () {
 
     // Remove a player from the team
     const removedUser = await kickUser(
-      lolTeam.players.find((player: User) => player.id !== lolTeam.captainId && player.id !== lolPlayer2.id).id,
+      lolTeam.players.find((player: User) => player.id !== lolTeam.captainId && player.id !== lolPlayer2.id),
     );
 
     // This will be called twice, in two different circumstances

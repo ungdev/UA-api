@@ -3,29 +3,42 @@ import request from 'supertest';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
+import * as tournamentOperations from '../../src/operations/tournament';
 import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeTeam } from '../utils';
+import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
+import { fetchTeam } from '../../src/operations/team';
 
 describe('DELETE /teams/current/users/current', () => {
   let user: User;
+  let coach: User;
 
   let token: string;
+  let coachToken: string;
+
   let team: Team;
 
   before(async () => {
-    team = await createFakeTeam({ members: 3 });
+    const tournament = await tournamentOperations.fetchTournament('rl');
+    team = await createFakeTeam({ members: tournament.playersPerTeam, locked: true, paid: true });
 
     // Find a user that is not a captain
     user = team.players.find((player) => player.id !== team.captainId);
     token = generateToken(user);
+
+    // Create a coach
+    coach = await createFakeUser({ type: UserType.coach });
+    coachToken = generateToken(coach);
+    teamOperations.joinTeam(team.id, coach, UserType.coach);
   });
 
   after(async () => {
     await database.team.deleteMany();
+    // User have paid, so they each have a cart
+    await database.cart.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -51,24 +64,33 @@ describe('DELETE /teams/current/users/current', () => {
       .expect(403, { error: Error.CaptainCannotQuit });
   });
 
-  it('should error as the team is locked', async () => {
-    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
-    const lockedCaptain = getCaptain(lockedTeam);
-    const lockedToken = generateToken(lockedCaptain);
+  it('should successfully quit the team, but not unlock the team as the user is a coach', async () => {
+    // Verify the team is locked
+    let databaseTeam = await fetchTeam(team.id);
+    expect(databaseTeam.lockedAt).to.be.not.null;
+    expect(databaseTeam.enteredQueueAt).to.be.null;
 
-    await request(app)
-      .delete('/teams/current/users/current')
-      .set('Authorization', `Bearer ${lockedToken}`)
-      .expect(403, { error: Error.TeamLocked });
+    // Make the request
+    await request(app).delete('/teams/current/users/current').set('Authorization', `Bearer ${coachToken}`).expect(204);
+
+    // Verify the team is still locked
+    databaseTeam = await fetchTeam(team.id);
+    expect(databaseTeam.lockedAt).to.be.not.null;
+    expect(databaseTeam.enteredQueueAt).to.be.null;
   });
 
-  it('should succesfully quit the team', async () => {
+  it('should successfully quit the team and unlock the team', async () => {
     await request(app).delete('/teams/current/users/current').set('Authorization', `Bearer ${token}`).expect(204);
 
     const removedUser = await fetchUser(user.id);
 
     expect(removedUser.teamId).to.be.null;
     expect(removedUser.type).to.be.null;
+
+    // Verify the team has been unlocked
+    const databaseTeam = await fetchTeam(team.id);
+    expect(databaseTeam.lockedAt).to.be.null;
+    expect(databaseTeam.enteredQueueAt).to.be.null;
 
     // Rejoin the team for next tests
     await teamOperations.joinTeam(team.id, removedUser, UserType.player);

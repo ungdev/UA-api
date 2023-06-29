@@ -12,7 +12,7 @@ import {
   PrimitiveTeamWithPartialTournament,
 } from '../types';
 import nanoid from '../utils/nanoid';
-import { countCoaches, formatUser, userInclusions } from './user';
+import { countCoaches, fetchUser, formatUser, userInclusions } from './user';
 import { setupDiscordTeam } from '../utils/discord';
 import { fetchTournament } from './tournament';
 
@@ -339,7 +339,7 @@ export const joinTeam = (teamId: string, user: User, newUserType?: UserType): Pr
   return promise;
 };
 
-export const kickUser = (userId: string): PrismaPromise<RawUser> => {
+export const kickUser = (user: User): PrismaPromise<RawUser> => {
   // Warning: for this version of prisma, this method is not idempotent. It will throw an error if there is no asking team. It should be solved in the next versions
   // Please correct this if this issue is closed and merged https://github.com/prisma/prisma/issues/3069
   const promise = database.user.update({
@@ -350,10 +350,10 @@ export const kickUser = (userId: string): PrismaPromise<RawUser> => {
       type: null,
     },
     where: {
-      id: userId,
+      id: user.id,
     },
   });
-  promise.then((user) => unlockTeam(user.teamId));
+  promise.then(() => user.type === 'player' && unlockTeam(user.teamId));
   return promise;
 };
 
@@ -367,7 +367,7 @@ export const replaceUser = (
     PrismaPromise<RawUser>,
     PrismaPromise<RawUser>,
     PrismaPromise<PrimitiveTeamWithPrimitiveUsers>?,
-  ] = [kickUser(user.id), joinTeam(team.id, targetUser, user.type)];
+  ] = [kickUser(user), joinTeam(team.id, targetUser, user.type)];
 
   // If he is the captain, change the captain
   if (team.captainId === user.id) {
