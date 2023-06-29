@@ -29,7 +29,12 @@ describe('POST /admin/carts/:cartId/refund', function () {
     const coach = await createFakeUser();
     admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
-    const team = await createFakeTeam({ members: tournament.playersPerTeam - 1, paid: true, locked: true, tournament: 'lol' });
+    const team = await createFakeTeam({
+      members: tournament.playersPerTeam - 1,
+      paid: true,
+      locked: true,
+      tournament: 'lol',
+    });
     await teamOperations.joinTeam(team.id, user, 'player');
     await teamOperations.joinTeam(team.id, coach, 'coach');
 

@@ -7,19 +7,18 @@ import { expect } from 'chai';
 import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
-import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
 import { Cart, Error, PrimitiveCartItem, Team, Tournament, TransactionState, User } from '../../src/types';
 import { createFakeTeam, createFakeUser } from '../utils';
 import env from '../../src/utils/env';
 import { encodeToBase64, randomInt } from '../../src/utils/helpers';
+import * as cartOperations from '../../src/operations/carts';
 import * as network from '../../src/utils/network';
 import * as emailOperations from '../../src/services/email';
-import { fetchAllItems } from '../../src/operations/item';
-import { forcePay } from '../../src/operations/carts';
-import { fetchTournament, formatTournament } from '../../src/operations/tournament';
-import { joinTeam, kickUser, lockTeam, unlockTeam } from '../../src/operations/team';
-import { fetchUser } from '../../src/operations/user';
+import * as itemOperations from '../../src/operations/item';
+import * as tournamentOperations from '../../src/operations/tournament';
+import * as teamOperations from '../../src/operations/team';
+import * as userOperations from '../../src/operations/user';
 
 const createEtupayPayload = (etupayBody: object) => {
   // Strinigifies the etupay body
@@ -111,7 +110,7 @@ describe('POST /etupay/callback', function () {
         {
           itemId: 'ticket-player',
           quantity: 1,
-          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
           forUserId: user.id,
         },
       ],
@@ -126,7 +125,7 @@ describe('POST /etupay/callback', function () {
         {
           itemId: 'ticket-player',
           quantity: 1,
-          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
           forUserId: user.id,
         },
       ],
@@ -137,7 +136,7 @@ describe('POST /etupay/callback', function () {
     // Store the promises, to wait them all at the same time
     const promises = [];
 
-    lolTournament = await fetchTournament('lol');
+    lolTournament = await tournamentOperations.fetchTournament('lol');
     lolTeam = await createFakeTeam({ members: lolTournament.playersPerTeam, tournament: 'lol' });
     // Fill the tournament
     for (let index = 0; index < lolTournament.placesLeft; index++) {
@@ -145,18 +144,18 @@ describe('POST /etupay/callback', function () {
     }
     // Fetch the first 2 players, and force pay the others
     [lolPlayer1, lolPlayer2] = lolTeam.players;
-    for (const player of lolTeam.players.slice(2)) await forcePay(player);
+    for (const player of lolTeam.players.slice(2)) await cartOperations.forcePay(player);
 
-    const csgoTournament = await formatTournament(await fetchTournament('csgo'));
+    const csgoTournament = await tournamentOperations.fetchTournament('csgo');
     csgoTeam = await createFakeTeam({ members: csgoTournament.playersPerTeam, tournament: 'csgo' });
     [csgoPlayer] = csgoTeam.players;
-    for (const player of csgoTeam.players.slice(1)) promises.push(forcePay(player));
+    for (const player of csgoTeam.players.slice(1)) promises.push(cartOperations.forcePay(player));
 
     // Await all the operations
     await Promise.all(promises);
 
     // Refresh the tournament
-    lolTournament = await fetchTournament('lol');
+    lolTournament = await tournamentOperations.fetchTournament('lol');
 
     ({ payload: lolTicket1Payload } = await createCartAndPayload(
       lolPlayer1.id,
@@ -164,7 +163,7 @@ describe('POST /etupay/callback', function () {
         {
           itemId: 'ticket-player',
           quantity: 1,
-          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
           forUserId: lolPlayer1.id,
         },
       ],
@@ -177,13 +176,13 @@ describe('POST /etupay/callback', function () {
         {
           itemId: 'ticket-player',
           quantity: 1,
-          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
           forUserId: lolPlayer2.id,
         },
         {
           itemId: 'ticket-player',
           quantity: 1,
-          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
           forUserId: csgoPlayer.id,
         },
       ],
@@ -196,7 +195,7 @@ describe('POST /etupay/callback', function () {
         {
           itemId: 'ticket-player',
           quantity: 1,
-          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
           forUserId: lolPlayer2.id,
         },
       ],
@@ -267,7 +266,7 @@ describe('POST /etupay/callback', function () {
       {
         itemId: 'ticket-player',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
         forUserId: user.id,
       },
     ]);
@@ -331,8 +330,8 @@ describe('POST /etupay/callback', function () {
       lolAndCsgoTicketsCart.transactionId,
       TransactionState.canceled,
     );
-    await unlockTeam(lolTeam.id);
-    await unlockTeam(csgoTeam.id);
+    await teamOperations.unlockTeam(lolTeam.id);
+    await teamOperations.unlockTeam(csgoTeam.id);
   });
 
   it('should respond api ok, and not lock the LOL team because the team is not full', async () => {
@@ -340,7 +339,7 @@ describe('POST /etupay/callback', function () {
     sandbox.stub(emailOperations, 'sendEmail').resolves();
 
     // Remove a player from the team
-    const removedUser = await kickUser(
+    const removedUser = await teamOperations.kickUser(
       lolTeam.players.find((player: User) => player.id !== lolTeam.captainId && player.id !== lolPlayer2.id),
     );
 
@@ -360,16 +359,18 @@ describe('POST /etupay/callback', function () {
 
     // Test with the tournament not full
     // Remove a team from the tournament
-    const unlockedTeam = await unlockTeam(lolTournament.teams.find((team: Team) => team.id !== lolTeam.id).id);
+    const unlockedTeam = await teamOperations.unlockTeam(
+      lolTournament.teams.find((team: Team) => team.id !== lolTeam.id).id,
+    );
     await makeTest();
     // Lock back the team
-    await lockTeam(unlockedTeam.id);
+    await teamOperations.lockTeam(unlockedTeam.id);
     // Test with the tournament full
     await makeTest();
 
     // Add back the player
     // We need to re-fetch the user because we don't have enough data returned from the kickUser function
-    await joinTeam(lolTeam.id, await fetchUser(removedUser.id), UserType.player);
+    await teamOperations.joinTeam(lolTeam.id, await userOperations.fetchUser(removedUser.id), UserType.player);
   });
 
   it('should respond api ok, and add the LOL team to the queue', async () => {
@@ -386,7 +387,7 @@ describe('POST /etupay/callback', function () {
     expect(lolTeamFromDatabase.lockedAt).to.be.null;
     expect(lolTeamFromDatabase.enteredQueueAt).to.be.not.null;
     // Unlock the team for the next test
-    await unlockTeam(lolTeam.id);
+    await teamOperations.unlockTeam(lolTeam.id);
 
     // Make the cart not paid
     lolTicket2Cart = await cartOperations.updateCart(
@@ -406,13 +407,15 @@ describe('POST /etupay/callback', function () {
     expect(lolTeamFromDatabase.enteredQueueAt).to.be.null;
 
     // Remove a team from the tournament
-    const unlockedTeam = await unlockTeam(lolTournament.teams.find((team: Team) => team.id !== lolTeam.id).id);
+    const unlockedTeam = await teamOperations.unlockTeam(
+      lolTournament.teams.find((team: Team) => team.id !== lolTeam.id).id,
+    );
     await request(app).post(`/etupay/callback?payload=${lolTicket2Payload}`).expect(200, { api: 'ok' });
     lolTeamFromDatabase = await database.team.findUnique({ where: { id: lolTeam.id } });
     expect(lolTeamFromDatabase.lockedAt).to.be.not.null;
     expect(lolTeamFromDatabase.enteredQueueAt).to.be.null;
     // Lock back the team
-    await lockTeam(unlockedTeam.id);
+    await teamOperations.lockTeam(unlockedTeam.id);
   });
 });
 
@@ -429,7 +432,7 @@ describe('GET /etupay/callback', () => {
       {
         itemId: 'ticket-player',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
         forUserId: user.id,
       },
     ]);
@@ -454,7 +457,7 @@ describe('GET /etupay/callback', () => {
       {
         itemId: 'ticket-player',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
         forUserId: user.id,
       },
     ]);

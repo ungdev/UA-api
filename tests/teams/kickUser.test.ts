@@ -8,7 +8,7 @@ import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
-import { fetchUser } from '../../src/operations/user';
+import * as userOperations from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
 describe('DELETE /teams/current/users/:userId', () => {
@@ -124,7 +124,7 @@ describe('DELETE /teams/current/users/:userId', () => {
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(204);
 
-    const kickedUser = await fetchUser(coachToKick.id);
+    const kickedUser = await userOperations.fetchUser(coachToKick.id);
     expect(kickedUser.teamId).to.be.null;
     expect(kickedUser.type).to.be.null;
     databaseTeam = await teamOperations.fetchTeam(team.id);
@@ -151,7 +151,7 @@ describe('DELETE /teams/current/users/:userId', () => {
       .set('Authorization', `Bearer ${captainToken}`)
       .expect(204);
 
-    const kickedUser = await fetchUser(userToKick.id);
+    const kickedUser = await userOperations.fetchUser(userToKick.id);
     expect(kickedUser.teamId).to.be.null;
     expect(kickedUser.type).to.be.null;
     // Verify the team has been unlocked

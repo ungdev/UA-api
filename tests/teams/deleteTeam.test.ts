@@ -4,12 +4,12 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import * as tournamentOperations from '../../src/operations/tournament';
+import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
-import { fetchUser } from '../../src/operations/user';
 
 // eslint-disable-next-line func-names
 describe('DELETE /teams/current', function () {
@@ -95,7 +95,7 @@ describe('DELETE /teams/current', function () {
     let deletedTeam = await teamOperations.fetchTeam(team.id);
     expect(deletedTeam).to.be.null;
 
-    let updatedCaptain = await fetchUser(captain.id);
+    let updatedCaptain = await userOperations.fetchUser(captain.id);
     expect(updatedCaptain.teamId).to.be.null;
     expect(updatedCaptain.type).to.be.null;
 
@@ -109,7 +109,7 @@ describe('DELETE /teams/current', function () {
       .set('Authorization', `Bearer ${waitingTeamToDeleteCaptainToken}`)
       .expect(204);
 
-    updatedCaptain = await fetchUser(waitingTeamToDelete.captainId);
+    updatedCaptain = await userOperations.fetchUser(waitingTeamToDelete.captainId);
     expect(updatedCaptain.teamId).to.be.null;
     expect(updatedCaptain.type).to.be.null;
 
@@ -124,7 +124,7 @@ describe('DELETE /teams/current', function () {
   it('should delete the team, and lock the waiting team, as the team was locked', async () => {
     await request(app).delete(`/teams/current`).set('Authorization', `Bearer ${lockedTeamCaptainToken}`).expect(204);
 
-    const updatedCaptain = await fetchUser(lockedTeam.captainId);
+    const updatedCaptain = await userOperations.fetchUser(lockedTeam.captainId);
     expect(updatedCaptain.teamId).to.be.null;
     expect(updatedCaptain.type).to.be.null;
 

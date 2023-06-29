@@ -5,11 +5,11 @@ import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import * as cartOperations from '../../src/operations/carts';
 import * as tournamentOperations from '../../src/operations/tournament';
+import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
-import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
 // eslint-disable-next-line func-names
@@ -139,7 +139,7 @@ describe('POST /teams/current/join-requests/:userId', function () {
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    const updatedUser = await fetchUser(user.id);
+    const updatedUser = await userOperations.fetchUser(user.id);
 
     expect(body.players).to.have.lengthOf(team.players.length + 1);
     expect(updatedUser.askingTeamId).to.be.null;
@@ -177,7 +177,7 @@ describe('POST /teams/current/join-requests/:userId', function () {
     await cartOperations.updateCart(cart.id, cart.transactionId, 'paid');
 
     // Remove the user for the next test
-    await teamOperations.kickUser(await fetchUser(user2.id));
+    await teamOperations.kickUser(await userOperations.fetchUser(user2.id));
     await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
   });
 
@@ -207,7 +207,7 @@ describe('POST /teams/current/join-requests/:userId', function () {
     await cartOperations.updateCart(cart.id, cart.transactionId, 'paid');
 
     // Remove the user for the next test
-    await teamOperations.kickUser(await fetchUser(user2.id));
+    await teamOperations.kickUser(await userOperations.fetchUser(user2.id));
     await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
   });
 
@@ -222,7 +222,7 @@ describe('POST /teams/current/join-requests/:userId', function () {
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    const updatedUser = await fetchUser(user2.id);
+    const updatedUser = await userOperations.fetchUser(user2.id);
 
     expect(body.players).to.have.lengthOf(team.players.length + 1);
     expect(updatedUser.askingTeamId).to.be.null;
@@ -235,7 +235,7 @@ describe('POST /teams/current/join-requests/:userId', function () {
     expect(team.enteredQueueAt).to.be.not.null;
 
     // Remove the user for the next test
-    await teamOperations.kickUser(await fetchUser(user2.id));
+    await teamOperations.kickUser(await userOperations.fetchUser(user2.id));
     await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
   });
 
@@ -261,7 +261,7 @@ describe('POST /teams/current/join-requests/:userId', function () {
     expect(team.enteredQueueAt).to.be.null;
 
     // Remove the user
-    await teamOperations.kickUser(await fetchUser(user2.id));
+    await teamOperations.kickUser(await userOperations.fetchUser(user2.id));
     await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
 
     // Readd the removed team from the tournament
@@ -276,7 +276,7 @@ describe('POST /teams/current/join-requests/:userId', function () {
   });
 
   it('should fail because the user has not asked for a team', async () => {
-    await teamOperations.kickUser(await fetchUser(user.id));
+    await teamOperations.kickUser(await userOperations.fetchUser(user.id));
     await request(app)
       .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
