@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
+import { isCaptain } from '../../middlewares/team';
 import { validateBody } from '../../middlewares/validation';
 import { conflict, success } from '../../utils/responses';
 import { updateTeam } from '../../operations/team';
@@ -12,7 +12,6 @@ import { Error } from '../../types';
 export default [
   // Middlewares
   ...isCaptain,
-  isTeamNotLocked,
   validateBody(
     Joi.object({
       name: validators.teamName.required(),

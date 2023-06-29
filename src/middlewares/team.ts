@@ -65,18 +65,3 @@ export const noSpectator = [
     return next();
   },
 ];
-
-// Checks if the team is locked. If it is, it will return an error.
-export const isTeamNotLocked = (request: Request, response: Response, next: NextFunction) => {
-  const { team } = getRequestInfo(response);
-
-  if (!team) {
-    return forbidden(response, Error.NotInTeam);
-  }
-
-  if (team.lockedAt) {
-    return forbidden(response, Error.TeamLocked);
-  }
-
-  return next();
-};
