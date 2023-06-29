@@ -131,19 +131,6 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
   return formatTeam(team);
 };
 
-export const deleteTeam = (teamId: string) =>
-  database.$transaction([
-    database.user.updateMany({
-      where: { teamId },
-      data: {
-        type: null,
-      },
-    }),
-    database.team.delete({
-      where: { id: teamId },
-    }),
-  ]);
-
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
   // We check the amount of coaches at that point
   const teamCoachCount = await countCoaches(teamId);
@@ -380,4 +367,21 @@ export const replaceUser = (
   }
 
   return database.$transaction(transactions);
+};
+
+export const deleteTeam = async (team: Team) => {
+  if (team.lockedAt) {
+    await unlockTeam(team.id);
+  }
+  return database.$transaction([
+    database.user.updateMany({
+      where: { teamId: team.id },
+      data: {
+        type: null,
+      },
+    }),
+    database.team.delete({
+      where: { id: team.id },
+    }),
+  ]);
 };
