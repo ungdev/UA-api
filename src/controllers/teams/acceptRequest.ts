@@ -11,7 +11,6 @@ import { getRequestInfo } from '../../utils/users';
 export default [
   // Middlewares
   ...isCaptain,
-  isTeamNotLocked,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
@@ -35,7 +34,7 @@ export default [
         return forbidden(response, Error.TeamFull);
       }
 
-      await joinTeam(team.id, askingUser);
+      await joinTeam(team.id, askingUser, askingUser.type);
 
       const updatedTeam = await fetchTeam(team.id);
 
