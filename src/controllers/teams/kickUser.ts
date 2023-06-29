@@ -27,7 +27,7 @@ export default [
       // If the user to kick is the captain, refuses the request
       if (userToKick.id === team.captainId) return forbidden(response, Error.CaptainCannotQuit);
 
-      await kickUser(userToKick.id);
+      await kickUser(userToKick);
 
       return noContent(response);
     } catch (error) {

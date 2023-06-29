@@ -142,7 +142,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail because the user has not asked for a team', async () => {
-    await teamOperations.kickUser(user.id);
+    await teamOperations.kickUser(user);
     await request(app)
       .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)

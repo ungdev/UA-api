@@ -141,7 +141,7 @@ describe('POST /admin/users/:userId/force-pay', function () {
   it('should response api ok, and not lock the team because the team is not full', async () => {
     // Remove a player from the team
     const removedUser = await teamOperations.kickUser(
-      team.players.find((player: User) => player.id !== team.captainId && player.id !== player2.id).id,
+      team.players.find((player: User) => player.id !== team.captainId && player.id !== player2.id),
     );
 
     // This will be called twice, in two different circumstances
