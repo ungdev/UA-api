@@ -12,7 +12,7 @@ import {
   PrimitiveTeamWithPartialTournament,
 } from '../types';
 import nanoid from '../utils/nanoid';
-import { countCoaches, fetchUser, formatUser, userInclusions } from './user';
+import { countCoaches, formatUser, userInclusions } from './user';
 import { setupDiscordTeam } from '../utils/discord';
 import { fetchTournament } from './tournament';
 
