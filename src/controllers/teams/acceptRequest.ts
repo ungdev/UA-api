@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
+import { isCaptain } from '../../middlewares/team';
 import { forbidden, notFound, success } from '../../utils/responses';
 import { fetchTeam, joinTeam } from '../../operations/team';
 import { filterTeam } from '../../utils/filters';
