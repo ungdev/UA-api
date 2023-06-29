@@ -17,10 +17,11 @@ describe('DELETE /teams/current/users/:userId', () => {
 
   let captainToken: string;
   let team: Team;
+  let waitingTeam: Team;
 
   before(async () => {
     const tournament = await tournamentOperations.fetchTournament('rl');
-    team = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true });
+    team = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true, tournament: 'rl' });
 
     // Find a user that is not a captain
     userToKick = team.players.find((player) => player.id !== team.captainId);
@@ -29,6 +30,22 @@ describe('DELETE /teams/current/users/:userId', () => {
 
     const captain = getCaptain(team);
     captainToken = generateToken(captain);
+
+    // Fill the tournament
+    const promises = [];
+    for (let index = 0; index < tournament.placesLeft - 1; index++) {
+      promises.push(createFakeTeam({ members: tournament.playersPerTeam, locked: true, paid: true, tournament: 'rl' }));
+    }
+    await Promise.all(promises);
+
+    // Create a team that is in the waiting list
+    waitingTeam = await createFakeTeam({
+      members: tournament.playersPerTeam,
+      locked: false,
+      paid: true,
+      tournament: 'rl',
+    });
+    await teamOperations.lockTeam(waitingTeam.id);
   });
 
   after(async () => {
@@ -116,6 +133,11 @@ describe('DELETE /teams/current/users/:userId', () => {
 
     // Rejoin the team for next tests
     await teamOperations.joinTeam(team.id, kickedUser, UserType.player);
+
+    // Verify the waiting team is still in the queue
+    waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
+    expect(waitingTeam.lockedAt).to.be.null;
+    expect(waitingTeam.enteredQueueAt).to.be.not.null;
   });
 
   it('should successfully kick the user (as the captain of the team and as a coach), and unlock the team', async () => {
@@ -136,6 +158,11 @@ describe('DELETE /teams/current/users/:userId', () => {
     const databaseTeam = await teamOperations.fetchTeam(team.id);
     expect(databaseTeam.lockedAt).to.be.null;
     expect(databaseTeam.enteredQueueAt).to.be.null;
+
+    // Verify the waiting team has been locked
+    waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
+    expect(waitingTeam.lockedAt).to.be.not.null;
+    expect(waitingTeam.enteredQueueAt).to.be.null;
   });
 
   it('should fail as the user has already been kicked', async () => {

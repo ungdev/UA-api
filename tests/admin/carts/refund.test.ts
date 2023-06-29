@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeTeam, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Cart, Error, Permission, User, TransactionState } from '../../../src/types';
+import { Cart, Error, Permission, User, TransactionState, Team } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import * as teamOperations from '../../../src/operations/team';
 import * as tournamentOperations from '../../../src/operations/tournament';
@@ -11,12 +11,17 @@ import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 
-describe('POST /admin/carts/:cartId/refund', () => {
+// eslint-disable-next-line func-names
+describe('POST /admin/carts/:cartId/refund', function () {
+  // Setup is slow
+  this.timeout(30000);
+
   let user: User;
   let admin: User;
   let adminToken: string;
   let playerCart: Cart;
   let coachCart: Cart;
+  let waitingTeam: Team;
 
   before(async () => {
     const tournament = await tournamentOperations.fetchTournament('lol');
@@ -24,9 +29,17 @@ describe('POST /admin/carts/:cartId/refund', () => {
     const coach = await createFakeUser();
     admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
-    const team = await createFakeTeam({ members: tournament.playersPerTeam - 2, paid: true, locked: true });
+    const team = await createFakeTeam({ members: tournament.playersPerTeam - 1, paid: true, locked: true, tournament: 'lol' });
     await teamOperations.joinTeam(team.id, user, 'player');
     await teamOperations.joinTeam(team.id, coach, 'coach');
+
+    // Fill the tournament
+    for (let index = 0; index < tournament.placesLeft - 1; index++) {
+      await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true, tournament: 'lol' });
+    }
+    waitingTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: 'lol' });
+    await teamOperations.lockTeam(waitingTeam.id);
+
     // Refresh the user
     user = await userOperations.fetchUser(user.id);
 
@@ -104,9 +117,14 @@ describe('POST /admin/carts/:cartId/refund', () => {
     team = await teamOperations.fetchTeam(user.teamId);
     expect(team.lockedAt).to.be.not.null;
     expect(team.enteredQueueAt).to.be.null;
+
+    // Verify the waiting team has not been unlocked
+    waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
+    expect(waitingTeam.lockedAt).to.be.null;
+    expect(waitingTeam.enteredQueueAt).to.be.not.null;
   });
 
-  it('should refund the cart, and unlock the team', async () => {
+  it('should refund the cart, unlock the team, and make the waiting team locked', async () => {
     await database.cart.update({
       data: { transactionState: TransactionState.paid },
       where: { id: playerCart.id },
@@ -121,5 +139,10 @@ describe('POST /admin/carts/:cartId/refund', () => {
     const team = await teamOperations.fetchTeam(user.teamId);
     expect(team.lockedAt).to.be.null;
     expect(team.enteredQueueAt).to.be.null;
+
+    // Verify the waiting team has been locked
+    waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
+    expect(waitingTeam.lockedAt).to.be.not.null;
+    expect(waitingTeam.enteredQueueAt).to.be.null;
   });
 });
