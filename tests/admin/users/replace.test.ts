@@ -99,7 +99,7 @@ describe('POST /admin/users/:userId/replace', () => {
       .send({ replacingUserId: user.id })
       .expect(403, { error: Error.AlreadyInTeam }));
 
-  it('should error as the team is not locked', async () => {
+  it('should error as the team is not locked (and is not in the waiting list)', async () => {
     const notLockedTeam = await createFakeTeam();
     const notLockedUser = getCaptain(notLockedTeam);
 
@@ -142,22 +142,35 @@ describe('POST /admin/users/:userId/replace', () => {
   });
 
   it('should replace the user', async () => {
-    const { body } = await request(app)
-      .post(`/admin/users/${user.id}/replace`)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send(validBody)
-      .expect(200);
+    const makeTest = async () => {
+      const { body } = await request(app)
+        .post(`/admin/users/${user.id}/replace`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(validBody)
+        .expect(200);
 
-    const updatedTeam = await teamOperations.fetchTeam(team.id);
+      const updatedTeam = await teamOperations.fetchTeam(team.id);
 
-    expect(body.replacedUser.id).to.be.equal(user.id);
-    expect(body.replacedUser.teamId).to.be.null;
-    expect(body.replacedUser.type).to.be.null;
+      expect(body.replacedUser.id).to.be.equal(user.id);
+      expect(body.replacedUser.teamId).to.be.null;
+      expect(body.replacedUser.type).to.be.null;
 
-    expect(body.replacingUser.id).to.be.equal(targetUser.id);
-    expect(body.replacingUser.teamId).to.be.equal(team.id);
-    expect(body.replacingUser.type).to.be.equal(user.type);
+      expect(body.replacingUser.id).to.be.equal(targetUser.id);
+      expect(body.replacingUser.teamId).to.be.equal(team.id);
+      expect(body.replacingUser.type).to.be.equal(user.type);
 
-    expect(updatedTeam.captainId).to.be.equal(body.replacingUser.id);
+      expect(updatedTeam.captainId).to.be.equal(body.replacingUser.id);
+    };
+    // Test with locked team
+    await makeTest();
+
+    // Reset
+    await teamOperations.replaceUser(targetUser, user, team);
+    await database.user.update({ where: { id: user.id }, data: { type: user.type } }); // user was not updated, so it still contains the old type
+    await database.user.update({ where: { id: targetUser.id }, data: { type: user.type } }); // user was not updated, so it still contains the old type
+
+    // Test with team in queue
+    await database.team.update({ where: { id: team.id }, data: { lockedAt: null, enteredQueueAt: new Date() } });
+    await makeTest();
   });
 });
