@@ -76,7 +76,7 @@ describe('GET /discord/oauth', () => {
       .get('/discord/oauth')
       .query({
         code: registerOauthCode(true),
-        state: encrypt(user.id.slice(1)).toString('base64').slice(1),
+        state: encrypt(user.id.slice(1)).toString('base64'),
       })
       .expect(302)
       .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=5`));
