@@ -40,16 +40,17 @@ export default [
 
       // Parallelize the request to the Discord API and the Database
       const [discordUserToken, user] = await Promise.all([getToken(code), userPromise]);
-      // Attach sentry error log (if an error occurs) to the user
-      Sentry.setUser({ id: user.id, username: user.username, email: user.email });
-      // Add extra details in sentry errors (involved discord ids)
-      Sentry.setExtra('currentDiscordId', user.discordId);
 
       // State is invalid ! User may have modified it on the fly
       // Or this is not the scope we asked access for => bad request
       // Or we haven't got a bearer token, abort process too
       if (!user || discordUserToken.scope !== 'identify' || discordUserToken.token_type?.toLowerCase() !== 'bearer')
         return redirect(response, DiscordFeedbackCode.ERR_BAD_REQUEST);
+
+      // Attach sentry error log (if an error occurs) to the user
+      Sentry.setUser({ id: user.id, username: user.username, email: user.email });
+      // Add extra details in sentry errors (involved discord ids)
+      Sentry.setExtra('currentDiscordId', user.discordId);
 
       // We now retrieve Authorization information. Contains basic user data containing
       // user id, username, discriminator, avatar url and public flags (ie. public badges)
