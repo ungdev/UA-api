@@ -49,9 +49,9 @@ Retournez dans l'invite de commande Ubuntu, et tapez les commandes suivantes. Po
 
 1.  `curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -`
 2.  `sudo apt-get install -y nodejs`
-3.  `sudo npm install -g yarn`
+3.  `sudo npm install -g pnpm`
 
-Si en tapant `yarn --version`, vous n'obtenez pas d'erreur, vous avez réussi à installer yarn !
+Si en tapant `pnpm --version`, vous n'obtenez pas d'erreur, vous avez réussi à installer pnpm !
 
 ​Ensuite, il va falloir récupérer votre clé SSH afin de la lier à votre compte GitHub (créez-en un si vous n'en avez pas) :
 
@@ -83,7 +83,7 @@ Pour récupérer le code, il faut "cloner" le dépôt Github. Commencez par cré
 ### Préparer le [front](https://github.com/ungdev/UA-front)
 
 Utilisez la commande `cd UA-front` pour vous déplacer dans le dossier du front. \
-Désormais, exécutez `yarn` et laissez les dépendances s'installer ! \
+Désormais, exécutez `pnpm install` et laissez les dépendances s'installer ! \
 Executez enfin `cp .env.example .env` pour génerer le fichier de configuration des variables d'environnement.
 
 Le front est prêt ! Retrouvez sur le readme [la liste des scripts disponibles](https://github.com/ungdev/UA-front#scripts-disponibles).
@@ -91,7 +91,7 @@ Le front est prêt ! Retrouvez sur le readme [la liste des scripts disponibles](
 ### Préparer l'[api](https://github.com/ungdev/UA-api)
 
 Utilisez la commande `cd ../UA-api` _(ou `cd UA-api` si vous ne venez pas de terminer l'étape précédente)_ pour vous déplacer dans le dossier de l'api. \
-Désormais, exécutez `yarn` et laissez les dépendances s'installer !
+Désormais, exécutez `pnpm install` et laissez les dépendances s'installer !
 
 #### Créer une base de donnée locale
 
@@ -110,8 +110,8 @@ Exécutez `CREATE DATABASE arena CHARACTER SET utf8;` dedans. Cela va créer une
 Depuis le terminal Ubuntu, dans le dossier du projet "UA API" que vous avez obtenu en clonant depuis GitHub, effectuez :
 
 - `cp .env.example .env`. Ensuite, modifiez la variable `DATABASE_URL` dans le `.env` avec la valeur `mysql://root:@localhost/arena`
-- `yarn prisma db push`
-- `yarn fake` Commande optionnelle pour générer des faux users et fausses équipes.
+- `pnpm prisma db push`
+- `pnpm fake` Commande optionnelle pour générer des faux users et fausses équipes.
 
 Si tout ce passe bien, vous devriez avoir un retour avec marqué, entre autres, `Your database is now in sync with your schema`.
 _Si prisma n'arrive pas à se connecter à la base de données (ERR: P1001), [assurez vous d'utiliser WSL 1](#méthode-rapide)._
@@ -139,13 +139,13 @@ Vous pouvez sortir de la console mysql en faisant `exit`.
 
 Si ce n'est pas déjà fait, copiez le fichier `.env.example`. Pour ce faire, tapez simplement `cp .env.example .env`. Rendez-vous dans le fichier `.env` et au niveau de la variable `DATABASE_URL`, changez le `root@root` en `dev@dev` et le `localhost` en `127.0.0.1`. La ligne doit ressembler à `DATABASE_URL=mysql://dev:dev@127.0.0.1/arena`.
 
-On va maintenant installer les dépendances manquantes. Pour cela, entrez juste `yarn`.
+On va maintenant installer les dépendances manquantes. Pour cela, entrez juste `pnpm`.
 Il faut ensuite configurer les fichiers pour la base de données. Il faut entrer la commande suivante : \
-`yarn prisma db push` - cela va créer les tables de la base de données ainsi que leur structure.
+`pnpm prisma db push` - cela va créer les tables de la base de données ainsi que leur structure.
 
 Maintenant la base de données configurée, nous allons la remplir grâce au fichier seed.sql qui se trouve dans le dossier. Entrez `mysql -u dev -p arena < seed.sql` pour, dans un premier temps se connecter à la base de données puis dans un second temps remplir cette base de données avec les informations du fichier seed.sql. Le mot de passe à utiliser quand il est demandé est `dev`.
 
-Pour voir si tout s'est correctement passé, faites la commande `yarn dev`.
+Pour voir si tout s'est correctement passé, faites la commande `pnpm dev`.
 
 Félicitation, vous venez d'importer toutes les données dans la base de données locale.
 

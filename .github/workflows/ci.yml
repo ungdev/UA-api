@@ -13,10 +13,10 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn --frozen-lockfile
-      - run: yarn prisma generate
-      - run: yarn lint
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
+      - run: pnpm lint
 
   build:
     runs-on: ubuntu-latest
@@ -25,10 +25,10 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn --frozen-lockfile
-      - run: yarn prisma generate
-      - run: yarn build
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
+      - run: pnpm build
 
   test:
     runs-on: ubuntu-latest
@@ -53,12 +53,12 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn --frozen-lockfile
-      - run: yarn prisma generate
-      - run: yarn prisma db push
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
+      - run: pnpm prisma db push
       - run: docker exec -i mariadb mysql -utest -ptest arena < seed.sql
-      - run: yarn test:coverage
+      - run: pnpm test:coverage
       - uses: codecov/codecov-action@v1
 
   deploy-dbdocs:
@@ -73,13 +73,13 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn --frozen-lockfile
-      - run: yarn prisma generate
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
       - env:
           BRANCH: ${{ github.ref == 'refs/heads/master' && 'master' || 'dev' }}
           DBDOCS_TOKEN: ${{ secrets.DBDOCS_TOKEN }}
-        run: yarn dbdocs build dbml/schema.dbml --project=${{ env.BRANCH }}
+        run: pnpm dbdocs build dbml/schema.dbml --project=${{ env.BRANCH }}
 
   deploy:
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
