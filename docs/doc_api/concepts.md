@@ -12,7 +12,7 @@ Ces informations sont envoyées à l'API sur `POST /auth/register` et l'utilisat
 
 ### Validation du compte
 
-L'utilisateur est redirigé du mail d'inscription vers `GET https://arena.utt.fr/?action=validate&state={token}`. L'interface va alors envoyer une requête sur l'API `POST /auth/validate/{token}` et recevra, en cas de succès, une réponse `HTTP 200`, contenant les données de l'utilisateur, ainsi qu'un token d'authentification sur l'API. \
+L'utilisateur est redirigé du mail d'inscription vers `GET https://arena.utt.fr/validate/{token}`. L'interface va alors envoyer une requête sur l'API `POST /auth/validate/{token}` et recevra, en cas de succès, une réponse `HTTP 200`, contenant les données de l'utilisateur, ainsi qu'un token d'authentification sur l'API. \
 Le compte est désormais validé et l'utilisateur pourra se reconnecter !
 
 ### Tableau récapitulatif
@@ -22,7 +22,7 @@ Le compte est désormais validé et l'utilisateur pourra se reconnecter !
 |   1   | `https://arena.utt.fr`                                | L'utilisateur rentre: `username`, `firstname`, `lastname`, `age`, `email`.                    | Pas de compte                        |
 |   2   | `POST /auth/register`                                 | L'interface envoie les données rentrées par l'utilisateur à l'API.                            | Création d'un compte **non vérifié** |
 |   3   | Envoi d'un email pour confirmation de l'adresse email | Le mail contient le lien de confirmation de compte qui permet d'accéder à la prochaine étape. | Compte non vérifié                   |
-|   4   | `https://arena.utt.fr/?action=validate&state={token}` | `token` que l'interface va pouvoir renvoyer dans sa prochaine requête.                        | Compte non vérifié                   |
+|   4   | `https://arena.utt.fr/validate/{token}` | `token` que l'interface va pouvoir renvoyer dans sa prochaine requête.                        | Compte non vérifié                   |
 |   5   | `POST /auth/validate/{token}`                         | `token` renvoyé par le front vers l'API.                                                      | Vérification du compte en cours      |
 |   6   | Le serveur a répondu `HTTP 200`                       | Un token d'authentification de l'API est renvoyé en plus des informations de l'utilisateur.   | Compte **vérifié**                   |
 
@@ -37,7 +37,7 @@ Le processus de réinitialisation du mot de passe d'un compte UA ressemble beauc
 |   1   | `https://arena.utt.fr`                                                       | L'utilisateur rentre l'`email` de son compte UA                                              | Oublié                        |
 |   2   | `POST /auth/reset-password/ask`                                              | `email` rentré par l'utilisateur                                                             | Génération du `resetToken`    |
 |   3   | Envoi d'un email de réinitialisation de mot de passe _(si le compte existe)_ | Lien de réinitialisation du mot de passe, ce qui permet d'accéder à l'étape suivante.        | `resetToken` créé             |
-|   4   | `https://arena.utt.fr/?action=pwd-reset&state={resetToken}`                  | `resetToken` que l'interface va pouvoir échanger pendant la prochaine requête.               | `resetToken` créé             |
+|   4   | `https://arena.utt.fr/reset/{resetToken}`                  | `resetToken` que l'interface va pouvoir échanger pendant la prochaine requête.               | `resetToken` créé             |
 |   5   | `POST /auth/reset-password/{resetToken}`                                     | `resetToken` du compte, avec le nouveau `password` dans le corps de la requête.              | Modification du mot de passe. |
 |   6   | Le serveur a répondu `HTTP 200`                                              | Un token d'authentification sur l'API est renvoyé en plus des informations de l'utilisateur. | **Mot de passe modifié !**    |
 

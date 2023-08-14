@@ -16,7 +16,7 @@ import type { Mail as Email } from './services/email';
 export enum ActionFeedback {
   DISCORD_OAUTH = 'oauth',
   VALIDATE = 'validate',
-  PASSWORD_RESET = 'pwd-reset',
+  PASSWORD_RESET = 'reset',
 }
 
 export enum DiscordFeedbackCode {
