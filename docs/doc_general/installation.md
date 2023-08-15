@@ -1,8 +1,8 @@
 # Installation de WSL
 
-**Cette installation concerne Windows 10, si ce n'est pas votre cas, contactez le respo dev.**
+**Cette installation concerne Windows 10-11, si ce n'est pas votre cas, contactez le respo dev.**
 
-##### _Pour aller plus vite, ayez un bonne connexion lors de l'installation._
+##### _Pour aller plus vite, ayez une bonne connexion lors de l'installation._
 
 On va commencer par installer WSL (Windows Sub-system for Linux). Il y a 2 méthodes, l'une d'elle est plus simple mais elle ne fonctionne pas sur tous les ordinateurs.
 
