@@ -10,6 +10,8 @@ USER node
 # Node has the uid 1000
 COPY --chown=node:node package.json pnpm-lock.yaml schema.prisma ./
 
+RUN npm install -g pnpm
+
 RUN pnpm install --frozen-lockfile --production=false
 
 COPY --chown=node:node ./ ./
