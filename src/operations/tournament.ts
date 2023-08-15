@@ -1,8 +1,11 @@
+import { Caster, PrismaPromise } from '@prisma/client';
 import database from '../services/database';
 import { PrimitiveTournament, Tournament, TournamentId } from '../types';
 import { fetchTeams } from './team';
 
-export const formatTournament = async (tournament: PrimitiveTournament): Promise<Tournament> => {
+export const formatTournament = async (
+  tournament: PrimitiveTournament & { casters: Caster[] },
+): Promise<Tournament> => {
   if (!tournament) return null;
 
   const lockedTeamsCount = await database.team.count({
@@ -31,14 +34,38 @@ export const formatTournament = async (tournament: PrimitiveTournament): Promise
 };
 
 export const fetchTournament = async (id: TournamentId): Promise<Tournament> => {
-  const tournament = await database.tournament.findUnique({ where: { id } });
+  const tournament = await database.tournament.findUnique({ where: { id }, include: { casters: true } });
 
   return formatTournament(tournament);
 };
 
 export const fetchTournaments = async (): Promise<Tournament[]> => {
-  // fetch all tournaments
-  const tournaments = await database.tournament.findMany();
+  // fetch all tournaments withs their casters
+  const tournaments = await database.tournament.findMany({
+    include: {
+      casters: true,
+    },
+  });
 
   return Promise.all(tournaments.map(formatTournament));
 };
+
+export const updateTournament = (
+  id: TournamentId,
+  data: {
+    name?: string;
+    maxPlayers?: number;
+    playersPerTeam?: number;
+    cashprize?: number;
+    displayCashprize?: boolean;
+    image?: string;
+    backgroundImage?: string;
+    displayCasters?: boolean;
+    rules?: string;
+    display?: boolean;
+  },
+): PrismaPromise<PrimitiveTournament> =>
+  database.tournament.update({
+    where: { id },
+    data,
+  });

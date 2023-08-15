@@ -1,0 +1,17 @@
+/partners:
+  get:
+    summary: Renvoie la liste des partenaires.
+    description: Renvoie la liste des partenaires.
+    tags:
+      - Partners
+    responses:
+      200:
+        description: Renvoie la liste des partenaires.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/Partner'
+                  

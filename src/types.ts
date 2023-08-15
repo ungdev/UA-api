@@ -1,4 +1,4 @@
-import prisma, { TournamentId, TransactionState, UserType, UserAge } from '@prisma/client';
+import prisma, { TournamentId, TransactionState, UserType, UserAge, Caster } from '@prisma/client';
 import type { ErrorRequestHandler } from 'express';
 import type Mail from 'nodemailer/lib/mailer';
 import type { ParsedQs } from 'qs';
@@ -201,6 +201,7 @@ export type Tournament = PrimitiveTournament & {
   lockedTeamsCount: number;
   placesLeft: number;
   teams: Team[];
+  casters: Caster[];
 };
 
 /************/

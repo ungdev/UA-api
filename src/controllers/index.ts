@@ -5,6 +5,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import root from './root';
 import users from './users';
 import tournaments from './tournaments';
+import partners from './partners';
 import items from './items';
 import teams from './teams';
 import auth from './auth';
@@ -45,6 +46,9 @@ router.use('/teams', teams);
 
 // Tournaments routes
 router.use('/tournaments', tournaments);
+
+// Tournaments routes
+router.use('/partners', partners);
 
 // Items routes
 router.use('/items', items);

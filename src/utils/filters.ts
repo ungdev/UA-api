@@ -137,6 +137,9 @@ export const filterTournamentRestricted = (tournament: Tournament) => {
     'playersPerTeam',
     'lockedTeamsCount',
     'placesLeft',
+    'image',
+    'backgroundImage',
+    'rules',
   );
 
   return {
