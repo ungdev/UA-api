@@ -57,7 +57,10 @@ export const updateTournament = (
     maxPlayers?: number;
     playersPerTeam?: number;
     cashprize?: number;
+    cashprizeDetails?: string;
     displayCashprize?: boolean;
+    format?: string;
+    infos?: string;
     image?: string;
     backgroundImage?: string;
     displayCasters?: boolean;

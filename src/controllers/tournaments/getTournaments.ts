@@ -22,6 +22,7 @@ export default [
 
         if (!tournament.displayCashprize) {
           tournament.cashprize = null;
+          tournament.cashprizeDetails = null;
         }
       }
 

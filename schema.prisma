@@ -95,9 +95,12 @@ model Tournament {
   maxPlayers             Int
   playersPerTeam         Int
   cashprize              Int?
+  cashprizeDetails       String?
   displayCashprize       Boolean      @default(false)
   image                  String?
   backgroundImage        String?
+  format                 String?
+  infos                  String?
   casters                Caster[]
   displayCasters         Boolean      @default(false)
   rules                  String?

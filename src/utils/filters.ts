@@ -142,6 +142,9 @@ export const filterTournamentRestricted = (tournament: Tournament) => {
     'rules',
     'casters',
     'cashprize',
+    'cashprizeDetails',
+    'format',
+    'infos',
   );
 
   return {

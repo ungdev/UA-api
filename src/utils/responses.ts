@@ -23,8 +23,6 @@ const respondError = (response: Response, error: Error, code: number) => {
   logger.http(message);
 
   response.status(code).json({ error }).end();
-
-  return;
 };
 
 export const badRequest = (response: Response, error: Error): void => respondError(response, error, 400);
