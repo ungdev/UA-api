@@ -140,6 +140,8 @@ export const filterTournamentRestricted = (tournament: Tournament) => {
     'image',
     'backgroundImage',
     'rules',
+    'casters',
+    'cashprize',
   );
 
   return {

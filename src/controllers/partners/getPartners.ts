@@ -8,9 +8,9 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const result = await fetchPartners();
+      let result = await fetchPartners();
 
-      result.filter((partner) => partner.display);
+      result = result.filter((partner) => partner.display);
 
       return success(response, result);
     } catch (error) {

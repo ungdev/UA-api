@@ -9,10 +9,10 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const result = await fetchTournaments();
+      let result = await fetchTournaments();
 
       // if tournament visible is false, then filter it
-      result.filter((tournament) => tournament.display);
+      result = result.filter((tournament) => tournament.display);
 
       // if tournament casterVisible is false, then remove the caster
       for (const tournament of result) {
