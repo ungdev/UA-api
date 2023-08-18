@@ -74,7 +74,7 @@ export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentI
 
 export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> => {
   const user = await database.user.findUnique({
-    where: { [key]: parameterId },
+    where: { [key]: parameterId } as unknown as Prisma.UserWhereUniqueInput,
     include: userInclusions,
   });
 

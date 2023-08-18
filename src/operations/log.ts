@@ -35,10 +35,15 @@ export const fetchLogs = (query: LogSearchQuery) =>
       where:
         query.teamId || query.userId
           ? {
-              OR: {
-                userId: query.userId ?? undefined,
-                user: { teamId: query.teamId },
-              },
+              OR: [
+                {
+                  userId: query.userId ?? undefined,
+                  
+                },
+                {
+                  user: { teamId: query.teamId },
+                },
+              ],
             }
           : undefined,
       take: env.api.itemsPerPage,
@@ -51,10 +56,14 @@ export const fetchLogs = (query: LogSearchQuery) =>
       where:
         query.teamId || query.userId
           ? {
-              OR: {
-                userId: query.userId ?? undefined,
-                user: { teamId: query.teamId },
-              },
+              OR: [
+                {
+                  userId: query.userId ?? undefined,
+                },
+                {
+                  user: { teamId: query.teamId },
+                },
+              ],
             }
           : undefined,
     }),
