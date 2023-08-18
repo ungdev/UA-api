@@ -51,6 +51,9 @@ const env = {
   front: {
     website: frontEndpoint,
   },
+  upload: {
+    token: loadEnv('UPLOAD_FILE_TOKEN'),
+  },
   bcrypt: {
     rounds: loadIntEnv('API_BCRYPT_ROUNDS') || 10,
   },

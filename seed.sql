@@ -17,6 +17,7 @@ INSERT INTO `items` (`id`, `name`, `category`, `attribute`, `price`, `reducedPri
 INSERT INTO `settings` (`id`, `value`) VALUES
 ('login', 0),
 ('shop', 0);
+('trombi', 0);
 
 INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`) VALUES
 ('lol', 'League of Legends', 160, 5),
