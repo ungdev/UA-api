@@ -54,7 +54,7 @@ export const decrypt = (encrypted: Buffer) => {
 };
 
 // More info : https://stackoverflow.com/a/37511463
-export const removeAccents = (string: string): string => string.normalize('NFD').replace(/[\u0300-\u036F]/g, '');
+export const removeAccents = (string: string): string => string.normalize('NFD').replaceAll(/[\u0300-\u036F]/g, '');
 
 export const formatPrice = (cents: number) => {
   const euros = cents / 100;
@@ -67,5 +67,5 @@ export const isPartnerSchool = (email: string) => env.email.partners.some((partn
 export const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min) + min);
 
 export const serializePermissions = (permissions?: Permission[]) =>
-  !permissions?.length ? null : permissions.join(',');
+  permissions?.length ? permissions.join(',') : null;
 export const deserializePermissions = (permissions: string) => (permissions?.split(',') ?? []) as Permission[];

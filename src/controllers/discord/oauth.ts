@@ -28,7 +28,7 @@ export default [
       const { error, code, state } = request.query;
 
       // At that point, an error is most likely because the user denied the permission access
-      if (typeof error !== 'undefined') return redirect(response, DiscordFeedbackCode.ERR_OAUTH_DENIED);
+      if (error !== undefined) return redirect(response, DiscordFeedbackCode.ERR_OAUTH_DENIED);
 
       // If there is no code with no error, it is probably a bad request !
       if (typeof code !== 'string' || typeof state !== 'string')

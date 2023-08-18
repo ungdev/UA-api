@@ -44,12 +44,12 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
      * https://github.com/faker-js/faker/blob/main/src/modules/internet/index.ts#L129)
      * We update the result to match our username regular expression:
      * replace dots with dashes and remove trailing chars */
-    username: data.username || faker.internet.userName().replace(/\./g, '-').slice(0, 16),
-    firstname: data.firstname || faker.name.firstName(),
-    lastname: data.lastname || faker.name.lastName(),
+    username: data.username || faker.internet.userName().replaceAll('.', '-').slice(0, 16),
+    firstname: data.firstname || faker.person.firstName(),
+    lastname: data.lastname || faker.person.lastName(),
     email: data.email || faker.internet.email(),
     type: userType,
-    registerToken: data.confirmed !== false ? null : nanoid(),
+    registerToken: data.confirmed === false ? nanoid() : null,
     password: await hash(data.password || faker.internet.password(), awaitedSalt),
     discordId: data.discordId || generateFakeDiscordId(),
     permissions: serializePermissions(data.permissions),

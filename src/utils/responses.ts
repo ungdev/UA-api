@@ -2,7 +2,9 @@ import { Response } from 'express';
 import { Error } from '../types';
 import logger from './logger';
 
-export const success = (response: Response, body: unknown): void => { response.status(200).json(body).end(); };
+export const success = (response: Response, body: unknown): void => {
+  response.status(200).json(body).end();
+};
 
 export const created = (response: Response, body?: unknown): void => {
   if (body) {

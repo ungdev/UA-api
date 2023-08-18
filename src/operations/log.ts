@@ -16,7 +16,7 @@ export const createLog = (
   // Remove all the values of the keys containing the word password to avoid logging plain text passwords
   if (body)
     for (const [key, value] of Object.entries(body))
-      safeBody[key] = !key.toLowerCase().includes('password') ? value : '***';
+      safeBody[key] = key.toLowerCase().includes('password') ? '***' : value;
 
   return database.log.create({
     data: {
@@ -38,7 +38,6 @@ export const fetchLogs = (query: LogSearchQuery) =>
               OR: [
                 {
                   userId: query.userId ?? undefined,
-                  
                 },
                 {
                   user: { teamId: query.teamId },

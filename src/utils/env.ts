@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
-import dotenv from 'dotenv';
 import crypto from 'crypto';
+import dotenv from 'dotenv';
 
 dotenv.config();
 

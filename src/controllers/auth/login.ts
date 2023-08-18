@@ -29,10 +29,10 @@ export default [
       let field;
       if (!validators.email.validate(login).error) {
         field = 'email';
-      } else if (!validators.username.validate(login).error) {
-        field = 'username';
-      } else {
+      } else if (validators.username.validate(login).error) {
         return unauthenticated(response, ResponseError.InvalidCredentials);
+      } else {
+        field = 'username';
       }
 
       const user = await fetchUser(login, field);
