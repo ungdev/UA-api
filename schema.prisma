@@ -97,13 +97,10 @@ model Tournament {
   cashprize              Int?
   cashprizeDetails       String?
   displayCashprize       Boolean      @default(false)
-  image                  String?
-  backgroundImage        String?
   format                 String?
   infos                  String?
   casters                Caster[]
   displayCasters         Boolean      @default(false)
-  rules                  String?
   display                Boolean      @default(false)
   discordRoleId          String?
   discordRespoRoleId     String?

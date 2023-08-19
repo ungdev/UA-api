@@ -61,10 +61,7 @@ export const updateTournament = (
     displayCashprize?: boolean;
     format?: string;
     infos?: string;
-    image?: string;
-    backgroundImage?: string;
     displayCasters?: boolean;
-    rules?: string;
     display?: boolean;
   },
 ): PrismaPromise<PrimitiveTournament> =>
