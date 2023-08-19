@@ -11,7 +11,7 @@ export const uploadFile = async (file: any, path: string, name: string) => {
     formData.append('path', path);
     formData.append('name', name);
 
-    const result = await axios.post(`http://localhost:4444/test/api`, formData, {
+    const result = await axios.post(`${env.front.website}/uploads/files/api`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
             'Accept': 'application/json',
