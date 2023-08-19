@@ -149,7 +149,8 @@ const computeRateLimitHeader = (enforceRateLimit = false): nock.ReplyHeaders => 
  */
 const listen = () => {
   // eslint-disable-next-line global-require
-  axios.defaults.adapter = require('axios/lib/adapters/http');
+  // TODO: fix this for nexts versions of axios
+  //axios.defaults.adapter = require('axios/lib/adapters/http');
   nock('https://discord.com/api/v9')
     .persist()
 
