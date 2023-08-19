@@ -125,7 +125,6 @@ model Partner {
   id      String  @id
   name    String
   link    String
-  logo    String
   display Boolean
 
   @@map("partners")

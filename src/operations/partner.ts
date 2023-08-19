@@ -6,7 +6,6 @@ export const fetchPartners = (): PrismaPromise<Partner[]> => database.partner.fi
 
 export const addPartner = (partner: {
   name: string;
-  logo: string;
   link: string;
   display?: boolean;
 }): PrismaPromise<Partner> =>
@@ -14,7 +13,6 @@ export const addPartner = (partner: {
     data: {
       id: nanoid(),
       name: partner.name,
-      logo: partner.logo,
       link: partner.link,
       display: partner.display,
     },
@@ -22,7 +20,7 @@ export const addPartner = (partner: {
 
 export const updatePartner = (
   id: string,
-  data: { name?: string; logo?: string; link?: string; display?: boolean },
+  data: { name?: string; link?: string; display?: boolean },
 ): PrismaPromise<Partner> =>
   database.partner.update({
     where: { id },

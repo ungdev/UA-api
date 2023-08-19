@@ -13,7 +13,6 @@ export default [
     Joi.object({
       name: Joi.string().required(),
       link: Joi.string().required(),
-      logo: Joi.string().required(),
       display: Joi.boolean().optional(),
     }),
   ),
