@@ -82,8 +82,6 @@ components:
           example: lol
         name:
           type: string
-        shortName:
-          type: string
         maxPlayers:
           type: integer
           example: 80

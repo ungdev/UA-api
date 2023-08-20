@@ -104,7 +104,7 @@ export const filterCartWithCartItemsAdmin = (cart: CartWithCartItemsAdmin) => {
 };
 
 export const filterTournament = (tournament: Tournament) =>
-  pick(tournament, 'id', 'name', 'shortName', 'maxPlayers', 'playersPerTeam', 'lockedTeamsCount');
+  pick(tournament, 'id', 'name', 'maxPlayers', 'playersPerTeam', 'lockedTeamsCount');
 
 export const filterTeam = (team: Team) => {
   const filteredTeam = pick(team, ['id', 'name', 'tournamentId', 'captainId', 'lockedAt']);
@@ -132,7 +132,6 @@ export const filterTournamentRestricted = (tournament: Tournament) => {
     tournament,
     'id',
     'name',
-    'shortName',
     'maxPlayers',
     'playersPerTeam',
     'lockedTeamsCount',

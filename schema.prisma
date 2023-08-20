@@ -92,7 +92,6 @@ model Team {
 model Tournament {
   id                     TournamentId @id
   name                   String       @unique
-  shortName              String       @unique
   maxPlayers             Int
   playersPerTeam         Int
   cashprize              Int?

@@ -13,7 +13,6 @@ export default [
   validateBody(
     Joi.object({
       name: Joi.string().optional(),
-      shortName: Joi.string().optional(),
       maxPlayers: Joi.number().optional(),
       playersPerTeam: Joi.number().optional(),
       cashprize: Joi.number().optional(),
