@@ -26,7 +26,7 @@ export default [
         case 'shop':
           result = await setShopAllowed(request.body.value === 'true');
           break;
-        case 'displayMembersTrombi':
+        case 'trombi':
           result = await setDisplayTrombi(request.body.value === 'true');
           break;
         default:
