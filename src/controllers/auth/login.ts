@@ -4,7 +4,7 @@ import { isNotAuthenticated } from '../../middlewares/authentication';
 import { validateBody } from '../../middlewares/validation';
 import { Error as ResponseError } from '../../types';
 import * as validators from '../../utils/validators';
-import { login } from '../../utils/login';
+import { loginAccount } from '../../utils/login';
 
 export default [
   // Middlewares
@@ -18,6 +18,6 @@ export default [
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
-    await login(request, response, next);
+    await loginAccount(request, response, next);
   },
 ];

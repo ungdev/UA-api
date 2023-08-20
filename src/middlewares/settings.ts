@@ -7,8 +7,8 @@ import { getRequestInfo } from '../utils/users';
 export const isLoginAllowed = async (request: Request, response: Response, next: NextFunction) => {
   const login = (await fetchSetting('login')).value;
   const { user } = getRequestInfo(response);
-  
-  if (login || (user.permissions && user.permissions.length !== 0)) {
+
+  if (login || (user.permissions && user.permissions.length > 0)) {
     return next();
   }
   return forbidden(response, Error.LoginNotAllowed);

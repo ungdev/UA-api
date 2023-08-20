@@ -4,11 +4,7 @@ import database from '../services/database';
 
 export const fetchPartners = (): PrismaPromise<Partner[]> => database.partner.findMany();
 
-export const addPartner = (partner: {
-  name: string;
-  link: string;
-  display?: boolean;
-}): PrismaPromise<Partner> =>
+export const addPartner = (partner: { name: string; link: string; display?: boolean }): PrismaPromise<Partner> =>
   database.partner.create({
     data: {
       id: nanoid(),

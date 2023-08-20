@@ -20,17 +20,21 @@ export default [
     try {
       let result;
       switch (request.params.setting) {
-        case 'login':
+        case 'login': {
           result = await setLoginAllowed(request.body.value === 'true');
           break;
-        case 'shop':
+        }
+        case 'shop': {
           result = await setShopAllowed(request.body.value === 'true');
           break;
-        case 'trombi':
+        }
+        case 'trombi': {
           result = await setDisplayTrombi(request.body.value === 'true');
           break;
-        default:
+        }
+        default: {
           return notFound(response, Error.NotFound);
+        }
       }
 
       return success(response, result);

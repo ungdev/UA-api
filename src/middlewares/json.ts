@@ -23,7 +23,7 @@ export default [
     ) {
       return next();
     }
-    
+
     return unsupportedMediaType(response, Error.UnsupportedMediaType);
   },
 

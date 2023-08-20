@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
+import bcrpyt from 'bcryptjs';
 import { filterUser } from './filters';
 import { forbidden, success, unauthenticated } from './responses';
 import { generateToken } from './users';
 import { fetchUser } from '../operations/user';
 import { Error as ResponseError, UserType } from '../types';
-import bcrpyt from 'bcryptjs';
 import * as validators from './validators';
 
-export async function login(request: Request, response: Response, next: NextFunction, admin = false) {
-    try {
+export async function loginAccount(request: Request, response: Response, next: NextFunction, admin = false) {
+  try {
     const { login, password } = request.body;
 
     // Fetch the user depending on the email or the username
@@ -43,10 +43,10 @@ export async function login(request: Request, response: Response, next: NextFunc
     if (!isPasswordValid) {
       return unauthenticated(response, ResponseError.InvalidCredentials);
     }
-    
+
     // If admin check that the user has any permissions
     if (admin && (!user.permissions || user.permissions.length === 0)) {
-        return forbidden(response, ResponseError.LoginNotAllowed);
+      return forbidden(response, ResponseError.LoginNotAllowed);
     }
 
     const token = generateToken(user);
@@ -58,4 +58,4 @@ export async function login(request: Request, response: Response, next: NextFunc
   } catch (error) {
     return next(error);
   }
-};
+}
