@@ -1,14 +1,13 @@
 import Joi from 'joi';
 import { NextFunction, Request, Response } from 'express';
+import { UserAge } from '@prisma/client';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error } from '../../../types';
 import { conflict, forbidden, success } from '../../../utils/responses';
 import { createUser, removeUserRegisterToken } from '../../../operations/user';
-import { filterUser } from '../../../utils/filters';
 import { validateBody } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
 import { getRequestInfo } from '../../../utils/users';
-import { UserAge } from '@prisma/client';
 
 export default [
   // Middlewares
@@ -28,8 +27,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { permissions, customMessage, email, username, firstname, lastname, password } =
-        request.body; 
+      const { permissions, customMessage, email, username, firstname, lastname, password } = request.body;
 
       // Check that permissions are not in the request body or that the initiator
       // is admin

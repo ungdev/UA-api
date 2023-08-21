@@ -18,7 +18,6 @@ import {
 } from '../types';
 import { deserializePermissions, serializePermissions } from '../utils/helpers';
 import { fetchAllItems } from './item';
-import { permission } from '../utils/validators';
 
 export const userInclusions = {
   cartItems: {
