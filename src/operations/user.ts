@@ -14,9 +14,11 @@ import {
   UserPatchBody,
   RawUserWithTeamAndTournamentInfo,
   UserWithTeamAndTournamentInfo,
+  Permission,
 } from '../types';
 import { deserializePermissions, serializePermissions } from '../utils/helpers';
 import { fetchAllItems } from './item';
+import { permission } from '../utils/validators';
 
 export const userInclusions = {
   cartItems: {
@@ -222,6 +224,7 @@ export const createUser = async (user: {
   discordId?: string;
   type?: UserType;
   customMessage?: string;
+  permissions?: Permission[];
 }): Promise<RawUser> => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
   const hashedPassword = await userOperations.hash(user.password, salt);
@@ -235,6 +238,7 @@ export const createUser = async (user: {
       type: user.type,
       discordId: user.discordId,
       password: hashedPassword,
+      permissions: serializePermissions(user.permissions),
       registerToken: nanoid(),
       customMessage: user.customMessage,
       age: user.age,
