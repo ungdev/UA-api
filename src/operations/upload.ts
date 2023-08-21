@@ -21,3 +21,14 @@ export const uploadFile = async (file: any, path: string, name: string) => {
 
   return result.data;
 };
+
+export const deleteFile = async (path: string) => {
+  const result = await axios.delete(`${env.front.website}/uploads/files/api?path=${path}`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${env.upload.token}`,
+    },
+  });
+
+  return result.data;
+};
