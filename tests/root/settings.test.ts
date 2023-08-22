@@ -8,14 +8,17 @@ describe('GET /settings', () => {
   it('should return 200 with an object', async () => {
     await settingsOperations.setLoginAllowed(false);
     await settingsOperations.setShopAllowed(false);
+    await settingsOperations.setTrombiAllowed(false);
 
-    await request(app).get('/settings').expect(200, { shop: false, login: false });
+    await request(app).get('/settings').expect(200, { shop: false, login: false, trombi: false });
   });
 
   it('should return the updated value', async () => {
     await settingsOperations.setLoginAllowed(true);
     await settingsOperations.setShopAllowed(true);
-    await request(app).get('/settings').expect(200, { shop: true, login: true });
+    await settingsOperations.setTrombiAllowed(true);
+
+    await request(app).get('/settings').expect(200, { shop: true, login: true, trombi: true });
   });
 
   it('should return an internal server error', async () => {

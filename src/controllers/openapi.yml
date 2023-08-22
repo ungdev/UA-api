@@ -354,7 +354,7 @@ components:
         captainId:
           type: string
           example: XiHGta
-        locked:
+        lockedAt:
           type: string
           format: date-time
           nullable: true
@@ -434,7 +434,7 @@ components:
                 captainId:
                   type: string
                   example: XiHGta
-                locked:
+                lockedAt:
                   type: string
                   format: date-time
                   nullable: true

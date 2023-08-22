@@ -4,7 +4,7 @@ import { hasPermission } from '../../../middlewares/authentication';
 import { validateBody } from '../../../middlewares/validation';
 import { notFound, success } from '../../../utils/responses';
 import { Error } from '../../../types';
-import { setDisplayTrombi, setLoginAllowed, setShopAllowed } from '../../../operations/settings';
+import { setTrombiAllowed, setLoginAllowed, setShopAllowed } from '../../../operations/settings';
 
 export default [
   // Middlewares
@@ -29,7 +29,7 @@ export default [
           break;
         }
         case 'trombi': {
-          result = await setDisplayTrombi(request.body.value === 'true');
+          result = await setTrombiAllowed(request.body.value === 'true');
           break;
         }
         default: {

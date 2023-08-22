@@ -39,7 +39,7 @@ describe('PATCH /admin/users/:userId', () => {
 
   before(async () => {
     user = await createFakeUser();
-    registerMember(user.discordId);
+    registerMember(user.discordId!);
     const admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
     const anim = await createFakeUser({ permissions: [Permission.anim] });
@@ -106,7 +106,7 @@ describe('PATCH /admin/users/:userId', () => {
 
     expect(body.type).to.be.equal(validBody.type);
     expect(body.place).to.be.equal(validBody.place);
-    expect(body.permissions).to.have.same.members(validBody.permissions);
+    expect(body.permissions).to.have.same.members(validBody.permissions!);
     expect(body.age).to.be.equal(validBody.age);
     expect(body.customMessage).to.be.equal(validBody.customMessage);
     expect(body.email).to.be.equal(validBody.email);
@@ -131,7 +131,7 @@ describe('PATCH /admin/users/:userId', () => {
 
   it('should update the user and remove him from his team', async () => {
     const team = await createFakeTeam({ members: 2, locked: true });
-    registerRole(team.discordRoleId);
+    registerRole(team.discordRoleId!);
 
     tournamentDiscordId = registerRole();
 
@@ -144,17 +144,17 @@ describe('PATCH /admin/users/:userId', () => {
       },
     });
     const teamMember = team.players.find((member) => member.id !== team.captainId);
-    registerMember(teamMember.discordId, [team.discordRoleId, tournamentDiscordId]);
+    registerMember(teamMember!.discordId!, [team.discordRoleId!, tournamentDiscordId]);
 
     const { body } = await request(app)
-      .patch(`/admin/users/${teamMember.id}`)
+      .patch(`/admin/users/${teamMember!.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         type: UserType.spectator,
       })
       .expect(200);
 
-    const updatedUser = await userOperations.fetchUser(teamMember.id);
+    const updatedUser = await userOperations.fetchUser(teamMember!.id);
 
     expect(body.type).to.be.equal(UserType.spectator);
     expect(body.type).to.be.equal(updatedUser.type);
@@ -192,8 +192,8 @@ describe('PATCH /admin/users/:userId', () => {
     const team = await createFakeTeam({ members: 1, locked: true });
     // tournament id has already been given
     const [teamMember] = team.players;
-    registerRole(team.discordRoleId);
-    registerMember(teamMember.discordId, [team.discordRoleId, tournamentDiscordId]);
+    registerRole(team.discordRoleId!);
+    registerMember(teamMember!.discordId!, [team.discordRoleId!, tournamentDiscordId]);
 
     const newAccount = registerMember();
 
@@ -206,17 +206,19 @@ describe('PATCH /admin/users/:userId', () => {
       .expect(200);
 
     expect(body.discordId).to.be.equal(newAccount);
-    deleteRole(team.discordRoleId);
+    deleteRole(team.discordRoleId!);
   });
 
   it('should be able to update discordId only (team locked, was not synced)', async () => {
     const team = await createFakeTeam({ members: 1, locked: true });
     // tournament id has already been given
     const [teamMember] = team.players;
-    registerRole(team.discordRoleId);
-    registerMember(teamMember.discordId);
+    registerRole(team.discordRoleId!);
+    registerMember(teamMember!.discordId!);
 
     const newAccount = registerMember();
+
+    console.log(newAccount);
 
     const { body } = await request(app)
       .patch(`/admin/users/${teamMember.id}`)
@@ -227,15 +229,15 @@ describe('PATCH /admin/users/:userId', () => {
       .expect(200);
 
     expect(body.discordId).to.be.equal(newAccount);
-    deleteRole(team.discordRoleId);
+    deleteRole(team.discordRoleId!);
   });
 
   it('should be able to update discordId only (team locked, left discord server)', async () => {
     const team = await createFakeTeam({ members: 1, locked: true });
     // tournament id has already been given
     const [teamMember] = team.players;
-    kickMember(teamMember.discordId);
-    registerRole(team.discordRoleId);
+    kickMember(teamMember!.discordId!);
+    registerRole(team.discordRoleId!);
 
     const newDiscordId = registerMember();
 

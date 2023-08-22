@@ -1,3 +1,39 @@
+/admin/auth/login:
+  post:
+    summary: Authentifie un admin même si le paramètre login est désactivé
+    description: Permet de s'authentifier.<br/>
+      **Au moins une permission requise.**
+    tags:
+      - Admin
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: Nom d'utilisateur
+              password:
+                type: string
+                description: Mot de passe
+    responses:
+      200:
+        description: L'authentification a réussi.
+          Les informations de l'utilisateur et le token d'authentification sont renvoyés.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+                token:
+                  type: string
+      400:
+        $ref: '#/components/responses/400Errored'
+
 /admin/auth/login/{userId}:
   post:
     summary: Authentifie en tant qu'un autre utilisateur

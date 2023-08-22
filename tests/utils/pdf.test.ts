@@ -31,7 +31,7 @@ describe('Tests the PDF utils', () => {
         {
           itemId: 'ticket-player',
           quantity: 1,
-          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player')!.price,
           forUserId: user.id,
         },
       ]);
@@ -54,7 +54,7 @@ describe('Tests the PDF utils', () => {
       {
         itemId: 'ticket-player',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player')!.price,
         forUserId: user.id,
       },
     ]);

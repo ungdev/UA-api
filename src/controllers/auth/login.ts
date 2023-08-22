@@ -18,6 +18,6 @@ export default [
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
-    await loginAccount(request, response, next);
+    return await loginAccount(request, response, next);
   },
 ];

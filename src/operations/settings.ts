@@ -19,4 +19,4 @@ const setSettingAllowed = (id: string, allowed: boolean): PrismaPromise<Setting>
 
 export const setLoginAllowed = (allowed: boolean): PrismaPromise<Setting> => setSettingAllowed('login', allowed);
 export const setShopAllowed = (allowed: boolean): PrismaPromise<Setting> => setSettingAllowed('shop', allowed);
-export const setDisplayTrombi = (allowed: boolean): PrismaPromise<Setting> => setSettingAllowed('trombi', allowed);
+export const setTrombiAllowed = (allowed: boolean): PrismaPromise<Setting> => setSettingAllowed('trombi', allowed);
