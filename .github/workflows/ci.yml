@@ -32,7 +32,7 @@ jobs:
         node-version: [18]
     steps:
       - uses: actions/checkout@v2
-     - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v2
         with:
           version: 8
       - name: Use Node.js ${{ matrix.node-version }}
@@ -85,6 +85,9 @@ jobs:
   deploy-dbdocs:
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
     needs:
       - lint
       - build
