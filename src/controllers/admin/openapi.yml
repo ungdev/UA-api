@@ -592,6 +592,60 @@
         $ref: '#/components/responses/401Unauthenticated'
       403:
         $ref: '#/components/responses/403Unauthorized'
+  post:
+    summary: Crée un utilisateur
+    description: Crée un utilisateur.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              permissions:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+              customMessage:
+                type: string
+                nullable: true
+              email:
+                type: string
+                format: email
+              username:
+                type: string
+              firstname:
+                type: string
+              lastname:
+                type: string
+              age:
+                $ref: '#/components/schemas/Age'
+    responses:
+      201:
+        description: L'utilisateur a bien été créé. Ses informations sont renvoyées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserWithMessage'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      409:
+        $ref: '#/components/responses/409PlaceAlreadyAttributed'
 
 /admin/users/{userId}:
   patch:
