@@ -4,7 +4,7 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as tournamentOperations from '../../src/operations/tournament';
 import database from '../../src/services/database';
-import { Error, TournamentId } from '../../src/types';
+import { Error } from '../../src/types';
 import { createFakeTeam } from '../utils';
 
 describe('GET /tournaments', () => {
@@ -41,7 +41,6 @@ describe('GET /tournaments', () => {
         display: false,
       },
     });
-    
 
     await createFakeTeam({ members: tournaments[1].playersPerTeam, tournament: tournaments[1].id });
 

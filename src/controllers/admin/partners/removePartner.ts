@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
-import { noContent, notFound, success } from '../../../utils/responses';
+import { noContent, notFound } from '../../../utils/responses';
 import { Error, Permission } from '../../../types';
 import { fetchPartners, removePartner } from '../../../operations/partner';
 

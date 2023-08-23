@@ -17,7 +17,5 @@ export default [
   ),
 
   // Controller
-  async (request: Request, response: Response, next: NextFunction) => {
-    return await loginAccount(request, response, next);
-  },
+  (request: Request, response: Response, next: NextFunction) => loginAccount(request, response, next),
 ];

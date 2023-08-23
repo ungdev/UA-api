@@ -218,8 +218,6 @@ describe('PATCH /admin/users/:userId', () => {
 
     const newAccount = registerMember();
 
-    console.log(newAccount);
-
     const { body } = await request(app)
       .patch(`/admin/users/${teamMember.id}`)
       .send({
