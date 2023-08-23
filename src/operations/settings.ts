@@ -4,7 +4,7 @@ import { Setting } from '../types';
 
 export const fetchSettings = (): PrismaPromise<Setting[]> => database.setting.findMany();
 
-export const fetchSetting = (id: 'login' | 'shop'): PrismaPromise<Setting> =>
+export const fetchSetting = (id: 'login' | 'shop' | 'trombi'): PrismaPromise<Setting> =>
   database.setting.findUnique({ where: { id } });
 
 const setSettingAllowed = (id: string, allowed: boolean): PrismaPromise<Setting> =>
