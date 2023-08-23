@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { Request, Response, NextFunction } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { validateBody } from '../../../middlewares/validation';
-import { success } from '../../../utils/responses';
+import { created } from '../../../utils/responses';
 import { Permission } from '../../../types';
 import { addPartner } from '../../../operations/partner';
 
@@ -22,7 +22,7 @@ export default [
     try {
       const result = await addPartner(request.body);
 
-      return success(response, result);
+      return created(response, result);
     } catch (error) {
       return next(error);
     }

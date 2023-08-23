@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
-import { notFound, success } from '../../../utils/responses';
+import { noContent, notFound, success } from '../../../utils/responses';
 import { Error, Permission } from '../../../types';
 import { fetchPartners, removePartner } from '../../../operations/partner';
 
@@ -17,7 +17,7 @@ export default [
 
       await removePartner(request.params.partnerId);
 
-      return success(response, {});
+      return noContent(response);
     } catch (error) {
       return next(error);
     }

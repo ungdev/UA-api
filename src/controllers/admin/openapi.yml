@@ -301,6 +301,156 @@
       404:
         $ref: '#/components/responses/404UserNotFound'
 
+/admin/parners:
+  get:
+    summary: Renvoie tous les partenaires de la base de données.
+    description: Renvoie toutes les propriétés des partenaires.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Renvoie tous les partenaires dans la base de données.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AdminPartner'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+post:
+    summary: Crée un partenaire
+    description: Crée un partenaire.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Le nom du partenaire
+              link:
+                type: string
+                description: L'url du partenaire
+              display:
+                type: boolean
+                description: Si le partenaire doit être affiché ou non
+    responses:
+      201:
+        description: Le partenaire a bien été créé. Ses informations sont renvoyées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPartner'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+/admin/partners/{partnerId}:
+  patch:
+    summary: Modifie un partenaire
+    description: Modifie un partenaire.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: partnerId
+        description: Identifiant du partenaire à modifier
+        schema:
+          type: string
+        required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Le nom du partenaire
+              link:
+                type: string
+                description: L'url du partenaire
+              display:
+                type: boolean
+                description: Si le partenaire doit être affiché ou non
+    responses:
+      200:
+        description: Le partenaire a bien été modifié. Ses informations sont renvoyées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminPartner'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+  delete:
+    summary: Supprime un partenaire
+    description: Supprime un partenaire.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: partnerId
+        description: Identifiant du partenaire à supprimer
+        schema:
+          type: string
+        required: true
+    responses:
+      204:
+        description: Le partenaire a bien été supprimé.
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+
 /admin/repo/user:
   get:
     summary: Renvoie les items déposés par l'utilisateur scanné
@@ -534,6 +684,257 @@
               $ref: '#/components/schemas/Error'
             example:
               error: Aucun utilisateur n'est associé à ce QR code
+/admin/settings/:settingId:
+  patch:
+    summary: Modifie un paramètre de la base de données
+    description: Modifie un paramètre de la base de données.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: settingId
+        description: Identifiant du paramètre à modifier
+        schema:
+          type: string
+        required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              value:
+                type: boolean
+                description: La nouvelle valeur du paramètre
+    responses:
+      200:
+        description: Le paramètre a bien été modifiée. Ses informations sont renvoyées.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: L'identifiant du paramètre
+                value:
+                  type: boolean
+                  description: La valeur du paramètre
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+/admin/tournaments:
+  get:
+    summary: Renvoie tous les tournois de la base de données.
+    description: Renvoie toutes les propriétés des tournois.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Renvoie tous les tournois dans la base de données.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AdminTournament'
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+/admin/tournaments/{tournamentId}:
+  patch:
+    summary: Modifie un tournoi
+    description: Modifie un tournoi.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: path
+        name: tournamentId
+        description: Identifiant du tournoi à modifier
+        schema:
+          type: string
+        required: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Le nom du tournoi
+              maxPlayers:
+                type: integer
+                description: Le nombre maximum de joueurs
+              playersPerTeam:
+                type: integer
+                description: Le nombre de joueurs par équipe
+              cashprize:
+                type: integer
+                description: Le cashprize du tournoi
+              cashprizeDetails:
+                type: string
+                description: Les détails du cashprize
+              displayCashprize:
+                type: boolean
+                description: Si le cashprize doit être affiché ou non
+              format:
+                type: string
+                description: Le format du tournoi
+              infos:
+                type: string
+                description: Les informations du tournoi
+              casters:
+                type: array
+                description: Les casters du tournoi
+                items:
+                  type: string
+              displayCasters:
+                type: boolean
+                description: Si les casters doivent être affichés ou non
+              display:
+                type: boolean
+                description: Si le tournoi doit être affiché ou non
+
+    responses:
+      200:
+        description: Le tournoi a bien été modifié. Ses informations sont renvoyées.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminTournament'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+/admin/upload:
+  post: 
+    summary: Upload un fichier
+    description: Upload un fichier<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              file:
+                type: string
+                format: binary
+                description: Le fichier à upload
+              path:
+                type: string
+                description: Le chemin du fichier (dossier d'upload)
+              name:
+                type: string
+                description: Le nom du fichier sans extension
+    responses:
+      200:
+        description: L'opération a bien été envoyé sur l'API distante
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: number
+                  description: 0 pour une opération réussite et 1 pour une opération échouée
+                message:
+                  type: string
+                  description: Le message de l'opération
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+
+/admin/upload/{userId}:
+  delete:
+    summary: Supprime un fichier
+    description: Supprime un fichier<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    parameters:
+      - in: query
+        name: path
+        description: Le chemin complet du fichier (exemple /tournaments/lol.jpg)
+        schema:
+          type: string
+        required: true
+
+    responses:
+      200:
+        description: L'opération a bien été envoyé sur l'API distante
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: number
+                  description: 0 pour une opération réussite et 1 pour une opération échouée
+                message:
+                  type: string
+                  description: Le message de l'opération
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
 
 /admin/users:
   get:

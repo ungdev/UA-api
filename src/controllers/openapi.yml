@@ -695,6 +695,75 @@ components:
                 type: string
               lastname:
                 type: string
+    AdminTournament:
+      type: object
+      properties:
+        id:
+          type: string
+          example: lol
+        name:
+          type: string
+        maxPlayers:
+          type: integer
+          example: 80
+        playersPerTeam:
+          type: integer
+          example: 5
+        cashprize:
+          type: integer
+          nullable: true
+        cashprizeDetails:
+          type: string
+          nullable: true
+        displayCashprize:
+          type: boolean
+          example: false
+        format:
+          type: string
+          nullable: true
+        infos:
+          type: string
+          nullable: true
+        casters:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+        displayCasters:
+          type: boolean
+          example: false
+        discordRoleId:
+          type: string
+          nullable: true
+        discordRespoRoleId:
+          type: string
+          nullable: true
+        discordTextCategoryId:
+          type: string
+          nullable: true
+        discordVocalCategoryId:
+          type: string
+          nullable: true
+        teams:
+          type: array
+          items:
+             $ref: '#/components/schemas/Team'
+
+    AdminPartner:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        link:
+          type: string
+        display:
+          type: boolean
 
   responses:
     400Errored:
