@@ -21,15 +21,15 @@ export default [
       let result;
       switch (request.params.setting) {
         case 'login': {
-          result = await setLoginAllowed(request.body.value === 'true');
+          result = await setLoginAllowed(request.body.value);
           break;
         }
         case 'shop': {
-          result = await setShopAllowed(request.body.value === 'true');
+          result = await setShopAllowed(request.body.value);
           break;
         }
         case 'trombi': {
-          result = await setTrombiAllowed(request.body.value === 'true');
+          result = await setTrombiAllowed(request.body.value);
           break;
         }
         default: {

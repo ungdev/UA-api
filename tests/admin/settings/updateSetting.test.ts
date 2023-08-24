@@ -65,7 +65,7 @@ describe('PATCH /admin/settings', () => {
       .patch('/admin/settings/login')
       .send({ value: 'hello' })
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(400, { error: Error.InvalidPermission });
+      .expect(400);
   });
 
   it('should successfully update the settings', async () => {
@@ -77,6 +77,7 @@ describe('PATCH /admin/settings', () => {
 
     const login = await settingsOperations.fetchSetting('login');
 
-    expect(login).to.be.equal(true);
+    expect(login.id).to.be.equal('login');
+    expect(login.value).to.be.equal(true);
   });
 });

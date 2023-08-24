@@ -227,6 +227,7 @@ describe('PATCH /admin/users/:userId', () => {
       .expect(200);
 
     expect(body.discordId).to.be.equal(newAccount);
+
     deleteRole(team.discordRoleId!);
   });
 
