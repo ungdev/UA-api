@@ -8,7 +8,12 @@ export const isLoginAllowed = async (request: Request, response: Response, next:
   const login = (await fetchSetting('login')).value;
   const { user } = getRequestInfo(response);
 
-  if (login || (user && user.permissions && user.permissions.length > 0)) {
+  // If login is allowed or if the user is logged in as an orga account or if the user is on the login page
+  if (
+    login ||
+    (user && user.permissions && user.permissions.length > 0) ||
+    request.originalUrl === '/admin/auth/login'
+  ) {
     return next();
   }
   return forbidden(response, Error.LoginNotAllowed);

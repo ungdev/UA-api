@@ -14,7 +14,7 @@ describe('POST /admin/users', () => {
   let admin: User;
   let adminToken: string;
   const validBody = {
-    username: faker.internet.userName(),
+    username: 'Nettie_Lehner', // faker.internet.userName() does not work as it can return a username with a dot
     lastname: faker.person.lastName(),
     firstname: faker.person.firstName(),
     email: faker.internet.email(),

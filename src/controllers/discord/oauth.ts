@@ -96,7 +96,7 @@ export default [
 
       // If the user uses an invalid state the {@link decrypt} function cannot decrypt,
       // this exception will be raised
-      if (updateError.code === 'ERR_OSSL_EVP_WRONG_FINAL_BLOCK_LENGTH')
+      if (updateError.code === 'ERR_OSSL_WRONG_FINAL_BLOCK_LENGTH')
         return redirect(response, DiscordFeedbackCode.ERR_BAD_REQUEST);
 
       // Unexpected error: log it and redirect the user
