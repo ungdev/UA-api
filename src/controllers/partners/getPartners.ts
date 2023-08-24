@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { pick } from 'lodash';
 import { fetchPartners } from '../../operations/partner';
 import { success } from '../../utils/responses';
 
@@ -13,7 +14,7 @@ export default [
       result = result.filter((partner) => partner.display);
 
       // Don't pick the display field
-      const partners = result.map(({ display, ...rest }) => rest);
+      const partners = pick(result, ['id', 'name', 'link']);
 
       return success(response, partners);
     } catch (error) {

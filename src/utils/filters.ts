@@ -1,4 +1,5 @@
 import { pick } from 'lodash';
+import { Partner } from '@prisma/client';
 import {
   CartItem,
   CartWithCartItems,
@@ -148,3 +149,5 @@ export const filterTournamentRestricted = (tournament: Tournament) => {
     teams: tournament.teams.map(filterTeamRestricted),
   };
 };
+
+export const filterPartnerRestricted = (partner: Partner) => pick(partner, 'id', 'name', 'link');

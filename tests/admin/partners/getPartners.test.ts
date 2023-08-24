@@ -1,15 +1,15 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { faker } from '@faker-js/faker';
+import { Partner } from '@prisma/client';
 import app from '../../../src/app';
 import { sandbox } from '../../setup';
 import * as partnerOperations from '../../../src/operations/partner';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
-import { faker } from '@faker-js/faker';
 import nanoid from '../../../src/utils/nanoid';
 import { generateToken } from '../../../src/utils/users';
 import { createFakeUser } from '../../utils';
-import { Partner } from '@prisma/client';
 
 describe('GET /admin/partners', () => {
   let nonAdminUser: User;
@@ -24,7 +24,7 @@ describe('GET /admin/partners', () => {
   before(async () => {
     const partnersList = [] as Partner[];
 
-    for (let i = 0; i < 10; i++) {
+    for (let index = 0; index < 10; index++) {
       partnersList.push({
         id: nanoid(),
         name: faker.company.name(),
@@ -43,7 +43,7 @@ describe('GET /admin/partners', () => {
   });
 
   it('should error as the user is not authenticated', () =>
-  request(app).get(`/admin/partners`).expect(401, { error: Error.Unauthenticated }));
+    request(app).get(`/admin/partners`).expect(401, { error: Error.Unauthenticated }));
 
   it('should error as the user is not an administrator', () => {
     const userToken = generateToken(nonAdminUser);
@@ -56,9 +56,11 @@ describe('GET /admin/partners', () => {
   it('should fail with an internal server error', async () => {
     sandbox.stub(partnerOperations, 'fetchPartners').throws('Unexpected error');
 
-    await request(app).get('/admin/partners').set('Authorization', `Bearer ${adminToken}`).expect(500, { error: Error.InternalServerError });
+    await request(app)
+      .get('/admin/partners')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
   });
-
 
   it('should return 200 with an array of partners', async () => {
     const partners = await database.partner.findMany();
@@ -78,12 +80,7 @@ describe('GET /admin/partners', () => {
     expect(response.body).to.have.lengthOf(partners.length);
     // Not to have tournaments[0] because it has display false
     expect(response.body).not.to.have.deep.members([partners[0]]);
-    expect(response.body[0]).to.have.all.keys([
-      'id',
-      'name',
-      'link',
-      'display',
-    ]);
+    expect(response.body[0]).to.have.all.keys(['id', 'name', 'link', 'display']);
     expect(response.body[0].name).to.be.a('string');
     expect(response.body[0].link).to.be.a('string');
   });

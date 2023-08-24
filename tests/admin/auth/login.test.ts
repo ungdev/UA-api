@@ -7,23 +7,15 @@ import { setLoginAllowed } from '../../../src/operations/settings';
 import database from '../../../src/services/database';
 import { sandbox } from '../../setup';
 import { createFakeUser } from '../../utils';
-import { Partner } from '@prisma/client';
 import { serializePermissions } from '../../../src/utils/helpers';
 
 describe('POST /admin/auth/login', () => {
   const password = 'bonjour123456';
   let user: User;
-  let nonAdminUser: User;
-  let admin: User;
-  let adminToken: string;
 
   before(async () => {
     user = await createFakeUser({ password });
     await setLoginAllowed(false);
-
-    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser();
-    adminToken = userUtils.generateToken(admin);
   });
 
   after(async () => {
@@ -45,9 +37,9 @@ describe('POST /admin/auth/login', () => {
         id: user.id,
       },
       data: {
-        permissions: serializePermissions([ Permission.anim ]),
-      }
-    })
+        permissions: serializePermissions([Permission.anim]),
+      },
+    });
   });
 
   it('should return an error as incorrect body', async () => {

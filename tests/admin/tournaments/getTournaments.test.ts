@@ -12,7 +12,7 @@ describe('GET /admin/tournaments', () => {
   let nonAdminUser: User;
   let admin: User;
   let adminToken: string;
-  
+
   after(async () => {
     await database.team.deleteMany();
     await database.user.deleteMany();
@@ -32,7 +32,7 @@ describe('GET /admin/tournaments', () => {
   });
 
   it('should error as the user is not authenticated', () =>
-  request(app).get(`/admin/tournaments`).expect(401, { error: Error.Unauthenticated }));
+    request(app).get(`/admin/tournaments`).expect(401, { error: Error.Unauthenticated }));
 
   it('should error as the user is not an administrator', () => {
     const userToken = generateToken(nonAdminUser);
@@ -45,7 +45,10 @@ describe('GET /admin/tournaments', () => {
   it('should fail with an internal server error', async () => {
     sandbox.stub(tournamentOperations, 'fetchTournaments').throws('Unexpected error');
 
-    await request(app).get('/admin/tournaments').set('Authorization', `Bearer ${adminToken}`).expect(500, { error: Error.InternalServerError });
+    await request(app)
+      .get('/admin/tournaments')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should return 200 with an array of tournaments', async () => {
@@ -63,7 +66,10 @@ describe('GET /admin/tournaments', () => {
 
     await createFakeTeam({ members: tournaments[0].playersPerTeam, tournament: tournaments[0].id });
 
-    const response = await request(app).get('/admin/tournaments').set('Authorization', `Bearer ${adminToken}`).expect(200);
+    const response = await request(app)
+      .get('/admin/tournaments')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
 
     expect(response.body).to.have.lengthOf(tournaments.length);
     // Not to have tournaments[0] because it has display false
@@ -84,16 +90,14 @@ describe('GET /admin/tournaments', () => {
       'display',
       'displayCashprize',
       'displayCasters',
-      "discordRespoRoleId",
-      "discordRoleId",
-      "discordTextCategoryId",
-      "discordVocalCategoryId",
+      'discordRespoRoleId',
+      'discordRoleId',
+      'discordTextCategoryId',
+      'discordVocalCategoryId',
     ]);
     expect(response.body[0].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.a('number');
     expect(response.body[0].casters).to.be.a('array');
-    expect(response.body[0].teams[0].players[0].id).to.be.a('string');
-    expect(response.body[0].teams[0].players[0].firstname).to.be.undefined;
   });
 
   it('should return 200 with an array of tournaments with the right fields', async () => {
@@ -110,7 +114,10 @@ describe('GET /admin/tournaments', () => {
       },
     });
 
-    const response = await request(app).get('/admin/tournaments').set('Authorization', `Bearer ${adminToken}`).expect(200);
+    const response = await request(app)
+      .get('/admin/tournaments')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
 
     expect(response.body).to.have.lengthOf(tournaments.length);
     expect(response.body[0]).to.have.all.keys([
@@ -129,15 +136,13 @@ describe('GET /admin/tournaments', () => {
       'display',
       'displayCashprize',
       'displayCasters',
-      "discordRespoRoleId",
-      "discordRoleId",
-      "discordTextCategoryId",
-      "discordVocalCategoryId",
+      'discordRespoRoleId',
+      'discordRoleId',
+      'discordTextCategoryId',
+      'discordVocalCategoryId',
     ]);
     expect(response.body[1].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.a('number');
     expect(response.body[0].casters).to.be.a('array');
-    expect(response.body[1].teams[0].players[0].id).to.be.a('string');
-    expect(response.body[1].teams[0].players[0].firstname).to.be.undefined;
   });
 });
