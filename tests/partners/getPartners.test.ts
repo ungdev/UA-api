@@ -7,6 +7,7 @@ import database from '../../src/services/database';
 import { Error } from '../../src/types';
 import { faker } from '@faker-js/faker';
 import nanoid from '../../src/utils/nanoid';
+import { Partner } from '@prisma/client';
 
 describe('GET /partners', () => {
   after(async () => {
@@ -14,13 +15,19 @@ describe('GET /partners', () => {
   });
 
   before(async () => {
-    await database.partner.createMany({
-      data: {
+    const partnersList = [] as Partner[];
+
+    for (let i = 0; i < 10; i++) {
+      partnersList.push({
         id: nanoid(),
         name: faker.company.name(),
         link: faker.internet.url(),
         display: true,
-      },
+      });
+    }
+
+    await database.partner.createMany({
+      data: partnersList,
     });
   });
 

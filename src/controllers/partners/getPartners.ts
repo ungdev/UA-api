@@ -12,7 +12,10 @@ export default [
 
       result = result.filter((partner) => partner.display);
 
-      return success(response, result);
+      // Don't pick the display field
+      const partners = result.map(({ display, ...rest }) => rest);
+
+      return success(response, partners);
     } catch (error) {
       return next(error);
     }

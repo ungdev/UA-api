@@ -13,10 +13,17 @@ import { serializePermissions } from '../../../src/utils/helpers';
 describe('POST /admin/auth/login', () => {
   const password = 'bonjour123456';
   let user: User;
+  let nonAdminUser: User;
+  let admin: User;
+  let adminToken: string;
 
   before(async () => {
     user = await createFakeUser({ password });
     await setLoginAllowed(false);
+
+    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
+    nonAdminUser = await createFakeUser();
+    adminToken = userUtils.generateToken(admin);
   });
 
   after(async () => {

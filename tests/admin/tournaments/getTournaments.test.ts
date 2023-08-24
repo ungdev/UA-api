@@ -4,10 +4,15 @@ import app from '../../../src/app';
 import { sandbox } from '../../setup';
 import * as tournamentOperations from '../../../src/operations/tournament';
 import database from '../../../src/services/database';
-import { Error } from '../../../src/types';
-import { createFakeTeam } from '../../utils';
+import { Error, Permission, User, UserType } from '../../../src/types';
+import { createFakeTeam, createFakeUser } from '../../utils';
+import { generateToken } from '../../../src/utils/users';
 
 describe('GET /admin/tournaments', () => {
+  let nonAdminUser: User;
+  let admin: User;
+  let adminToken: string;
+  
   after(async () => {
     await database.team.deleteMany();
     await database.user.deleteMany();
@@ -21,12 +26,26 @@ describe('GET /admin/tournaments', () => {
         displayCasters: true,
       },
     });
+    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
+    nonAdminUser = await createFakeUser();
+    adminToken = generateToken(admin);
+  });
+
+  it('should error as the user is not authenticated', () =>
+  request(app).get(`/admin/tournaments`).expect(401, { error: Error.Unauthenticated }));
+
+  it('should error as the user is not an administrator', () => {
+    const userToken = generateToken(nonAdminUser);
+    return request(app)
+      .get(`/admin/tournaments`)
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(403, { error: Error.NoPermission });
   });
 
   it('should fail with an internal server error', async () => {
     sandbox.stub(tournamentOperations, 'fetchTournaments').throws('Unexpected error');
 
-    await request(app).get('/admin/tournaments').expect(500, { error: Error.InternalServerError });
+    await request(app).get('/admin/tournaments').set('Authorization', `Bearer ${adminToken}`).expect(500, { error: Error.InternalServerError });
   });
 
   it('should return 200 with an array of tournaments', async () => {
@@ -42,9 +61,9 @@ describe('GET /admin/tournaments', () => {
       },
     });
 
-    await createFakeTeam({ members: tournaments[1].playersPerTeam, tournament: tournaments[1].id });
+    await createFakeTeam({ members: tournaments[0].playersPerTeam, tournament: tournaments[0].id });
 
-    const response = await request(app).get('/tournaments').expect(200);
+    const response = await request(app).get('/admin/tournaments').set('Authorization', `Bearer ${adminToken}`).expect(200);
 
     expect(response.body).to.have.lengthOf(tournaments.length);
     // Not to have tournaments[0] because it has display false
@@ -65,6 +84,10 @@ describe('GET /admin/tournaments', () => {
       'display',
       'displayCashprize',
       'displayCasters',
+      "discordRespoRoleId",
+      "discordRoleId",
+      "discordTextCategoryId",
+      "discordVocalCategoryId",
     ]);
     expect(response.body[0].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.a('number');
@@ -87,7 +110,7 @@ describe('GET /admin/tournaments', () => {
       },
     });
 
-    const response = await request(app).get('/tournaments').expect(200);
+    const response = await request(app).get('/admin/tournaments').set('Authorization', `Bearer ${adminToken}`).expect(200);
 
     expect(response.body).to.have.lengthOf(tournaments.length);
     expect(response.body[0]).to.have.all.keys([
@@ -106,6 +129,10 @@ describe('GET /admin/tournaments', () => {
       'display',
       'displayCashprize',
       'displayCasters',
+      "discordRespoRoleId",
+      "discordRoleId",
+      "discordTextCategoryId",
+      "discordVocalCategoryId",
     ]);
     expect(response.body[1].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.a('number');

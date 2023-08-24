@@ -11,7 +11,7 @@ export default [
   ...hasPermission(),
   validateBody(
     Joi.object({
-      value: Joi.string().required(),
+      value: Joi.boolean().required(),
     }),
   ),
 

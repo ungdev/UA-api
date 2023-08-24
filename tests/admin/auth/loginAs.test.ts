@@ -19,7 +19,7 @@ describe('POST /admin/auth/login', () => {
   });
 
   after(async () => {
-    // Delete the user created
+    // Delete the users created
     await database.user.deleteMany();
   });
 
