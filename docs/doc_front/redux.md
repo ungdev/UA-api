@@ -4,6 +4,37 @@ Redux permet de gérer l'état de l'application. Il contient les états de login
 
 Les modules Redux sont dans le dossier `src/modules`. Chaque module permet de gérer un état de l'application à l'aide de variables et de fonctions.
 
+## Le state global de l'application
+
+Tout d'abord, il faut que nous définissions ce qu'est le state global de l'application. Le state global est un simple objet JavaScript qui contient des données générales sur l'application. Le state est géré par plusieurs modules, un par type de donné : un pour les données de connexion, un qui sert de cache pour les partenaires, ...
+
+Le format du state global est assez simple, il contient un objet par module (les objets ont le nom de leur module : `login`, `partners`) :
+
+```ts
+{
+  login: {
+    token: string | null
+    user: User | null;
+    loading: boolean;
+    status: {
+      login: boolean;
+      paid: boolean;
+      team: boolean;
+      admin: boolean;
+      spectator: boolean;
+    }
+  };
+  partners: {
+    id: string;
+    name: string;
+    link: string;
+  } | null;
+  ...
+}
+```
+
+Le state global est conservé d'une page à l'autre, mais est supprimé à la fermeture de la page ou au rafraichissement
+
 ## Créer un module
 
 Pour créer un module, il faut créer un fichier dans `src/modules` avec le nom du module.
