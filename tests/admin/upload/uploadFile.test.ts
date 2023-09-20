@@ -12,6 +12,14 @@ describe('POST /admin/upload', () => {
   let admin: User;
   let adminToken: string;
 
+  let validObject = {
+    name: "test",
+    path: "tournaments",
+    file: new File(["foo"], "foo.jpg", {
+      type: "image/jpeg",
+    }),
+  };
+
   after(async () => {
     await database.user.deleteMany();
   });
@@ -33,15 +41,15 @@ describe('POST /admin/upload', () => {
       .expect(403, { error: Error.NoPermission });
   });
  
-  // it('should fail with an internal server error', async () => {
-  //   sandbox.stub(uploadOperation, 'uploadFile').throws('Unexpected error');
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(uploadOperation, 'uploadFile').throws('Unexpected error');
 
-  //   await request(app)
-  //     .post(`/admin/upload`)
-  //     // .send({ path: 'tournaments/lol-logo.png' })
-  //     .set('Authorization', `Bearer ${adminToken}`)
-  //     .expect(500, { error: Error.InternalServerError });
-  // });
+    await request(app)
+      .post(`/admin/upload`)
+      .send(validObject)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
+  });
 
   // it('should fail because no path is provided', async () => {
   //   await request(app)

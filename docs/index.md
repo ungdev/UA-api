@@ -28,6 +28,8 @@ Bienvenue sur le Wiki de l'UTT Arena. Le but est d'expliquer les choix effectué
 
 - [Github api bouffe](https://github.com/ungdev/UA-bouffe-api)
 
+- [Github appli sécu](https://github.com/ungdev/UA-appli-secu)
+
 - [References de l'API](https://arena.dev.uttnetgroup.fr/api/docs/)
 
 - [References de la DB](https://dbdocs.io/arena/dev)
