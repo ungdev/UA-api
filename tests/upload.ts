@@ -8,17 +8,13 @@ import env from '../src/utils/env';
  * routes of the upload api, check the {@link listen} function below)
  */
 
-const existingFiles = [
-    'tournaments/lol-logo.png',
-    'tournaments/lol-background.jpg',
-]
+const existingFiles = ['tournaments/lol-logo.png', 'tournaments/lol-background.jpg'];
 
-const allowed_paths = ['tournaments', 'partners'];
-const allowed_file_types = ['image/png', 'image/jpeg', 'application/pdf'];
-const allowed_extensions = ['png', 'jpg', 'pdf'];
+const allowedPaths = ['tournaments', 'partners'];
+const allowedFileTypes = ['image/png', 'image/jpeg', 'application/pdf'];
+const allowedExtensions = ['png', 'jpg', 'pdf'];
 
-const max_file_size = 5000000;
-
+const maxFileSize = 5000000;
 
 /**
  * Adds interceptors to the axios adapter. This function is called by {@link enableFakeDiscordApi}
@@ -26,45 +22,44 @@ const max_file_size = 5000000;
  */
 const listen = () => {
   axios.defaults.adapter = 'http';
-  nock(`${env.front.website}/uploads/files/api`)
+  nock(`${env.front.website}/uploads/files`, { encodedQueryParams: true })
     .persist()
 
     // Upload file
-    .post('/')
+    .post('/api')
     .reply((_, body) => {
-        const bearer = (this! as nock.ReplyFnContext).req.headers.authorization;
-        if(bearer !== env.upload.token) return [200, { status: 1, message: 'Authentification échouée' }];
-
-        const { name, path, file } = body as {
-            name: string;
-            path: string;
-            file: File;
-        };
-        if(!name || !path || !file) return [200, { status: 1, message: 'Paramètres manquants' }];
-        if(file.size > max_file_size) return [200, { status: 1, message: 'La taille maximale d\'un fichier est de 5MB' }];
-        if(!allowed_file_types.includes(file.type)) return [200, { status: 1, message: 'Type de fichier non autorisé' }];
-        const extension = file.name.split('.').pop();
-        if(!allowed_extensions.includes(extension!)) return [200, { status: 1, message: 'Extension de fichier non autorisée' }];
-        if(!allowed_paths.includes(path)) return [200, { status: 1, message: 'Le chemin n\'est pas autorisé' }];
-        const index = existingFiles.indexOf(`${path}/${name}.${extension}`);
-        existingFiles.push(`${path}/${name}.${extension}`);
-        return [200, { status: 0, message: 'Fichier téléversé avec succès' }];
+      const { name, path, file } = body as {
+        name: string;
+        path: string;
+        file: File;
+      };
+      if (!name || !path || !file) return [200, { status: 1, message: 'Paramètres manquants' }];
+      if (file.size > maxFileSize) return [200, { status: 1, message: "La taille maximale d'un fichier est de 5MB" }];
+      if (!allowedFileTypes.includes(file.type)) return [200, { status: 1, message: 'Type de fichier non autorisé' }];
+      const extension = file.name.split('.').pop();
+      if (!allowedExtensions.includes(extension!))
+        return [200, { status: 1, message: 'Extension de fichier non autorisée' }];
+      if (!allowedPaths.includes(path)) return [200, { status: 1, message: "Le chemin n'est pas autorisé" }];
+      existingFiles.push(`${path}/${name}.${extension}`);
+      return [200, { status: 0, message: 'Fichier téléversé avec succès' }];
     })
 
     // Delete file
-    .delete('/')
+    .delete('/api')
+    .query({
+      path: /.*/,
+    })
     .reply((uri) => {
-        const bearer = (this! as nock.ReplyFnContext).req.headers.authorization;
-        if(bearer !== env.upload.token) return [200, { status: 1, message: 'Authentification échouée' }];
+      const path = uri.split('?')[1].split('=')[1];
+      if (!path) return [200, { status: 1, message: 'Paramètres manquants' }];
 
-        const path = uri.split('?')[1].split('=')[1];
-        if(!path) return [200, { status: 1, message: 'Paramètres manquants' }];
-        const index = existingFiles.indexOf(path);
-        if (index > -1) {
-            existingFiles.splice(index, 1);
-            return [200, { status: 0, message: 'Fichier supprimé avec succès' }];
-        }
-        return [200, { status: 1, message: 'Le fichier n\'existe pas' }];
+      const index = existingFiles.indexOf(decodeURIComponent(path));
+
+      if (index > -1) {
+        existingFiles.splice(index, 1);
+        return [200, { status: 0, message: 'Fichier supprimé avec succès' }];
+      }
+      return [200, { status: 1, message: "Le fichier n'existe pas" }];
     });
 };
 
