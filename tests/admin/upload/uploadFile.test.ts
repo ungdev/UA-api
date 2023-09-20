@@ -12,11 +12,11 @@ describe('POST /admin/upload', () => {
   let admin: User;
   let adminToken: string;
 
-  let validObject = {
-    name: "test",
-    path: "tournaments",
-    file: new File(["foo"], "foo.jpg", {
-      type: "image/jpeg",
+  const validObject = {
+    name: 'test',
+    path: 'tournaments',
+    file: new File(['foo'], 'foo.jpg', {
+      type: 'image/jpeg',
     }),
   };
 
@@ -62,28 +62,32 @@ describe('POST /admin/upload', () => {
       .expect(200, { status: 1, message: 'Paramètres manquants' });
   });
 
+  function generateBits(size: number) {
+    const array = new Uint8Array(size);
+    window.crypto.getRandomValues(array);
+    return array;
+  }
+
   it('should fail as the file is too big', async () => {
     await request(app)
       .post(`/admin/upload`)
       .send({
         ...validObject,
-        file: new File(["foo"], "foo.jpg", {
-          type: "image/jpeg",
-          size: 5000001,
+        file: new File([generateBits(6000001)], 'foo.jpg', {
+          type: 'image/jpeg',
         }),
       })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: "La taille maximale d'un fichier est de 5MB" });
   });
 
-
   it('should fail as the file type is not allowed', async () => {
     await request(app)
       .post(`/admin/upload`)
       .send({
         ...validObject,
-        file: new File(["foo"], "foo.jpg", {
-          type: "image/gif",
+        file: new File(['foo'], 'foo.jpg', {
+          type: 'image/gif',
         }),
       })
       .set('Authorization', `Bearer ${adminToken}`)
@@ -95,8 +99,8 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .send({
         ...validObject,
-        file: new File(["foo"], "foo.gif", {
-          type: "image/jpeg",
+        file: new File(['foo'], 'foo.gif', {
+          type: 'image/jpeg',
         }),
       })
       .set('Authorization', `Bearer ${adminToken}`)
@@ -108,7 +112,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .send({
         ...validObject,
-        path: "test",
+        path: 'test',
       })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: "Le chemin n'est pas autorisé" });
@@ -119,6 +123,6 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .send(validObject)
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200, { status: 0, message: "Fichier téléversé avec succès" });
+      .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
   });
 });
