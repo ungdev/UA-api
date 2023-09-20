@@ -10,9 +10,9 @@ On va commencer par installer WSL (Windows Sub-system for Linux). Il y a 2 méth
 
 Dans le menu démarrer de Windows, cherchez `Invite de commandes`, et exécutez le en tant qu'administrateur.
 
-> Si le nom de WSL vous dit déjà quelque chose et que vous l'avez déjà utilisé sur votre machine, exécutez `wsl -l -v`. La commande vous donnera le nom de la version utilisée (eg. _Ubuntu_ ou _Ubuntu-20.04_). Utilisez le maintenant dans la commande `wsl --set-version <version> 1`. [Passez ensuite à la section suivante](#setup-de-visual-studio-code) s'il n'y a pas d'erreur.
+> Si le nom de WSL vous dit déjà quelque chose et que vous l'avez déjà utilisé sur votre machine, exécutez `wsl -l -v`. La commande vous donnera le nom de la version utilisée (eg. _Ubuntu_ ou _Ubuntu-20.04_). Utilisez le maintenant dans la commande `wsl --set-version <version> 2`. [Passez ensuite à la section suivante](#setup-de-visual-studio-code) s'il n'y a pas d'erreur.
 
-Pour installer WSL 1, exécutez `wsl --set-default-version 1` **puis** `wsl --install`. Il est également possible d'utiliser WSL 2 mais ce sera plus compliqué pour installer la base de données _(et ce n'est pas détaillé dans cette doc)_
+Pour installer WSL 1, exécutez `wsl --set-default-version 2` **puis** `wsl --install`. Il est également possible d'utiliser WSL 2 mais ce sera plus compliqué pour installer la base de données _(et ce n'est pas détaillé dans cette doc)_
 
 > Si la méthode rapide a fonctionné, vous pouvez [passer à la section suivante](#setup-de-visual-studio-code).
 
@@ -47,7 +47,7 @@ Il faut maintenant indiquer le formateur par défaut. Appuyez simultanément sur
 
 Retournez dans l'invite de commande Ubuntu, et tapez les commandes suivantes. Pour certaines commandes, l'invite de commande demandera le mot de passe administrateur : c'est celui que vous avez entré lors de la création du système. Comme la première fois, le mot de passe ne s'affichera pas quand vous le rentrerez.
 
-1.  `curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -`
+1.  `curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -`
 2.  `sudo apt-get install -y nodejs`
 3.  `sudo npm install -g pnpm`
 

@@ -1,32 +1,20 @@
 # Deadlines (seuils du trépas)
 
-## Nouveau site - 12 septembre
+## Nouveau site - 25 septembre
 
 - Contenu 
 
 - Title 
 
-## Billetterie - Equipe billetterie - 1 Octobre
-
-- API : 18 Septembre 
-
-- Front 25 Septembre
+## Billetterie - Equipe billetterie - 9 octobre
 
 Principalement du front à faire
 
-Discord
+## Netgame - début novembre
 
-## Netgame - 21 octobre
+- Turbobouffe
 
-- API : 17 Octobre
-
-- Front : 24 Octobre
-
-Panneau admin
-
-Dockeriser + réseau (mettre en place DNS, DHCP)
-
-## UA - 26 Novembre
+## UA - 30 novemebre
 
 - API : 7 Novembre
 
