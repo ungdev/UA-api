@@ -40,7 +40,7 @@ describe('POST /admin/upload', () => {
       .set('Authorization', `Bearer ${userToken}`)
       .expect(403, { error: Error.NoPermission });
   });
- 
+
   it('should fail with an internal server error', async () => {
     sandbox.stub(uploadOperation, 'uploadFile').throws('Unexpected error');
 
@@ -51,24 +51,74 @@ describe('POST /admin/upload', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  // it('should fail because no path is provided', async () => {
-  //   await request(app)
-  //     .post(`/admin/upload`)
-  //     .set('Authorization', `Bearer ${adminToken}`)
-  //     .expect(200, { status: 1, message: "Paramètres manquants" });
-  // });
+  it('should fail as the name is missing', async () => {
+    await request(app)
+      .post(`/admin/upload`)
+      .send({
+        path: validObject.path,
+        file: validObject.file,
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { status: 1, message: 'Paramètres manquants' });
+  });
 
-  // it('should successfully delete the file', async () => {
-  //   await request(app)
-  //     .post(`/admin/upload`)
-  //     .set('Authorization', `Bearer ${adminToken}`)
-  //     .expect(200, { status: 0, message: "Fichier supprimé avec succès" });
-  // });
+  it('should fail as the file is too big', async () => {
+    await request(app)
+      .post(`/admin/upload`)
+      .send({
+        ...validObject,
+        file: new File(["foo"], "foo.jpg", {
+          type: "image/jpeg",
+          size: 5000001,
+        }),
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { status: 1, message: "La taille maximale d'un fichier est de 5MB" });
+  });
 
-  // it("should fail as the path as already been deleted", async () => {
-  //   await request(app)
-  //     .post(`/admin/upload`)
-  //     .set('Authorization', `Bearer ${adminToken}`)
-  //     .expect(200, { status: 1, message: "Le fichier n'existe pas" });
-  // });
+
+  it('should fail as the file type is not allowed', async () => {
+    await request(app)
+      .post(`/admin/upload`)
+      .send({
+        ...validObject,
+        file: new File(["foo"], "foo.jpg", {
+          type: "image/gif",
+        }),
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { status: 1, message: 'Type de fichier non autorisé' });
+  });
+
+  it('should fail as the file extension is not allowed', async () => {
+    await request(app)
+      .post(`/admin/upload`)
+      .send({
+        ...validObject,
+        file: new File(["foo"], "foo.gif", {
+          type: "image/jpeg",
+        }),
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { status: 1, message: 'Extension de fichier non autorisée' });
+  });
+
+  it('should fail as the path is not allowed', async () => {
+    await request(app)
+      .post(`/admin/upload`)
+      .send({
+        ...validObject,
+        path: "test",
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { status: 1, message: "Le chemin n'est pas autorisé" });
+  });
+
+  it('should successfully upload the file', async () => {
+    await request(app)
+      .post(`/admin/upload`)
+      .send(validObject)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { status: 0, message: "Fichier téléversé avec succès" });
+  });
 });
