@@ -12,12 +12,16 @@ describe('POST /admin/upload', () => {
   let admin: User;
   let adminToken: string;
 
+  const generateFile = (buffer: ArrayBuffer, mimetype: string, originalname: string) => ({
+    buffer,
+    mimetype,
+    originalname,
+  });
+
   const validObject = {
     name: 'test',
     path: 'tournaments',
-    file: new File(['foo'], 'foo.jpg', {
-      type: 'image/jpeg',
-    }),
+    file: generateFile(new ArrayBuffer(100), 'image/jpeg', 'test.jpg'),
   };
 
   after(async () => {
@@ -62,20 +66,12 @@ describe('POST /admin/upload', () => {
       .expect(200, { status: 1, message: 'Paramètres manquants' });
   });
 
-  function generateBits(size: number) {
-    const array = new Uint8Array(size);
-    window.crypto.getRandomValues(array);
-    return array;
-  }
-
   it('should fail as the file is too big', async () => {
     await request(app)
       .post(`/admin/upload`)
       .send({
         ...validObject,
-        file: new File([generateBits(6000001)], 'foo.jpg', {
-          type: 'image/jpeg',
-        }),
+        file: generateFile(new ArrayBuffer(10000000), 'image/jpeg', 'test.jpg'),
       })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: "La taille maximale d'un fichier est de 5MB" });
@@ -86,9 +82,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .send({
         ...validObject,
-        file: new File(['foo'], 'foo.jpg', {
-          type: 'image/gif',
-        }),
+        file: generateFile(new ArrayBuffer(100), 'image/gif', 'test.png'),
       })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: 'Type de fichier non autorisé' });
@@ -99,9 +93,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .send({
         ...validObject,
-        file: new File(['foo'], 'foo.gif', {
-          type: 'image/jpeg',
-        }),
+        file: generateFile(new ArrayBuffer(100), 'image/jpeg', 'test.gif'),
       })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: 'Extension de fichier non autorisée' });
