@@ -98,7 +98,6 @@
     "lint:fix": "eslint --fix src/ tests/ --ext .ts --max-warnings 0",
     "test": "mocha",
     "test:coverage": "nyc pnpm test",
-
     "send:mail:discord": "node build/src/scripts/sendDiscordMails.js",
     "send:mails": "node build/src/scripts/mails"
   }
