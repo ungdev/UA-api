@@ -14,7 +14,7 @@ const allowedPaths = ['tournaments', 'partners'];
 const allowedFileTypes = ['image/png', 'image/jpeg', 'application/pdf'];
 const allowedExtensions = ['png', 'jpg', 'pdf'];
 
-const maxFileSize = 5000000;
+const maxFileSize = 5000;
 
 /**
  * Adds interceptors to the axios adapter. This function is called by {@link enableFakeDiscordApi}
@@ -28,6 +28,7 @@ const listen = () => {
     // Upload file
     .post('/api')
     .reply((_, body) => {
+      // Awful code to parse the formData
       const encodedHexData = body;
 
       // Remove any whitespace or newline characters from the encoded data
@@ -39,33 +40,65 @@ const listen = () => {
       // Convert the binary Buffer to a string
       const formDataString = binaryBuffer.toString('utf-8');
 
-      // Split the formData by the boundary
-      
-      // Split the formData by the boundary
-        const boundary = '--axios-1.4.0-boundary-6CDbQBbdmiVQbGP_Uo86cJAnB';
-        const parts = formDataString.split(boundary);
+      // Use a regex pattern to match the boundary
+      const boundaryRegex = /--([^\r\n]*)/g;
 
-        // Initialize variables to store form fields and file data
-        let fileBuffer;
-        let path;
-        let name;
+      // Find all matches of the boundary pattern in the formData
+      const boundaries = formDataString.match(boundaryRegex);
 
-        // Iterate through parts
-        for (const part of parts) {
-          if (part.includes('name="file"')) {
-            // This part contains file data
-            fileBuffer = part.split('\r\n\r\n')[1]; // Extract content after headers
-          } else if (part.includes('name="path"')) {
-            // This part contains the "path" field
-            path = part.split('\r\n\r\n')[1].trim();
-          } else if (part.includes('name="name"')) {
-            // This part contains the "name" field
-            name = part.split('\r\n\r\n')[1].trim();
+      // Initialize variables to store form fields, file data, filename, and MIME type
+      let fileData;
+      let path;
+      let name;
+      let filename;
+      let mimeType;
+
+      // Extract the content between boundaries
+      const boundaryContent = formDataString.split(boundaries![0]);
+
+      for (let i = 0; i < boundaryContent.length; i++) {
+        const c = boundaryContent[i];
+
+        // Check if boundaryContent is defined and not empty
+        if (c && c.trim().length > 0) {
+          if (c.includes('name="file"')) {
+            // This part contains file data and filename
+            const headers = c.split('\r\n\r\n')[0]; // Get headers
+            const content = c.split('\r\n\r\n')[1]; // Extract content after headers
+
+            // Extract filename and MIME type from headers
+            const filenameMatch = headers.match(/filename="(.+?)"/);
+            const contentTypeMatch = headers.match(/Content-Type: (.+)/);
+
+            if (filenameMatch) {
+              filename = filenameMatch[1];
+            }
+
+            if (contentTypeMatch) {
+              mimeType = contentTypeMatch[1];
+            }
+
+            fileData = content;
+          } else {
+            // Check if the part contains "path" or "name"
+            const contentLines = c.split('\r\n');
+
+            if (c.includes('name="path"')) {
+              path = contentLines[3].trim();
+            } else if (c.includes('name="name"')) {
+              name = contentLines[3].trim();
+            }
           }
         }
+      }
 
+      const file = {
+        name: filename,
+        size: fileData.length,
+        type: mimeType,
+      };
 
-      if (!name || !path || !fileBuffer) return [200, { status: 1, message: 'Paramètres manquants' }];
+      if (!name || !path || !fileData) return [200, { status: 1, message: 'Paramètres manquants' }];
       if (file.size > maxFileSize) return [200, { status: 1, message: "La taille maximale d'un fichier est de 5MB" }];
       if (!allowedFileTypes.includes(file.type)) return [200, { status: 1, message: 'Type de fichier non autorisé' }];
       const extension = file.name.split('.').pop();

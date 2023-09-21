@@ -79,19 +79,19 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', await generateDummyJpgBuffer(10000000), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(100000000), 'test.jpg')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: "La taille maximale d'un fichier est de 5MB" });
   });
 
-  it('should fail as the file extension is not allowed', async () => {
+  it('should fail as the file type is not allowed', async () => {
     await request(app)
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', Buffer.from(new Uint8Array(1)), 'test.gif')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.gif')
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200, { status: 1, message: 'Extension de fichier non autorisée' });
+      .expect(200, { status: 1, message: 'Type de fichier non autorisé' });
   });
 
   it('should fail as the path is not allowed', async () => {
