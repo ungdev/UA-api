@@ -28,12 +28,44 @@ const listen = () => {
     // Upload file
     .post('/api')
     .reply((_, body) => {
-      const { name, path, file } = body as {
-        name: string;
-        path: string;
-        file: File;
-      };
-      if (!name || !path || !file) return [200, { status: 1, message: 'Paramètres manquants' }];
+      const encodedHexData = body;
+
+      // Remove any whitespace or newline characters from the encoded data
+      const sanitizedHexData = encodedHexData.replace(/\s/g, '');
+
+      // Convert the sanitized hexadecimal string to a Buffer
+      const binaryBuffer = Buffer.from(sanitizedHexData, 'hex');
+
+      // Convert the binary Buffer to a string
+      const formDataString = binaryBuffer.toString('utf-8');
+
+      // Split the formData by the boundary
+      
+      // Split the formData by the boundary
+        const boundary = '--axios-1.4.0-boundary-6CDbQBbdmiVQbGP_Uo86cJAnB';
+        const parts = formDataString.split(boundary);
+
+        // Initialize variables to store form fields and file data
+        let fileBuffer;
+        let path;
+        let name;
+
+        // Iterate through parts
+        for (const part of parts) {
+          if (part.includes('name="file"')) {
+            // This part contains file data
+            fileBuffer = part.split('\r\n\r\n')[1]; // Extract content after headers
+          } else if (part.includes('name="path"')) {
+            // This part contains the "path" field
+            path = part.split('\r\n\r\n')[1].trim();
+          } else if (part.includes('name="name"')) {
+            // This part contains the "name" field
+            name = part.split('\r\n\r\n')[1].trim();
+          }
+        }
+
+
+      if (!name || !path || !fileBuffer) return [200, { status: 1, message: 'Paramètres manquants' }];
       if (file.size > maxFileSize) return [200, { status: 1, message: "La taille maximale d'un fichier est de 5MB" }];
       if (!allowedFileTypes.includes(file.type)) return [200, { status: 1, message: 'Type de fichier non autorisé' }];
       const extension = file.name.split('.').pop();

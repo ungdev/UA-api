@@ -1,4 +1,3 @@
-import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../../src/app';
 import { sandbox } from '../../setup';
@@ -22,7 +21,7 @@ describe('DELETE /admin/upload', () => {
 
   before(async () => {
     await setLoginAllowed(true);
-    
+
     admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
     nonAdminUser = await createFakeUser();
     adminToken = generateToken(admin);
@@ -59,10 +58,10 @@ describe('DELETE /admin/upload', () => {
     await request(app)
       .delete(`/admin/upload/${path}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200, { status: 0, message: "Fichier supprimé avec succès" });
+      .expect(200, { status: 0, message: 'Fichier supprimé avec succès' });
   });
 
-  it("should fail as the path as already been deleted", async () => {
+  it('should fail as the path as already been deleted', async () => {
     await request(app)
       .delete(`/admin/upload/${path}`)
       .set('Authorization', `Bearer ${adminToken}`)

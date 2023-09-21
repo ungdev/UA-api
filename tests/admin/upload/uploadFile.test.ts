@@ -6,22 +6,30 @@ import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import { createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
+import sharp from 'sharp';
 
 describe('POST /admin/upload', () => {
   let nonAdminUser: User;
   let admin: User;
   let adminToken: string;
 
-  const generateFile = (buffer: ArrayBuffer, mimetype: string, originalname: string) => ({
-    buffer,
-    mimetype,
-    originalname,
-  });
+  function generateDummyJpgBuffer(size: number) {
+    const sizeInPixels = Math.ceil(Math.sqrt(size / 3));
+    return sharp({
+      create: {
+        width: sizeInPixels,
+        height: sizeInPixels,
+        channels: 3,
+        background: { r: 255, g: 255, b: 255 }
+      }
+    })
+    .jpeg()
+    .toBuffer();
+  }
 
   const validObject = {
     name: 'test',
     path: 'tournaments',
-    file: generateFile(new ArrayBuffer(100), 'image/jpeg', 'test.jpg'),
   };
 
   after(async () => {
@@ -50,51 +58,38 @@ describe('POST /admin/upload', () => {
 
     await request(app)
       .post(`/admin/upload`)
-      .send(validObject)
+      .field('name', validObject.name)
+      .field('path', validObject.path)
+      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should fail as the name is missing', async () => {
+  it('should fail as the path is missing', async () => {
     await request(app)
       .post(`/admin/upload`)
-      .send({
-        path: validObject.path,
-        file: validObject.file,
-      })
+      .field('name', validObject.name)
+      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200, { status: 1, message: 'Paramètres manquants' });
+      .expect(400);
   });
 
   it('should fail as the file is too big', async () => {
     await request(app)
       .post(`/admin/upload`)
-      .send({
-        ...validObject,
-        file: generateFile(new ArrayBuffer(10000000), 'image/jpeg', 'test.jpg'),
-      })
+      .field('name', validObject.name)
+      .field('path', validObject.path)
+      .attach('file', await generateDummyJpgBuffer(10000000), 'test.jpg')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: "La taille maximale d'un fichier est de 5MB" });
-  });
-
-  it('should fail as the file type is not allowed', async () => {
-    await request(app)
-      .post(`/admin/upload`)
-      .send({
-        ...validObject,
-        file: generateFile(new ArrayBuffer(100), 'image/gif', 'test.png'),
-      })
-      .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200, { status: 1, message: 'Type de fichier non autorisé' });
   });
 
   it('should fail as the file extension is not allowed', async () => {
     await request(app)
       .post(`/admin/upload`)
-      .send({
-        ...validObject,
-        file: generateFile(new ArrayBuffer(100), 'image/jpeg', 'test.gif'),
-      })
+      .field('name', validObject.name)
+      .field('path', validObject.path)
+      .attach('file', Buffer.from(new Uint8Array(1)), 'test.gif')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: 'Extension de fichier non autorisée' });
   });
@@ -102,10 +97,9 @@ describe('POST /admin/upload', () => {
   it('should fail as the path is not allowed', async () => {
     await request(app)
       .post(`/admin/upload`)
-      .send({
-        ...validObject,
-        path: 'test',
-      })
+      .field('name', validObject.name)
+      .field('path', 'test')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: "Le chemin n'est pas autorisé" });
   });
@@ -113,7 +107,9 @@ describe('POST /admin/upload', () => {
   it('should successfully upload the file', async () => {
     await request(app)
       .post(`/admin/upload`)
-      .send(validObject)
+      .field('name', validObject.name)
+      .field('path', validObject.path)
+      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
   });

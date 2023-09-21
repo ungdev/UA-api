@@ -52,7 +52,7 @@ const env = {
     website: frontEndpoint,
   },
   upload: {
-    token: loadEnv('UPLOAD_FILE_TOKEN'),
+    token: loadEnv('UPLOAD_FILE_TOKEN') || '1234azer',
   },
   bcrypt: {
     rounds: loadIntEnv('API_BCRYPT_ROUNDS') || 10,
