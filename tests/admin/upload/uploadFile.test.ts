@@ -1,4 +1,5 @@
 import request from 'supertest';
+import sharp from 'sharp';
 import app from '../../../src/app';
 import { sandbox } from '../../setup';
 import * as uploadOperation from '../../../src/operations/upload';
@@ -6,7 +7,6 @@ import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import { createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
-import sharp from 'sharp';
 
 describe('POST /admin/upload', () => {
   let nonAdminUser: User;
@@ -20,11 +20,11 @@ describe('POST /admin/upload', () => {
         width: sizeInPixels,
         height: sizeInPixels,
         channels: 3,
-        background: { r: 255, g: 255, b: 255 }
-      }
+        background: { r: 255, g: 255, b: 255 },
+      },
     })
-    .jpeg()
-    .toBuffer();
+      .jpeg()
+      .toBuffer();
   }
 
   const validObject = {

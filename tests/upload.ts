@@ -32,7 +32,7 @@ const listen = () => {
       const encodedHexData = body;
 
       // Remove any whitespace or newline characters from the encoded data
-      const sanitizedHexData = encodedHexData.replace(/\s/g, '');
+      const sanitizedHexData = encodedHexData.replaceAll(/\s/g, '');
 
       // Convert the sanitized hexadecimal string to a Buffer
       const binaryBuffer = Buffer.from(sanitizedHexData, 'hex');
@@ -41,7 +41,7 @@ const listen = () => {
       const formDataString = binaryBuffer.toString('utf-8');
 
       // Use a regex pattern to match the boundary
-      const boundaryRegex = /--([^\r\n]*)/g;
+      const boundaryRegex = /--([^\n\r]*)/g;
 
       // Find all matches of the boundary pattern in the formData
       const boundaries = formDataString.match(boundaryRegex);
@@ -56,9 +56,7 @@ const listen = () => {
       // Extract the content between boundaries
       const boundaryContent = formDataString.split(boundaries![0]);
 
-      for (let i = 0; i < boundaryContent.length; i++) {
-        const c = boundaryContent[i];
-
+      for (const c of boundaryContent) {
         // Check if boundaryContent is defined and not empty
         if (c && c.trim().length > 0) {
           if (c.includes('name="file"')) {
@@ -71,11 +69,11 @@ const listen = () => {
             const contentTypeMatch = headers.match(/Content-Type: (.+)/);
 
             if (filenameMatch) {
-              filename = filenameMatch[1];
+              [, filename] = filenameMatch;
             }
 
             if (contentTypeMatch) {
-              mimeType = contentTypeMatch[1];
+              [, mimeType] = contentTypeMatch;
             }
 
             fileData = content;
