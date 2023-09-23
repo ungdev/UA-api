@@ -28,7 +28,7 @@ export default [
       const { error, code, state } = request.query;
 
       // At that point, an error is most likely because the user denied the permission access
-      if (typeof error !== 'undefined') return redirect(response, DiscordFeedbackCode.ERR_OAUTH_DENIED);
+      if (error !== undefined) return redirect(response, DiscordFeedbackCode.ERR_OAUTH_DENIED);
 
       // If there is no code with no error, it is probably a bad request !
       if (typeof code !== 'string' || typeof state !== 'string')
@@ -96,7 +96,7 @@ export default [
 
       // If the user uses an invalid state the {@link decrypt} function cannot decrypt,
       // this exception will be raised
-      if (updateError.code === 'ERR_OSSL_EVP_WRONG_FINAL_BLOCK_LENGTH')
+      if (updateError.code === 'ERR_OSSL_WRONG_FINAL_BLOCK_LENGTH')
         return redirect(response, DiscordFeedbackCode.ERR_BAD_REQUEST);
 
       // Unexpected error: log it and redirect the user

@@ -14,6 +14,7 @@ import {
   UserPatchBody,
   RawUserWithTeamAndTournamentInfo,
   UserWithTeamAndTournamentInfo,
+  Permission,
 } from '../types';
 import { deserializePermissions, serializePermissions } from '../utils/helpers';
 import { fetchAllItems } from './item';
@@ -74,7 +75,7 @@ export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentI
 
 export const fetchUser = async (parameterId: string, key = 'id'): Promise<User> => {
   const user = await database.user.findUnique({
-    where: { [key]: parameterId },
+    where: { [key]: parameterId } as unknown as Prisma.UserWhereUniqueInput,
     include: userInclusions,
   });
 
@@ -222,6 +223,7 @@ export const createUser = async (user: {
   discordId?: string;
   type?: UserType;
   customMessage?: string;
+  permissions?: Permission[];
 }): Promise<RawUser> => {
   const salt = await userOperations.genSalt(env.bcrypt.rounds);
   const hashedPassword = await userOperations.hash(user.password, salt);
@@ -235,6 +237,7 @@ export const createUser = async (user: {
       type: user.type,
       discordId: user.discordId,
       password: hashedPassword,
+      permissions: serializePermissions(user.permissions),
       registerToken: nanoid(),
       customMessage: user.customMessage,
       age: user.age,

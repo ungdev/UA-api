@@ -7,7 +7,6 @@ import { logSuccessfulUpdates } from './log';
 
 // Checks the user is authenticated. If not, it will return an error
 export const isAuthenticated = [
-  isLoginAllowed,
   logSuccessfulUpdates,
   (request: Request, response: Response, next: NextFunction) => {
     // Retreives the user
@@ -18,6 +17,7 @@ export const isAuthenticated = [
 
     return next();
   },
+  isLoginAllowed,
 ];
 
 export const isNotAuthenticated = [

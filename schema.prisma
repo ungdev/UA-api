@@ -94,6 +94,14 @@ model Tournament {
   name                   String       @unique
   maxPlayers             Int
   playersPerTeam         Int
+  cashprize              Int?
+  cashprizeDetails       String?
+  displayCashprize       Boolean      @default(false)
+  format                 String?
+  infos                  String?
+  casters                Caster[]
+  displayCasters         Boolean      @default(false)
+  display                Boolean      @default(false)
   discordRoleId          String?
   discordRespoRoleId     String?
   discordTextCategoryId  String?
@@ -101,6 +109,25 @@ model Tournament {
   teams                  Team[]
 
   @@map("tournaments")
+}
+
+model Caster {
+  id           String       @id
+  name         String
+  tournamentId TournamentId
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+
+  @@index([tournamentId], map: "casters_tournamentId_fkey")
+  @@map("casters")
+}
+
+model Partner {
+  id      String  @id
+  name    String
+  link    String
+  display Boolean
+
+  @@map("partners")
 }
 
 model Log {
@@ -162,7 +189,7 @@ model RepoItem {
   zone      String
   pickedUp  Boolean      @default(false)
   user      User         @relation("repoItemUser", fields: [forUserId], references: [id])
-  repoLogs RepoLog[]     @relation("repoLogItem")
+  repoLogs  RepoLog[]    @relation("repoLogItem")
 
   @@index([id])
   @@index([forUserId])

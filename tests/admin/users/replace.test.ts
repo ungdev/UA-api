@@ -22,7 +22,7 @@ describe('POST /admin/users/:userId/replace', () => {
 
   before(async () => {
     team = await createFakeTeam({ locked: true });
-    registerRole(team.discordRoleId);
+    registerRole(team.discordRoleId!);
     user = getCaptain(team);
     targetUser = await createFakeUser({ paid: true });
     admin = await createFakeUser({ permissions: [Permission.admin] });
@@ -39,9 +39,9 @@ describe('POST /admin/users/:userId/replace', () => {
           discordRoleId: registerRole(),
         },
       })
-    ).discordRoleId;
+    ).discordRoleId!;
 
-    registerMember(user.discordId, [team.discordRoleId, tournamentDiscordId]);
+    registerMember(user.discordId!, [team.discordRoleId!, tournamentDiscordId]);
   });
 
   after(async () => {

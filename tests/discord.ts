@@ -1,6 +1,6 @@
+import { decode } from 'querystring';
 import axios from 'axios';
 import nock from 'nock';
-import { decode } from 'querystring';
 import type {
   DiscordAuthorizationData,
   DiscordChannel,
@@ -148,8 +148,7 @@ const computeRateLimitHeader = (enforceRateLimit = false): nock.ReplyHeaders => 
  * and enables/handles http requests to the 'fake discord api'.
  */
 const listen = () => {
-  // eslint-disable-next-line global-require
-  axios.defaults.adapter = require('axios/lib/adapters/http');
+  axios.defaults.adapter = 'http';
   nock('https://discord.com/api/v9')
     .persist()
 
@@ -157,7 +156,7 @@ const listen = () => {
     .get(/\/guilds\/\d+\/members\/\d+/)
     .reply((uri) => {
       if (rateLimitRemainingRequests < 0) return [429, null, computeRateLimitHeader(true)];
-      const discordMemberId = uri.match(/\d+$/)[0];
+      const discordMemberId = uri.match(/\d+$/)![0];
       const discordMember = members.find((member) => member.user.id === discordMemberId);
       return [
         discordMember ? 200 : 404,
@@ -173,10 +172,10 @@ const listen = () => {
     .delete(/\/guilds\/\d+\/members\/\d+\/roles\/\d+/)
     .reply((uri) => {
       if (rateLimitRemainingRequests < 0) return [429, null, computeRateLimitHeader(true)];
-      const [, discordMemberId, discordRoleId] = /(\d+)\/[^/]*\/(\d+)$/.exec(uri);
+      const [, discordMemberId, discordRoleId] = /(\d+)\/[^/]*\/(\d+)$/.exec(uri)!;
       const discordMember = members.find((member) => member.user.id === discordMemberId);
       const roleExists = roles.includes(discordRoleId);
-      if (roleExists) discordMember.roles.splice(discordMember.roles.indexOf(discordRoleId, 1));
+      if (roleExists) discordMember!.roles.splice(discordMember!.roles.indexOf(discordRoleId, 1));
       return [
         roleExists && discordMember ? 204 : 404,
         roleExists && discordMember
@@ -285,10 +284,10 @@ const listen = () => {
     .put(/\/guilds\/\d+\/members\/\d+\/roles\/\d+/)
     .reply((uri) => {
       if (rateLimitRemainingRequests < 0) return [429, null, computeRateLimitHeader(true)];
-      const [, discordMemberId, discordRoleId] = /(\d+)\/[^/]*\/(\d+)$/.exec(uri);
+      const [, discordMemberId, discordRoleId] = /(\d+)\/[^/]*\/(\d+)$/.exec(uri)!;
       const discordMember = members.find((member) => member.user.id === discordMemberId);
       const roleExists = roles.includes(discordRoleId);
-      if (roleExists) discordMember.roles.push(discordRoleId);
+      if (roleExists) discordMember!.roles.push(discordRoleId);
       return [
         roleExists && discordMember ? 204 : 404,
         roleExists && discordMember

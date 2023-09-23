@@ -7,7 +7,7 @@
 /build
 .nyc_output
 coverage
-yarn-error.log
+pnpm-error.log
 
 # misc
 .DS_Store

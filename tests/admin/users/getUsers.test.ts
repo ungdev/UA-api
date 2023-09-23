@@ -254,7 +254,7 @@ describe('GET /admin/users', () => {
       await database.team.deleteMany({
         where: {
           id: {
-            in: [lockedTeamMember.teamId, unlockedTeamMember.teamId],
+            in: [lockedTeamMember.teamId!, unlockedTeamMember.teamId!],
           },
         },
       });

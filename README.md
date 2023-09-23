@@ -11,7 +11,7 @@ API web à destination des services de l'UTT Arena
 ## Requirements
 
 - [Node.js](https://nodejs.org/)
-- [yarn](https://yarnpkg.com/)
+- [pnpm](https://pnpm.io/)
 
 ## Installation
 
@@ -23,7 +23,7 @@ git clone https://github.com/ungdev/UA-api.git
 cd UA-api
 
 # Install all the dependencies
-yarn
+pnpm install
 
 # Copy the file .env.example to .env
 
@@ -41,7 +41,7 @@ CREATE DATABASE arena CHARACTER SET utf8;
 Create the tables
 
 ```
-yarn prisma db push
+pnpm prisma db push
 ```
 
 Populate the tables
@@ -53,7 +53,7 @@ mysql -u DATABASE_USER -p arena --protocol tcp < seed.sql
 Generate the prisma client (redo this command when you update schema.prisma)
 
 ```
-yarn prisma generate
+pnpm prisma generate
 ```
 
 ## Configuration
@@ -63,12 +63,12 @@ Edit the file .env with your values
 ## Commands
 
 ```
-yarn dev       # start development server
-yarn build     # builds the typescript to javascript
-yarn start     # start production server
-yarn lint      # checks if the code is correct
-yarn lint-fix  # try to fix lint errors and warnings
-yarn fake      # populate the database with fake data
+pnpm dev       # start development server
+pnpm build     # builds the typescript to javascript
+pnpm start     # start production server
+pnpm lint      # checks if the code is correct
+pnpm lint-fix  # try to fix lint errors and warnings
+pnpm fake      # populate the database with fake data
 ```
 
 ## Prisma config

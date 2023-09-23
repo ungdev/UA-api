@@ -9,7 +9,23 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const result = await fetchTournaments();
+      let result = await fetchTournaments();
+
+      // if tournament visible is false, then filter it
+      result = result.filter((tournament) => tournament.display);
+
+      // if tournament casterVisible is false, then remove the caster
+      for (const tournament of result) {
+        if (!tournament.displayCasters) {
+          tournament.casters = null;
+        }
+
+        if (!tournament.displayCashprize) {
+          tournament.cashprize = null;
+          tournament.cashprizeDetails = null;
+        }
+      }
+
       return success(response, result.map(filterTournamentRestricted));
     } catch (error) {
       return next(error);

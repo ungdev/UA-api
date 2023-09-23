@@ -144,9 +144,9 @@ export const generateValidationEmail = (user: Omit<RawUser, 'permissions'>) =>
           "On sait bien que c'est pénible mais on doit vérifier que ton adresse email fonctionne bien (sinon tu ne pourras pas recevoir tes billets&nbsp;!).",
           {
             name: 'Confirme ton adresse email',
-            location: `${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}`,
+            location: `${env.front.website}/${ActionFeedback.VALIDATE}/${user.registerToken}`,
           },
-          `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/?action=${ActionFeedback.VALIDATE}&state=${user.registerToken}_`,
+          `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/${ActionFeedback.VALIDATE}/${user.registerToken}_`,
         ],
       },
       {
@@ -198,10 +198,10 @@ export const generatePasswordResetEmail = (user: Omit<RawUser, 'permissions'>) =
           "On doit s'assurer que tu es bien à l'origine de cette demande. Tu peux finaliser la procédure en cliquant sur le bouton ci-dessous.",
           {
             name: 'Réinitialise ton mot de passe',
-            location: `${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}`,
+            location: `${env.front.website}/${ActionFeedback.PASSWORD_RESET}/${user.resetToken}`,
             color: '#8767AA',
           },
-          `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/?action=${ActionFeedback.PASSWORD_RESET}&state=${user.resetToken}_`,
+          `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/${ActionFeedback.PASSWORD_RESET}/${user.resetToken}_`,
         ],
       },
     ],

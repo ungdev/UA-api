@@ -30,10 +30,10 @@ export const style = {
  */
 export const escapeText = (text: string) =>
   escape(text)
-    .replace(/&amp;nbsp;/gi, '&nbsp;')
-    .replace(/\n/gi, '<br>')
-    .replace(/_([^<>_]+)_/gi, '<i>$1</i>')
-    .replace(/\*([^*<>]+)\*/gi, '<strong>$1</strong>');
+    .replaceAll(/&amp;nbsp;/gi, '&nbsp;')
+    .replaceAll(/\n/gi, '<br>')
+    .replaceAll(/_([^<>_]+)_/gi, '<i>$1</i>')
+    .replaceAll(/\*([^*<>]+)\*/gi, '<strong>$1</strong>');
 
 const inflateButton = (item: Component.Button) =>
   `<a target="_blank" href="${escapeText(

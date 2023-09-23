@@ -45,7 +45,7 @@ describe('Test middlewares', () => {
     });
 
     it("should reject a wrong token because it's expired", async () => {
-      const token = jwt.sign({ userId: 'A1B2C3' }, env.jwt.secret, {
+      const token = jwt.sign({ userId: 'A1B2C3' }, env.jwt.secret!, {
         expiresIn: '1ms',
       });
 
@@ -63,7 +63,7 @@ describe('Test middlewares', () => {
 
     // This case should never happen. (Auth as a deleted user)
     it('should tell the user does not exists', async () => {
-      const token = jwt.sign({ userId: 'A1B2C3' }, env.jwt.secret, {
+      const token = jwt.sign({ userId: 'A1B2C3' }, env.jwt.secret!, {
         expiresIn: env.jwt.expires,
       });
 

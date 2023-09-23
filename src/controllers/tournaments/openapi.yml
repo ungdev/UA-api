@@ -1,12 +1,12 @@
 /tournaments:
   get:
-    summary: Renvoie les informations des tournois, des teams et des joueurs.
-    description: Renvoie les informations des tournois, des teams et des joueurs.
+    summary: Renvoie les informations des tournois, des teams, des casters et des joueurs dont les informations sont publiques.
+    description: Renvoie les informations des tournois, des teams, des casters et des joueurs dont les informations sont publiques.
     tags:
       - Tournaments
     responses:
       200:
-        description: Renvoie les informations des tournois, des teams et des joueurs.
+        description: Renvoie les informations des tournois, des teams, des casters et des joueurs dont les informations sont publiques.
         content:
           application/json:
             schema:
@@ -20,3 +20,7 @@
                         type: array
                         items:
                           $ref: '#/components/schemas/TeamWithUsersRestricted'
+                      casters:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Caster'

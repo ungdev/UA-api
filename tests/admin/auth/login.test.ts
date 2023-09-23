@@ -1,63 +1,111 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../../src/app';
-import { createFakeUser } from '../../utils';
-import database from '../../../src/services/database';
-import { Error, Permission, User, UserType } from '../../../src/types';
 import * as userUtils from '../../../src/utils/users';
+import { Error, Permission, User, UserType } from '../../../src/types';
+import { setLoginAllowed } from '../../../src/operations/settings';
+import database from '../../../src/services/database';
 import { sandbox } from '../../setup';
+import { createFakeUser } from '../../utils';
+import { serializePermissions } from '../../../src/utils/helpers';
 
 describe('POST /admin/auth/login', () => {
+  const password = 'bonjour123456';
   let user: User;
-  let admin: User;
-  let adminToken: string;
 
   before(async () => {
-    user = await createFakeUser();
-    admin = await createFakeUser({ permissions: [Permission.admin] });
-    adminToken = userUtils.generateToken(admin);
+    user = await createFakeUser({ password });
+    await setLoginAllowed(false);
   });
 
   after(async () => {
     // Delete the user created
     await database.user.deleteMany();
+    await setLoginAllowed(true);
   });
 
-  it('should error as the user is not authenticated', () =>
-    request(app).post(`/admin/auth/login/${user.id}`).expect(401, { error: Error.Unauthenticated }));
-
-  it('should error as the user is not an administrator', () => {
-    const userToken = userUtils.generateToken(user);
-    return request(app)
-      .post(`/admin/auth/login/${user.id}`)
-      .set('Authorization', `Bearer ${userToken}`)
-      .expect(403, { error: Error.NoPermission });
+  it('should get an error as the user is not an orga', async () => {
+    await request(app)
+      .post('/admin/auth/login')
+      .send({
+        login: user.email,
+        password,
+      })
+      .expect(403, { error: Error.LoginNotAllowed });
+    await database.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        permissions: serializePermissions([Permission.anim]),
+      },
+    });
   });
 
+  it('should return an error as incorrect body', async () => {
+    await request(app)
+      .post('/admin/auth/login')
+      .send({
+        login: user.email,
+      })
+      .expect(400, { error: Error.InvalidPassword });
+  });
+
+  it('should return an error as incorrect credentials (wrong password)', async () => {
+    await request(app)
+      .post('/admin/auth/login')
+      .send({
+        login: user.email,
+        password: 'wrongpassword',
+      })
+      .expect(401, { error: Error.InvalidCredentials });
+  });
+
+  it('should return an error as incorrect credentials (wrong email)', async () => {
+    await request(app)
+      .post('/admin/auth/login')
+      .send({
+        login: 'wrong@email.fr',
+        password: user.password,
+      })
+      .expect(401, { error: Error.InvalidCredentials });
+  });
+
+  it('should return an error as incorrect credentials (neither username nor email)', async () => {
+    await request(app)
+      .post('/admin/auth/login')
+      .send({
+        login: 'email.fr',
+        password: user.password,
+      })
+      .expect(401, { error: Error.InvalidCredentials });
+  });
+
+  it('should return an error as the login is empty', async () => {
+    await request(app)
+      .post('/admin/auth/login')
+      .send({
+        password: user.password,
+      })
+      .expect(400, { error: Error.EmptyLogin });
+  });
+
+  // This case should never happen
   it('should error because the user is an attendant', async () => {
-    const visitor = await createFakeUser({ type: UserType.attendant });
+    const visitorEmail = 'bonjour@lol.fr';
+    const visitorPassword = 'randomPass';
+    await createFakeUser({ type: UserType.attendant, email: visitorEmail, password: visitorPassword });
 
     await request(app)
-      .post(`/admin/auth/login/${visitor.id}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .post('/admin/auth/login')
+      .send({
+        login: visitorEmail,
+        password: visitorPassword,
+      })
       .expect(403, { error: Error.LoginAsAttendant });
   });
 
-  it('should error because the user is not confirmed', async () => {
-    const notConfirmedUser = await createFakeUser({ confirmed: false });
-
-    await request(app)
-      .post(`/admin/auth/login/${notConfirmedUser.id}`)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .expect(403, { error: Error.EmailNotConfirmed });
-  });
-
-  it('should error because the user is not found', async () => {
-    await request(app)
-      .post(`/admin/auth/login/A1B2C3`)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .expect(404, { error: Error.UserNotFound });
-  });
+  let authorizationToken = '';
 
   it('should throw an internal server error', async () => {
     // Fake the main function to throw
@@ -65,18 +113,52 @@ describe('POST /admin/auth/login', () => {
 
     // Request to login
     await request(app)
-      .post(`/admin/auth/login/${user.id}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+      .post('/admin/auth/login')
+      .send({
+        login: user.email,
+        password,
+      })
       .expect(500, { error: Error.InternalServerError });
   });
 
   it('should validate the login', async () => {
-    const { body } = await request(app)
-      .post(`/admin/auth/login/${user.id}`)
-      .set('Authorization', `Bearer ${adminToken}`)
+    const response = await request(app)
+      .post('/admin/auth/login')
+      .send({
+        login: user.email,
+        password,
+      })
       .expect(200);
 
-    expect(body.user).to.be.an('object');
-    expect(body.token).to.be.a('string');
+    expect(response.body.user).to.be.an('object');
+    expect(response.body.token).to.be.a('string');
+
+    authorizationToken = response.body.token;
+  });
+
+  it('should validate the login even with a username', async () => {
+    const response = await request(app)
+      .post('/admin/auth/login')
+      .send({
+        login: user.username,
+        password,
+      })
+      .expect(200);
+
+    expect(response.body.user).to.be.an('object');
+    expect(response.body.token).to.be.a('string');
+
+    authorizationToken = response.body.token;
+  });
+
+  it('should return a bad request because we are already authenticated', async () => {
+    await request(app)
+      .post('/admin/auth/login')
+      .set('Authorization', `Bearer ${authorizationToken}`)
+      .send({
+        login: user.email,
+        password,
+      })
+      .expect(403, { error: Error.AlreadyAuthenticated });
   });
 });

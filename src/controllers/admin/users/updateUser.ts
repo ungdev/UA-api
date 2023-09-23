@@ -83,14 +83,18 @@ export default [
       if (error.code === 'P2002' && error.meta) {
         // eslint-disable-next-line default-case
         switch (error.meta.target) {
-          case 'users_place_key':
+          case 'users_place_key': {
             return conflict(response, Error.PlaceAlreadyAttributed);
-          case 'users_discordId_key':
+          }
+          case 'users_discordId_key': {
             return conflict(response, Error.DiscordAccountAlreadyUsed);
-          case 'users_email_key':
+          }
+          case 'users_email_key': {
             return conflict(response, Error.EmailAlreadyExists);
-          case 'users_username_key':
+          }
+          case 'users_username_key': {
             return conflict(response, Error.UsernameAlreadyExists);
+          }
         }
       }
 

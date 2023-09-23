@@ -8,30 +8,47 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: pnpm/action-setup@v2
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn --frozen-lockfile
-      - run: yarn prisma generate
-      - run: yarn lint
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm pnpx prisma generate
+      - run: pnpm lint
 
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: pnpm/action-setup@v2
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn --frozen-lockfile
-      - run: yarn prisma generate
-      - run: yarn build
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm pnpx prisma generate
+      - run: pnpm build
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
     env:
       # Used for prisma generation
       DATABASE_URL: mysql://test:test@localhost:3306/arena
@@ -50,36 +67,47 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: pnpm/action-setup@v2
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn --frozen-lockfile
-      - run: yarn prisma generate
-      - run: yarn prisma db push
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm pnpx prisma generate
+      - run: pnpm pnpx prisma db push
       - run: docker exec -i mariadb mysql -utest -ptest arena < seed.sql
-      - run: yarn test:coverage
+      - run: pnpm test:coverage
       - uses: codecov/codecov-action@v1
 
   deploy-dbdocs:
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
     needs:
       - lint
       - build
       - test
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: pnpm/action-setup@v2
         with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - run: yarn --frozen-lockfile
-      - run: yarn prisma generate
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm pnpx prisma generate
       - env:
           BRANCH: ${{ github.ref == 'refs/heads/master' && 'master' || 'dev' }}
           DBDOCS_TOKEN: ${{ secrets.DBDOCS_TOKEN }}
-        run: yarn dbdocs build dbml/schema.dbml --project=${{ env.BRANCH }}
+        run: pnpm dbdocs build dbml/schema.dbml --project=${{ env.BRANCH }}
 
   deploy:
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
