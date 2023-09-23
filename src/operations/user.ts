@@ -401,13 +401,3 @@ export const countCoaches = (teamId: string) =>
       ],
     },
   });
-
-export const updateCompumsaCode = (userId: string, code: number): Promise<RawUser> =>
-  database.user.update({
-    data: {
-      compumsaCode: code,
-    },
-    where: {
-      id: userId,
-    },
-  });
