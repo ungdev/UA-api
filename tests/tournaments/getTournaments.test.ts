@@ -11,6 +11,7 @@ describe('GET /tournaments', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.user.deleteMany();
+    await database.caster.deleteMany();
   });
 
   before(async () => {
@@ -31,6 +32,18 @@ describe('GET /tournaments', () => {
 
   it('should return 200 with an array of tournaments', async () => {
     const tournaments = await database.tournament.findMany();
+
+    await Promise.all(
+      tournaments.map(({ id }) =>
+        database.tournament.update({
+          data: {
+            casters: { create: { id: `caster-${id}`, name: `un caster pour ${id}` } },
+            cashprize: 42,
+          },
+          where: { id },
+        }),
+      ),
+    );
 
     // add display false to a random tournament
     await database.tournament.update({
