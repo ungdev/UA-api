@@ -78,7 +78,7 @@ model Team {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @default(now()) @updatedAt
   discordRoleId   String?
-  pokemonPlayerId String?
+  pokemonPlayerId Int?
   captain         User         @relation(fields: [captainId], references: [id])
   tournament      Tournament   @relation(fields: [tournamentId], references: [id])
   askingUsers     User[]       @relation("teamAskingUsers")
@@ -236,6 +236,17 @@ enum UserType {
 enum UserAge {
   adult
   child
+}
+
+enum TournamentId {
+  lol
+  ssbu
+  csgo
+  valorant
+  rl
+  osu
+  tft
+  open
 }
 
 enum RepoItemType {
