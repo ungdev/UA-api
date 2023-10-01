@@ -5,7 +5,6 @@ import { badRequest, created } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Error as ApiError, MailQuery } from '../../../types';
 import { validateBody } from '../../../middlewares/validation';
-import * as validators from '../../../utils/validators';
 import { sendEmail, SerializedMail } from '../../../services/email';
 import { serialize } from '../../../services/email/serializer';
 import database from '../../../services/database';
