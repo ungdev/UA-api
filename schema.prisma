@@ -72,7 +72,7 @@ model Setting {
 model Team {
   id            String       @id
   name          String
-  tournamentId  TournamentId
+  tournamentId  String
   captainId     String       @unique
   lockedAt      DateTime?
   createdAt     DateTime     @default(now())
@@ -90,7 +90,7 @@ model Team {
 }
 
 model Tournament {
-  id                     TournamentId @id
+  id                     String @id
   name                   String       @unique
   maxPlayers             Int
   playersPerTeam         Int
@@ -114,7 +114,7 @@ model Tournament {
 model Caster {
   id           String       @id
   name         String
-  tournamentId TournamentId
+  tournamentId String
   tournament   Tournament   @relation(fields: [tournamentId], references: [id])
 
   @@index([tournamentId], map: "casters_tournamentId_fkey")
@@ -235,17 +235,6 @@ enum UserType {
 enum UserAge {
   adult
   child
-}
-
-enum TournamentId {
-  lol
-  ssbu
-  csgo
-  valorant
-  rl
-  osu
-  tft
-  open
 }
 
 enum RepoItemType {

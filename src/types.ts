@@ -1,4 +1,4 @@
-import prisma, { TournamentId, TransactionState, UserType, UserAge, Caster } from '@prisma/client';
+import prisma, { TransactionState, UserType, UserAge, Caster } from '@prisma/client';
 import type { ErrorRequestHandler } from 'express';
 import type Mail from 'nodemailer/lib/mailer';
 import type { ParsedQs } from 'qs';
@@ -40,7 +40,7 @@ export type EmailAttachement = Mail.Attachment & {
 
 export type MailQuery = ParsedQs & {
   readonly locked?: boolean;
-  readonly tournamentId?: TournamentId;
+  readonly tournamentId?: string;
   readonly preview: boolean;
   readonly subject: string;
   readonly highlight: {
@@ -66,7 +66,7 @@ export enum Permission {
   repo = 'repo',
 }
 
-export { TransactionState, UserAge, UserType, TournamentId, ItemCategory, Log, RepoItemType } from '@prisma/client';
+export { TransactionState, UserAge, UserType, ItemCategory, Log, RepoItemType } from '@prisma/client';
 
 /************************/
 /** Database extensions **/
@@ -156,7 +156,7 @@ export type UserSearchQuery = {
   search: string;
   type: UserType;
   permission: Permission;
-  tournament: TournamentId;
+  tournament: string;
   locked: string;
   payment: string;
   scan: string;
@@ -245,7 +245,6 @@ export const enum Error {
   stringBooleanError = "Ce n'est pas du texte",
 
   InvalidTeamName = "Nom d'équipe invalide !",
-  InvalidTournamentId = "Ce tournoi n'existe pas",
 
   InvalidQRCode = 'Le QR code est invalide',
   NoQRCode = "Le QR code n'existe pas",

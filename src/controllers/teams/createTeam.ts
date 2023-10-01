@@ -9,7 +9,7 @@ import { fetchTournament } from '../../operations/tournament';
 import { hasUserAlreadyPaidForAnotherTicket } from '../../operations/user';
 import { Error as ResponseError, UserType } from '../../types';
 import { filterTeam } from '../../utils/filters';
-import { conflict, created, forbidden, gone } from '../../utils/responses';
+import { conflict, created, forbidden, gone, notFound } from "../../utils/responses";
 import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
 
@@ -21,7 +21,7 @@ export default [
   validateBody(
     Joi.object({
       name: validators.teamName.required(),
-      tournamentId: validators.tournamentId.required(),
+      tournamentId: Joi.string().required(),
       userType: Joi.string()
         .valid(UserType.player, UserType.coach)
         .required()
@@ -36,6 +36,10 @@ export default [
       const { user } = getRequestInfo(response);
 
       const tournament = await fetchTournament(tournamentId);
+
+      if (!tournament) {
+        return notFound(response, ResponseError.TournamentNotFound);
+      }
 
       // If there are more or equal teams than places, return a tournament full
       if (tournament.placesLeft === 0) {

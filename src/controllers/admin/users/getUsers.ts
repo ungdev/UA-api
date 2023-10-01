@@ -18,7 +18,7 @@ export default [
       search: Joi.string().optional(),
       place: Joi.string().optional(),
       type: validators.type.optional(),
-      tournament: validators.tournamentId.optional(),
+      tournament: Joi.string().optional(),
       locked: validators.stringBoolean.optional(),
       payment: validators.stringBoolean.optional(),
       scan: validators.stringBoolean.optional(),

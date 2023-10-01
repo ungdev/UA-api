@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { TournamentId, UserAge, UserType, Permission, Error as ResponseError } from '../types';
+import { UserAge, UserType, Permission, Error as ResponseError } from '../types';
 
 // Matches with LoL EUW summoner name
 const usernameRegex = /^[0-9\p{L} _-]{3,16}$/u;
@@ -37,8 +37,3 @@ export const teamName = Joi.string().regex(nameRegex).error(new Error(ResponseEr
 
 // Cart
 export const quantity = Joi.number().integer().min(1).error(new Error(ResponseError.EmptyBasket));
-
-// Tournament
-export const tournamentId = Joi.string()
-  .valid(...Object.keys(TournamentId))
-  .error(new Error(ResponseError.InvalidTournamentId));

@@ -17,14 +17,14 @@ import {
   Snowflake,
 } from '../controllers/discord/discordApi';
 import database from '../services/database';
-import { Team, Tournament, TournamentId, User } from '../types';
+import { Team, Tournament, User } from '../types';
 import env from './env';
 import logger from './logger';
 
 const createDiscordTeamChannel = async (
   channelName: string,
   channelType: DiscordChannelType,
-  tournamentId: TournamentId,
+  tournamentId: string,
   teamRole: DiscordRole,
   parentId: Snowflake,
 ) => {
