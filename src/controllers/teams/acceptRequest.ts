@@ -15,6 +15,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
+      console.log("début de la requête")
       const { userId } = request.params;
       const askingUser = await fetchUser(userId);
 
@@ -38,6 +39,7 @@ export default [
 
       const updatedTeam = await fetchTeam(team.id);
 
+      console.log("fin de la requête");
       return success(response, filterTeam(updatedTeam));
     } catch (error) {
       return next(error);

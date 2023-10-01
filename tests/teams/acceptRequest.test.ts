@@ -11,6 +11,7 @@ import { Error, Team, User, UserType } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
+import { fetchUser, formatUser } from "../../src/operations/user";
 
 // eslint-disable-next-line func-names
 describe('POST /teams/current/join-requests/:userId', function () {
@@ -257,6 +258,12 @@ describe('POST /teams/current/join-requests/:userId', function () {
 
     // Verify the team has been locked
     team = await teamOperations.fetchTeam(team.id);
+    console.log("équipe :");
+    console.log(team);
+    console.log("joueurs :");
+    console.log(await Promise.all(team.players.map((user) => fetchUser(user.id))));
+    console.log("joueur ajouté :");
+    console.log(user2);
     expect(team.lockedAt).to.be.not.null;
     expect(team.enteredQueueAt).to.be.null;
 
