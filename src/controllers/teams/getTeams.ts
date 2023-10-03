@@ -4,14 +4,13 @@ import { validateQuery } from '../../middlewares/validation';
 import { fetchTeams } from '../../operations/team';
 import { filterTeamRestricted } from '../../utils/filters';
 import { success } from '../../utils/responses';
-import { TournamentId } from '../../types';
 import * as validators from '../../utils/validators';
 
 export default [
   // Middlewares
   validateQuery(
     Joi.object({
-      tournamentId: validators.tournamentId.required(),
+      tournamentId: Joi.string().required(),
       locked: validators.stringBoolean,
     }),
   ),
@@ -19,7 +18,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { tournamentId, locked } = request.query as { tournamentId: TournamentId; locked: string };
+      const { tournamentId, locked } = request.query as { tournamentId: string; locked: string };
       const lockedCasted = Boolean(locked);
 
       const teams = await fetchTeams(tournamentId);

@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { validateBody } from '../../../middlewares/validation';
 import { notFound, success } from '../../../utils/responses';
-import { Error, Permission, TournamentId } from '../../../types';
+import { Error, Permission } from '../../../types';
 import { fetchTournaments, updateTournament } from '../../../operations/tournament';
 import { addCasterToTournament, removeAllCastersFromTournament } from '../../../operations/caster';
 
@@ -34,14 +34,14 @@ export default [
       }
 
       if (request.body.casters && request.body.casters.length > 0) {
-        await removeAllCastersFromTournament(request.params.tournamentId as TournamentId);
+        await removeAllCastersFromTournament(request.params.tournamentId as string);
 
         for (const casterName of request.body.casters) {
-          await addCasterToTournament(request.params.tournamentId as TournamentId, casterName);
+          await addCasterToTournament(request.params.tournamentId as string, casterName);
         }
       }
 
-      const result = await updateTournament(request.params.tournamentId as TournamentId, request.body);
+      const result = await updateTournament(request.params.tournamentId as string, request.body);
 
       return success(response, result);
     } catch (error) {

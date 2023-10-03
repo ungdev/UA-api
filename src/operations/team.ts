@@ -3,7 +3,6 @@ import database from '../services/database';
 import {
   Team,
   User,
-  TournamentId,
   UserType,
   PrimitiveTeam,
   RawUser,
@@ -61,7 +60,7 @@ export const fetchTeamWithTournament = (id: string): Promise<PrimitiveTeamWithPa
     },
   });
 
-export const fetchTeams = async (tournamentId: TournamentId): Promise<Team[]> => {
+export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
   const teams = await database.team.findMany({
     where: {
       tournamentId,
@@ -74,7 +73,7 @@ export const fetchTeams = async (tournamentId: TournamentId): Promise<Team[]> =>
 
 export const createTeam = async (
   name: string,
-  tournamentId: TournamentId,
+  tournamentId: string,
   captainId: string,
   userType: UserType,
 ): Promise<Team> => {

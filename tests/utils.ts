@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
 import { fetchUser } from '../src/operations/user';
-import { Permission, RawUser, User, TournamentId, UserAge, UserType, TransactionState } from '../src/types';
+import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
 import logger from '../src/utils/logger';
 import database from '../src/services/database';
@@ -96,14 +96,14 @@ export const createFakeUser = async (userData: FakeUserData = {}): Promise<User>
  */
 export const createFakeTeam = async ({
   members = 1,
-  tournament = TournamentId.lol,
+  tournament = 'lol',
   paid = false,
   locked = false,
   name = faker.internet.userName(),
   userPassword,
 }: {
   members?: number;
-  tournament?: TournamentId;
+  tournament?: string;
   paid?: boolean;
   locked?: boolean;
   name?: string;

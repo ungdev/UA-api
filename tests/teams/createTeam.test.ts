@@ -6,7 +6,7 @@ import * as teamOperations from '../../src/operations/team';
 import * as tournamentOperations from '../../src/operations/tournament';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
-import { Error, User, TournamentId, UserType } from '../../src/types';
+import { Error, User, UserType } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
 
@@ -71,14 +71,14 @@ describe('POST /teams', () => {
       .post('/teams')
       .send({ name: teamBody.name })
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: "Ce tournoi n'existe pas" }));
+      .expect(400, { error: '"tournamentId" is required' }));
 
   it("should fail because the tournament doesn't exists", () =>
     request(app)
       .post('/teams')
       .send({ ...teamBody, tournamentId: 'factorio' })
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: "Ce tournoi n'existe pas" }));
+      .expect(404, { error: 'Le tournoi est introuvable' }));
 
   it('should fail with an internal server error (test nested check)', () => {
     sandbox.stub(teamOperations, 'createTeam').throws('Unexpected error');
@@ -269,7 +269,7 @@ describe('POST /teams', () => {
       .send({
         ...teamBody,
         name: 'osuPlayer',
-        tournamentId: TournamentId.osu,
+        tournamentId: 'osu',
       })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(403, { error: Error.NotWhitelisted });

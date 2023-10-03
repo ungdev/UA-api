@@ -330,12 +330,6 @@ describe('GET /admin/users', () => {
         .expect(200);
       expect(body.users.length).to.be.equal(1);
     });
-
-    it('should return an error as the tournament id is incorrect', () =>
-      request(app)
-        .get(`/admin/users?tournament=ptdr`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(400, { error: Error.InvalidQueryParameters }));
   });
 
   describe('Test scan field', () => {
