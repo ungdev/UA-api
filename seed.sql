@@ -1,3 +1,4 @@
+/*
 INSERT INTO `items` (`id`, `name`, `category`, `attribute`, `price`, `reducedPrice`, `infos`, `image`, `stock`) VALUES
 ('ticket-player', 'Place joueur', 'ticket', NULL, 2500, 2000, NULL, NULL, NULL),
 ('ticket-player-ssbu', 'Place joueur (SSBU)', 'ticket', NULL, 2200, 1700, NULL, NULL, NULL),
@@ -13,6 +14,7 @@ INSERT INTO `items` (`id`, `name`, `category`, `attribute`, `price`, `reducedPri
 ('tshirt-l', 'T-shirt UA 2022 (Unixese)', 'supplement', 'l', 1500, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', 30),
 ('tshirt-xl', 'T-shirt UA 2022 (Unixese)', 'supplement', 'xl', 1500, NULL, 'Un t-shirt souvenir de cette LAN de folie', 'tshirt.png', 30),
 ('pc', 'Location de PC', 'rent', NULL, 14000, NULL, 'Location de PC si tu ne peux pas amener le tien pendant l''UTT Arena. L''un des PC suivants sera mis à ta disposition :->AMD Ryzen 5 2600,16GB RAM SSD 500G° et 2060 ou 6600XT->INTEL I5 8500 16GB RAM SSD 500G° et 2060 ou 6600XT->AMD RYZEN 5 5600X 500G° SSD et 2060 ou 6600XT', NULL, 7);
+ */
 
 INSERT INTO `settings` (`id`, `value`) VALUES
 ('login', 0),
@@ -27,4 +29,5 @@ INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`, `cashpr
 ('rl', 'Rocket League', 48, 3, 0),
 ('osu', 'Osu!', 48, 1, 0),
 ('tft', 'Teamfight Tactics', 32, 1, 0),
-('open', 'Libre', 56, 1, 0);
+('open', 'Libre', 56, 1, 0),
+('pokemon', 'Pokémon', 24, 1, 0);
