@@ -13,17 +13,10 @@ export const isLoginAllowed = async (request: Request, response: Response, next:
     login ||
     (user && user.permissions && user.permissions.length > 0) ||
     request.originalUrl === '/admin/auth/login' ||
-    request.route.path === '/admin/auth/login'
+    request.originalUrl === '/api/admin/auth/login'
   ) {
     return next();
   }
-  /* eslint-disable no-console */
-  console.error('------chaussette');
-  /* eslint-disable no-console */
-  console.error(request.originalUrl);
-  /* eslint-disable no-console */
-  console.error(request.route.path);
-  console.error('------chaussette');
   return forbidden(response, Error.LoginNotAllowed);
 };
 
