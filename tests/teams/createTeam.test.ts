@@ -151,12 +151,12 @@ describe('POST /teams', () => {
 
     const { body } = await request(app)
       .post('/teams')
-      .send({ ...teamBody, tournamentId: 'csgo' })
+      .send({ ...teamBody, tournamentId: 'cs2' })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(201);
 
     expect(body.name).to.be.equal(teamBody.name);
-    expect(body.tournamentId).to.be.equal('csgo');
+    expect(body.tournamentId).to.be.equal('cs2');
     expect(body.captainId).to.be.equal(newUser.id);
     const remoteUser = await userOperations.fetchUser(body.captainId);
     expect(remoteUser.type).to.be.equal(teamBody.userType);
