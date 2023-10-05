@@ -1,4 +1,4 @@
-import prisma, { TransactionState, UserType, UserAge, Caster, TournamentId } from '@prisma/client';
+import prisma, { TransactionState, UserType, UserAge, Caster } from '@prisma/client';
 import type { ErrorRequestHandler } from 'express';
 import type Mail from 'nodemailer/lib/mailer';
 import type { ParsedQs } from 'qs';
@@ -40,7 +40,7 @@ export type EmailAttachement = Mail.Attachment & {
 
 export type MailQuery = ParsedQs & {
   readonly locked?: boolean;
-  readonly tournamentId?: (typeof TournamentId)[keyof typeof TournamentId];
+  readonly tournamentId?: string;
   readonly preview: boolean;
   readonly subject: string;
   readonly highlight: {
@@ -156,7 +156,7 @@ export type UserSearchQuery = {
   search: string;
   type: UserType;
   permission: Permission;
-  tournament: (typeof TournamentId)[keyof typeof TournamentId];
+  tournament: string;
   locked: string;
   payment: string;
   scan: string;

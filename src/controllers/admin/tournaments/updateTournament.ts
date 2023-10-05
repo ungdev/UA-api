@@ -1,6 +1,5 @@
 import Joi from 'joi';
 import { Request, Response, NextFunction } from 'express';
-import { TournamentId } from '@prisma/client';
 import { hasPermission } from '../../../middlewares/authentication';
 import { validateBody } from '../../../middlewares/validation';
 import { notFound, success } from '../../../utils/responses';
@@ -30,32 +29,19 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      if (
-        !(await fetchTournaments()).some(
-          (tournament) =>
-            tournament.id === (request.params.tournamentId as (typeof TournamentId)[keyof typeof TournamentId]),
-        )
-      ) {
+      if (!(await fetchTournaments()).some((tournament) => tournament.id === request.params.tournamentId)) {
         return notFound(response, Error.NotFound);
       }
 
       if (request.body.casters && request.body.casters.length > 0) {
-        await removeAllCastersFromTournament(
-          request.params.tournamentId as (typeof TournamentId)[keyof typeof TournamentId],
-        );
+        await removeAllCastersFromTournament(request.params.tournamentId as string);
 
         for (const casterName of request.body.casters) {
-          await addCasterToTournament(
-            request.params.tournamentId as (typeof TournamentId)[keyof typeof TournamentId],
-            casterName,
-          );
+          await addCasterToTournament(request.params.tournamentId as string, casterName);
         }
       }
 
-      const result = await updateTournament(
-        request.params.tournamentId as (typeof TournamentId)[keyof typeof TournamentId],
-        request.body,
-      );
+      const result = await updateTournament(request.params.tournamentId as string, request.body);
 
       return success(response, result);
     } catch (error) {

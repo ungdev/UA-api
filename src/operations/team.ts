@@ -1,4 +1,4 @@
-import type { PrismaPromise, TournamentId } from '@prisma/client';
+import type { PrismaPromise } from '@prisma/client';
 import database from '../services/database';
 import {
   Team,
@@ -60,7 +60,7 @@ export const fetchTeamWithTournament = (id: string): Promise<PrimitiveTeamWithPa
     },
   });
 
-export const fetchTeams = async (tournamentId: (typeof TournamentId)[keyof typeof TournamentId]): Promise<Team[]> => {
+export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
   const teams = await database.team.findMany({
     where: {
       tournamentId,
@@ -73,7 +73,7 @@ export const fetchTeams = async (tournamentId: (typeof TournamentId)[keyof typeo
 
 export const createTeam = async (
   name: string,
-  tournamentId: (typeof TournamentId)[keyof typeof TournamentId],
+  tournamentId: string,
   captainId: string,
   userType: UserType,
 ): Promise<Team> => {

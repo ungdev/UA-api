@@ -1,4 +1,4 @@
-import { Caster, PrismaPromise, TournamentId } from '@prisma/client';
+import { Caster, PrismaPromise } from '@prisma/client';
 import database from '../services/database';
 import { PrimitiveTournament, Tournament } from '../types';
 import { fetchTeams } from './team';
@@ -33,7 +33,7 @@ export const formatTournament = async (
   };
 };
 
-export const fetchTournament = async (id: (typeof TournamentId)[keyof typeof TournamentId]): Promise<Tournament> => {
+export const fetchTournament = async (id: string): Promise<Tournament> => {
   const tournament = await database.tournament.findUnique({ where: { id }, include: { casters: true } });
 
   return formatTournament(tournament);
@@ -51,7 +51,7 @@ export const fetchTournaments = async (): Promise<Tournament[]> => {
 };
 
 export const updateTournament = (
-  id: (typeof TournamentId)[keyof typeof TournamentId],
+  id: string,
   data: {
     name?: string;
     maxPlayers?: number;

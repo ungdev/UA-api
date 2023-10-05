@@ -9,7 +9,6 @@ import { sendEmail, SerializedMail } from '../../../services/email';
 import { serialize } from '../../../services/email/serializer';
 import database from '../../../services/database';
 import { getRequestInfo } from '../../../utils/users';
-import * as validators from '../../../utils/validators';
 
 export default [
   // Middlewares
@@ -18,7 +17,7 @@ export default [
     Joi.object({
       preview: Joi.boolean().default(false),
       locked: Joi.boolean().optional(),
-      tournamentId: validators.tournamentId.optional(),
+      tournamentId: Joi.string().optional(),
       subject: Joi.string().required(),
       highlight: Joi.object({
         title: Joi.string().required(),

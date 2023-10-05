@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
-import { TournamentId } from '@prisma/client';
 import { fetchUser } from '../src/operations/user';
 import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
@@ -104,7 +103,7 @@ export const createFakeTeam = async ({
   userPassword,
 }: {
   members?: number;
-  tournament?: (typeof TournamentId)[keyof typeof TournamentId];
+  tournament?: string;
   paid?: boolean;
   locked?: boolean;
   name?: string;

@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-import { TournamentId } from '@prisma/client';
 import { validateQuery } from '../../middlewares/validation';
 import { fetchTeams } from '../../operations/team';
 import { filterTeamRestricted } from '../../utils/filters';
@@ -11,7 +10,7 @@ export default [
   // Middlewares
   validateQuery(
     Joi.object({
-      tournamentId: validators.tournamentId.required(),
+      tournamentId: Joi.string().required(),
       locked: validators.stringBoolean,
     }),
   ),
@@ -20,7 +19,7 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const { tournamentId, locked } = request.query as {
-        tournamentId: (typeof TournamentId)[keyof typeof TournamentId];
+        tournamentId: string;
         locked: string;
       };
       const lockedCasted = Boolean(locked);

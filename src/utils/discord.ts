@@ -1,5 +1,4 @@
 /* eslint-disable import/no-unresolved */
-import { TournamentId } from '@prisma/client';
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
 import { fetchTeam, fetchTeams } from '../operations/team';
 import {
@@ -25,7 +24,7 @@ import logger from './logger';
 const createDiscordTeamChannel = async (
   channelName: string,
   channelType: DiscordChannelType,
-  tournamentId: (typeof TournamentId)[keyof typeof TournamentId],
+  tournamentId: string,
   teamRole: DiscordRole,
   parentId: Snowflake,
 ) => {
