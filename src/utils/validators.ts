@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { TournamentId } from '@prisma/client';
 import { UserAge, UserType, Permission, Error as ResponseError } from '../types';
 
 // Matches with LoL EUW summoner name
@@ -34,6 +35,11 @@ export const stringBoolean = Joi.string().valid('true', 'false').error(new Error
 
 // Team
 export const teamName = Joi.string().regex(nameRegex).error(new Error(ResponseError.InvalidTeamName));
+
+// Tournament
+export const tournamentId = Joi.string()
+  .valid(...Object.values(TournamentId))
+  .error(new Error(ResponseError.TournamentNotFound));
 
 // Cart
 export const quantity = Joi.number().integer().min(1).error(new Error(ResponseError.EmptyBasket));

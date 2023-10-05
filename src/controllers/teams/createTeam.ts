@@ -21,7 +21,7 @@ export default [
   validateBody(
     Joi.object({
       name: validators.teamName.required(),
-      tournamentId: Joi.string().required(),
+      tournamentId: validators.tournamentId.required(),
       userType: Joi.string()
         .valid(UserType.player, UserType.coach)
         .required()

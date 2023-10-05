@@ -1,5 +1,6 @@
 /* eslint-disable security/detect-non-literal-fs-filename */
 import fs from 'fs/promises';
+import { TournamentId } from '@prisma/client';
 import { createFakeTeam, createFakeUser } from '../utils';
 import { createCart, updateCart } from '../../src/operations/carts';
 import { generateTicket } from '../../src/utils/pdf';
@@ -20,7 +21,9 @@ describe('Tests the PDF utils', () => {
   for (const tournamentId of ['lol', 'ssbu', 'cs2', 'rl', 'osu', 'tft', 'open', 'pokemon']) {
     it(`should generate a PDF ticket for ${tournamentId}`, async () => {
       // Create a fake user and add it in a random team
-      const team = await createFakeTeam({ tournament: tournamentId as string });
+      const team = await createFakeTeam({
+        tournament: tournamentId as (typeof TournamentId)[keyof typeof TournamentId],
+      });
       const user = getCaptain(team);
 
       await updateAdminUser(user.id, {

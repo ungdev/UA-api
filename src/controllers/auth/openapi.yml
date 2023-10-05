@@ -37,6 +37,31 @@
       400:
         $ref: '#/components/responses/400Errored'
 
+/auth/resendEmail:
+  post:
+    summary: Renvoie le mail de confirmation d'inscription
+    description: Renvoie le mail de confirmation d'inscription à l'utilisateur.<br/>
+      *L'utilisateur ne doit pas être connecté*
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+              username:
+                type: string
+              password:
+                type: string
+    responses:
+      204:
+        description: Le mail a bien été renvoyé
+      400:
+        $ref: '#/components/responses/400Errored'
+
 /auth/register:
   post:
     summary: Crée un nouvel utilisateur

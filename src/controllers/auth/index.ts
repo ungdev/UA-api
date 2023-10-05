@@ -13,6 +13,6 @@ router.post('/validate/:token', validate);
 router.post('/login', login);
 router.post('/reset-password/ask', askResetPassword);
 router.post('/reset-password/:token', resetPassword);
-router.post('/resendEmail', resendEmail)
+router.post('/resendEmail', resendEmail);
 
 export default router;

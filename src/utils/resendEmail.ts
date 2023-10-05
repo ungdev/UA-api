@@ -53,7 +53,6 @@ export async function resendEmail(request: Request, response: Response, next: Ne
       });
       logger.warn(error);
     });
-
     return success(response, {
       sent: true,
     });

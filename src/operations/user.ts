@@ -1,5 +1,5 @@
 import userOperations from 'bcryptjs';
-import type { Prisma } from '@prisma/client';
+import type { Prisma, TournamentId } from '@prisma/client';
 import database from '../services/database';
 import nanoid from '../utils/nanoid';
 import env from '../utils/env';
@@ -57,7 +57,11 @@ export const formatUserWithTeamAndTournament = (
   };
 };
 
-export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentId: string, userType: UserType) => {
+export const hasUserAlreadyPaidForAnotherTicket = async (
+  user: User,
+  tournamentId: (typeof TournamentId)[keyof typeof TournamentId],
+  userType: UserType,
+) => {
   const currentTickets = user.cartItems.filter(
     (cartItem) =>
       cartItem.cart.transactionState === 'paid' &&

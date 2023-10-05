@@ -71,14 +71,14 @@ describe('POST /teams', () => {
       .post('/teams')
       .send({ name: teamBody.name })
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: '"tournamentId" is required' }));
+      .expect(400, { error: Error.TournamentNotFound }));
 
   it("should fail because the tournament doesn't exists", () =>
     request(app)
       .post('/teams')
       .send({ ...teamBody, tournamentId: 'factorio' })
       .set('Authorization', `Bearer ${token}`)
-      .expect(404, { error: 'Le tournoi est introuvable' }));
+      .expect(400, { error: Error.TournamentNotFound }));
 
   it('should fail with an internal server error (test nested check)', () => {
     sandbox.stub(teamOperations, 'createTeam').throws('Unexpected error');
