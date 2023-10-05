@@ -17,6 +17,13 @@ export const isLoginAllowed = async (request: Request, response: Response, next:
   ) {
     return next();
   }
+  /* eslint-disable no-console */
+  console.error('------chaussette');
+  /* eslint-disable no-console */
+  console.error(request.originalUrl);
+  /* eslint-disable no-console */
+  console.error(request.route.path);
+  console.error('------chaussette');
   return forbidden(response, Error.LoginNotAllowed);
 };
 
