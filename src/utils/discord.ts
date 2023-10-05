@@ -17,14 +17,14 @@ import {
   Snowflake,
 } from '../controllers/discord/discordApi';
 import database from '../services/database';
-import { Team, Tournament, TournamentId, User } from '../types';
+import { Team, Tournament, User } from '../types';
 import env from './env';
 import logger from './logger';
 
 const createDiscordTeamChannel = async (
   channelName: string,
   channelType: DiscordChannelType,
-  tournamentId: TournamentId,
+  tournamentId: string,
   teamRole: DiscordRole,
   parentId: Snowflake,
 ) => {
@@ -156,9 +156,13 @@ export const removeDiscordRoles = async (fromUser: User) => {
   // increase the role rate limits)
   try {
     const discordGuildMember = await fetchGuildMember(fromUser.discordId);
-    if (team.discordRoleId && discordGuildMember.roles.includes(team.discordRoleId))
+    if (team.discordRoleId && discordGuildMember.roles && discordGuildMember.roles.includes(team.discordRoleId))
       await removeMemberRole(fromUser.discordId, team.discordRoleId);
-    if (tournament.discordRoleId && discordGuildMember.roles.includes(tournament.discordRoleId))
+    if (
+      tournament.discordRoleId &&
+      discordGuildMember.roles &&
+      discordGuildMember.roles.includes(tournament.discordRoleId)
+    )
       await removeMemberRole(fromUser.discordId, tournament.discordRoleId);
   } catch (error) {
     if (!error.response || error.response.status !== 404) throw error;

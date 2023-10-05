@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
 import { fetchUser } from '../src/operations/user';
-import { Permission, RawUser, User, TournamentId, UserAge, UserType, TransactionState } from '../src/types';
+import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
 import logger from '../src/utils/logger';
 import database from '../src/services/database';
@@ -44,12 +44,12 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
      * https://github.com/faker-js/faker/blob/main/src/modules/internet/index.ts#L129)
      * We update the result to match our username regular expression:
      * replace dots with dashes and remove trailing chars */
-    username: data.username || faker.internet.userName().replace(/\./g, '-').slice(0, 16),
-    firstname: data.firstname || faker.name.firstName(),
-    lastname: data.lastname || faker.name.lastName(),
+    username: data.username || faker.internet.userName().replace('.', '-').slice(0, 16),
+    firstname: data.firstname || faker.person.firstName(),
+    lastname: data.lastname || faker.person.lastName(),
     email: data.email || faker.internet.email(),
     type: userType,
-    registerToken: data.confirmed !== false ? null : nanoid(),
+    registerToken: data.confirmed === false ? nanoid() : null,
     password: await hash(data.password || faker.internet.password(), awaitedSalt),
     discordId: data.discordId || generateFakeDiscordId(),
     permissions: serializePermissions(data.permissions),
@@ -96,14 +96,14 @@ export const createFakeUser = async (userData: FakeUserData = {}): Promise<User>
  */
 export const createFakeTeam = async ({
   members = 1,
-  tournament = TournamentId.lol,
+  tournament = 'lol',
   paid = false,
   locked = false,
   name = faker.internet.userName(),
   userPassword,
 }: {
   members?: number;
-  tournament?: TournamentId;
+  tournament?: string;
   paid?: boolean;
   locked?: boolean;
   name?: string;

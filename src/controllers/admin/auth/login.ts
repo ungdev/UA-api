@@ -1,42 +1,23 @@
 import { NextFunction, Request, Response } from 'express';
-import { filterUser } from '../../../utils/filters';
-import { generateToken } from '../../../utils/users';
-import { fetchUser } from '../../../operations/user';
-import { hasPermission } from '../../../middlewares/authentication';
-import { Permission, Error, UserType } from '../../../types';
-import { forbidden, notFound, success } from '../../../utils/responses';
+import Joi from 'joi';
+import { loginAccount } from '../../../utils/login';
+import { isNotAuthenticated } from '../../../middlewares/authentication';
+import { validateBody } from '../../../middlewares/validation';
+import { Error as ResponseError } from '../../../types';
+import * as validators from '../../../utils/validators';
 
 export default [
   // Middlewares
-  ...hasPermission(Permission.admin),
+  ...isNotAuthenticated,
+  validateBody(
+    Joi.object({
+      login: Joi.string().required().error(new Error(ResponseError.EmptyLogin)),
+      password: validators.password.required(),
+    }),
+  ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
-    try {
-      const user = await fetchUser(request.params.userId);
-
-      // Check if the user exists
-      if (!user) {
-        return notFound(response, Error.UserNotFound);
-      }
-
-      if (user.registerToken) {
-        return forbidden(response, Error.EmailNotConfirmed);
-      }
-
-      if (user.type === UserType.attendant) {
-        return forbidden(response, Error.LoginAsAttendant);
-      }
-
-      // Generate a token
-      const token = generateToken(user);
-
-      return success(response, {
-        user: filterUser(user),
-        token,
-      });
-    } catch (error) {
-      return next(error);
-    }
+    await loginAccount(request, response, next, true);
   },
 ];

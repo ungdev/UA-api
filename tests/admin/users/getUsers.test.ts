@@ -86,7 +86,6 @@ describe('GET /admin/users', () => {
       type: user.type,
       age: user.age,
       scannedAt: null,
-      compumsaCode: null,
       username: user.username,
       hasPaid: user.hasPaid,
       customMessage: null,
@@ -136,7 +135,6 @@ describe('GET /admin/users', () => {
       type: placedUser.type,
       age: placedUser.age,
       scannedAt: null,
-      compumsaCode: null,
       username: placedUser.username,
       hasPaid: false,
       customMessage: null,
@@ -254,7 +252,7 @@ describe('GET /admin/users', () => {
       await database.team.deleteMany({
         where: {
           id: {
-            in: [lockedTeamMember.teamId, unlockedTeamMember.teamId],
+            in: [lockedTeamMember.teamId!, unlockedTeamMember.teamId!],
           },
         },
       });
@@ -332,12 +330,6 @@ describe('GET /admin/users', () => {
         .expect(200);
       expect(body.users.length).to.be.equal(1);
     });
-
-    it('should return an error as the tournament id is incorrect', () =>
-      request(app)
-        .get(`/admin/users?tournament=ptdr`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(400, { error: Error.InvalidQueryParameters }));
   });
 
   describe('Test scan field', () => {

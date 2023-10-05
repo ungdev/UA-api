@@ -1,4 +1,5 @@
 import { pick } from 'lodash';
+import { Partner } from '@prisma/client';
 import {
   CartItem,
   CartWithCartItems,
@@ -33,7 +34,6 @@ export const filterUser = (user: User) =>
     'attendant.firstname',
     'attendant.lastname',
     'attendant.id',
-    'compumsaCode',
   ]);
 
 export const filterAdminAccount = (user: ParsedPermissionsHolder<RawUser>) =>
@@ -104,7 +104,7 @@ export const filterCartWithCartItemsAdmin = (cart: CartWithCartItemsAdmin) => {
 };
 
 export const filterTournament = (tournament: Tournament) =>
-  pick(tournament, 'id', 'name', 'shortName', 'maxPlayers', 'playersPerTeam', 'lockedTeamsCount');
+  pick(tournament, 'id', 'name', 'maxPlayers', 'playersPerTeam', 'lockedTeamsCount');
 
 export const filterTeam = (team: Team) => {
   const filteredTeam = pick(team, ['id', 'name', 'tournamentId', 'captainId', 'lockedAt']);
@@ -132,11 +132,15 @@ export const filterTournamentRestricted = (tournament: Tournament) => {
     tournament,
     'id',
     'name',
-    'shortName',
     'maxPlayers',
     'playersPerTeam',
     'lockedTeamsCount',
     'placesLeft',
+    'casters',
+    'cashprize',
+    'cashprizeDetails',
+    'format',
+    'infos',
   );
 
   return {
@@ -144,3 +148,5 @@ export const filterTournamentRestricted = (tournament: Tournament) => {
     teams: tournament.teams.map(filterTeamRestricted),
   };
 };
+
+export const filterPartnerRestricted = (partner: Partner) => pick(partner, 'id', 'name', 'link');

@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { beforeEach } from 'mocha';
-import { User, Error, Permission, TournamentId, UserType } from '../../../src/types';
+import { User, Error, Permission, UserType } from '../../../src/types';
 import database from '../../../src/services/database';
 import * as mailOperations from '../../../src/services/email';
 import { createFakeTeam, createFakeUser } from '../../utils';
@@ -15,9 +15,9 @@ describe('POST /admin/emails', () => {
 
   before(async () => {
     admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    await createFakeTeam({ members: 4, tournament: TournamentId.csgo });
-    await createFakeTeam({ members: 2, tournament: TournamentId.lol });
-    [nonAdminUser] = (await createFakeTeam({ members: 5, tournament: TournamentId.csgo, locked: true })).players;
+    await createFakeTeam({ members: 4, tournament: 'cs2' });
+    await createFakeTeam({ members: 2, tournament: 'lol' });
+    [nonAdminUser] = (await createFakeTeam({ members: 5, tournament: 'cs2', locked: true })).players;
     adminToken = generateToken(admin);
   });
 
@@ -163,7 +163,7 @@ describe('POST /admin/emails', () => {
       request(app)
         .post(`/admin/emails`)
         .send({
-          tournamentId: TournamentId.csgo,
+          tournamentId: 'cs2',
           ...validMailBody,
         })
         .set('Authorization', `Bearer ${adminToken}`)
@@ -173,7 +173,7 @@ describe('POST /admin/emails', () => {
       request(app)
         .post(`/admin/emails`)
         .send({
-          tournamentId: TournamentId.csgo,
+          tournamentId: 'cs2',
           locked: true,
           ...validMailBody,
         })
@@ -184,7 +184,7 @@ describe('POST /admin/emails', () => {
       request(app)
         .post(`/admin/emails`)
         .send({
-          tournamentId: TournamentId.csgo,
+          tournamentId: 'cs2',
           locked: false,
           ...validMailBody,
         })

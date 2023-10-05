@@ -6,7 +6,7 @@ import * as teamOperations from '../../src/operations/team';
 import * as tournamentOperations from '../../src/operations/tournament';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
-import { Error, User, TournamentId, UserType } from '../../src/types';
+import { Error, User, UserType } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
 
@@ -71,14 +71,14 @@ describe('POST /teams', () => {
       .post('/teams')
       .send({ name: teamBody.name })
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: "Ce tournoi n'existe pas" }));
+      .expect(400, { error: '"tournamentId" is required' }));
 
   it("should fail because the tournament doesn't exists", () =>
     request(app)
       .post('/teams')
       .send({ ...teamBody, tournamentId: 'factorio' })
       .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: "Ce tournoi n'existe pas" }));
+      .expect(404, { error: 'Le tournoi est introuvable' }));
 
   it('should fail with an internal server error (test nested check)', () => {
     sandbox.stub(teamOperations, 'createTeam').throws('Unexpected error');
@@ -151,12 +151,12 @@ describe('POST /teams', () => {
 
     const { body } = await request(app)
       .post('/teams')
-      .send({ ...teamBody, tournamentId: 'csgo' })
+      .send({ ...teamBody, tournamentId: 'cs2' })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(201);
 
     expect(body.name).to.be.equal(teamBody.name);
-    expect(body.tournamentId).to.be.equal('csgo');
+    expect(body.tournamentId).to.be.equal('cs2');
     expect(body.captainId).to.be.equal(newUser.id);
     const remoteUser = await userOperations.fetchUser(body.captainId);
     expect(remoteUser.type).to.be.equal(teamBody.userType);
@@ -269,7 +269,7 @@ describe('POST /teams', () => {
       .send({
         ...teamBody,
         name: 'osuPlayer',
-        tournamentId: TournamentId.osu,
+        tournamentId: 'osu',
       })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(403, { error: Error.NotWhitelisted });

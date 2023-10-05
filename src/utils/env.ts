@@ -1,6 +1,6 @@
 /* eslint-disable consistent-return */
-import dotenv from 'dotenv';
 import crypto from 'crypto';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -50,6 +50,9 @@ const env = {
   },
   front: {
     website: frontEndpoint,
+  },
+  upload: {
+    token: loadEnv('UPLOAD_FILE_TOKEN') || '1234azer',
   },
   bcrypt: {
     rounds: loadIntEnv('API_BCRYPT_ROUNDS') || 10,

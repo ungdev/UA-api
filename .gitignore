@@ -7,7 +7,7 @@
 /build
 .nyc_output
 coverage
-yarn-error.log
+pnpm-error.log
 
 # misc
 .DS_Store
@@ -23,5 +23,3 @@ yarn-error.log
 openapi.json
 
 /docs/build
-
-compumsaCodes.json

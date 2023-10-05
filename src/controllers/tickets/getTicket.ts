@@ -23,9 +23,7 @@ export default [
       // Retrieves the cart item
       const ticket = await fetchCartItem(
         cartItemId ??
-          (
-            await fetchUser(user.id)
-          ).cartItems.find(
+          (await fetchUser(user.id)).cartItems.find(
             (item) => item.itemId === `ticket-${user.type}` && item.cart.transactionState === TransactionState.paid,
           ).id,
       );

@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User, TournamentId, UserType } from '../../../src/types';
+import { Error, Permission, User, UserType } from '../../../src/types';
 import * as userUtils from '../../../src/utils/users';
 import { sandbox } from '../../setup';
 import * as logOperations from '../../../src/operations/log';
@@ -75,7 +75,7 @@ describe('GET /admin/logs', () => {
       .post('/teams')
       .send({
         name: 'fake-team',
-        tournamentId: TournamentId.lol,
+        tournamentId: 'lol',
         userType: UserType.player,
       })
       .set('Authorization', `Bearer ${userUtils.generateToken(user)}`)

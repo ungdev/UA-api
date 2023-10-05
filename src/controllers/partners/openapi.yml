@@ -1,0 +1,17 @@
+/partners:
+  get:
+    summary: Renvoie la liste des partenaires dont les informations sont publiques.
+    description: Renvoie la liste des partenaires dont les informations sont publiques.
+    tags:
+      - Partners
+    responses:
+      200:
+        description: Renvoie la liste des partenaires dont les informations sont publiques.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/Partner'
+                  

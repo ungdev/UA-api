@@ -32,10 +32,6 @@ describe('GET /teams', () => {
     await request(app).get('/teams?tournamentId=lol&locked=mdr').expect(400, { error: Error.InvalidQueryParameters });
   });
 
-  it('should return not accept unknown tournament', async () => {
-    await request(app).get('/teams?tournamentId=random').expect(400, { error: Error.InvalidQueryParameters });
-  });
-
   it('should return 200 with an array of teams', async () => {
     const { body } = await request(app).get('/teams?tournamentId=lol').expect(200);
 

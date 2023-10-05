@@ -57,7 +57,7 @@ import { createFakeTeam, createFakeUser } from './utils';
 
   // Create 10 users without team and 30 orgas
   for (let standAloneUser = 0; standAloneUser < 10; standAloneUser += 1) {
-    await createFakeUser({ type: null, password: defaultPassword });
+    await createFakeUser({ type: undefined, password: defaultPassword });
   }
 
   // Add fake users (with sufficient length to be allowed in the database)

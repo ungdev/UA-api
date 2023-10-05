@@ -5,7 +5,7 @@ import { createCart, updateCart } from '../../src/operations/carts';
 import { generateTicket } from '../../src/utils/pdf';
 import { getCaptain } from '../../src/utils/teams';
 import database from '../../src/services/database';
-import { TournamentId, TransactionState } from '../../src/types';
+import { TransactionState } from '../../src/types';
 import { fetchAllItems } from '../../src/operations/item';
 import { updateAdminUser } from '../../src/operations/user';
 
@@ -17,10 +17,10 @@ describe('Tests the PDF utils', () => {
   });
 
   let placeId = 0;
-  for (const tournamentId in TournamentId) {
+  for (const tournamentId of ['lol', 'ssbu', 'cs2', 'rl', 'osu', 'tft', 'open', 'pokemon']) {
     it(`should generate a PDF ticket for ${tournamentId}`, async () => {
       // Create a fake user and add it in a random team
-      const team = await createFakeTeam({ tournament: tournamentId as TournamentId });
+      const team = await createFakeTeam({ tournament: tournamentId as string });
       const user = getCaptain(team);
 
       await updateAdminUser(user.id, {
@@ -31,7 +31,7 @@ describe('Tests the PDF utils', () => {
         {
           itemId: 'ticket-player',
           quantity: 1,
-          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player')!.price,
           forUserId: user.id,
         },
       ]);
@@ -54,7 +54,7 @@ describe('Tests the PDF utils', () => {
       {
         itemId: 'ticket-player',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player')!.price,
         forUserId: user.id,
       },
     ]);

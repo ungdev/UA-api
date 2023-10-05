@@ -1,23 +1,25 @@
-FROM node:16
+FROM node:18
 
 ENV NODE_ENV=production
 WORKDIR /srv/app
+
+RUN npm install -g pnpm
 
 RUN chown node:node .
 
 USER node
 
 # Node has the uid 1000
-COPY --chown=node:node package.json yarn.lock schema.prisma ./
+COPY --chown=node:node package.json pnpm-lock.yaml schema.prisma ./
 
-RUN yarn --frozen-lockfile --production=false --network-timeout 1000000
+RUN pnpm install --frozen-lockfile --production=false
 
 COPY --chown=node:node ./ ./
 
-RUN yarn prisma generate
-RUN yarn build
+RUN pnpm pnpx prisma generate
+RUN pnpm build
 
 # Prunes devDependencies
-RUN yarn install --production --ignore-scripts --prefer-offline --network-timeout 1000000
+RUN pnpm install --production --ignore-scripts --prefer-offline
 
-CMD yarn start
+CMD pnpm start
