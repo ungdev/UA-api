@@ -13,7 +13,7 @@ export const isLoginAllowed = async (request: Request, response: Response, next:
     login ||
     (user && user.permissions && user.permissions.length > 0) ||
     request.originalUrl === '/admin/auth/login' ||
-    request.route.path === '/admin/auth/login'
+    request.originalUrl === '/api/admin/auth/login'
   ) {
     return next();
   }
