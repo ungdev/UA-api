@@ -18,7 +18,7 @@ describe('POST /discord/sync-roles', () => {
       locked: true,
       paid: true,
       members: 5,
-      tournament: 'csgo',
+      tournament: 'cs2',
     });
     // We will test with one missing user (he may have left the server)
     for (const user of [...team.players.slice(1), ...team.coaches]) registerMember(user.discordId);
@@ -27,13 +27,13 @@ describe('POST /discord/sync-roles', () => {
     const team2 = await createFakeTeam({
       locked: false,
       members: 2,
-      tournament: 'csgo',
+      tournament: 'cs2',
     });
     registerMember(team2.players[0].discordId);
 
     await database.tournament.update({
       where: {
-        id: 'csgo',
+        id: 'cs2',
       },
       data: {
         discordRoleId: registerRole(),

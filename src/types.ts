@@ -271,6 +271,7 @@ export const enum Error {
   IsOrga = "L'utilisateur est un organisateur",
   TeamNotPaid = "Tous les membres de l'équipe n'ont pas payé",
   LoginNotAllowed = 'Tu ne peux pas te connecter actuellement',
+  NotAdmin = "Tu n'es pas administrateur",
   ShopNotAllowed = 'La billetterie est fermée',
   EmailNotConfirmed = "Le compte n'est pas confirmé",
   NoPermission = "Tu n'as pas la permission d'accéder à cette ressource",

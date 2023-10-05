@@ -17,7 +17,7 @@ describe('Tests the PDF utils', () => {
   });
 
   let placeId = 0;
-  for (const tournamentId of ['lol', 'ssbu', 'csgo', 'rl', 'osu', 'tft', 'open', 'pokemon']) {
+  for (const tournamentId of ['lol', 'ssbu', 'cs2', 'rl', 'osu', 'tft', 'open', 'pokemon']) {
     it(`should generate a PDF ticket for ${tournamentId}`, async () => {
       // Create a fake user and add it in a random team
       const team = await createFakeTeam({ tournament: tournamentId as string });

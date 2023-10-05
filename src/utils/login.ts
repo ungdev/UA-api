@@ -46,7 +46,7 @@ export async function loginAccount(request: Request, response: Response, next: N
 
     // If admin check that the user has any permissions
     if (admin && (!user.permissions || user.permissions.length === 0)) {
-      return forbidden(response, ResponseError.LoginNotAllowed);
+      return forbidden(response, ResponseError.NotAdmin);
     }
 
     const token = generateToken(user);
