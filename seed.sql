@@ -25,7 +25,6 @@ INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`, `cashpr
 ('lol', 'League of Legends', 160, 5, 0),
 ('ssbu', 'SSBU', 128, 1, 0),
 ('csgo', 'Counter-Strike : Global Offensive', 80, 5, 0),
-('valorant', 'Valorant', 80, 5, 0),
 ('rl', 'Rocket League', 48, 3, 0),
 ('osu', 'Osu!', 48, 1, 0),
 ('tft', 'Teamfight Tactics', 32, 1, 0),
