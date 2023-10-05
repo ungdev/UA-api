@@ -31,7 +31,7 @@ describe('POST /admin/auth/login', () => {
         login: user.email,
         password,
       })
-      .expect(403, { error: Error.LoginNotAllowed });
+      .expect(403, { error: Error.NotAdmin });
     await database.user.update({
       where: {
         id: user.id,
