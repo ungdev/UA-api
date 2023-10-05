@@ -21,10 +21,10 @@ INSERT INTO `settings` (`id`, `value`) VALUES
 
 INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`, `cashprize`) VALUES
 ('lol', 'League of Legends', 160, 5, 0),
-('ssbu', 'Super Smash Bros. Ultimate', 128, 1, 0),
+('ssbu', 'Super Smash Bros. Ultimate', 64, 1, 0),
 ('cs2', 'Counter-Strike 2', 80, 5, 0),
-('rl', 'Rocket League', 48, 3, 0),
-('osu', 'Osu!', 48, 1, 0),
+('rl', 'Rocket League', 60, 3, 0),
+('osu', 'Osu!', 64, 1, 0),
 ('tft', 'Teamfight Tactics', 32, 1, 0),
-('open', 'Libre', 56, 1, 0),
+('open', 'Libre', 40, 1, 0),
 ('pokemon', 'Pokémon', 24, 1, 0);
