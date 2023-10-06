@@ -19,6 +19,7 @@ describe('GET /tournaments', () => {
         display: true,
         displayCashprize: true,
         displayCasters: true,
+        displayMaxPlayers: true,
       },
     });
   });
@@ -81,6 +82,7 @@ describe('GET /tournaments', () => {
         display: true,
         displayCashprize: false,
         displayCasters: false,
+        displayMaxPlayers: false,
       },
     });
 
@@ -90,11 +92,11 @@ describe('GET /tournaments', () => {
     expect(response.body[0]).to.have.all.keys([
       'id',
       'name',
-      'maxPlayers',
       'lockedTeamsCount',
       'teams',
       'placesLeft',
       'playersPerTeam',
+      'maxPlayers',
       'cashprize',
       'casters',
       'infos',
@@ -104,6 +106,7 @@ describe('GET /tournaments', () => {
     expect(response.body[1].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.null;
     expect(response.body[0].casters).to.be.null;
+    expect(response.body[0].maxPlayers).to.be.null;
     expect(response.body[1].teams[0].players[0].id).to.be.a('string');
     expect(response.body[1].teams[0].players[0].firstname).to.be.undefined;
   });

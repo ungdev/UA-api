@@ -93,6 +93,7 @@ model Tournament {
   id                     String @id
   name                   String       @unique
   maxPlayers             Int
+  displayMaxPlayers      Boolean      @default(false)
   playersPerTeam         Int
   cashprize              Int?
   cashprizeDetails       String?

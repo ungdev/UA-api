@@ -24,6 +24,10 @@ export default [
           tournament.cashprize = null;
           tournament.cashprizeDetails = null;
         }
+
+        if (!tournament.displayMaxPlayers) {
+          tournament.maxPlayers = null;
+        }
       }
 
       return success(response, result.map(filterTournamentRestricted));
