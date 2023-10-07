@@ -23,6 +23,7 @@ type FakeUserData = {
   confirmed?: boolean;
   /** @default false */
   paid?: boolean;
+  pricePaid?: number;
   discordId?: string;
   /** @default null */
   permissions?: Permission[];
@@ -67,7 +68,7 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
                   id: nanoid(),
                   itemId: `ticket-${userType}`,
                   quantity: 1,
-                  price: 0,
+                  price: data.pricePaid || 0,
                   forUserId: userId,
                 },
               ],
