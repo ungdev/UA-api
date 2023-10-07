@@ -73,6 +73,63 @@ export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
   return teams.map(formatTeam);
 };
 
+export const lockTeam = async (teamId: string) => {
+  // We want to group all queries in one transaction. It is not possible currently, but keep being updated on prisma
+
+  const askingUsers = await database.user.findMany({
+    where: {
+      askingTeamId: teamId,
+    },
+  });
+
+  await database.$transaction(
+    askingUsers.map((user) =>
+      database.user.update({
+        data: {
+          askingTeam: {
+            disconnect: true,
+          },
+        },
+        where: {
+          id: user.id,
+        },
+      }),
+    ),
+  );
+
+  const team = await fetchTeam(teamId);
+  const tournament = await fetchTournament(team.tournamentId);
+  let updatedTeam: PrimitiveTeamWithPrimitiveUsers;
+
+  if (tournament.placesLeft > 0) {
+    // Lock the team the usual way
+    updatedTeam = await database.team.update({
+      data: {
+        lockedAt: new Date(),
+      },
+      where: {
+        id: teamId,
+      },
+      include: teamInclusions,
+    });
+    // Setup team on Discord
+    await setupDiscordTeam(team, tournament);
+  } else {
+    // Put the team in the waiting list
+    updatedTeam = await database.team.update({
+      data: {
+        enteredQueueAt: new Date(),
+      },
+      where: {
+        id: teamId,
+      },
+      include: teamInclusions,
+    });
+  }
+
+  return formatTeam(updatedTeam);
+};
+
 export const createTeam = async (
   name: string,
   tournamentId: string,
@@ -114,7 +171,14 @@ export const createTeam = async (
     include: teamInclusions,
   });
 
-  return formatTeam(team);
+  // Verify if team need to be locked
+  const newTeam = formatTeam(team);
+  const tournament = await fetchTournament(newTeam.tournamentId);
+  if (newTeam.players.length === tournament.playersPerTeam && newTeam.players.every((player) => player.hasPaid)) {
+    await lockTeam(newTeam.id);
+  }
+
+  return newTeam;
 };
 
 export const updateTeam = async (teamId: string, name: string): Promise<Team> => {
@@ -185,63 +249,6 @@ export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise
     },
     include: teamInclusions,
   });
-
-export const lockTeam = async (teamId: string) => {
-  // We want to group all queries in one transaction. It is not possible currently, but keep being updated on prisma
-
-  const askingUsers = await database.user.findMany({
-    where: {
-      askingTeamId: teamId,
-    },
-  });
-
-  await database.$transaction(
-    askingUsers.map((user) =>
-      database.user.update({
-        data: {
-          askingTeam: {
-            disconnect: true,
-          },
-        },
-        where: {
-          id: user.id,
-        },
-      }),
-    ),
-  );
-
-  const team = await fetchTeam(teamId);
-  const tournament = await fetchTournament(team.tournamentId);
-  let updatedTeam: PrimitiveTeamWithPrimitiveUsers;
-
-  if (tournament.placesLeft > 0) {
-    // Lock the team the usual way
-    updatedTeam = await database.team.update({
-      data: {
-        lockedAt: new Date(),
-      },
-      where: {
-        id: teamId,
-      },
-      include: teamInclusions,
-    });
-    // Setup team on Discord
-    await setupDiscordTeam(team, tournament);
-  } else {
-    // Put the team in the waiting list
-    updatedTeam = await database.team.update({
-      data: {
-        enteredQueueAt: new Date(),
-      },
-      where: {
-        id: teamId,
-      },
-      include: teamInclusions,
-    });
-  }
-
-  return formatTeam(updatedTeam);
-};
 
 export const unlockTeam = async (teamId: string) => {
   const updatedTeam = await database.team.update({
