@@ -15,7 +15,7 @@ import { getCaptain } from '../../src/utils/teams';
 // eslint-disable-next-line func-names
 describe('POST /teams/current/join-requests/:userId', function () {
   // Setup is slow
-  this.timeout(20000);
+  this.timeout(30000);
 
   let user: User;
   let user2: User;
