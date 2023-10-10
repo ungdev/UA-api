@@ -146,8 +146,8 @@ describe('POST /etupay/callback', function () {
     [lolPlayer1, lolPlayer2] = lolTeam.players;
     for (const player of lolTeam.players.slice(2)) await cartOperations.forcePay(player);
 
-    const csgoTournament = await tournamentOperations.fetchTournament('csgo');
-    csgoTeam = await createFakeTeam({ members: csgoTournament.playersPerTeam, tournament: 'csgo' });
+    const csgoTournament = await tournamentOperations.fetchTournament('cs2');
+    csgoTeam = await createFakeTeam({ members: csgoTournament.playersPerTeam, tournament: 'cs2' });
     [csgoPlayer] = csgoTeam.players;
     for (const player of csgoTeam.players.slice(1)) promises.push(cartOperations.forcePay(player));
 
