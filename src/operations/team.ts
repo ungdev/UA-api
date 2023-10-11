@@ -75,7 +75,7 @@ export const createTeam = async (
   name: string,
   tournamentId: string,
   captainId: string,
-  pokemonPlayerId: string|undefined,
+  pokemonPlayerId: string | undefined,
   userType: UserType,
 ): Promise<Team> => {
   // Update the user to create a transaction update (update the user AND create the team)

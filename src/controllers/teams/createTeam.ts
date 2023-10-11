@@ -22,7 +22,7 @@ export default [
     Joi.object({
       name: validators.teamName.required(),
       tournamentId: Joi.string().required(),
-      pokemonPlayerId: Joi.string().pattern(/^[0-9]+$/),
+      pokemonPlayerId: Joi.string().pattern(/^\d+$/),
       userType: Joi.string()
         .valid(UserType.player, UserType.coach)
         .required()
