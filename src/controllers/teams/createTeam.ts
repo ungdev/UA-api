@@ -22,6 +22,7 @@ export default [
     Joi.object({
       name: validators.teamName.required(),
       tournamentId: Joi.string().required(),
+      pokemonPlayerId: Joi.string().pattern(/^[0-9]+$/),
       userType: Joi.string()
         .valid(UserType.player, UserType.coach)
         .required()
@@ -32,7 +33,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { name, tournamentId, userType } = request.body;
+      const { name, tournamentId, pokemonPlayerId, userType } = request.body;
       const { user } = getRequestInfo(response);
 
       const tournament = await fetchTournament(tournamentId);
@@ -51,7 +52,7 @@ export default [
         return forbidden(response, ResponseError.HasAlreadyPaidForAnotherTicket);
 
       try {
-        const team = await createTeam(name, tournamentId, response.locals.user.id, userType);
+        const team = await createTeam(name, tournamentId, response.locals.user.id, pokemonPlayerId, userType);
         return created(response, filterTeam(team));
       } catch (error) {
         // If the email already exists in the database, throw a bad request
