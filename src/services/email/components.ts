@@ -4,11 +4,11 @@ import type { Component } from './types';
 export const style = {
   text: {
     color: '#202020',
-    font: "Montserrat,Roboto,Arial,sans-serif",
+    font: 'Montserrat,Roboto,Arial,sans-serif',
   },
   title: {
     color: '#FF414D',
-    font: "Lexend,Roboto,Arial,sans-serif",
+    font: 'Lexend,Roboto,Arial,sans-serif',
   },
   button: {
     background: '#FF414D',
