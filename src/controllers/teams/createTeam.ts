@@ -9,7 +9,7 @@ import { fetchTournament } from '../../operations/tournament';
 import { hasUserAlreadyPaidForAnotherTicket } from '../../operations/user';
 import { Error as ResponseError, UserType } from '../../types';
 import { filterTeam } from '../../utils/filters';
-import { conflict, created, forbidden, gone, notFound } from '../../utils/responses';
+import { badRequest, conflict, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
 
@@ -50,6 +50,10 @@ export default [
       // Check whether the user has already paid for another ticket
       if (await hasUserAlreadyPaidForAnotherTicket(user, tournamentId, userType))
         return forbidden(response, ResponseError.HasAlreadyPaidForAnotherTicket);
+
+      if (tournamentId === 'pokemon' && !pokemonPlayerId) {
+        return badRequest(response, ResponseError.NoPokemonIdProvided);
+      }
 
       try {
         const team = await createTeam(name, tournamentId, response.locals.user.id, pokemonPlayerId, userType);
