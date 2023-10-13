@@ -3,27 +3,55 @@ import request from 'supertest';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
+import * as tournamentOperations from '../../src/operations/tournament';
+import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
 import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
-import { fetchUser } from '../../src/operations/user';
 
-describe('DELETE /teams/current', () => {
+// eslint-disable-next-line func-names
+describe('DELETE /teams/current', function () {
+  // Setup is slow
+  this.timeout(30000);
+
   let captain: User;
   let team: Team;
+  let lockedTeam: Team;
+  let waitingTeam: Team;
+  let waitingTeamToDelete: Team;
   let captainToken: string;
+  let lockedTeamCaptainToken: string;
+  let waitingTeamToDeleteCaptainToken: string;
 
   before(async () => {
-    team = await createFakeTeam({ members: 2 });
+    const tournament = await tournamentOperations.fetchTournament('rl');
+    team = await createFakeTeam({ members: tournament.playersPerTeam, locked: false, tournament: 'rl' });
+    for (let index = 0; index < tournament.placesLeft; index++) {
+      // We want to get only one, so we can erase the previous value
+      lockedTeam = await createFakeTeam({
+        members: tournament.playersPerTeam,
+        paid: true,
+        locked: true,
+        tournament: 'rl',
+      });
+    }
+    waitingTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: 'rl' });
+    await teamOperations.lockTeam(waitingTeam.id);
+    waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
+    waitingTeamToDelete = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: 'rl' });
+    await teamOperations.lockTeam(waitingTeamToDelete.id);
 
     captain = getCaptain(team);
     captainToken = generateToken(captain);
+    lockedTeamCaptainToken = generateToken(getCaptain(lockedTeam));
+    waitingTeamToDeleteCaptainToken = generateToken(getCaptain(waitingTeamToDelete));
   });
 
   after(async () => {
     await database.team.deleteMany();
+    await database.cart.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -60,25 +88,51 @@ describe('DELETE /teams/current', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should error as the team is locked', async () => {
-    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
-    const lockedCaptain = getCaptain(lockedTeam);
-    const lockedToken = generateToken(lockedCaptain);
-
-    await request(app)
-      .delete(`/teams/current`)
-      .set('Authorization', `Bearer ${lockedToken}`)
-      .expect(403, { error: Error.TeamLocked });
-  });
-
-  it('should delete the team', async () => {
+  it('should delete the team, but not lock the waiting team, as the team is not locked', async () => {
+    // Test with the team that is not in the waiting list
     await request(app).delete(`/teams/current`).set('Authorization', `Bearer ${captainToken}`).expect(204);
 
-    const deletedTeam = await teamOperations.fetchTeam(team.id);
+    let deletedTeam = await teamOperations.fetchTeam(team.id);
     expect(deletedTeam).to.be.null;
 
-    const updatedCaptain = await fetchUser(captain.id);
+    let updatedCaptain = await userOperations.fetchUser(captain.id);
     expect(updatedCaptain.teamId).to.be.null;
     expect(updatedCaptain.type).to.be.null;
+
+    waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
+    expect(waitingTeam.lockedAt).to.be.null;
+    expect(waitingTeam.enteredQueueAt).to.be.not.null;
+
+    // Test with the team that is in the waiting list
+    await request(app)
+      .delete(`/teams/current`)
+      .set('Authorization', `Bearer ${waitingTeamToDeleteCaptainToken}`)
+      .expect(204);
+
+    updatedCaptain = await userOperations.fetchUser(waitingTeamToDelete.captainId);
+    expect(updatedCaptain.teamId).to.be.null;
+    expect(updatedCaptain.type).to.be.null;
+
+    deletedTeam = await teamOperations.fetchTeam(waitingTeamToDelete.id);
+    expect(deletedTeam).to.be.null;
+
+    waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
+    expect(waitingTeam.lockedAt).to.be.null;
+    expect(waitingTeam.enteredQueueAt).to.be.not.null;
+  });
+
+  it('should delete the team, and lock the waiting team, as the team was locked', async () => {
+    await request(app).delete(`/teams/current`).set('Authorization', `Bearer ${lockedTeamCaptainToken}`).expect(204);
+
+    const updatedCaptain = await userOperations.fetchUser(lockedTeam.captainId);
+    expect(updatedCaptain.teamId).to.be.null;
+    expect(updatedCaptain.type).to.be.null;
+
+    const deletedTeam = await teamOperations.fetchTeam(lockedTeam.id);
+    expect(deletedTeam).to.be.null;
+
+    waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
+    expect(waitingTeam.lockedAt).to.be.not.null;
+    expect(waitingTeam.enteredQueueAt).to.be.null;
   });
 });

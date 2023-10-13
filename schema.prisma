@@ -83,7 +83,7 @@ model Team {
   tournament      Tournament   @relation(fields: [tournamentId], references: [id])
   askingUsers     User[]       @relation("teamAskingUsers")
   users           User[]       @relation("teamUsers")
-
+  enteredQueueAt DateTime?
   @@unique([name, tournamentId])
   @@index([id])
   @@index([tournamentId], map: "teams_tournamentId_fkey")

@@ -84,7 +84,7 @@ describe('POST /teams', () => {
       .post('/teams')
       .send({ ...teamBody, tournamentId: 'factorio' })
       .set('Authorization', `Bearer ${token}`)
-      .expect(404, { error: 'Le tournoi est introuvable' }));
+      .expect(404, { error: Error.TournamentNotFound }));
 
   it('should fail with an internal server error (test nested check)', () => {
     sandbox.stub(teamOperations, 'createTeam').throws('Unexpected error');
@@ -312,5 +312,56 @@ describe('POST /teams', () => {
       })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(403, { error: Error.NotWhitelisted });
+  });
+
+  it('should successfully lock the team (create solo team)', async () => {
+    // Here, a user creates a team in a solo tournament (his team is therefore complete),
+    // he has paid his ticket, so his team should be locked.
+    // let's check it out
+
+    // creation of a fake user who paid for his ticket
+    const localUser = await createFakeUser({ paid: true, type: UserType.player, pricePaid: 2500 });
+    const localUserToken = generateToken(localUser);
+
+    // TFT : team of 1 person
+    const localTeamBody = {
+      name: 'Alone_1',
+      tournamentId: 'tft',
+      userType: UserType.player,
+    };
+
+    // Create the team
+    await request(app).post('/teams').send(localTeamBody).set('Authorization', `Bearer ${localUserToken}`).expect(201);
+
+    const databasedTeam = await database.team.findFirst({ where: { name: localTeamBody.name } });
+
+    // Check if the team is lock
+    expect(databasedTeam?.lockedAt).to.not.be.null;
+  });
+
+  it('should fail lock the team (create solo team but the user has not paid)', async () => {
+    // Here, a user creates a team in a solo tournament (so his team is complete),
+    // but he hasn't paid his ticket,
+    // so his team shouldn't be locked.
+    // let's check this out
+
+    // creation of a fake user who has not paid for his ticket
+    const localUser = await createFakeUser({ paid: false });
+    const localUserToken = generateToken(localUser);
+
+    // TFT : team of 1 person
+    const localTeamBody = {
+      name: 'AloneButNotPaid_1',
+      tournamentId: 'tft',
+      userType: UserType.player,
+    };
+
+    // Create the team
+    await request(app).post('/teams').send(localTeamBody).set('Authorization', `Bearer ${localUserToken}`).expect(201);
+
+    const databasedTeam = await database.team.findFirst({ where: { name: localTeamBody.name } });
+
+    // Check if the team is not lock
+    expect(databasedTeam?.lockedAt).to.be.null;
   });
 });
