@@ -48,16 +48,18 @@ model CartItem {
 }
 
 model Item {
-  id           String       @id
-  name         String
-  category     ItemCategory
-  attribute    String?
-  price        Int
-  reducedPrice Int?
-  infos        String?      @db.VarChar(300)
-  image        String?
-  stock        Int?
-  cartItems    CartItem[]
+  id            String       @id
+  name          String
+  category      ItemCategory
+  attribute     String?
+  price         Int
+  reducedPrice  Int?
+  infos         String?      @db.VarChar(300)
+  image         String?
+  stock         Int?
+  availableFrom DateTime?
+  availableUntil   DateTime?
+  cartItems     CartItem[]
 
   @@map("items")
 }
@@ -91,18 +93,18 @@ model Team {
 }
 
 model Tournament {
-  id                     String @id
-  name                   String       @unique
+  id                     String   @id
+  name                   String   @unique
   maxPlayers             Int
   playersPerTeam         Int
   cashprize              Int?
   cashprizeDetails       String?
-  displayCashprize       Boolean      @default(false)
+  displayCashprize       Boolean  @default(false)
   format                 String?
   infos                  String?
   casters                Caster[]
-  displayCasters         Boolean      @default(false)
-  display                Boolean      @default(false)
+  displayCasters         Boolean  @default(false)
+  display                Boolean  @default(false)
   discordRoleId          String?
   discordRespoRoleId     String?
   discordTextCategoryId  String?
@@ -113,10 +115,10 @@ model Tournament {
 }
 
 model Caster {
-  id           String       @id
+  id           String     @id
   name         String
   tournamentId String
-  tournament   Tournament   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 
   @@index([tournamentId], map: "casters_tournamentId_fkey")
   @@map("casters")
