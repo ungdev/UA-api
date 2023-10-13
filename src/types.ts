@@ -274,6 +274,7 @@ export const enum Error {
   NotAdmin = "Tu n'es pas administrateur",
   ShopNotAllowed = 'La billetterie est fermée',
   EmailNotConfirmed = "Le compte n'est pas confirmé",
+  EmailAlreadyConfirmed = 'Le compte est déjà confirmé',
   NoPermission = "Tu n'as pas la permission d'accéder à cette ressource",
   NotCaptain = "Tu dois être le capitaine de l'équipe pour modifier cette ressource",
   NotSelf = 'Tu ne peux pas modifier les information de cette personne',

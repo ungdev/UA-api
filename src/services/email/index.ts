@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { DetailedCart, EmailAttachement, RawUser } from '../../types';
+import { DetailedCart, EmailAttachement, RawUser, User } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
 import { generateTicketsEmail, generateValidationEmail, generatePasswordResetEmail } from './serializer';
@@ -73,7 +73,7 @@ export const sendPaymentConfirmation = async (cart: DetailedCart) => {
  * @throws an error if the mail declared above (corresponding to this
  * request) is invalid ie. contains an object which is not a {@link Component}
  */
-export const sendValidationCode = async (user: RawUser) => sendEmail(await generateValidationEmail(user));
+export const sendValidationCode = async (user: RawUser | User) => sendEmail(await generateValidationEmail(user));
 
 /**
  * Sends an email to the user with a password reset link.

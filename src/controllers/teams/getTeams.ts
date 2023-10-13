@@ -18,7 +18,10 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { tournamentId, locked } = request.query as { tournamentId: string; locked: string };
+      const { tournamentId, locked } = request.query as {
+        tournamentId: string;
+        locked: string;
+      };
       const lockedCasted = Boolean(locked);
 
       const teams = await fetchTeams(tournamentId);
