@@ -75,7 +75,7 @@
                 type: string
                 enum: [player, coach]
               pokemonPlayerId:
-                description: Identifiant du Pokémon du joueur (obligatoire di tournamentId est pokemon)
+                description: Identifiant du Pokémon du joueur (obligatoire si tournamentId est pokemon)
                 optional: true
                 type: string
                 example: "1"
