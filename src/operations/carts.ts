@@ -194,11 +194,11 @@ export const forcePay = async (user: User) => {
   // First, verify the user is a player and that he has a team
   if (user.type === UserType.player && team) {
     // Check whether every player in the team has paid (except for this one, but we know it's going to be paid just after this)
-    const hasEveryonePaied = team.players.every((player) => player.id === user.id || player.hasPaid);
+    const hasEveryonePaid = team.players.every((player) => player.id === user.id || player.hasPaid);
     const tournament = await fetchTournament(team.tournamentId);
     // Verify the team is full
     const isTeamFull = team.players.length === tournament.playersPerTeam;
-    if (hasEveryonePaied && isTeamFull) {
+    if (hasEveryonePaid && isTeamFull) {
       await lockTeam(team.id);
     }
   }

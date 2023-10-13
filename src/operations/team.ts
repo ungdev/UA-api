@@ -27,7 +27,7 @@ const teamInclusions = {
 };
 
 export const getPositionInQueue = (team: Team): Promise<number | undefined> => {
-  if (!team.enteredQueueAt) return undefined;
+  if (!team.enteredQueueAt) return null;
   return database.team.count({
     where: { AND: [{ enteredQueueAt: { not: null } }, { enteredQueueAt: { lte: team.enteredQueueAt } }] },
   });

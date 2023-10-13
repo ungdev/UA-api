@@ -72,7 +72,7 @@ describe('GET /teams/current', () => {
     const response = await request(app).get(`/teams/current`).set('Authorization', `Bearer ${memberToken}`).expect(200);
 
     expect(response.body.name).to.be.equal(team.name);
-    expect(response.body.positionInQueue).to.be.undefined;
+    expect(response.body.positionInQueue).to.be.null;
   });
 
   it('should throw an internal server error', async () => {
