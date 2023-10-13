@@ -48,7 +48,7 @@ describe('GET /teams/current', () => {
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
-    await database.tournament.deleteMany();
+    await database.tournament.delete({ where: { id: tournament.id } });
   });
 
   it('should error as the token is missing', async () => {
