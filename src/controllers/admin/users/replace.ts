@@ -43,7 +43,7 @@ export default [
       const team = await fetchTeam(user.teamId);
 
       // Check if the team is locked
-      if (!team.lockedAt) {
+      if (!team.lockedAt && !team.enteredQueueAt) {
         return forbidden(response, Error.TeamNotLocked);
       }
 

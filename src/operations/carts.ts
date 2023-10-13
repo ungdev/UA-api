@@ -13,7 +13,8 @@ import database from '../services/database';
 import env from '../utils/env';
 import nanoid from '../utils/nanoid';
 import { fetchUserItems } from './item';
-import { fetchTeam } from './team';
+import { fetchTeam, lockTeam, unlockTeam } from './team';
+import { fetchTournament } from './tournament';
 
 export const dropStale = () =>
   database.$transaction([
@@ -106,12 +107,12 @@ export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
     },
   });
 
-export const updateCart = (
+export const updateCart = async (
   cartId: string,
   transactionId: number,
   transactionState: TransactionState,
-): Promise<DetailedCart> =>
-  database.cart.update({
+): Promise<DetailedCart> => {
+  const cart = await database.cart.update({
     data: {
       transactionState,
       paidAt: new Date(),
@@ -131,11 +132,44 @@ export const updateCart = (
     },
   });
 
-export const refundCart = (cartId: string): Promise<Cart> =>
-  database.cart.update({
+  // Lock the team if all the players have paid
+  // First, verify the cart is now paid
+  if (cart.transactionState !== TransactionState.paid) {
+    return cart;
+  }
+  // Fetch player tickets from the cart
+  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.id === 'ticket-player');
+  for (const ticket of playerTickets) {
+    // If the user is not in a team, skip
+    if (!ticket.forUser.teamId) {
+      continue;
+    }
+    // Verify every player paid in the team, the team is full, and there are still places left in the tournament
+    const team = await fetchTeam(ticket.forUser.teamId);
+    const tournament = await fetchTournament(team.tournamentId);
+    if (team.players.length === tournament.playersPerTeam && team.players.every((player) => player.hasPaid)) {
+      await lockTeam(team.id);
+    }
+  }
+  return cart;
+};
+
+export const refundCart = async (cartId: string): Promise<Cart> => {
+  const cart = await database.cart.update({
     data: { transactionState: TransactionState.refunded },
     where: { id: cartId },
+    include: { cartItems: { include: { item: true, forUser: { include: { team: true } } } } },
   });
+
+  // Unlock the teams of the players whose tickets were refunded
+  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.id === 'ticket-player');
+  for (const ticket of playerTickets) {
+    if (ticket.forUser.team) {
+      await unlockTeam(ticket.forUser.team.id);
+    }
+  }
+  return cart;
+};
 
 export const forcePay = async (user: User) => {
   let itemId: string;
@@ -154,6 +188,18 @@ export const forcePay = async (user: User) => {
     }
     default: {
       itemId = `ticket-${UserType.spectator}`;
+    }
+  }
+
+  // First, verify the user is a player and that he has a team
+  if (user.type === UserType.player && team) {
+    // Check whether every player in the team has paid (except for this one, but we know it's going to be paid just after this)
+    const hasEveryonePaid = team.players.every((player) => player.id === user.id || player.hasPaid);
+    const tournament = await fetchTournament(team.tournamentId);
+    // Verify the team is full
+    const isTeamFull = team.players.length === tournament.playersPerTeam;
+    if (hasEveryonePaid && isTeamFull) {
+      await lockTeam(team.id);
     }
   }
 

@@ -3,17 +3,22 @@
 
 import crypto from 'crypto';
 import request from 'supertest';
+import { expect } from 'chai';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
-import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
-import { Cart, Error, TransactionState } from '../../src/types';
-import { createFakeUser } from '../utils';
+import { Cart, Error, PrimitiveCartItem, Team, Tournament, TransactionState, User } from '../../src/types';
+import { createFakeTeam, createFakeUser } from '../utils';
 import env from '../../src/utils/env';
 import { encodeToBase64, randomInt } from '../../src/utils/helpers';
+import * as cartOperations from '../../src/operations/carts';
 import * as network from '../../src/utils/network';
 import * as emailOperations from '../../src/services/email';
-import { fetchAllItems } from '../../src/operations/item';
+import * as itemOperations from '../../src/operations/item';
+import * as tournamentOperations from '../../src/operations/tournament';
+import * as teamOperations from '../../src/operations/team';
+import * as userOperations from '../../src/operations/user';
 
 const createEtupayPayload = (etupayBody: object) => {
   // Strinigifies the etupay body
@@ -48,58 +53,161 @@ const createEtupayPayload = (etupayBody: object) => {
   });
 };
 
-describe('POST /etupay/callback', () => {
+const createCartAndPayload = async (
+  userId: string,
+  items: PrimitiveCartItem[],
+  type: string,
+  step: string,
+): Promise<{ cart: Cart; payload: string }> => {
+  let cart = await cartOperations.createCart(userId, items);
+  cart = await cartOperations.updateCart(cart.id, randomInt(1e4, 1e5 - 1), TransactionState.authorization);
+
+  // This is the data format how it is encrypted in the payload
+  return {
+    cart,
+    payload: createEtupayPayload({
+      // Create a random transaction id
+      transaction_id: cart.transactionId,
+      type,
+      amount: items.reduce((accumulator, item) => accumulator + item.price * item.quantity, 0),
+      step,
+      // Create the service data as it is in the createCart controller. (It is already encoded in the data)
+      service_data: encodeToBase64({ cartId: cart.id }),
+    }),
+  };
+};
+
+// eslint-disable-next-line func-names
+describe('POST /etupay/callback', function () {
+  // The setup is slow
+  this.timeout(30000);
+
   let cart: Cart;
   let paidPayload: string;
   let refusedPayload: string;
+
+  let lolTeam: Team;
+  let lolTournament: Tournament;
+  let lolPlayer1: User;
+  let lolPlayer2: User;
+
+  let cs2Team: Team;
+  let cs2Player: User;
+
+  let lolTicket1Payload: string;
+  let lolAndCs2TicketsCart: Cart;
+  let lolAndCs2TicketsPayload: string;
+  let lolTicket2Cart: Cart;
+  let lolTicket2Payload: string;
 
   before(async () => {
     const user = await createFakeUser();
 
     // Create a fake cart
-    cart = await cartOperations.createCart(user.id, [
-      {
-        itemId: 'ticket-player',
-        quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
-        forUserId: user.id,
-      },
-    ]);
-    cart = await cartOperations.updateCart(cart.id, randomInt(1e4, 1e5 - 1), TransactionState.authorization);
-
-    // This is the data format how it is encrypted in the payload
-    const etupayBody = {
-      // Create a random transaction id
-      transaction_id: cart.transactionId,
-      type: 'checkout',
-      // We bought a ticket for a player, so 15€ (the price doesn't matter now),
-      amount: 1500,
-      step: 'PAID',
-      // Create the service data as it is in the createCart controller. (It is already encoded in the data)
-      service_data: encodeToBase64({ cartId: cart.id }),
-    };
-
-    // Create a paid payload
-    paidPayload = createEtupayPayload(etupayBody);
+    ({ cart, payload: paidPayload } = await createCartAndPayload(
+      user.id,
+      [
+        {
+          itemId: 'ticket-player',
+          quantity: 1,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          forUserId: user.id,
+        },
+      ],
+      'checkout',
+      'PAID',
+    ));
 
     // Create a refused payload
-    const failedCart = await cartOperations.createCart(user.id, [
-      {
-        itemId: 'ticket-player',
-        quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
-        forUserId: user.id,
-      },
-    ]);
-    await cartOperations.updateCart(failedCart.id, randomInt(1e4, 1e5 - 1), TransactionState.refused);
-    etupayBody.step = 'REFUSED';
-    etupayBody.service_data = encodeToBase64({ cartId: failedCart.id });
-    refusedPayload = createEtupayPayload(etupayBody);
+    ({ payload: refusedPayload } = await createCartAndPayload(
+      user.id,
+      [
+        {
+          itemId: 'ticket-player',
+          quantity: 1,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          forUserId: user.id,
+        },
+      ],
+      'checkout',
+      'REFUSED',
+    ));
+
+    // Store the promises, to wait them all at the same time
+    const promises = [];
+
+    lolTournament = await tournamentOperations.fetchTournament('lol');
+    lolTeam = await createFakeTeam({ members: lolTournament.playersPerTeam, tournament: 'lol' });
+    // Fill the tournament
+    for (let index = 0; index < lolTournament.placesLeft; index++) {
+      promises.push(createFakeTeam({ members: lolTournament.playersPerTeam, tournament: 'lol', locked: true }));
+    }
+    // Fetch the first 2 players, and force pay the others
+    [lolPlayer1, lolPlayer2] = lolTeam.players;
+    for (const player of lolTeam.players.slice(2)) await cartOperations.forcePay(player);
+
+    const cs2Tournament = await tournamentOperations.fetchTournament('cs2');
+    cs2Team = await createFakeTeam({ members: cs2Tournament.playersPerTeam, tournament: 'cs2' });
+    [cs2Player] = cs2Team.players;
+    for (const player of cs2Team.players.slice(1)) promises.push(cartOperations.forcePay(player));
+
+    // Await all the operations
+    await Promise.all(promises);
+
+    // Refresh the tournament
+    lolTournament = await tournamentOperations.fetchTournament('lol');
+
+    ({ payload: lolTicket1Payload } = await createCartAndPayload(
+      lolPlayer1.id,
+      [
+        {
+          itemId: 'ticket-player',
+          quantity: 1,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          forUserId: lolPlayer1.id,
+        },
+      ],
+      'checkout',
+      'PAID',
+    ));
+    ({ cart: lolAndCs2TicketsCart, payload: lolAndCs2TicketsPayload } = await createCartAndPayload(
+      lolPlayer2.id,
+      [
+        {
+          itemId: 'ticket-player',
+          quantity: 1,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          forUserId: lolPlayer2.id,
+        },
+        {
+          itemId: 'ticket-player',
+          quantity: 1,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          forUserId: cs2Player.id,
+        },
+      ],
+      'checkout',
+      'PAID',
+    ));
+    ({ cart: lolTicket2Cart, payload: lolTicket2Payload } = await createCartAndPayload(
+      lolPlayer2.id,
+      [
+        {
+          itemId: 'ticket-player',
+          quantity: 1,
+          price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+          forUserId: lolPlayer2.id,
+        },
+      ],
+      'checkout',
+      'PAID',
+    ));
   });
 
   after(async () => {
     // Delete the user created
     await database.cart.deleteMany();
+    await database.team.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -158,7 +266,7 @@ describe('POST /etupay/callback', () => {
       {
         itemId: 'ticket-player',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
         forUserId: user.id,
       },
     ]);
@@ -190,6 +298,125 @@ describe('POST /etupay/callback', () => {
     sandbox.stub(network, 'getIp').returns('10.0.0.0');
     return request(app).post(`/etupay/callback?payload=${paidPayload}`).expect(403, { error: Error.AlreadyPaid });
   });
+
+  it("should respond api ok, and not lock the LOL team because everyone hasn't payed", async () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    sandbox.stub(emailOperations, 'sendEmail').resolves();
+    await request(app).post(`/etupay/callback?payload=${lolTicket1Payload}`).expect(200, { api: 'ok' });
+    const lolTeamFromDatabase = await database.team.findUnique({ where: { id: lolTeam.id } });
+    expect(lolTeamFromDatabase.lockedAt).to.be.null;
+    expect(lolTeamFromDatabase.enteredQueueAt).to.be.null;
+    // There is no reason it would change, but we're better safe than sorry
+    const cs2TeamFromDatabase = await database.team.findUnique({ where: { id: cs2Team.id } });
+    expect(cs2TeamFromDatabase.lockedAt).to.be.null;
+    expect(cs2TeamFromDatabase.enteredQueueAt).to.be.null;
+  });
+
+  it('should respond api ok, lock the cs2 team but not and place the lol team in the queue', async () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    sandbox.stub(emailOperations, 'sendEmail').resolves();
+
+    await request(app).post(`/etupay/callback?payload=${lolAndCs2TicketsPayload}`).expect(200, { api: 'ok' });
+    const lolTeamFromDatabase = await database.team.findUnique({ where: { id: lolTeam.id } });
+    expect(lolTeamFromDatabase.lockedAt).to.be.null;
+    expect(lolTeamFromDatabase.enteredQueueAt).to.not.be.null;
+    const cs2TeamFromDatabase = await database.team.findUnique({ where: { id: cs2Team.id } });
+    expect(cs2TeamFromDatabase.lockedAt).to.be.not.null;
+    expect(cs2TeamFromDatabase.enteredQueueAt).to.be.null;
+
+    // Cancel the payment
+    lolAndCs2TicketsCart = await cartOperations.updateCart(
+      lolAndCs2TicketsCart.id,
+      lolAndCs2TicketsCart.transactionId,
+      TransactionState.canceled,
+    );
+    await teamOperations.unlockTeam(lolTeam.id);
+    await teamOperations.unlockTeam(cs2Team.id);
+  });
+
+  it('should respond api ok, and not lock the LOL team because the team is not full', async () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    sandbox.stub(emailOperations, 'sendEmail').resolves();
+
+    // Remove a player from the team
+    const removedUser = await teamOperations.kickUser(
+      lolTeam.players.find((player: User) => player.id !== lolTeam.captainId && player.id !== lolPlayer2.id),
+    );
+
+    // This will be called twice, in two different circumstances
+    const makeTest = async () => {
+      await request(app).post(`/etupay/callback?payload=${lolTicket2Payload}`).expect(200, { api: 'ok' });
+      const lolTeamFromDatabase = await database.team.findUnique({ where: { id: lolTeam.id } });
+      expect(lolTeamFromDatabase.lockedAt).to.be.null;
+      expect(lolTeamFromDatabase.enteredQueueAt).to.be.null;
+      // Make the cart not paid
+      lolTicket2Cart = await cartOperations.updateCart(
+        lolTicket2Cart.id,
+        lolTicket2Cart.transactionId,
+        TransactionState.authorization,
+      );
+    };
+
+    // Test with the tournament not full
+    // Remove a team from the tournament
+    const unlockedTeam = await teamOperations.unlockTeam(
+      lolTournament.teams.find((team: Team) => team.id !== lolTeam.id).id,
+    );
+    await makeTest();
+    // Lock back the team
+    await teamOperations.lockTeam(unlockedTeam.id);
+    // Test with the tournament full
+    await makeTest();
+
+    // Add back the player
+    // We need to re-fetch the user because we don't have enough data returned from the kickUser function
+    await teamOperations.joinTeam(lolTeam.id, await userOperations.fetchUser(removedUser.id), UserType.player);
+  });
+
+  it('should respond api ok, and add the LOL team to the queue', async () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    sandbox.stub(emailOperations, 'sendEmail').resolves();
+
+    // Verify the team is not already locked
+    let lolTeamFromDatabase = await database.team.findUnique({ where: { id: lolTeam.id } });
+    expect(lolTeamFromDatabase.lockedAt).to.be.null;
+    expect(lolTeamFromDatabase.enteredQueueAt).to.be.null;
+
+    await request(app).post(`/etupay/callback?payload=${lolTicket2Payload}`).expect(200, { api: 'ok' });
+    lolTeamFromDatabase = await database.team.findUnique({ where: { id: lolTeam.id } });
+    expect(lolTeamFromDatabase.lockedAt).to.be.null;
+    expect(lolTeamFromDatabase.enteredQueueAt).to.be.not.null;
+    // Unlock the team for the next test
+    await teamOperations.unlockTeam(lolTeam.id);
+
+    // Make the cart not paid
+    lolTicket2Cart = await cartOperations.updateCart(
+      lolTicket2Cart.id,
+      lolTicket2Cart.transactionId,
+      TransactionState.authorization,
+    );
+  });
+
+  it('should respond api ok, and lock the team because there is enough place in the tournament', async () => {
+    sandbox.stub(network, 'getIp').returns('10.0.0.0');
+    sandbox.stub(emailOperations, 'sendEmail').resolves();
+
+    // Verify the team is not already locked
+    let lolTeamFromDatabase = await database.team.findUnique({ where: { id: lolTeam.id } });
+    expect(lolTeamFromDatabase.lockedAt).to.be.null;
+    expect(lolTeamFromDatabase.enteredQueueAt).to.be.null;
+
+    // Remove a team from the tournament
+    const unlockedTeam = await teamOperations.unlockTeam(
+      lolTournament.teams.find((team: Team) => team.id !== lolTeam.id).id,
+    );
+    await request(app).post(`/etupay/callback?payload=${lolTicket2Payload}`).expect(200, { api: 'ok' });
+    lolTeamFromDatabase = await database.team.findUnique({ where: { id: lolTeam.id } });
+    expect(lolTeamFromDatabase.lockedAt).to.be.not.null;
+    expect(lolTeamFromDatabase.enteredQueueAt).to.be.null;
+    // Lock back the team
+    await teamOperations.lockTeam(unlockedTeam.id);
+  });
 });
 
 describe('GET /etupay/callback', () => {
@@ -205,7 +432,7 @@ describe('GET /etupay/callback', () => {
       {
         itemId: 'ticket-player',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
         forUserId: user.id,
       },
     ]);
@@ -230,7 +457,7 @@ describe('GET /etupay/callback', () => {
       {
         itemId: 'ticket-player',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
         forUserId: user.id,
       },
     ]);

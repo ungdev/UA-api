@@ -12,6 +12,8 @@ import {
 } from '../types';
 import nanoid from '../utils/nanoid';
 import { countCoaches, formatUser, userInclusions } from './user';
+import { setupDiscordTeam } from '../utils/discord';
+import { fetchTournament } from './tournament';
 
 const teamMaxCoachCount = 2;
 
@@ -22,6 +24,13 @@ const teamInclusions = {
   askingUsers: {
     include: userInclusions,
   },
+};
+
+export const getPositionInQueue = (team: Team): Promise<number | undefined> => {
+  if (!team.enteredQueueAt) return null;
+  return database.team.count({
+    where: { AND: [{ enteredQueueAt: { not: null } }, { enteredQueueAt: { lte: team.enteredQueueAt } }] },
+  });
 };
 
 export const formatTeam = (
@@ -71,6 +80,63 @@ export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
   return teams.map(formatTeam);
 };
 
+export const lockTeam = async (teamId: string) => {
+  // We want to group all queries in one transaction. It is not possible currently, but keep being updated on prisma
+
+  const askingUsers = await database.user.findMany({
+    where: {
+      askingTeamId: teamId,
+    },
+  });
+
+  await database.$transaction(
+    askingUsers.map((user) =>
+      database.user.update({
+        data: {
+          askingTeam: {
+            disconnect: true,
+          },
+        },
+        where: {
+          id: user.id,
+        },
+      }),
+    ),
+  );
+
+  const team = await fetchTeam(teamId);
+  const tournament = await fetchTournament(team.tournamentId);
+  let updatedTeam: PrimitiveTeamWithPrimitiveUsers;
+
+  if (tournament.placesLeft > 0) {
+    // Lock the team the usual way
+    updatedTeam = await database.team.update({
+      data: {
+        lockedAt: new Date(),
+      },
+      where: {
+        id: teamId,
+      },
+      include: teamInclusions,
+    });
+    // Setup team on Discord
+    await setupDiscordTeam(team, tournament);
+  } else {
+    // Put the team in the waiting list
+    updatedTeam = await database.team.update({
+      data: {
+        enteredQueueAt: new Date(),
+      },
+      where: {
+        id: teamId,
+      },
+      include: teamInclusions,
+    });
+  }
+
+  return formatTeam(updatedTeam);
+};
+
 export const createTeam = async (
   name: string,
   tournamentId: string,
@@ -112,7 +178,14 @@ export const createTeam = async (
     include: teamInclusions,
   });
 
-  return formatTeam(team);
+  // Verify if team need to be locked
+  const newTeam = formatTeam(team);
+  const tournament = await fetchTournament(newTeam.tournamentId);
+  if (newTeam.players.length === tournament.playersPerTeam && newTeam.players.every((player) => player.hasPaid)) {
+    await lockTeam(newTeam.id);
+  }
+
+  return newTeam;
 };
 
 export const updateTeam = async (teamId: string, name: string): Promise<Team> => {
@@ -128,19 +201,6 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
 
   return formatTeam(team);
 };
-
-export const deleteTeam = (teamId: string) =>
-  database.$transaction([
-    database.user.updateMany({
-      where: { teamId },
-      data: {
-        type: null,
-      },
-    }),
-    database.team.delete({
-      where: { id: teamId },
-    }),
-  ]);
 
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
   // We check the amount of coaches at that point
@@ -184,21 +244,6 @@ export const deleteTeamRequest = (userId: string): PrismaPromise<RawUser> =>
     },
   });
 
-export const kickUser = (userId: string): PrismaPromise<RawUser> =>
-  // Warning: for this version of prisma, this method is not idempotent. It will throw an error if there is no asking team. It should be solved in the next versions
-  // Please correct this if this issue is closed and merged https://github.com/prisma/prisma/issues/3069
-  database.user.update({
-    data: {
-      team: {
-        disconnect: true,
-      },
-      type: null,
-    },
-    where: {
-      id: userId,
-    },
-  });
-
 export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise<PrimitiveTeamWithPrimitiveUsers> =>
   database.team.update({
     data: {
@@ -212,7 +257,54 @@ export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise
     include: teamInclusions,
   });
 
-export const joinTeam = (teamId: string, user: User, newUserType?: UserType): PrismaPromise<RawUser> =>
+export const unlockTeam = async (teamId: string) => {
+  const updatedTeam = await database.team.update({
+    data: {
+      lockedAt: null,
+      enteredQueueAt: null,
+    },
+    where: {
+      id: teamId,
+    },
+    include: teamInclusions,
+  });
+
+  const tournament = await fetchTournament(updatedTeam.tournamentId);
+  // We freed a place, so there is at least one place left
+  // (except if the team was already in the queue, but then we want to skip the condition, so that's fine)
+  if (tournament.placesLeft === 1) {
+    // We unlock the first team in the queue
+    const firstTeamInQueue = await database.team.findFirst({
+      where: {
+        enteredQueueAt: {
+          not: null,
+        },
+      },
+      orderBy: {
+        enteredQueueAt: 'asc',
+      },
+    });
+
+    if (firstTeamInQueue) {
+      // The team is no longer in the queue
+      await database.team.update({
+        data: {
+          enteredQueueAt: null,
+        },
+        where: {
+          id: firstTeamInQueue.id,
+        },
+      });
+
+      // We lock the team
+      await lockTeam(firstTeamInQueue.id);
+    }
+  }
+
+  return formatTeam(updatedTeam);
+};
+
+const prismaRequestJoinTeam = (teamId: string, user: User, newUserType?: UserType): PrismaPromise<RawUser> =>
   database.user.update({
     data: {
       team: {
@@ -230,6 +322,47 @@ export const joinTeam = (teamId: string, user: User, newUserType?: UserType): Pr
     },
   });
 
+export const joinTeam = async (teamId: string, user: User, newUserType?: UserType): Promise<RawUser> => {
+  const updatedUser = await prismaRequestJoinTeam(teamId, user, newUserType);
+  // Check if we need to lock the team
+  // First, check the type of the user and that he has paid
+  if (newUserType !== 'player' || !user.hasPaid) {
+    return updatedUser;
+  }
+  const team = await fetchTeam(teamId);
+  const tournament = await fetchTournament(team.tournamentId);
+  // Then, check if the team is full and that every player has paid
+  if (team.players.length !== tournament.playersPerTeam || !team.players.every((player) => player.hasPaid)) {
+    return updatedUser;
+  }
+  // If we are still there, we passed all the tests, so we can lock the team
+  await lockTeam(teamId);
+
+  return updatedUser;
+};
+
+const prismaRequestKickUser = (user: User): PrismaPromise<RawUser> =>
+  database.user.update({
+    data: {
+      team: {
+        disconnect: true,
+      },
+      type: null,
+    },
+    where: {
+      id: user.id,
+    },
+  });
+
+export const kickUser = async (user: User): Promise<RawUser> => {
+  // Warning: for this version of prisma, this method is not idempotent. It will throw an error if there is no asking team. It should be solved in the next versions
+  // Please correct this if this issue is closed and merged https://github.com/prisma/prisma/issues/3069
+  if (user.type === 'player') {
+    await unlockTeam(user.teamId);
+  }
+  return prismaRequestKickUser(user);
+};
+
 export const replaceUser = (
   user: User,
   targetUser: User,
@@ -240,7 +373,7 @@ export const replaceUser = (
     PrismaPromise<RawUser>,
     PrismaPromise<RawUser>,
     PrismaPromise<PrimitiveTeamWithPrimitiveUsers>?,
-  ] = [kickUser(user.id), joinTeam(team.id, targetUser, user.type)];
+  ] = [prismaRequestKickUser(user), prismaRequestJoinTeam(team.id, targetUser, user.type)];
 
   // If he is the captain, change the captain
   if (team.captainId === user.id) {
@@ -250,39 +383,19 @@ export const replaceUser = (
   return database.$transaction(transactions);
 };
 
-export const lockTeam = async (teamId: string) => {
-  // We want to group all queries in one transaction. It is not possible currently, but keep being updated on prisma
-
-  const askingUsers = await database.user.findMany({
-    where: {
-      askingTeamId: teamId,
-    },
-  });
-
-  await database.$transaction(
-    askingUsers.map((user) =>
-      database.user.update({
-        data: {
-          askingTeam: {
-            disconnect: true,
-          },
-        },
-        where: {
-          id: user.id,
-        },
-      }),
-    ),
-  );
-
-  const updatedTeam = await database.team.update({
-    data: {
-      lockedAt: new Date(),
-    },
-    where: {
-      id: teamId,
-    },
-    include: teamInclusions,
-  });
-
-  return formatTeam(updatedTeam);
+export const deleteTeam = async (team: Team) => {
+  if (team.lockedAt) {
+    await unlockTeam(team.id);
+  }
+  return database.$transaction([
+    database.user.updateMany({
+      where: { teamId: team.id },
+      data: {
+        type: null,
+      },
+    }),
+    database.team.delete({
+      where: { id: team.id },
+    }),
+  ]);
 };
