@@ -74,6 +74,11 @@
                 description: Type d'utilisateur
                 type: string
                 enum: [player, coach]
+              pokemonPlayerId:
+                description: Identifiant du Pokémon du joueur (obligatoire di tournamentId est pokemon)
+                optional: true
+                type: string
+                example: "1"
     responses:
       201:
         description: L'équipe a bien été créée. Ses informations sont retournées.
