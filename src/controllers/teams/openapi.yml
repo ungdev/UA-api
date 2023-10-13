@@ -164,7 +164,13 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TeamWithUsers'
+              allOf:
+                - $ref: '#/components/schemas/TeamWithUsers'
+                - type: object
+                  properties:
+                    positionInQueue:
+                      type: integer
+                      example: 1
       401:
         $ref: '#/components/responses/401Unauthenticated'
       403:

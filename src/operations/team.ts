@@ -26,6 +26,13 @@ const teamInclusions = {
   },
 };
 
+export const getPositionInQueue = (team: Team): Promise<number | undefined> => {
+  if (!team.enteredQueueAt) return undefined;
+  return database.team.count({
+    where: { AND: [{ enteredQueueAt: { not: null } }, { enteredQueueAt: { lte: team.enteredQueueAt } }] },
+  });
+};
+
 export const formatTeam = (
   team: PrimitiveTeam & { users: RawUserWithCartItems[]; askingUsers: RawUserWithCartItems[] },
 ): Team => {

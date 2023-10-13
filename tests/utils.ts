@@ -8,6 +8,7 @@ import database from '../src/services/database';
 import nanoid from '../src/utils/nanoid';
 import env from '../src/utils/env';
 import { serializePermissions } from '../src/utils/helpers';
+import { fetchTournament } from '../src/operations/tournament';
 
 export const generateFakeDiscordId = () => `${Math.floor(Date.now() * (1 + Math.random()))}`;
 
@@ -139,4 +140,20 @@ export const createFakeTeam = async ({
 
   logger.verbose(`Created team ${team.name}`);
   return fetchTeam(team.id);
+};
+
+export const createFakeTournament = async ({
+  id,
+  name,
+  playersPerTeam,
+  maxTeams,
+}: {
+  id: string;
+  name: string;
+  playersPerTeam: number;
+  maxTeams: number;
+}) => {
+  await database.tournament.create({ data: { id, name, maxPlayers: playersPerTeam * maxTeams, playersPerTeam } });
+  logger.verbose(`Created tournament ${name}`);
+  return fetchTournament(id);
 };
