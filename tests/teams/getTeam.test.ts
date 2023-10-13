@@ -8,8 +8,8 @@ import { Error, Team, Tournament, User } from '../../src/types';
 import { createFakeTeam, createFakeTournament, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
-import { fetchTeam, lockTeam } from "../../src/operations/team";
-import { sleep } from "../../src/utils/helpers";
+import { fetchTeam, lockTeam } from '../../src/operations/team';
+import { sleep } from '../../src/utils/helpers';
 
 describe('GET /teams/current', () => {
   let tournament: Tournament;
