@@ -255,6 +255,8 @@ export const enum Error {
   MalformedMailBody = 'Structure du mail incorrecte',
   InvalidMailOptions = "Paramètres d'envoi incorrects",
 
+  NoPokemonIdProvided = "L'ID Pokémon n'a pas été spécifié",
+
   // 401
   // The user credentials were refused or not provided
   Unauthenticated = "Tu n'es pas authentifié",

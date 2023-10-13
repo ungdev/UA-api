@@ -9,7 +9,7 @@ import { fetchTournament } from '../../operations/tournament';
 import { hasUserAlreadyPaidForAnotherTicket } from '../../operations/user';
 import { Error as ResponseError, UserType } from '../../types';
 import { filterTeam } from '../../utils/filters';
-import { conflict, created, forbidden, gone, notFound } from '../../utils/responses';
+import { badRequest, conflict, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
 
@@ -22,6 +22,7 @@ export default [
     Joi.object({
       name: validators.teamName.required(),
       tournamentId: Joi.string().required(),
+      pokemonPlayerId: Joi.string().pattern(/^\d+$/),
       userType: Joi.string()
         .valid(UserType.player, UserType.coach)
         .required()
@@ -32,7 +33,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { name, tournamentId, userType } = request.body;
+      const { name, tournamentId, pokemonPlayerId, userType } = request.body;
       const { user } = getRequestInfo(response);
 
       const tournament = await fetchTournament(tournamentId);
@@ -50,8 +51,12 @@ export default [
       if (await hasUserAlreadyPaidForAnotherTicket(user, tournamentId, userType))
         return forbidden(response, ResponseError.HasAlreadyPaidForAnotherTicket);
 
+      if (tournamentId === 'pokemon' && !pokemonPlayerId) {
+        return badRequest(response, ResponseError.NoPokemonIdProvided);
+      }
+
       try {
-        const team = await createTeam(name, tournamentId, response.locals.user.id, userType);
+        const team = await createTeam(name, tournamentId, response.locals.user.id, pokemonPlayerId, userType);
         return created(response, filterTeam(team));
       } catch (error) {
         // If the email already exists in the database, throw a bad request

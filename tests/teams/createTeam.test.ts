@@ -22,6 +22,12 @@ describe('POST /teams', () => {
     userType: UserType.player,
   };
 
+  const teamBodyPokemon = {
+    name: 'ZeBest2',
+    tournamentId: 'pokemon',
+    userType: UserType.player,
+  };
+
   before(async () => {
     user = await createFakeUser();
     token = generateToken(user);
@@ -96,6 +102,39 @@ describe('POST /teams', () => {
       .send(teamBody)
       .set('Authorization', `Bearer ${token}`)
       .expect(500, { error: Error.InternalServerError });
+  });
+
+  it('should fail as the pokemonId is required for pokemon tournament', async () => {
+    const pokemonUser = await createFakeUser();
+    const pokemonToken = generateToken(pokemonUser);
+
+    return request(app)
+      .post('/teams')
+      .send({ ...teamBodyPokemon })
+      .set('Authorization', `Bearer ${pokemonToken}`)
+      .expect(400, { error: Error.NoPokemonIdProvided });
+  });
+
+  it('should fail as the pokemonId is not a number', async () => {
+    const pokemonUser = await createFakeUser();
+    const pokemonToken = generateToken(pokemonUser);
+
+    return request(app)
+      .post('/teams')
+      .send({ ...teamBodyPokemon, pokemonPlayerId: 'test' })
+      .set('Authorization', `Bearer ${pokemonToken}`)
+      .expect(400);
+  });
+
+  it('should successfully create a pokemon team', async () => {
+    const pokemonUser = await createFakeUser();
+    const pokemonToken = generateToken(pokemonUser);
+
+    return request(app)
+      .post('/teams')
+      .send({ ...teamBodyPokemon, pokemonPlayerId: '1' })
+      .set('Authorization', `Bearer ${pokemonToken}`)
+      .expect(201);
   });
 
   it('should successfully create a team (as a player)', async () => {
