@@ -130,7 +130,7 @@ export const generateValidationEmail = (user: Omit<RawUser, 'permissions'>) =>
   serialize({
     receiver: user.email,
     reason:
-      "Tu as reçu ce mail car tu as envoyé une demande de création de compte à l'UTT Arena. Si ce n'est pas toi, ignore ce message ou contacte nous.",
+      "Tu as reçu ce mail car tu as envoyé une demande de création de compte à l'UTT Arena. Si ce n'est pas toi, ignore ce message ou contacte-nous.",
     title: {
       topic: 'Code de validation',
       banner: 'Création du compte',
