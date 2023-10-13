@@ -132,7 +132,7 @@ describe('POST /teams', () => {
 
     return request(app)
       .post('/teams')
-      .send({ ...teamBodyPokemon, pokemonPlayerId: "1" })
+      .send({ ...teamBodyPokemon, pokemonPlayerId: '1' })
       .set('Authorization', `Bearer ${pokemonToken}`)
       .expect(201);
   });
