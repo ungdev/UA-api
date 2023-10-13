@@ -116,7 +116,7 @@ model Caster {
   id           String       @id
   name         String
   tournamentId String
-  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 
   @@index([tournamentId], map: "casters_tournamentId_fkey")
   @@map("casters")
@@ -236,17 +236,6 @@ enum UserType {
 enum UserAge {
   adult
   child
-}
-
-enum TournamentId {
-  lol
-  ssbu
-  csgo
-  valorant
-  rl
-  osu
-  tft
-  open
 }
 
 enum RepoItemType {
