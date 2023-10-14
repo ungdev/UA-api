@@ -27,7 +27,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     casters: ['test'],
     displayCasters: true,
     display: true,
-    position: 0,
+    position: 150,
   };
 
   after(async () => {
@@ -96,6 +96,6 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     expect(tournament.casters[0].name).to.be.equal(validBody.casters[0]);
     expect(tournament.displayCasters).to.equal(validBody.displayCasters);
     expect(tournament.display).to.equal(validBody.display);
-    expect(tournament.position).to.equal(0);
+    expect(tournament.position).to.equal(152);
   });
 });

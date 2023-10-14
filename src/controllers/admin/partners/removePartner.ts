@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { noContent, notFound } from '../../../utils/responses';
-import { Error, Permission } from '../../../types';
+import { Error } from '../../../types';
 import { fetchPartners, removePartner } from '../../../operations/partner';
 
 export default [
   // Middlewares
-  ...hasPermission(Permission.anim),
+  ...hasPermission(),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {

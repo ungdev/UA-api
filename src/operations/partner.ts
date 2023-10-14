@@ -9,7 +9,12 @@ export const fetchPartners = (): PrismaPromise<Partner[]> =>
     },
   });
 
-export const addPartner = (partner: { name: string; link: string; display?: boolean, position: number }): PrismaPromise<Partner> =>
+export const addPartner = (partner: {
+  name: string;
+  link: string;
+  display?: boolean;
+  position: number;
+}): PrismaPromise<Partner> =>
   database.partner.create({
     data: {
       id: nanoid(),
@@ -30,16 +35,18 @@ export const updatePartner = (
   });
 
 export const updatePartnersPosition = async (partners: { id: string; position: number }[]) => {
-  for (const partner of partners) {
-    await database.partner.update({
-      where: {
-        id: partner.id,
-      },
-      data: {
-        position: partner.position,
-      },
-    });
-  }
+  await Promise.all(
+    partners.map((partner) =>
+      database.partner.update({
+        where: {
+          id: partner.id,
+        },
+        data: {
+          position: partner.position,
+        },
+      }),
+    ),
+  );
 };
 
 export const removePartner = (id: string): PrismaPromise<Partner> =>

@@ -3,12 +3,11 @@ import { Request, Response, NextFunction } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { validateBody } from '../../../middlewares/validation';
 import { created } from '../../../utils/responses';
-import { Permission } from '../../../types';
 import { addPartner } from '../../../operations/partner';
 
 export default [
   // Middlewares
-  ...hasPermission(Permission.anim),
+  ...hasPermission(),
   validateBody(
     Joi.object({
       name: Joi.string().required(),
