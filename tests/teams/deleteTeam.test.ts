@@ -12,7 +12,7 @@ import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
 // eslint-disable-next-line func-names
-describe('DELETE /teams/current', function () {
+describe('DELETE /teams/currenta', function () {
   // Setup is slow
   this.timeout(30000);
 
@@ -93,7 +93,7 @@ describe('DELETE /teams/current', function () {
     await request(app).delete(`/teams/current`).set('Authorization', `Bearer ${captainToken}`).expect(204);
 
     let deletedTeam = await teamOperations.fetchTeam(team.id);
-    expect(deletedTeam).to.be.null;
+    expect(deletedTeam).to.be.undefined;
 
     let updatedCaptain = await userOperations.fetchUser(captain.id);
     expect(updatedCaptain.teamId).to.be.null;
@@ -114,7 +114,7 @@ describe('DELETE /teams/current', function () {
     expect(updatedCaptain.type).to.be.null;
 
     deletedTeam = await teamOperations.fetchTeam(waitingTeamToDelete.id);
-    expect(deletedTeam).to.be.null;
+    expect(deletedTeam).to.be.undefined;
 
     waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
     expect(waitingTeam.lockedAt).to.be.null;
@@ -129,7 +129,7 @@ describe('DELETE /teams/current', function () {
     expect(updatedCaptain.type).to.be.null;
 
     const deletedTeam = await teamOperations.fetchTeam(lockedTeam.id);
-    expect(deletedTeam).to.be.null;
+    expect(deletedTeam).to.be.undefined;
 
     waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
     expect(waitingTeam.lockedAt).to.be.not.null;

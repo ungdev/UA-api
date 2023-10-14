@@ -6,7 +6,6 @@ import {
   UserType,
   PrimitiveTeam,
   RawUser,
-  RawUserWithCartItems,
   PrimitiveTeamWithPrimitiveUsers,
   PrimitiveTeamWithPartialTournament,
 } from '../types';
@@ -26,15 +25,20 @@ const teamInclusions = {
   },
 };
 
-export const getPositionInQueue = (team: Team): Promise<number | undefined> => {
+export const getPositionInQueue = (team: PrimitiveTeam): Promise<number | null> => {
   if (!team.enteredQueueAt) return null;
   return database.team.count({
-    where: { AND: [{ enteredQueueAt: { not: null } }, { enteredQueueAt: { lte: team.enteredQueueAt } }] },
+    where: {
+      tournamentId: team.tournamentId,
+      AND: [{ enteredQueueAt: { not: null } }, { enteredQueueAt: { lte: team.enteredQueueAt } }],
+    },
   });
 };
 
 export const formatTeam = (
-  team: PrimitiveTeam & { users: RawUserWithCartItems[]; askingUsers: RawUserWithCartItems[] },
+  team: PrimitiveTeamWithPrimitiveUsers & {
+    positionInQueue: number | null;
+  },
 ): Team => {
   if (!team) return null;
 
@@ -50,10 +54,16 @@ export const formatTeam = (
   };
 };
 
-export const fetchTeam = async (id: string): Promise<Team> => {
-  const team = await database.team.findUnique({ where: { id }, include: teamInclusions });
+export const formatPrimitiveTeam = async (team: PrimitiveTeamWithPrimitiveUsers): Promise<Team> =>
+  formatTeam({ ...team, positionInQueue: await getPositionInQueue(team) });
 
-  return formatTeam(team);
+export const fetchTeam = async (id: string): Promise<Team> | undefined => {
+  const team: PrimitiveTeamWithPrimitiveUsers = await database.team.findUnique({
+    where: { id },
+    include: teamInclusions,
+  });
+
+  return team ? formatPrimitiveTeam(team) : undefined;
 };
 
 export const fetchTeamWithTournament = (id: string): Promise<PrimitiveTeamWithPartialTournament> =>
@@ -77,7 +87,7 @@ export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
     include: teamInclusions,
   });
 
-  return teams.map(formatTeam);
+  return Promise.all(teams.map(formatPrimitiveTeam));
 };
 
 export const lockTeam = async (teamId: string) => {
@@ -134,7 +144,7 @@ export const lockTeam = async (teamId: string) => {
     });
   }
 
-  return formatTeam(updatedTeam);
+  return formatPrimitiveTeam(updatedTeam);
 };
 
 export const createTeam = async (
@@ -180,8 +190,8 @@ export const createTeam = async (
     include: teamInclusions,
   });
 
-  // Verify if team need to be locked
-  const newTeam = formatTeam(team);
+  // Verify if team needs to be locked
+  const newTeam = await formatPrimitiveTeam(team);
   const tournament = await fetchTournament(newTeam.tournamentId);
   if (newTeam.players.length === tournament.playersPerTeam && newTeam.players.every((player) => player.hasPaid)) {
     await lockTeam(newTeam.id);
@@ -201,7 +211,7 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
     include: teamInclusions,
   });
 
-  return formatTeam(team);
+  return formatPrimitiveTeam(team);
 };
 
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
@@ -303,7 +313,7 @@ export const unlockTeam = async (teamId: string) => {
     }
   }
 
-  return formatTeam(updatedTeam);
+  return formatPrimitiveTeam(updatedTeam);
 };
 
 const prismaRequestJoinTeam = (teamId: string, user: User, newUserType?: UserType): PrismaPromise<RawUser> =>
