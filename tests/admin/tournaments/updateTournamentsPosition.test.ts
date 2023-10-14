@@ -9,25 +9,17 @@ import { createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
 import { fetchTournaments } from '../../../src/operations/tournament';
 
-describe('PATCH /admin/tournaments/{tournamentId}', () => {
+describe('PATCH /admin/tournaments', () => {
   let nonAdminUser: User;
   let admin: User;
   let adminToken: string;
   let tournaments: Tournament[];
 
-  const validBody = {
-    name: 'test',
-    maxPlayers: 100,
-    playersPerTeam: 5,
-    cashprize: 100,
-    cashprizeDetails: 'test',
-    displayCashprize: true,
-    format: 'test',
-    infos: 'test',
-    casters: ['test'],
-    displayCasters: true,
-    display: true,
-    position: 150,
+  let validBody: {
+    tournaments: {
+      id: string;
+      position: number;
+    }[];
   };
 
   after(async () => {
@@ -40,28 +32,38 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     adminToken = generateToken(admin);
 
     tournaments = await fetchTournaments();
+
+    validBody = {
+      tournaments: [
+        {
+          id: tournaments[0].id,
+          position: 1,
+        },
+        {
+          id: tournaments[1].id,
+          position: 0,
+        },
+      ],
+    };
   });
 
   it('should error as the user is not authenticated', () =>
-    request(app)
-      .patch(`/admin/tournaments/${tournaments[0].id}`)
-      .send(validBody)
-      .expect(401, { error: Error.Unauthenticated }));
+    request(app).patch(`/admin/tournaments`).send(validBody).expect(401, { error: Error.Unauthenticated }));
 
   it('should error as the user is not an administrator', () => {
     const userToken = generateToken(nonAdminUser);
     return request(app)
-      .patch(`/admin/tournaments/${tournaments[0].id}`)
+      .patch(`/admin/tournaments`)
       .send(validBody)
       .set('Authorization', `Bearer ${userToken}`)
       .expect(403, { error: Error.NoPermission });
   });
 
   it('should fail with an internal server error', async () => {
-    sandbox.stub(tournamentOperations, 'updateTournament').throws('Unexpected error');
+    sandbox.stub(tournamentOperations, 'updateTournamentsPosition').throws('Unexpected error');
 
     await request(app)
-      .patch(`/admin/tournaments/${tournaments[0].id}`)
+      .patch(`/admin/tournaments`)
       .send(validBody)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(500, { error: Error.InternalServerError });
@@ -69,33 +71,54 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
 
   it("should throw an error as tournament's id does not exist", async () => {
     await request(app)
-      .patch('/admin/tournaments/aaaaaa')
-      .send(validBody)
+      .patch(`/admin/tournaments`)
+      .send({
+        tournaments: [
+          {
+            id: 'aaaaaa',
+            position: 1,
+          },
+          {
+            id: 'aaaaaa',
+            position: 0,
+          },
+        ],
+      })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(404, { error: Error.NotFound });
   });
 
-  it('should successfully update the tournament', async () => {
+  it("should throw an error as tournament's position is not a number", async () => {
     await request(app)
-      .patch(`/admin/tournaments/${tournaments[0].id}`)
+      .patch(`/admin/tournaments`)
+      .send({
+        tournaments: [
+          {
+            id: tournaments[0].id,
+            position: 'aaaaaa',
+          },
+          {
+            id: tournaments[1].id,
+            position: 0,
+          },
+        ],
+      })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(400);
+  });
+
+  it('should successfully update the tournaments', async () => {
+    const result = await request(app)
+      .patch(`/admin/tournaments`)
       .send(validBody)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    const tournament = await tournamentOperations.fetchTournament(tournaments[0].id);
-
-    expect(tournament.name).to.equal(validBody.name);
-    expect(tournament.maxPlayers).to.equal(validBody.maxPlayers);
-    expect(tournament.playersPerTeam).to.equal(validBody.playersPerTeam);
-    expect(tournament.cashprize).to.equal(validBody.cashprize);
-    expect(tournament.cashprizeDetails).to.equal(validBody.cashprizeDetails);
-    expect(tournament.displayCashprize).to.equal(validBody.displayCashprize);
-    expect(tournament.format).to.equal(validBody.format);
-    expect(tournament.infos).to.equal(validBody.infos);
-    expect(tournament.casters).to.be.an('array');
-    expect(tournament.casters[0].name).to.be.equal(validBody.casters[0]);
-    expect(tournament.displayCasters).to.equal(validBody.displayCasters);
-    expect(tournament.display).to.equal(validBody.display);
-    expect(tournament.position).to.equal(150);
+    expect(
+      result.body.find((a: { id: string; position: number }) => a.id === validBody.tournaments[0].id).position,
+    ).to.equal(validBody.tournaments[0].position);
+    expect(
+      result.body.find((a: { id: string; position: number }) => a.id === validBody.tournaments[1].id).position,
+    ).to.equal(validBody.tournaments[1].position);
   });
 });

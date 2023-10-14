@@ -23,6 +23,7 @@ export default [
       casters: Joi.array().items(Joi.string()).optional(),
       displayCasters: Joi.boolean().optional(),
       display: Joi.boolean().optional(),
+      position: Joi.number().optional(),
     }),
   ),
 

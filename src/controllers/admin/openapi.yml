@@ -330,7 +330,7 @@
       404:
         $ref: '#/components/responses/404UserNotFound'
 
-/admin/parners:
+/admin/partners:
   get:
     summary: Renvoie tous les partenaires de la base de données.
     description: Renvoie toutes les propriétés des partenaires.<br/>
@@ -352,7 +352,7 @@
         $ref: '#/components/responses/401Unauthenticated'
       403:
         $ref: '#/components/responses/403Unauthorized'
-post:
+  post:
     summary: Crée un partenaire
     description: Crée un partenaire.<br/>
       **Permission 'admin' requise.**
@@ -395,6 +395,60 @@ post:
               error: L'utilisateur n'est pas authentifié
       403:
         $ref: '#/components/responses/403Unauthorized'
+  patch:
+    summary: Modifie la position des partenaires
+    description: Modifie la position des partenaires.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            description: La liste des partenaires avec leur nouvelle position
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: L'identifiant du partenaire
+                position:
+                  type: integer
+                  description: La nouvelle position du partenaire
+    responses:
+      200:
+        description: Les partenaires ont bien été modifiés. Leur nouvelle position est renvoyée.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: L'identifiant du partenaire
+                  position:
+                    type: integer
+                    description: La nouvelle position du partenaire
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
 
 /admin/partners/{partnerId}:
   patch:
@@ -788,6 +842,60 @@ post:
         $ref: '#/components/responses/401Unauthenticated'
       403:
         $ref: '#/components/responses/403Unauthorized'
+  patch:
+    summary: Modifie la position des tournois
+    description: Modifie la position des tournois.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            description: La liste des tournois avec leur nouvelle position
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: L'identifiant du tournoi
+                position:
+                  type: integer
+                  description: La nouvelle position du tournoi
+    responses:
+      200:
+        description: Les tournois ont bien été modifiés. Leur nouvelle position est renvoyée.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: L'identifiant du tournoi
+                  position:
+                    type: integer
+                    description: La nouvelle position du tournoi
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
 
 /admin/tournaments/{tournamentId}:
   patch:

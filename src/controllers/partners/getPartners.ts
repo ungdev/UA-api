@@ -14,7 +14,7 @@ export default [
       result = result.filter((partner) => partner.display);
 
       // Don't pick the display field
-      const partners = result.map((partner) => pick(partner, ['id', 'name', 'link']));
+      const partners = result.map((partner) => pick(partner, ['id', 'name', 'link', 'position']));
 
       return success(response, partners);
     } catch (error) {
