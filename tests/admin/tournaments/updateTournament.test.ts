@@ -27,6 +27,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     casters: ['test'],
     displayCasters: true,
     display: true,
+    position: 0,
   };
 
   after(async () => {
@@ -76,12 +77,12 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
 
   it('should successfully update the tournament', async () => {
     await request(app)
-      .patch(`/admin/tournaments/${tournaments[0].id}`)
+      .patch(`/admin/tournaments/${tournaments.find((a) => a.name === 'test')!.id}`)
       .send(validBody)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    const tournament = await tournamentOperations.fetchTournament(tournaments[0].id);
+    const tournament = await tournamentOperations.fetchTournament(tournaments.find((a) => a.name === 'test')!.id);
 
     expect(tournament.name).to.equal(validBody.name);
     expect(tournament.maxPlayers).to.equal(validBody.maxPlayers);
@@ -95,5 +96,6 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     expect(tournament.casters[0].name).to.be.equal(validBody.casters[0]);
     expect(tournament.displayCasters).to.equal(validBody.displayCasters);
     expect(tournament.display).to.equal(validBody.display);
+    expect(tournament.position).to.equal(0);
   });
 });

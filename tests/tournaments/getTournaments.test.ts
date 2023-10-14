@@ -39,6 +39,7 @@ describe('GET /tournaments', () => {
           data: {
             casters: { create: { id: `caster-${id}`, name: `un caster pour ${id}` } },
             cashprize: 42,
+            position: 8,
           },
           where: { id },
         }),
@@ -75,6 +76,7 @@ describe('GET /tournaments', () => {
       'infos',
       'format',
       'cashprizeDetails',
+      'position',
     ]);
     expect(response.body[0].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.a('number');
@@ -113,6 +115,7 @@ describe('GET /tournaments', () => {
       'infos',
       'format',
       'cashprizeDetails',
+      'position',
     ]);
     expect(response.body[1].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.null;

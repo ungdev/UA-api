@@ -56,7 +56,7 @@ describe('POST /admin/partners', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(201);
 
-    expect(response.body).to.have.all.keys(['id', 'name', 'link', 'display']);
+    expect(response.body).to.have.all.keys(['id', 'name', 'link', 'display', 'position']);
     expect(response.body.name).to.equal('test');
     expect(response.body.link).to.equal('test');
     expect(response.body.display).to.equal(true);

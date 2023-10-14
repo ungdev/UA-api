@@ -32,6 +32,7 @@ describe('DELETE /admin/partners/{partnerId}', () => {
         name: faker.company.name(),
         link: faker.internet.url(),
         display: true,
+        position: index,
       });
     }
 
