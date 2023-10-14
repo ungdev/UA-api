@@ -93,6 +93,8 @@ components:
         placesLeft:
           type: integer
           example: 5
+        position:
+          type: integer
 
     UserRestricted:
       type: object
