@@ -31,7 +31,7 @@ describe('GET /tournaments', () => {
   });
 
   it('should return 200 with an array of tournaments', async () => {
-    const tournaments = await database.tournament.findMany();
+    const tournaments = await tournamentOperations.fetchTournaments();
 
     await Promise.all(
       tournaments.map(({ id }) =>
@@ -85,7 +85,7 @@ describe('GET /tournaments', () => {
   });
 
   it('should return 200 with an array of tournaments with the right fields', async () => {
-    const tournaments = await database.tournament.findMany();
+    const tournaments = await tournamentOperations.fetchTournaments();
 
     await database.tournament.update({
       where: {
