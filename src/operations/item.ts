@@ -103,28 +103,44 @@ export const findAdminItem = async (itemId: string) => {
 };
 
 export const updateAdminItem = async (
-  itemId: string,
-  newStock?: number,
+  itemId?: string,
+  name?: string,
+  category?: ItemCategory,
+  attribute?: string,
+  price?: number,
+  reducedPrice?: number,
+  infos?: string,
+  image?: string,
+  stock?: number,
   availableFrom?: Date,
   availableUntil?: Date,
 ): Promise<Item> => {
-  const item = await database.item.update({ data: { stock: newStock }, where: { id: itemId } });
-  if (newStock) {
-    const cartItems = await database.cartItem.findMany({
-      where: {
-        itemId: item.id,
-        cart: {
-          transactionState: {
-            in: [TransactionState.paid, TransactionState.pending],
-          },
+  const item = await database.item.update({
+    data: {
+      name,
+      category,
+      attribute,
+      price,
+      reducedPrice,
+      infos,
+      image,
+      stock,
+      availableFrom,
+      availableUntil,
+    },
+    where: { id: itemId },
+  });
+  const cartItems = await database.cartItem.findMany({
+    where: {
+      itemId: item.id,
+      cart: {
+        transactionState: {
+          in: [TransactionState.paid, TransactionState.pending],
         },
       },
-    });
-    // Calculates how many items were ordered by adding all the quantity ordered
-    const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
-    item.stock = newStock - count;
-  }
-  item.availableFrom = availableFrom ?? item.availableFrom;
-  item.availableUntil = availableUntil ?? item.availableUntil;
-  return item;
+    },
+  });
+  // Calculates how many items were ordered by adding all the quantity ordered
+  const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
+  return { ...item, left: item.stock - count };
 };

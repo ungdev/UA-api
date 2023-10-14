@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import { Item } from '@prisma/client';
+import { Item, ItemCategory } from '@prisma/client';
 import app from '../../../src/app';
 import { createFakeItem, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
@@ -12,7 +12,18 @@ describe('PATCH /admin/items/:itemId', () => {
   let admin: User;
   let item: Item;
   let adminToken: string;
-  let validBody: { newStock: number; availableFrom: Date; availableUntil: Date };
+  let validBody: {
+    name: string;
+    category: ItemCategory;
+    attribute: string;
+    price: number;
+    reducedPrice: number;
+    infos: string;
+    image: string;
+    stock: number;
+    availableFrom: Date;
+    availableUntil: Date;
+  };
 
   before(async () => {
     item = await createFakeItem({
@@ -24,7 +35,18 @@ describe('PATCH /admin/items/:itemId', () => {
     user = await createFakeUser();
     admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
-    validBody = { newStock: 18, availableFrom: new Date(Date.now()), availableUntil: new Date(Date.now() + 1000) };
+    validBody = {
+      name: 'Miel pops',
+      category: 'rent',
+      attribute: 'family-size',
+      price: 2000,
+      reducedPrice: 1500,
+      infos: 'A big pack of miel pops for big families :)',
+      image: 'https://https://picsum.photos/200',
+      stock: 18,
+      availableFrom: new Date(Date.now()),
+      availableUntil: new Date(Date.now() + 1000),
+    };
   });
 
   after(async () => {
@@ -57,9 +79,32 @@ describe('PATCH /admin/items/:itemId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({})
       .expect(200);
+
+    // Check body response
+    expect(body.id).to.be.equal(item.id);
+    expect(body.name).to.be.equal(item.name);
+    expect(body.category).to.be.equal(item.category);
+    expect(body.attribute).to.be.equal(item.attribute);
+    expect(body.price).to.be.equal(item.price);
+    expect(body.reducedPrice).to.be.equal(item.reducedPrice);
+    expect(body.infos).to.be.equal(item.infos);
+    expect(body.image).to.be.equal(item.image);
     expect(body.stock).to.be.equal(item.stock);
     expect(body.availableFrom).to.be.equal(item.availableFrom.toISOString());
     expect(body.availableUntil).to.be.equal(item.availableUntil.toISOString());
+
+    // Check it hasn't been modified in the database
+    const itemDatabase = await database.item.findUnique({ where: { id: item.id } });
+    expect(itemDatabase.name).to.be.equal(item.name);
+    expect(itemDatabase.category).to.be.equal(item.category);
+    expect(itemDatabase.attribute).to.be.equal(item.attribute);
+    expect(itemDatabase.price).to.be.equal(item.price);
+    expect(itemDatabase.reducedPrice).to.be.equal(item.reducedPrice);
+    expect(itemDatabase.infos).to.be.equal(item.infos);
+    expect(itemDatabase.image).to.be.equal(item.image);
+    expect(itemDatabase.stock).to.be.equal(item.stock);
+    expect(itemDatabase.availableFrom.getTime()).to.be.equal(item.availableFrom.getTime());
+    expect(itemDatabase.availableUntil.getTime()).to.be.equal(item.availableUntil.getTime());
   });
 
   it('should change the item stock and availability dates', async () => {
@@ -69,8 +114,30 @@ describe('PATCH /admin/items/:itemId', () => {
       .send(validBody)
       .expect(200);
 
-    expect(body.stock).to.be.equal(validBody.newStock);
+    // Check body response
+    expect(body.id).to.be.equal(item.id);
+    expect(body.name).to.be.equal(validBody.name);
+    expect(body.category).to.be.equal(validBody.category);
+    expect(body.attribute).to.be.equal(validBody.attribute);
+    expect(body.price).to.be.equal(validBody.price);
+    expect(body.reducedPrice).to.be.equal(validBody.reducedPrice);
+    expect(body.infos).to.be.equal(validBody.infos);
+    expect(body.image).to.be.equal(validBody.image);
+    expect(body.stock).to.be.equal(validBody.stock);
     expect(body.availableFrom).to.be.equal(validBody.availableFrom.toISOString());
     expect(body.availableUntil).to.be.equal(validBody.availableUntil.toISOString());
+
+    // Check it has been modified in the database
+    const itemDatabase = await database.item.findUnique({ where: { id: item.id } });
+    expect(itemDatabase.name).to.be.equal(validBody.name);
+    expect(itemDatabase.category).to.be.equal(validBody.category);
+    expect(itemDatabase.attribute).to.be.equal(validBody.attribute);
+    expect(itemDatabase.price).to.be.equal(validBody.price);
+    expect(itemDatabase.reducedPrice).to.be.equal(validBody.reducedPrice);
+    expect(itemDatabase.infos).to.be.equal(validBody.infos);
+    expect(itemDatabase.image).to.be.equal(validBody.image);
+    expect(itemDatabase.stock).to.be.equal(validBody.stock);
+    expect(itemDatabase.availableFrom.getTime()).to.be.equal(validBody.availableFrom.getTime());
+    expect(itemDatabase.availableUntil.getTime()).to.be.equal(validBody.availableUntil.getTime());
   });
 });
