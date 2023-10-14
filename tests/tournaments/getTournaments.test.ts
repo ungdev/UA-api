@@ -39,7 +39,6 @@ describe('GET /tournaments', () => {
           data: {
             casters: { create: { id: `caster-${id}`, name: `un caster pour ${id}` } },
             cashprize: 42,
-            position: 8,
           },
           where: { id },
         }),

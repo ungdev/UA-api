@@ -77,12 +77,12 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
 
   it('should successfully update the tournament', async () => {
     await request(app)
-      .patch(`/admin/tournaments/${tournaments.find((a) => a.name === 'test')!.id}`)
+      .patch(`/admin/tournaments/${tournaments[0].id}`)
       .send(validBody)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    const tournament = await tournamentOperations.fetchTournament(tournaments.find((a) => a.name === 'test')!.id);
+    const tournament = await tournamentOperations.fetchTournament(tournaments[0].id);
 
     expect(tournament.name).to.equal(validBody.name);
     expect(tournament.maxPlayers).to.equal(validBody.maxPlayers);
