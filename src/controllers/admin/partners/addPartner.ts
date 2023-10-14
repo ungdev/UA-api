@@ -14,7 +14,7 @@ export default [
       name: Joi.string().required(),
       link: Joi.string().required(),
       display: Joi.boolean().optional(),
-      position: Joi.number().optional(),
+      position: Joi.number().required(),
     }),
   ),
 

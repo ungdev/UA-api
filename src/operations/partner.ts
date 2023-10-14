@@ -9,13 +9,14 @@ export const fetchPartners = (): PrismaPromise<Partner[]> =>
     },
   });
 
-export const addPartner = (partner: { name: string; link: string; display?: boolean }): PrismaPromise<Partner> =>
+export const addPartner = (partner: { name: string; link: string; display?: boolean, position: number }): PrismaPromise<Partner> =>
   database.partner.create({
     data: {
       id: nanoid(),
       name: partner.name,
       link: partner.link,
       display: partner.display,
+      position: partner.position,
     },
   });
 
