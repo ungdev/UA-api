@@ -10,7 +10,6 @@ import nanoid from '../src/utils/nanoid';
 import env from '../src/utils/env';
 import { serializePermissions } from '../src/utils/helpers';
 import { fetchTournament } from '../src/operations/tournament';
-import carts from '../src/controllers/admin/carts';
 
 export const generateFakeDiscordId = () => `${Math.floor(Date.now() * (1 + Math.random()))}`;
 
