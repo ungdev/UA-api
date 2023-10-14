@@ -10,6 +10,7 @@ import nanoid from '../src/utils/nanoid';
 import env from '../src/utils/env';
 import { serializePermissions } from '../src/utils/helpers';
 import { fetchTournament } from '../src/operations/tournament';
+import carts from '../src/controllers/admin/carts';
 
 export const generateFakeDiscordId = () => `${Math.floor(Date.now() * (1 + Math.random()))}`;
 
@@ -174,3 +175,32 @@ export const createFakeItem = ({
   availableFrom?: Date;
   availableUntil?: Date;
 }) => database.item.create({ data: { id: nanoid(), category, name, price, stock, availableFrom, availableUntil } });
+
+export const createFakeCart = ({
+  userId,
+  transactionState = 'paid',
+  items,
+}: {
+  userId: string;
+  transactionState?: TransactionState;
+  items: Array<{ itemId: string; quantity: number; price: number }>;
+}) =>
+  database.cart.create({
+    data: {
+      id: nanoid(),
+      userId,
+      transactionState,
+      transactionId: 123,
+      cartItems: {
+        createMany: {
+          data: items.map(({ itemId, quantity, price }) => ({
+            id: nanoid(),
+            itemId,
+            quantity,
+            price,
+            forUserId: userId,
+          })),
+        },
+      },
+    },
+  });

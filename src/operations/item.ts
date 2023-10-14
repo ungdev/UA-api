@@ -111,10 +111,20 @@ export const updateAdminItem = async (
   reducedPrice?: number,
   infos?: string,
   image?: string,
-  stock?: number,
+  stockDifference?: number,
   availableFrom?: Date,
   availableUntil?: Date,
 ): Promise<Item> => {
+  const newStock = stockDifference
+    ? (
+        await database.item.findUnique({
+          where: {
+            id: itemId,
+          },
+          select: { stock: true },
+        })
+      ).stock + stockDifference
+    : undefined;
   const item = await database.item.update({
     data: {
       name,
@@ -124,7 +134,7 @@ export const updateAdminItem = async (
       reducedPrice,
       infos,
       image,
-      stock,
+      stock: newStock,
       availableFrom,
       availableUntil,
     },
@@ -135,7 +145,7 @@ export const updateAdminItem = async (
       itemId: item.id,
       cart: {
         transactionState: {
-          in: [TransactionState.paid, TransactionState.pending],
+          in: [TransactionState.paid, TransactionState.pending, TransactionState.authorization],
         },
       },
     },

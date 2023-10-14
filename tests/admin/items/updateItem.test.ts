@@ -1,8 +1,8 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import { Item, ItemCategory } from '@prisma/client';
+import { Item, ItemCategory, TransactionState } from '@prisma/client';
 import app from '../../../src/app';
-import { createFakeItem, createFakeUser } from '../../utils';
+import { createFakeCart, createFakeItem, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, User } from '../../../src/types';
 import { generateToken } from '../../../src/utils/users';
@@ -20,7 +20,7 @@ describe('PATCH /admin/items/:itemId', () => {
     reducedPrice: number;
     infos: string;
     image: string;
-    stock: number;
+    stockDifference: number;
     availableFrom: Date;
     availableUntil: Date;
   };
@@ -33,6 +33,17 @@ describe('PATCH /admin/items/:itemId', () => {
       availableUntil: new Date(1971, 1, 1),
     });
     user = await createFakeUser();
+    // Buy this item. Buy it once per transaction state, to test them all
+    await Promise.all(
+      (['paid', 'pending', 'authorization', 'refused', 'canceled', 'refunded'] as TransactionState[]).map(
+        (transactionState) =>
+          createFakeCart({
+            userId: user.id,
+            transactionState,
+            items: [{ itemId: item.id, price: item.price, quantity: 1 }],
+          }),
+      ),
+    );
     admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
     validBody = {
@@ -43,13 +54,14 @@ describe('PATCH /admin/items/:itemId', () => {
       reducedPrice: 1500,
       infos: 'A big pack of miel pops for big families :)',
       image: 'https://https://picsum.photos/200',
-      stock: 18,
+      stockDifference: 18,
       availableFrom: new Date(Date.now()),
       availableUntil: new Date(Date.now() + 1000),
     };
   });
 
   after(async () => {
+    await database.cart.deleteMany();
     // Delete the user created
     await database.user.deleteMany();
     await database.item.delete({ where: { id: item.id } });
@@ -90,6 +102,7 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(body.infos).to.be.equal(item.infos);
     expect(body.image).to.be.equal(item.image);
     expect(body.stock).to.be.equal(item.stock);
+    expect(body.left).to.be.equal(item.stock - 3); // Only three carts should count as bought
     expect(body.availableFrom).to.be.equal(item.availableFrom.toISOString());
     expect(body.availableUntil).to.be.equal(item.availableUntil.toISOString());
 
@@ -107,7 +120,7 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(itemDatabase.availableUntil.getTime()).to.be.equal(item.availableUntil.getTime());
   });
 
-  it('should change the item stock and availability dates', async () => {
+  it('should modify the item entirely', async () => {
     const { body } = await request(app)
       .patch(`/admin/items/${item.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
@@ -123,7 +136,8 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(body.reducedPrice).to.be.equal(validBody.reducedPrice);
     expect(body.infos).to.be.equal(validBody.infos);
     expect(body.image).to.be.equal(validBody.image);
-    expect(body.stock).to.be.equal(validBody.stock);
+    expect(body.stock).to.be.equal(validBody.stockDifference + item.stock);
+    expect(body.left).to.be.equal(validBody.stockDifference + item.stock - 3); // Only three carts should count as bought
     expect(body.availableFrom).to.be.equal(validBody.availableFrom.toISOString());
     expect(body.availableUntil).to.be.equal(validBody.availableUntil.toISOString());
 
@@ -136,7 +150,7 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(itemDatabase.reducedPrice).to.be.equal(validBody.reducedPrice);
     expect(itemDatabase.infos).to.be.equal(validBody.infos);
     expect(itemDatabase.image).to.be.equal(validBody.image);
-    expect(itemDatabase.stock).to.be.equal(validBody.stock);
+    expect(itemDatabase.stock).to.be.equal(validBody.stockDifference + item.stock);
     expect(itemDatabase.availableFrom.getTime()).to.be.equal(validBody.availableFrom.getTime());
     expect(itemDatabase.availableUntil.getTime()).to.be.equal(validBody.availableUntil.getTime());
   });

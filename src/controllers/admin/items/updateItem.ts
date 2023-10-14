@@ -19,7 +19,7 @@ export default [
       reducedPrice: Joi.number().integer(),
       infos: Joi.string(),
       image: Joi.string(),
-      stock: Joi.number().integer(),
+      stockDifference: Joi.number().integer(),
       availableFrom: Joi.date(),
       availableUntil: Joi.date(),
     }),
@@ -28,19 +28,29 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { name, category, attribute, price, reducedPrice, infos, image, stock, availableFrom, availableUntil } =
-        request.body as {
-          name: string;
-          category: ItemCategory;
-          attribute: string;
-          price: number;
-          reducedPrice: number;
-          infos: string;
-          image: string;
-          stock: number;
-          availableFrom: Date;
-          availableUntil: Date;
-        };
+      const {
+        name,
+        category,
+        attribute,
+        price,
+        reducedPrice,
+        infos,
+        image,
+        stockDifference,
+        availableFrom,
+        availableUntil,
+      } = request.body as {
+        name: string;
+        category: ItemCategory;
+        attribute: string;
+        price: number;
+        reducedPrice: number;
+        infos: string;
+        image: string;
+        stockDifference: number;
+        availableFrom: Date;
+        availableUntil: Date;
+      };
 
       if (!(await fetchAllItems()).some((item) => item.id === request.params.itemId)) {
         return notFound(response, Error.ItemNotFound);
@@ -55,7 +65,7 @@ export default [
         reducedPrice,
         infos,
         image,
-        stock,
+        stockDifference,
         availableFrom,
         availableUntil,
       );
