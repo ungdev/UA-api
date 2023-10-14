@@ -72,20 +72,21 @@ model Setting {
 }
 
 model Team {
-  id              String       @id
+  id              String     @id
   name            String
   tournamentId    String
-  captainId       String       @unique
+  captainId       String     @unique
   lockedAt        DateTime?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @default(now()) @updatedAt
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @default(now()) @updatedAt
   discordRoleId   String?
   pokemonPlayerId String?
-  captain         User         @relation(fields: [captainId], references: [id])
-  tournament      Tournament   @relation(fields: [tournamentId], references: [id])
-  askingUsers     User[]       @relation("teamAskingUsers")
-  users           User[]       @relation("teamUsers")
-  enteredQueueAt DateTime?
+  captain         User       @relation(fields: [captainId], references: [id])
+  tournament      Tournament @relation(fields: [tournamentId], references: [id])
+  askingUsers     User[]     @relation("teamAskingUsers")
+  users           User[]     @relation("teamUsers")
+  enteredQueueAt  DateTime?
+
   @@unique([name, tournamentId])
   @@index([id])
   @@index([tournamentId], map: "teams_tournamentId_fkey")
@@ -109,6 +110,7 @@ model Tournament {
   discordRespoRoleId     String?
   discordTextCategoryId  String?
   discordVocalCategoryId String?
+  position               Int      @default(0)
   teams                  Team[]
 
   @@map("tournaments")
@@ -125,10 +127,11 @@ model Caster {
 }
 
 model Partner {
-  id      String  @id
-  name    String
-  link    String
-  display Boolean
+  id       String  @id
+  name     String
+  link     String
+  display  Boolean
+  position Int     @default(0)
 
   @@map("partners")
 }

@@ -45,6 +45,9 @@ export const fetchTournaments = async (): Promise<Tournament[]> => {
     include: {
       casters: true,
     },
+    orderBy: {
+      position: 'asc',
+    },
   });
 
   return Promise.all(tournaments.map(formatTournament));
@@ -63,9 +66,24 @@ export const updateTournament = (
     infos?: string;
     displayCasters?: boolean;
     display?: boolean;
+    position?: number;
   },
 ): PrismaPromise<PrimitiveTournament> =>
   database.tournament.update({
     where: { id },
     data: { ...data, casters: undefined },
   });
+
+export const updateTournamentsPosition = (tournaments: { id: string; position: number }[]) =>
+  Promise.all(
+    tournaments.map((tournament) =>
+      database.tournament.update({
+        where: {
+          id: tournament.id,
+        },
+        data: {
+          position: tournament.position,
+        },
+      }),
+    ),
+  );
