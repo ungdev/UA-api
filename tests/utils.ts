@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
+import { ItemCategory } from '@prisma/client';
 import { fetchUser } from '../src/operations/user';
 import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
@@ -157,3 +158,19 @@ export const createFakeTournament = async ({
   logger.verbose(`Created tournament ${name}`);
   return fetchTournament(id);
 };
+
+export const createFakeItem = ({
+  name,
+  category = 'supplement',
+  price = 1000,
+  stock,
+  availableFrom,
+  availableUntil,
+}: {
+  name: string;
+  category?: ItemCategory;
+  price?: number;
+  stock?: number;
+  availableFrom?: Date;
+  availableUntil?: Date;
+}) => database.item.create({ data: { id: nanoid(), category, name, price, stock, availableFrom, availableUntil } });

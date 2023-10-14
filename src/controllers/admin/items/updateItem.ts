@@ -5,27 +5,33 @@ import { Error, Permission } from '../../../types';
 import { notFound, success } from '../../../utils/responses';
 import { filterAdminItem } from '../../../utils/filters';
 import { validateBody } from '../../../middlewares/validation';
-import { fetchAllItems, updateAdminItemStock } from '../../../operations/item';
+import { fetchAllItems, updateAdminItem } from '../../../operations/item';
 
 export default [
   // Middlewares
   ...hasPermission(Permission.admin),
   validateBody(
     Joi.object({
-      newStock: Joi.number().integer().required(),
+      newStock: Joi.number().integer(),
+      availableFrom: Joi.date(),
+      availableUntil: Joi.date(),
     }),
   ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { newStock } = request.body as { newStock: number };
+      const { newStock, availableFrom, availableUntil } = request.body as {
+        newStock: number;
+        availableFrom: Date;
+        availableUntil: Date;
+      };
 
       if (!(await fetchAllItems()).some((item) => item.id === request.params.itemId)) {
         return notFound(response, Error.ItemNotFound);
       }
 
-      const item = await updateAdminItemStock(request.params.itemId, newStock);
+      const item = await updateAdminItem(request.params.itemId, newStock, availableFrom, availableUntil);
 
       return success(response, filterAdminItem(item));
     } catch (error) {
