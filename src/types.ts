@@ -250,6 +250,7 @@ export const enum Error {
   NoQRCode = "Le QR code n'existe pas",
 
   InvalidCart = 'Le contenu de la commande est invalide',
+  ItemNotAvailableYet = "L'objet demandé n'est pas encore disponible",
   EmptyLogin = "Le nom d'utilisateur ne peut pas être vide",
 
   MalformedMailBody = 'Structure du mail incorrecte',
@@ -347,6 +348,7 @@ export const enum Error {
   // indicates that access to the target resource is no longer available at the server.
   TournamentFull = 'Le tournoi est complet',
   ItemOutOfStock = "L'objet demandé n'est plus en stock",
+  ItemNotAvailableAnymore = "L'objet demandé n'est plus disponible",
 
   // 415
   UnsupportedMediaType = "Le format de la requête n'est pas supporté",

@@ -13,14 +13,12 @@ describe('GET /admin/items/:itemId', () => {
   let admin: User;
   let item: Item;
   let adminToken: string;
-  let validBody: { newStock: number };
 
   before(async () => {
     [item] = await fetchAllItems();
     user = await createFakeUser();
     admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
-    validBody = { newStock: 18 };
   });
 
   after(async () => {
@@ -46,17 +44,21 @@ describe('GET /admin/items/:itemId', () => {
       .expect(404, { error: Error.ItemNotFound }));
 
   it('should return the item with proper stock and left value', async () => {
-    await request(app)
-      .patch(`/admin/items/${item.id}`)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send(validBody)
-      .expect(200);
-
     const { body } = await request(app)
       .get(`/admin/items/${item.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.stock).to.be.equal(validBody.newStock);
+    expect(body.id).to.be.equal(item.id);
+    expect(body.name).to.be.equal(item.name);
+    expect(body.category).to.be.equal(item.category);
+    expect(body.attribute).to.be.equal(item.attribute);
+    expect(body.price).to.be.equal(item.price);
+    expect(body.reducedPrice).to.be.equal(item.reducedPrice);
+    expect(body.infos).to.be.equal(item.infos);
+    expect(body.image).to.be.equal(item.image);
+    expect(body.stock).to.be.equal(item.stock);
+    expect(body.availableFrom).to.be.equal(item.availableFrom ? item.availableFrom.toISOString() : null);
+    expect(body.availableUntil).to.be.equal(item.availableUntil ? item.availableUntil.toISOString() : null);
   });
 });
