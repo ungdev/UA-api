@@ -34,8 +34,8 @@ export const updatePartner = (
     data,
   });
 
-export const updatePartnersPosition = async (partners: { id: string; position: number }[]) =>
-  await Promise.all(
+export const updatePartnersPosition = (partners: { id: string; position: number }[]) =>
+  Promise.all(
     partners.map((partner) =>
       database.partner.update({
         where: {
