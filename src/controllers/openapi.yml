@@ -568,6 +568,14 @@ components:
           description: La quantité disponible de cet Item. Si l'item n'est pas limité,
             cette valeur est omise (et vaudra donc undefined en javascript)
           optional: true
+        availableFrom:
+          type: string
+          format: date-time
+          nullable: true
+        availableUntil:
+          type: string
+          format: date-time
+          nullable: true
 
     AdminItem:
       type: object
