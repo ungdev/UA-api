@@ -197,16 +197,14 @@ export default [
       }
 
       // Checks if the item is available
-      if (items.find((item) => item.availableFrom !== null && item.availableFrom > new Date())) {
+      if (items.some((item) => item.availableFrom !== null && item.availableFrom > new Date())) {
         return gone(response, ResponseError.ItemNotAvailableYet);
       }
 
-
       // Checks if the item is not available anymore
-      if (items.find((item) => item.availableUntil !== null && item.availableUntil < new Date())) {
+      if (items.some((item) => item.availableUntil !== null && item.availableUntil < new Date())) {
         return badRequest(response, ResponseError.ItemNotAvailableAnymore);
       }
-
 
       // Defines the cart
       let cart: Cart;

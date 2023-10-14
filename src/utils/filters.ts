@@ -53,10 +53,35 @@ export const filterUserWithTeamAndTournamentInfo = (user: UserWithTeamAndTournam
 };
 
 export const filterAdminItem = (item: Item) =>
-  pick(item, ['id', 'name', 'category', 'attribute', 'price', 'reducedPrice', 'infos', 'image', 'left', 'stock', 'availableFrom', 'availableUntil']);
+  pick(item, [
+    'id',
+    'name',
+    'category',
+    'attribute',
+    'price',
+    'reducedPrice',
+    'infos',
+    'image',
+    'left',
+    'stock',
+    'availableFrom',
+    'availableUntil',
+  ]);
 
 export const filterItem = (item: Item) =>
-  pick(item, ['id', 'name', 'category', 'attribute', 'price', 'reducedPrice', 'infos', 'image', 'left', 'availableFrom', 'availableUntil']);
+  pick(item, [
+    'id',
+    'name',
+    'category',
+    'attribute',
+    'price',
+    'reducedPrice',
+    'infos',
+    'image',
+    'left',
+    'availableFrom',
+    'availableUntil',
+  ]);
 
 export const filterCartItem = (cartItem: CartItem) =>
   pick(cartItem, [
