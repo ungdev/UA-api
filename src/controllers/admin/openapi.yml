@@ -193,8 +193,8 @@
 
 /admin/items/:itemId:
   patch:
-    summary: Change le stock disponible de l'item.
-    description: Change le stock disponible de l'item. via le `PATCH admin/items/:itemId`<br/>
+    summary: Change les informations de l'item.
+    description: Change les informations de l'item ":" nom, catégorie, attribut, prix, informations, image, stock, dates de disponibilité.
       **Permission 'admin' requise.**
     tags:
       - Admin
@@ -205,11 +205,40 @@
       content:
         application/json:
           schema:
-            type: Object
+            type: object
             properties:
-              newStock:
+              name:
+                type: string
+                description: Le nouveau nom de l'item
+              category:
+                type: string
+                description: La nouvelle catégorie de l'item
+              attribute:
+                type: string
+                description: Le nouvel attribut de l'item
+              price:
+                type: string
+                description: Le nouveau prix de l'item
+              reducedPrice:
+                type: string
+                description: Le nouveau prix pour les étudiants UT de l'item (si `null`, il n'y a pas de prix pour les étudiants)
+              infos:
+                type: string
+                description: Les nouvelles informations de l'item
+              image:
+                type: string
+                description: Le lien vers la nouvelle image de l'item
+              stockDifference:
                 type: integer
-                description: Le nouveau stock disponible de l'item
+                description: La différence de stock de l'item (par exemple, pour passer d'un stock total de 50 à 40, on aurait la valeur -10)
+              availableFrom:
+                type: string
+                format: date-time
+                description: La nouvelle date à partir de laquelle l'item sera disponible à la vente
+              availableUntil:
+                type: string
+                format: date-time
+                description: La nouvelle date à partir de laquelle l'item ne sera plus disponible à la vente
     responses:
       200:
         description: Change le stock disponible de l'item.
@@ -948,7 +977,7 @@
         $ref: '#/components/responses/403Unauthorized'
 
 /admin/upload:
-  post: 
+  post:
     summary: Upload un fichier
     description: Upload un fichier<br/>
       **Permission 'admin' requise.**
