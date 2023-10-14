@@ -34,7 +34,7 @@ export const updatePartner = (
     data,
   });
 
-export const updatePartnersPosition = async (partners: { id: string; position: number }[]) => {
+export const updatePartnersPosition = async (partners: { id: string; position: number }[]) =>
   await Promise.all(
     partners.map((partner) =>
       database.partner.update({
@@ -47,7 +47,6 @@ export const updatePartnersPosition = async (partners: { id: string; position: n
       }),
     ),
   );
-};
 
 export const removePartner = (id: string): PrismaPromise<Partner> =>
   database.partner.delete({

@@ -74,7 +74,7 @@ export const updateTournament = (
     data: { ...data, casters: undefined },
   });
 
-export const updateTournamentsPosition = async (tournaments: { id: string; position: number }[]) => {
+export const updateTournamentsPosition = async (tournaments: { id: string; position: number }[]) =>
   await Promise.all(
     tournaments.map((tournament) =>
       database.tournament.update({
@@ -87,4 +87,3 @@ export const updateTournamentsPosition = async (tournaments: { id: string; posit
       }),
     ),
   );
-};

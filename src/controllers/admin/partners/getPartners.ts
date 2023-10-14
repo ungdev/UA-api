@@ -2,10 +2,11 @@ import { NextFunction, Request, Response } from 'express';
 import { fetchPartners } from '../../../operations/partner';
 import { success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
+import { Permission } from '../../../types';
 
 export default [
   // Middlewares
-  ...hasPermission(),
+  ...hasPermission(Permission.admin),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
