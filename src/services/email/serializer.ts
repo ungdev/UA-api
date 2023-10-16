@@ -64,7 +64,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
       },
       {
         title: 'Billet',
-        components: ["Tu reçevras ton *billet personnalisé* par mail quelques jours avant l'UTT Arena&nbsp;!"],
+        components: ["Tu recevras ton *billet personnalisé* par mail quelques jours avant l'UTT Arena&nbsp;!"],
       },
       {
         title: 'Confirmation de commande',
