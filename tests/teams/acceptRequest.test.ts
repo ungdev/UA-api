@@ -37,13 +37,13 @@ describe('POST /teams/current/join-requests/:userId', function () {
     user2 = await createFakeUser({ paid: true, type: UserType.player });
     await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
     await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
-    fullTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true });
+    fullTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true });
     fullCaptain = getCaptain(fullTeam);
     fullToken = generateToken(fullCaptain);
     // Fill the tournament
     // Store the promises
     const promises = [];
-    for (let index = 1; index < tournament.placesLeft; index++) {
+    for (let index = 0; index < tournament.placesLeft; index++) {
       promises.push(createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true }));
     }
     await Promise.all(promises);
@@ -115,11 +115,7 @@ describe('POST /teams/current/join-requests/:userId', function () {
   });
 
   it('should fail as the team is full', async () => {
-    const fullTeam = await createFakeTeam({ members: 5 });
     const otherUser = await createFakeUser();
-
-    const fullCaptain = getCaptain(fullTeam);
-    const fullToken = generateToken(fullCaptain);
     await teamOperations.askJoinTeam(fullTeam.id, otherUser.id, UserType.player);
 
     await request(app)

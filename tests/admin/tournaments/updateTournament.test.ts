@@ -31,7 +31,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
 
   after(async () => {
     await database.user.deleteMany();
-    await database.tournament.delete({where: {id: tournament.id}});
+    await database.tournament.delete({ where: { id: tournament.id } });
   });
 
   before(async () => {
