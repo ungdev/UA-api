@@ -71,7 +71,7 @@ export const updateTournament = (
 ): PrismaPromise<PrimitiveTournament> =>
   database.tournament.update({
     where: { id },
-    data: { ...data, casters: undefined },
+    data: { ...data },
   });
 
 export const updateTournamentsPosition = (tournaments: { id: string; position: number }[]) =>

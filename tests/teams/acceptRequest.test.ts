@@ -11,6 +11,7 @@ import { Error, Team, User, UserType } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
+import { fetchUser } from '../../src/operations/user';
 
 // eslint-disable-next-line func-names
 describe('POST /teams/current/join-requests/:userId', function () {
@@ -22,6 +23,12 @@ describe('POST /teams/current/join-requests/:userId', function () {
   let team: Team;
   let captain: User;
   let token: string;
+  let fullTeam: Team;
+  let fullCaptain: User;
+  let fullToken: string;
+  let onePlayerTeam: Team;
+  let onePlayerTeamCaptain: User;
+  let onePlayerTeamToken: string;
 
   before(async () => {
     const tournament = await tournamentOperations.fetchTournament('lol');
@@ -30,10 +37,13 @@ describe('POST /teams/current/join-requests/:userId', function () {
     user2 = await createFakeUser({ paid: true, type: UserType.player });
     await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
     await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
+    fullTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true });
+    fullCaptain = getCaptain(fullTeam);
+    fullToken = generateToken(fullCaptain);
     // Fill the tournament
     // Store the promises
     const promises = [];
-    for (let index = 0; index < tournament.placesLeft; index++) {
+    for (let index = 1; index < tournament.placesLeft; index++) {
       promises.push(createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true }));
     }
     await Promise.all(promises);
@@ -42,6 +52,10 @@ describe('POST /teams/current/join-requests/:userId', function () {
 
     captain = getCaptain(team);
     token = generateToken(captain);
+
+    onePlayerTeam = await createFakeTeam({ tournament: 'pokemon' });
+    onePlayerTeamCaptain = getCaptain(onePlayerTeam);
+    onePlayerTeamToken = generateToken(onePlayerTeamCaptain);
   });
 
   after(async () => {
@@ -115,17 +129,56 @@ describe('POST /teams/current/join-requests/:userId', function () {
   });
 
   it('should succeed to join a full team as a coach', async () => {
-    const fullTeam = await createFakeTeam({ members: 5 });
     const otherUser = await createFakeUser();
 
-    const fullCaptain = getCaptain(fullTeam);
-    const fullToken = generateToken(fullCaptain);
     await teamOperations.askJoinTeam(fullTeam.id, otherUser.id, UserType.coach);
 
     await request(app)
       .post(`/teams/current/join-requests/${otherUser.id}`)
       .set('Authorization', `Bearer ${fullToken}`)
       .expect(200);
+
+    const databaseUser = await fetchUser(otherUser.id);
+    expect(databaseUser.teamId).to.be.equal(fullTeam.id);
+  });
+
+  it('should fail to join the team as a coach because there are already 2 coaches', async () => {
+    // There is only one coach for the moment
+    const coach = await createFakeUser();
+    await teamOperations.joinTeam(fullTeam.id, coach, UserType.coach);
+    const willNotJoinCoach = await createFakeUser();
+    await teamOperations.askJoinTeam(fullTeam.id, willNotJoinCoach.id, UserType.coach);
+    await request(app)
+      .post(`/teams/current/join-requests/${willNotJoinCoach.id}`)
+      .set('Authorization', `Bearer ${fullToken}`)
+      .expect(403, { error: Error.TeamMaxCoachReached });
+
+    const databaseCoach = await fetchUser(willNotJoinCoach.id);
+    expect(databaseCoach.teamId).to.be.null;
+  });
+
+  it('should successfully join the 1-player team as a coach', async () => {
+    const coach = await createFakeUser();
+    await teamOperations.askJoinTeam(onePlayerTeam.id, coach.id, UserType.coach);
+    await request(app)
+      .post(`/teams/current/join-requests/${coach.id}`)
+      .set('Authorization', `Bearer ${onePlayerTeamToken}`)
+      .expect(200);
+
+    const databaseCoach = await fetchUser(coach.id);
+    expect(databaseCoach.teamId).to.be.equal(onePlayerTeam.id);
+  });
+
+  it('should fail to join the 1-player team as a coach because there is already a coach', async () => {
+    const coach = await createFakeUser();
+    await teamOperations.askJoinTeam(onePlayerTeam.id, coach.id, UserType.coach);
+    await request(app)
+      .post(`/teams/current/join-requests/${coach.id}`)
+      .set('Authorization', `Bearer ${onePlayerTeamToken}`)
+      .expect(403, { error: Error.TeamMaxCoachReached });
+
+    const databaseCoach = await fetchUser(coach.id);
+    expect(databaseCoach.teamId).to.be.null;
   });
 
   it('should successfully join the team and not lock the team as it is not full', async () => {

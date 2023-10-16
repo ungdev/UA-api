@@ -15,7 +15,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
   let tournament: Tournament;
 
   const validBody = {
-    name: 'test',
+    name: 'anothertestname',
     maxPlayers: 100,
     playersPerTeam: 5,
     cashprize: 100,
@@ -31,7 +31,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
 
   after(async () => {
     await database.user.deleteMany();
-    await database.tournament.delete({ where: { id: tournament.id } });
+    await database.tournament.delete({where: {id: tournament.id}});
   });
 
   before(async () => {
@@ -39,7 +39,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     nonAdminUser = await createFakeUser();
     adminToken = generateToken(admin);
 
-    tournament = await createFakeTournament({ id: 'test', name: 'Dragibus', maxTeams: 1, playersPerTeam: 1 });
+    tournament = await createFakeTournament({ id: 'test', name: 'test', playersPerTeam: 1, maxTeams: 1 });
   });
 
   it('should error as the user is not authenticated', () =>
@@ -73,6 +73,14 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
       .send(validBody)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(404, { error: Error.NotFound });
+  });
+
+  it('should fail as a tournament already has this name', async () => {
+    await request(app)
+      .patch(`/admin/tournaments/${tournament.id}`)
+      .send({ name: 'Pokémon' })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(409, { error: Error.TournamentNameAlreadyExists });
   });
 
   it('should successfully update the tournament', async () => {

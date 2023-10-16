@@ -11,11 +11,9 @@ import {
   PrimitiveTeamWithPartialTournament,
 } from '../types';
 import nanoid from '../utils/nanoid';
-import { countCoaches, formatUser, userInclusions } from './user';
+import { formatUser, userInclusions } from './user';
 import { setupDiscordTeam } from '../utils/discord';
 import { fetchTournament } from './tournament';
-
-const teamMaxCoachCount = 2;
 
 const teamInclusions = {
   users: {
@@ -205,13 +203,6 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
 };
 
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
-  // We check the amount of coaches at that point
-  const teamCoachCount = await countCoaches(teamId);
-  if (userType === UserType.coach && teamCoachCount >= teamMaxCoachCount)
-    throw Object.assign(new Error('Query cannot be executed: max count of coach reached already'), {
-      code: 'API_COACH_MAX_TEAM',
-    });
-
   // Then we create the join request when it is alright
   const updatedUser = await database.user.update({
     data: {
