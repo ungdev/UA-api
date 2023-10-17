@@ -11,11 +11,7 @@ import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 
-// eslint-disable-next-line func-names
-describe('POST /admin/carts/:cartId/refund', function () {
-  // Setup is slow
-  this.timeout(30000);
-
+describe('POST /admin/carts/:cartId/refund', () => {
   let user: User;
   let admin: User;
   let adminToken: string;

@@ -11,11 +11,7 @@ import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
-// eslint-disable-next-line func-names
-describe('DELETE /teams/current', function () {
-  // Setup is slow
-  this.timeout(30000);
-
+describe('DELETE /teams/current', () => {
   let captain: User;
   let team: Team;
   let lockedTeam: Team;
