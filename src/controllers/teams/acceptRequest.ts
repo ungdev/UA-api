@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { isCaptain, isTeamNotLocked } from '../../middlewares/team';
+import { isCaptain } from '../../middlewares/team';
 import { forbidden, notFound, success } from '../../utils/responses';
 import { fetchTeam, joinTeam } from '../../operations/team';
 import { filterTeam } from '../../utils/filters';
@@ -11,7 +11,6 @@ import { getRequestInfo } from '../../utils/users';
 export default [
   // Middlewares
   ...isCaptain,
-  isTeamNotLocked,
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
@@ -35,7 +34,11 @@ export default [
         return forbidden(response, Error.TeamFull);
       }
 
-      await joinTeam(team.id, askingUser);
+      if (team.coaches.length >= Math.min(tournament.playersPerTeam, 2) && askingUser.type === UserType.coach) {
+        return forbidden(response, Error.TeamMaxCoachReached);
+      }
+
+      await joinTeam(team.id, askingUser, askingUser.type);
 
       const updatedTeam = await fetchTeam(team.id);
 

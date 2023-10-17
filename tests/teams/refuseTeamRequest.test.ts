@@ -72,18 +72,6 @@ describe('DELETE /teams/current/join-requests/:userId', () => {
       .expect(403, { error: Error.NotAskedTeam });
   });
 
-  it('should error as the team is locked', async () => {
-    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
-    const lockedCaptain = getCaptain(lockedTeam);
-    const lockedToken = generateToken(lockedCaptain);
-    const lockedUserToRefuse = lockedTeam.players.find((player) => player.id !== lockedCaptain.id);
-
-    await request(app)
-      .delete(`/teams/current/users/${lockedUserToRefuse.id}`)
-      .set('Authorization', `Bearer ${lockedToken}`)
-      .expect(403, { error: Error.TeamLocked });
-  });
-
   it('should fail with an internal server error', async () => {
     sandbox.stub(teamOperations, 'deleteTeamRequest').throws('Unexpected error');
     await request(app)

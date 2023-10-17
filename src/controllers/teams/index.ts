@@ -8,7 +8,6 @@ import deleteTeam from './deleteTeam';
 import createTeamRequest from './createTeamRequest';
 import cancelTeamRequest from './cancelTeamRequest';
 import refuseTeamRequest from './refuseTeamRequest';
-import lockTeam from './lockTeam';
 import acceptRequest from './acceptRequest';
 import kickUser from './kickUser';
 import promoteCaptain from './promoteCaptain';
@@ -29,8 +28,6 @@ router.post('/:teamId/join-requests', createTeamRequest);
 router.delete('/current/join-requests/current', cancelTeamRequest);
 router.delete('/current/join-requests/:userId', refuseTeamRequest);
 router.post('/current/join-requests/:userId', acceptRequest);
-
-router.post('/current/lock', lockTeam);
 
 router.get('/:teamId', getIndividualTeam);
 

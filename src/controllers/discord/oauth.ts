@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/node';
 import env from '../../utils/env';
 import database from '../../services/database';
 import { fetchUser } from '../../operations/user';
-import { ActionFeedback, DiscordFeedbackCode } from '../../types';
+import { DiscordFeedbackCode } from '../../types';
 import { decrypt } from '../../utils/helpers';
 import { isLoginAllowed } from '../../middlewares/settings';
 import type { DiscordAuthorization } from './discordApi';
@@ -16,7 +16,7 @@ const redirect = (response: Response, statusCode: DiscordFeedbackCode) => {
   response
     .status(302)
     .set({
-      Location: `${env.front.website}/dashboard/account?action=${ActionFeedback.DISCORD_OAUTH}&state=${statusCode}`,
+      Location: `${env.front.website}/oauth/discord/${statusCode}`,
     })
     .end();
 };
@@ -40,16 +40,17 @@ export default [
 
       // Parallelize the request to the Discord API and the Database
       const [discordUserToken, user] = await Promise.all([getToken(code), userPromise]);
-      // Attach sentry error log (if an error occurs) to the user
-      Sentry.setUser({ id: user.id, username: user.username, email: user.email });
-      // Add extra details in sentry errors (involved discord ids)
-      Sentry.setExtra('currentDiscordId', user.discordId);
 
       // State is invalid ! User may have modified it on the fly
       // Or this is not the scope we asked access for => bad request
       // Or we haven't got a bearer token, abort process too
       if (!user || discordUserToken.scope !== 'identify' || discordUserToken.token_type?.toLowerCase() !== 'bearer')
         return redirect(response, DiscordFeedbackCode.ERR_BAD_REQUEST);
+
+      // Attach sentry error log (if an error occurs) to the user
+      Sentry.setUser({ id: user.id, username: user.username, email: user.email });
+      // Add extra details in sentry errors (involved discord ids)
+      Sentry.setExtra('currentDiscordId', user.discordId);
 
       // We now retrieve Authorization information. Contains basic user data containing
       // user id, username, discriminator, avatar url and public flags (ie. public badges)

@@ -6,7 +6,7 @@ import { fetchPartners, removePartner } from '../../../operations/partner';
 
 export default [
   // Middlewares
-  ...hasPermission(Permission.anim),
+  ...hasPermission(Permission.admin),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {

@@ -3,30 +3,60 @@ import request from 'supertest';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
+import * as cartOperations from '../../src/operations/carts';
+import * as tournamentOperations from '../../src/operations/tournament';
+import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
 import { createFakeUser, createFakeTeam } from '../utils';
 import { generateToken } from '../../src/utils/users';
-import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
+import { fetchUser } from '../../src/operations/user';
 
 describe('POST /teams/current/join-requests/:userId', () => {
   let user: User;
+  let user2: User;
   let team: Team;
   let captain: User;
   let token: string;
+  let fullTeam: Team;
+  let fullCaptain: User;
+  let fullToken: string;
+  let onePlayerTeam: Team;
+  let onePlayerTeamCaptain: User;
+  let onePlayerTeamToken: string;
 
   before(async () => {
-    team = await createFakeTeam({ members: 2 });
-    user = await createFakeUser();
+    const tournament = await tournamentOperations.fetchTournament('lol');
+    team = await createFakeTeam({ members: tournament.playersPerTeam - 2, paid: true });
+    user = await createFakeUser({ paid: true, type: UserType.player });
+    user2 = await createFakeUser({ paid: true, type: UserType.player });
     await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
+    await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
+    fullTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true });
+    fullCaptain = getCaptain(fullTeam);
+    fullToken = generateToken(fullCaptain);
+    // Fill the tournament
+    // Store the promises
+    const promises = [];
+    for (let index = 0; index < tournament.placesLeft; index++) {
+      promises.push(createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true }));
+    }
+    await Promise.all(promises);
+    // Update the team
+    team = await teamOperations.fetchTeam(team.id);
 
     captain = getCaptain(team);
     token = generateToken(captain);
+
+    onePlayerTeam = await createFakeTeam({ tournament: 'pokemon' });
+    onePlayerTeamCaptain = getCaptain(onePlayerTeam);
+    onePlayerTeamToken = generateToken(onePlayerTeamCaptain);
   });
 
   after(async () => {
     await database.team.deleteMany();
+    await database.cart.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -80,23 +110,8 @@ describe('POST /teams/current/join-requests/:userId', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should error as the team is locked', async () => {
-    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
-    const lockedCaptain = getCaptain(lockedTeam);
-    const lockedToken = generateToken(lockedCaptain);
-
-    await request(app)
-      .post(`/teams/current/join-requests/${user.id}`)
-      .set('Authorization', `Bearer ${lockedToken}`)
-      .expect(403, { error: Error.TeamLocked });
-  });
-
   it('should fail as the team is full', async () => {
-    const fullTeam = await createFakeTeam({ members: 5 });
     const otherUser = await createFakeUser();
-
-    const fullCaptain = getCaptain(fullTeam);
-    const fullToken = generateToken(fullCaptain);
     await teamOperations.askJoinTeam(fullTeam.id, otherUser.id, UserType.player);
 
     await request(app)
@@ -106,32 +121,196 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should succeed to join a full team as a coach', async () => {
-    const fullTeam = await createFakeTeam({ members: 5 });
     const otherUser = await createFakeUser();
 
-    const fullCaptain = getCaptain(fullTeam);
-    const fullToken = generateToken(fullCaptain);
     await teamOperations.askJoinTeam(fullTeam.id, otherUser.id, UserType.coach);
 
     await request(app)
       .post(`/teams/current/join-requests/${otherUser.id}`)
       .set('Authorization', `Bearer ${fullToken}`)
       .expect(200);
+
+    const databaseUser = await fetchUser(otherUser.id);
+    expect(databaseUser.teamId).to.be.equal(fullTeam.id);
   });
 
-  it('should succesfully join the team', async () => {
+  it('should fail to join the team as a coach because there are already 2 coaches', async () => {
+    // There is only one coach for the moment
+    const coach = await createFakeUser();
+    await teamOperations.joinTeam(fullTeam.id, coach, UserType.coach);
+    const willNotJoinCoach = await createFakeUser();
+    await teamOperations.askJoinTeam(fullTeam.id, willNotJoinCoach.id, UserType.coach);
+    await request(app)
+      .post(`/teams/current/join-requests/${willNotJoinCoach.id}`)
+      .set('Authorization', `Bearer ${fullToken}`)
+      .expect(403, { error: Error.TeamMaxCoachReached });
+
+    const databaseCoach = await fetchUser(willNotJoinCoach.id);
+    expect(databaseCoach.teamId).to.be.null;
+  });
+
+  it('should successfully join the 1-player team as a coach', async () => {
+    const coach = await createFakeUser();
+    await teamOperations.askJoinTeam(onePlayerTeam.id, coach.id, UserType.coach);
+    await request(app)
+      .post(`/teams/current/join-requests/${coach.id}`)
+      .set('Authorization', `Bearer ${onePlayerTeamToken}`)
+      .expect(200);
+
+    const databaseCoach = await fetchUser(coach.id);
+    expect(databaseCoach.teamId).to.be.equal(onePlayerTeam.id);
+  });
+
+  it('should fail to join the 1-player team as a coach because there is already a coach', async () => {
+    const coach = await createFakeUser();
+    await teamOperations.askJoinTeam(onePlayerTeam.id, coach.id, UserType.coach);
+    await request(app)
+      .post(`/teams/current/join-requests/${coach.id}`)
+      .set('Authorization', `Bearer ${onePlayerTeamToken}`)
+      .expect(403, { error: Error.TeamMaxCoachReached });
+
+    const databaseCoach = await fetchUser(coach.id);
+    expect(databaseCoach.teamId).to.be.null;
+  });
+
+  it('should successfully join the team and not lock the team as it is not full', async () => {
+    // Verify the team is not locked
+    team = await teamOperations.fetchTeam(team.id);
+    expect(team.lockedAt).to.be.null;
+    expect(team.enteredQueueAt).to.be.null;
+
     const { body } = await request(app)
       .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    const updatedUser = await fetchUser(user.id);
+    const updatedUser = await userOperations.fetchUser(user.id);
 
     expect(body.players).to.have.lengthOf(team.players.length + 1);
     expect(updatedUser.askingTeamId).to.be.null;
 
     // Check if the object was filtered
     expect(body.updatedAt).to.be.undefined;
+    // Verify the team has not been locked
+    team = await teamOperations.fetchTeam(team.id);
+    expect(team.lockedAt).to.be.null;
+    expect(team.enteredQueueAt).to.be.null;
+
+    // Update the team
+    team = await teamOperations.fetchTeam(team.id);
+  });
+
+  it("should successfully join the team and not lock it as the user hasn't paid", async () => {
+    // Make the user not pay
+    const cart = await database.cart.findFirst({
+      where: { cartItems: { some: { itemId: 'ticket-player', forUserId: user2.id } } },
+      include: { cartItems: true },
+    });
+    await cartOperations.updateCart(cart.id, cart.transactionId, 'pending');
+
+    await request(app)
+      .post(`/teams/current/join-requests/${user2.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    // Verify the team has not been locked
+    const databaseTeam = await teamOperations.fetchTeam(team.id);
+    expect(databaseTeam.lockedAt).to.be.null;
+    expect(databaseTeam.enteredQueueAt).to.be.null;
+
+    // Make the user pay again
+    await cartOperations.updateCart(cart.id, cart.transactionId, 'paid');
+
+    // Remove the user for the next test
+    await teamOperations.kickUser(await userOperations.fetchUser(user2.id));
+    await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
+  });
+
+  it('should successfully join the team and not lock it as not all players have paid', async () => {
+    // Verify the team is not locked
+    team = await teamOperations.fetchTeam(team.id);
+    expect(team.lockedAt).to.be.null;
+    expect(team.enteredQueueAt).to.be.null;
+
+    // Make a user not pay
+    const cart = await database.cart.findFirst({
+      where: { cartItems: { some: { itemId: 'ticket-player', forUserId: user.id } } },
+      include: { cartItems: true },
+    });
+    await cartOperations.updateCart(cart.id, cart.transactionId, 'pending');
+
+    await request(app)
+      .post(`/teams/current/join-requests/${user2.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    team = await teamOperations.fetchTeam(team.id);
+    expect(team.lockedAt).to.be.null;
+    expect(team.enteredQueueAt).to.be.null;
+
+    // Make the user pay again
+    await cartOperations.updateCart(cart.id, cart.transactionId, 'paid');
+
+    // Remove the user for the next test
+    await teamOperations.kickUser(await userOperations.fetchUser(user2.id));
+    await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
+  });
+
+  it('should successfully join the team and place it in the queue as the tournament is full', async () => {
+    // Verify the team is not locked
+    team = await teamOperations.fetchTeam(team.id);
+    expect(team.lockedAt).to.be.null;
+    expect(team.enteredQueueAt).to.be.null;
+
+    const { body } = await request(app)
+      .post(`/teams/current/join-requests/${user2.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    const updatedUser = await userOperations.fetchUser(user2.id);
+
+    expect(body.players).to.have.lengthOf(team.players.length + 1);
+    expect(updatedUser.askingTeamId).to.be.null;
+
+    // Check if the object was filtered
+    expect(body.updatedAt).to.be.undefined;
+    // Verify the team has been put into queue
+    team = await teamOperations.fetchTeam(team.id);
+    expect(team.lockedAt).to.be.null;
+    expect(team.enteredQueueAt).to.be.not.null;
+
+    // Remove the user for the next test
+    await teamOperations.kickUser(await userOperations.fetchUser(user2.id));
+    await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
+  });
+
+  it('should successfully join the team and lock it', async () => {
+    // Verify the team is not locked
+    team = await teamOperations.fetchTeam(team.id);
+    expect(team.lockedAt).to.be.null;
+    expect(team.enteredQueueAt).to.be.null;
+
+    // Remove a team from the tournament
+    const tournament = await tournamentOperations.fetchTournament('lol');
+    const teamToRemove = tournament.teams.find((pTeam) => pTeam.id !== team.id);
+    await teamOperations.unlockTeam(teamToRemove.id);
+
+    await request(app)
+      .post(`/teams/current/join-requests/${user2.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    // Verify the team has been locked
+    team = await teamOperations.fetchTeam(team.id);
+    expect(team.lockedAt).to.be.not.null;
+    expect(team.enteredQueueAt).to.be.null;
+
+    // Remove the user
+    await teamOperations.kickUser(await userOperations.fetchUser(user2.id));
+    await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
+
+    // Readd the removed team from the tournament
+    await teamOperations.lockTeam(teamToRemove.id);
   });
 
   it('should fail because the user is already in a team', async () => {
@@ -142,7 +321,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail because the user has not asked for a team', async () => {
-    await teamOperations.kickUser(user.id);
+    await teamOperations.kickUser(await userOperations.fetchUser(user.id));
     await request(app)
       .post(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${token}`)

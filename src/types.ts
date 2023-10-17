@@ -250,10 +250,13 @@ export const enum Error {
   NoQRCode = "Le QR code n'existe pas",
 
   InvalidCart = 'Le contenu de la commande est invalide',
+  ItemNotAvailableYet = "L'objet demandé n'est pas encore disponible",
   EmptyLogin = "Le nom d'utilisateur ne peut pas être vide",
 
   MalformedMailBody = 'Structure du mail incorrecte',
   InvalidMailOptions = "Paramètres d'envoi incorrects",
+
+  NoPokemonIdProvided = "L'ID Pokémon n'a pas été spécifié",
 
   // 401
   // The user credentials were refused or not provided
@@ -274,6 +277,7 @@ export const enum Error {
   NotAdmin = "Tu n'es pas administrateur",
   ShopNotAllowed = 'La billetterie est fermée',
   EmailNotConfirmed = "Le compte n'est pas confirmé",
+  EmailAlreadyConfirmed = 'Le compte est déjà confirmé',
   NoPermission = "Tu n'as pas la permission d'accéder à cette ressource",
   NotCaptain = "Tu dois être le capitaine de l'équipe pour modifier cette ressource",
   NotSelf = 'Tu ne peux pas modifier les information de cette personne',
@@ -339,11 +343,12 @@ export const enum Error {
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
   PlaceAlreadyAttributed = 'Cette place est déjà attribuée',
   DiscordAccountAlreadyUsed = 'Ce compte discord est déjà lié à un compte',
+  TournamentNameAlreadyExists = 'Un tournoi a déjà ce nom',
 
   // 410
   // indicates that access to the target resource is no longer available at the server.
-  TournamentFull = 'Le tournoi est complet',
   ItemOutOfStock = "L'objet demandé n'est plus en stock",
+  ItemNotAvailableAnymore = "L'objet demandé n'est plus disponible",
 
   // 415
   UnsupportedMediaType = "Le format de la requête n'est pas supporté",

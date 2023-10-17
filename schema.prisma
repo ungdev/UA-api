@@ -48,16 +48,19 @@ model CartItem {
 }
 
 model Item {
-  id           String       @id
-  name         String
-  category     ItemCategory
-  attribute    String?
-  price        Int
-  reducedPrice Int?
-  infos        String?      @db.VarChar(300)
-  image        String?
-  stock        Int?
-  cartItems    CartItem[]
+  id             String       @id
+  name           String
+  category       ItemCategory
+  attribute      String?
+  price          Int
+  reducedPrice   Int?
+  infos          String?      @db.VarChar(300)
+  image          String?
+  stock          Int?
+  availableFrom  DateTime?
+  availableUntil DateTime?
+  position       Int          @default(0)
+  cartItems      CartItem[]
 
   @@map("items")
 }
@@ -70,18 +73,20 @@ model Setting {
 }
 
 model Team {
-  id            String       @id
-  name          String
-  tournamentId  String
-  captainId     String       @unique
-  lockedAt      DateTime?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @default(now()) @updatedAt
-  discordRoleId String?
-  captain       User         @relation(fields: [captainId], references: [id])
-  tournament    Tournament   @relation(fields: [tournamentId], references: [id])
-  askingUsers   User[]       @relation("teamAskingUsers")
-  users         User[]       @relation("teamUsers")
+  id              String     @id
+  name            String
+  tournamentId    String
+  captainId       String     @unique
+  lockedAt        DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @default(now()) @updatedAt
+  discordRoleId   String?
+  pokemonPlayerId String?
+  captain         User       @relation(fields: [captainId], references: [id])
+  tournament      Tournament @relation(fields: [tournamentId], references: [id])
+  askingUsers     User[]     @relation("teamAskingUsers")
+  users           User[]     @relation("teamUsers")
+  enteredQueueAt  DateTime?
 
   @@unique([name, tournamentId])
   @@index([id])
@@ -90,42 +95,44 @@ model Team {
 }
 
 model Tournament {
-  id                     String @id
-  name                   String       @unique
+  id                     String   @id
+  name                   String   @unique
   maxPlayers             Int
   playersPerTeam         Int
   cashprize              Int?
   cashprizeDetails       String?
-  displayCashprize       Boolean      @default(false)
+  displayCashprize       Boolean  @default(false)
   format                 String?
   infos                  String?
   casters                Caster[]
-  displayCasters         Boolean      @default(false)
-  display                Boolean      @default(false)
+  displayCasters         Boolean  @default(false)
+  display                Boolean  @default(false)
   discordRoleId          String?
   discordRespoRoleId     String?
   discordTextCategoryId  String?
   discordVocalCategoryId String?
+  position               Int      @default(0)
   teams                  Team[]
 
   @@map("tournaments")
 }
 
 model Caster {
-  id           String       @id
+  id           String     @id
   name         String
   tournamentId String
-  tournament   Tournament   @relation(fields: [tournamentId], references: [id])
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
 
   @@index([tournamentId], map: "casters_tournamentId_fkey")
   @@map("casters")
 }
 
 model Partner {
-  id      String  @id
-  name    String
-  link    String
-  display Boolean
+  id       String  @id
+  name     String
+  link     String
+  display  Boolean
+  position Int     @default(0)
 
   @@map("partners")
 }

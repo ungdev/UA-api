@@ -1,11 +1,11 @@
-# Nom de la PR
+# PR name
 
-## Changements
+## Changes
 
 ## Breaking changes
 
-## Ce qu'il reste à faire (POUR LES DRAFTS)
+## What's left to do (DELTE THIS PART FOR NON-DRAFT PRs)
 
-- [ ] Vérifier le build
+- [ ] Verify build
 - [ ] Lint
-- [ ] Supprimer les console.log / code commenté
+- [ ] Remove console.log / commented code
