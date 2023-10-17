@@ -343,6 +343,7 @@ export const enum Error {
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
   PlaceAlreadyAttributed = 'Cette place est déjà attribuée',
   DiscordAccountAlreadyUsed = 'Ce compte discord est déjà lié à un compte',
+  TournamentNameAlreadyExists = 'Un tournoi a déjà ce nom',
 
   // 410
   // indicates that access to the target resource is no longer available at the server.
