@@ -42,11 +42,6 @@ export default [
         return notFound(response, ResponseError.TournamentNotFound);
       }
 
-      // If there are more or equal teams than places, return a tournament full
-      if (tournament.placesLeft === 0) {
-        return gone(response, ResponseError.TournamentFull);
-      }
-
       // Check whether the user has already paid for another ticket
       if (await hasUserAlreadyPaidForAnotherTicket(user, tournamentId, userType))
         return forbidden(response, ResponseError.HasAlreadyPaidForAnotherTicket);

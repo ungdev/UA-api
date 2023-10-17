@@ -347,7 +347,6 @@ export const enum Error {
 
   // 410
   // indicates that access to the target resource is no longer available at the server.
-  TournamentFull = 'Le tournoi est complet',
   ItemOutOfStock = "L'objet demandé n'est plus en stock",
   ItemNotAvailableAnymore = "L'objet demandé n'est plus disponible",
 
