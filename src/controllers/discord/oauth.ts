@@ -16,7 +16,7 @@ const redirect = (response: Response, statusCode: DiscordFeedbackCode) => {
   response
     .status(302)
     .set({
-      Location: `${env.front.website}/dashboard/account?action=${ActionFeedback.DISCORD_OAUTH}&state=${statusCode}`,
+      Location: `${env.front.website}/oauth/discord/${statusCode}`,
     })
     .end();
 };
