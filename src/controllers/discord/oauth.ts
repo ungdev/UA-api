@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/node';
 import env from '../../utils/env';
 import database from '../../services/database';
 import { fetchUser } from '../../operations/user';
-import { ActionFeedback, DiscordFeedbackCode } from '../../types';
+import { DiscordFeedbackCode } from '../../types';
 import { decrypt } from '../../utils/helpers';
 import { isLoginAllowed } from '../../middlewares/settings';
 import type { DiscordAuthorization } from './discordApi';

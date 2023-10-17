@@ -34,10 +34,7 @@ describe('GET /discord/oauth', () => {
       .expect('Location', `${env.front.website}/oauth/discord/4`));
 
   it('should fail because no query params were provided', () =>
-    request(app)
-      .get('/discord/oauth')
-      .expect(302)
-      .expect('Location', `${env.front.website}/oauth/discord/5`));
+    request(app).get('/discord/oauth').expect(302).expect('Location', `${env.front.website}/oauth/discord/5`));
 
   it('should fail because query params were incomplete', () =>
     request(app)
