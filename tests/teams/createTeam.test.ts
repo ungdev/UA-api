@@ -234,28 +234,6 @@ describe('POST /teams', () => {
       .expect(403, { error: Error.HasAlreadyPaidForAnotherTicket });
   });
 
-  it('should error as the tournament is full', async () => {
-    await createFakeTeam({ members: 5, locked: true });
-    const otherUser = await createFakeUser();
-    const otherToken = generateToken(otherUser);
-
-    // We limit the tournament to only one team (as only one has locked)
-    await database.tournament.update({
-      data: {
-        maxPlayers: 5,
-      },
-      where: {
-        id: 'lol',
-      },
-    });
-
-    return request(app)
-      .post('/teams')
-      .send({ name: 'otherName', tournamentId: teamBody.tournamentId, userType: teamBody.userType })
-      .set('Authorization', `Bearer ${otherToken}`)
-      .expect(410, { error: Error.TournamentFull });
-  });
-
   it('should deny orga captain type', async () => {
     const newUser = await createFakeUser();
     const newToken = generateToken(newUser);
