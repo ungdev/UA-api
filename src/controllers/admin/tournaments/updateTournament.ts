@@ -50,8 +50,8 @@ export default [
         for (const casterName of request.body.casters) {
           await addCasterToTournament(request.params.tournamentId as string, casterName);
         }
-        request.body.casters = undefined;
       }
+      request.body.casters = undefined;
 
       const result = await updateTournament(request.params.tournamentId as string, request.body);
 
