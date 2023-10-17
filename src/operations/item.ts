@@ -5,9 +5,6 @@ import { isPartnerSchool } from '../utils/helpers';
 export const fetchAllItems = async (): Promise<Item[]> => {
   // fetches the items
   const items = await database.item.findMany({ orderBy: [{ position: 'asc' }] });
-  // const order = ['tshirt-s', 'tshirt-m', 'tshirt-l', 'tshirt-xl'];
-  // sort items according to size attribute
-  // items = items.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
 
   // Add a left property which tells how many items are there left
   return Promise.all(
