@@ -48,18 +48,19 @@ model CartItem {
 }
 
 model Item {
-  id            String       @id
-  name          String
-  category      ItemCategory
-  attribute     String?
-  price         Int
-  reducedPrice  Int?
-  infos         String?      @db.VarChar(300)
-  image         String?
-  stock         Int?
-  availableFrom DateTime?
-  availableUntil   DateTime?
-  cartItems     CartItem[]
+  id             String       @id
+  name           String
+  category       ItemCategory
+  attribute      String?
+  price          Int
+  reducedPrice   Int?
+  infos          String?      @db.VarChar(300)
+  image          String?
+  stock          Int?
+  availableFrom  DateTime?
+  availableUntil DateTime?
+  position       Int          @default(0)
+  cartItems      CartItem[]
 
   @@map("items")
 }
