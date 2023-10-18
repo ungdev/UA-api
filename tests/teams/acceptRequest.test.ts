@@ -13,7 +13,6 @@ import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchUser } from '../../src/operations/user';
 
-// eslint-disable-next-line func-names
 describe('POST /teams/current/join-requests/:userId', () => {
   let user: User;
   let user2: User;
