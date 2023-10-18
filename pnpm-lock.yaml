@@ -24,7 +24,7 @@ dependencies:
     specifier: ^3.0.0
     version: 3.0.0
   axios:
-    specifier: ^1.4.0
+    specifier: ^1.5.1
     version: 1.5.1
   bcryptjs:
     specifier: ^2.4.3

@@ -111,6 +111,17 @@ const env = {
     syncKey: loadEnv('DISCORD_SYNC_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
     teamRoleColor: Number.parseInt(loadEnv('DISCORD_TEAM_ROLE_COLOR')) || 0x3498db,
     oauthCallback: `${apiEndpoint}${apiEndpointPrefix === '/' ? '' : '/'}discord/oauth`,
+    webhooks: {
+      channel_lol: process.env.DISCORD_WEBHOOK_TOURNAMENT_LOL,
+      channel_ssbu: process.env.DISCORD_WEBHOOK_TOURNAMENT_SSBU,
+      channel_cs2: process.env.DISCORD_WEBHOOK_TOURNAMENT_CS2,
+      channel_pokemon: process.env.DISCORD_WEBHOOK_TOURNAMENT_POKEMON,
+      channel_rl: process.env.DISCORD_WEBHOOK_TOURNAMENT_RL,
+      channel_osu: process.env.DISCORD_WEBHOOK_TOURNAMENT_OSU,
+      channel_tft: process.env.DISCORD_WEBHOOK_TOURNAMENT_TFT,
+      channel_open: process.env.DISCORD_WEBHOOK_TOURNAMENT_OPEN,
+      channel_other: process.env.DISCORD_WEBHOOK_TOURNAMENT_OTHER,
+    },
   },
   log: {
     level: loadEnv('LOG_LEVEL', true) || 'silly',

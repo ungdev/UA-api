@@ -12,7 +12,7 @@ import {
 } from '../types';
 import nanoid from '../utils/nanoid';
 import { countCoaches, formatUser, userInclusions } from './user';
-import { setupDiscordTeam } from '../utils/discord';
+import { sendDiscordTeamLockout, sendDiscordTeamUnlock, setupDiscordTeam } from '../utils/discord';
 import { fetchTournament } from './tournament';
 
 const teamMaxCoachCount = 2;
@@ -114,6 +114,9 @@ export const lockTeam = async (teamId: string) => {
     });
     // Setup team on Discord
     await setupDiscordTeam(team, tournament);
+
+    // Inform inform the Discord channel that the team has been locked out
+    await sendDiscordTeamLockout(team, tournament);
   } else {
     // Put the team in the waiting list
     updatedTeam = await database.team.update({
@@ -263,6 +266,8 @@ export const unlockTeam = async (teamId: string) => {
   });
 
   const tournament = await fetchTournament(updatedTeam.tournamentId);
+
+  sendDiscordTeamUnlock(formatTeam(updatedTeam), tournament);
   // We freed a place, so there is at least one place left
   // (except if the team was already in the queue, but then we want to skip the condition, so that's fine)
   if (tournament.placesLeft === 1) {
