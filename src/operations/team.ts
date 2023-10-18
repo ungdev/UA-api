@@ -11,11 +11,9 @@ import {
   PrimitiveTeamWithPartialTournament,
 } from '../types';
 import nanoid from '../utils/nanoid';
-import { countCoaches, formatUser, userInclusions } from './user';
+import { formatUser, userInclusions } from './user';
 import { sendDiscordTeamLockout, sendDiscordTeamUnlock, setupDiscordTeam } from '../utils/discord';
 import { fetchTournament } from './tournament';
-
-const teamMaxCoachCount = 2;
 
 const teamInclusions = {
   users: {
