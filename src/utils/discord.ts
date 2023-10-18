@@ -226,7 +226,18 @@ export const sendDiscordTeamLockout = async (team: Team, tournament: Tournament)
     // Get the list of players in this team
     const playersList = [];
     for (const p of team.players) {
-      playersList.push({ name: p.username, value: `Discord : <@${p.discordId}>` });
+      playersList.push({ name: `${p.username}`, value: `<@${p.discordId}>` });
+    }
+
+    const nbPlaces = tournament.maxPlayers / tournament.playersPerTeam;
+    const nbParticipants = tournament.lockedTeamsCount;
+
+    let coachsList = [{ name: 'Les coachs de cette équipe sont : ', value: '' }];
+    for (const c of team.coaches) {
+      coachsList.push({ name: `${c.username} - [coach]`, value: `<@${c.discordId}>` });
+    }
+    if (coachsList.length === 1) {
+      coachsList = [];
     }
 
     // An array of Discord Embeds.
@@ -235,9 +246,9 @@ export const sendDiscordTeamLockout = async (team: Team, tournament: Tournament)
         title: `L'équipe **${team.name}** est maintenant verrouillée ! 🚀\n\nCette équipe contient les joueurs : `,
         color: 5174599,
         footer: {
-          text: `Equipe pour ${tournament.name} complète, billets payés`,
+          text: `Equipe pour ${tournament.name} complète, billets payés\n\n${nbParticipants} / ${nbPlaces} places occupées - ${tournament.name}`,
         },
-        fields: playersList,
+        fields: [...playersList, ...coachsList],
       },
     ];
 
@@ -267,15 +278,26 @@ export const sendDiscordTeamUnlock = async (team: Team, tournament: Tournament) 
       playersList.push({ name: p.username, value: `Discord : <@${p.discordId}>` });
     }
 
+    const nbPlaces = tournament.maxPlayers / tournament.playersPerTeam;
+    const nbParticipants = tournament.lockedTeamsCount;
+
+    let coachsList = [{ name: 'Les coachs de cette équipe sont : ', value: '' }];
+    for (const c of team.coaches) {
+      coachsList.push({ name: `${c.username} - [coach]`, value: `<@${c.discordId}>` });
+    }
+    if (coachsList.length === 1) {
+      coachsList = [];
+    }
+
     // An array of Discord Embeds.
     const embeds = [
       {
         title: `L'équipe **${team.name}** n'est plus verrouillée ! ❌\n\nCette équipe contient les joueurs : `,
-        color: 5174599,
+        color: 14177041,
         footer: {
-          text: `Equipe pour ${tournament.name}. Après modification, cette équipe n'est plus verrouillée`,
+          text: `Equipe pour ${tournament.name}. Après modification, cette équipe n'est plus verrouillée\n\n${nbParticipants} / ${nbPlaces} places occupées - ${tournament.name}`,
         },
-        fields: playersList,
+        fields: [...playersList, ...coachsList],
       },
     ];
 
