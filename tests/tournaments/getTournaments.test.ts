@@ -45,18 +45,6 @@ describe('GET /tournaments', () => {
       ),
     );
 
-    await Promise.all(
-      tournaments.map(({ id }) =>
-        database.tournament.update({
-          data: {
-            casters: { create: { id: `caster-${id}`, name: `un caster pour ${id}` } },
-            cashprize: 42,
-          },
-          where: { id },
-        }),
-      ),
-    );
-
     // add display false to a random tournament
     await database.tournament.update({
       where: {
