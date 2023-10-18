@@ -1,4 +1,6 @@
+/* eslint-disable default-case */
 /* eslint-disable import/no-unresolved */
+import axios from 'axios';
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
 import { fetchTeam, fetchTeams } from '../operations/team';
 import {
@@ -169,5 +171,128 @@ export const removeDiscordRoles = async (fromUser: User) => {
     // Uh uh... It seems the discord member doesn't exist
     // Or the role has been deleted - but don't care as we wanted to remove it
     // You have left the server. How dare you ?!
+  }
+};
+
+export const getWebhookEnvFromString = (name: string) => {
+  let envValue = env.discord.webhooks.channel_other;
+  switch (name) {
+    case 'lol': {
+      envValue = env.discord.webhooks.channel_lol;
+      break;
+    }
+    case 'ssbu': {
+      envValue = env.discord.webhooks.channel_ssbu;
+      break;
+    }
+    case 'cs2': {
+      envValue = env.discord.webhooks.channel_cs2;
+      break;
+    }
+    case 'pokemon': {
+      envValue = env.discord.webhooks.channel_pokemon;
+      break;
+    }
+    case 'rl': {
+      envValue = env.discord.webhooks.channel_rl;
+      break;
+    }
+    case 'osu': {
+      envValue = env.discord.webhooks.channel_osu;
+      break;
+    }
+    case 'tft': {
+      envValue = env.discord.webhooks.channel_tft;
+      break;
+    }
+    case 'open': {
+      envValue = env.discord.webhooks.channel_open;
+      break;
+    }
+  }
+  return envValue;
+};
+
+export const sendDiscordTeamLockout = async (team: Team, tournament: Tournament) => {
+  // Get the webhook of the tournament
+  const webhook = getWebhookEnvFromString(tournament.id.toString());
+
+  if (!webhook || webhook === undefined || webhook === '') {
+    logger.warn(
+      `Discord webhook for team ${tournament.name} is missing. It will skip discord messages for team locking`,
+    );
+    logger.warn(`Team ${team.name} (id : ${team.id}) is now locked but no discord messages could be sent)`);
+  } else {
+    // Get the list of players in this team
+    const playersList = [];
+    for (const p of team.players) {
+      playersList.push({ name: `${p.username}`, value: `<@${p.discordId}>` });
+    }
+
+    const nbPlaces = tournament.maxPlayers / tournament.playersPerTeam;
+    const nbParticipants = tournament.lockedTeamsCount;
+
+    let coachsList = [{ name: 'Les coachs de cette équipe sont : ', value: '' }];
+    for (const c of team.coaches) {
+      coachsList.push({ name: `${c.username} - [coach]`, value: `<@${c.discordId}>` });
+    }
+    if (coachsList.length === 1) {
+      coachsList = [];
+    }
+
+    // An array of Discord Embeds.
+    const embeds = [
+      {
+        title: `L'équipe **${team.name}** est maintenant verrouillée ! 🚀\n\nCette équipe contient les joueurs : `,
+        color: 5174599,
+        footer: {
+          text: `Equipe pour ${tournament.name} complète, billets payés\n\n${nbParticipants} / ${nbPlaces} places occupées - ${tournament.name}`,
+        },
+        fields: [...playersList, ...coachsList],
+      },
+    ];
+
+    try {
+      const data = JSON.stringify({ embeds });
+
+      // Send request
+      await axios.post(webhook, data, { headers: { 'Content-Type': 'application/json' } });
+    } catch {
+      logger.warn('An error occurred while sending a message on a webhook discord (team lock)');
+    }
+  }
+};
+
+export const sendDiscordTeamUnlock = async (team: Team, tournament: Tournament) => {
+  // Get the webhook of the tournament
+  const webhook = getWebhookEnvFromString(tournament.id.toString());
+  if (!webhook || webhook === undefined || webhook === '') {
+    logger.warn(
+      `Discord webhook for team ${tournament.name} is missing. It will skip discord messages for team unlocking`,
+    );
+    logger.warn(`Team ${team.name} (id : ${team.id}) is now unlocked but no discord messages could be sent)`);
+  } else {
+    const nbPlaces = tournament.maxPlayers / tournament.playersPerTeam;
+    const nbParticipants = tournament.lockedTeamsCount;
+
+    // An array of Discord Embeds.
+    const embeds = [
+      {
+        title: `L'équipe **${team.name}** n'est plus verrouillée ! ❌\n`,
+        color: 14177041,
+        footer: {
+          text: `Equipe pour ${tournament.name}. Après modification, cette équipe n'est plus verrouillée\n\n${nbParticipants} / ${nbPlaces} places occupées - ${tournament.name}`,
+        },
+      },
+    ];
+
+    try {
+      const data = JSON.stringify({ embeds });
+
+      // Send request
+      await axios.post(webhook, data, { headers: { 'Content-Type': 'application/json' } });
+    } catch {
+      logger.warn('An error occurred while sending a message on a webhook discord (team unlock)');
+    }
   }
 };
