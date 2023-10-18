@@ -115,10 +115,16 @@ describe('GET /items', () => {
   });
 
   it('should return items with their stock', async () => {
-    const items = await database.item.findMany();
+    // Fetch all items, order them by their position, and remove special ticket players and ssbu discount
+    const items = await database.item.findMany({
+      where: { NOT: { OR: [{ id: { startsWith: 'ticket-player-' } }, { id: 'discount-switch-ssbu' }] } },
+      orderBy: [{ position: 'asc' }],
+    });
     const response = await request(app).get('/items').expect(200);
 
-    for (const responseItem of response.body)
-      expect(responseItem.left ?? null).to.be.equal(items.find((item) => item.name === responseItem.name).stock);
+    for (let index = 0; index < response.body.length; index++) {
+      expect(response.body[index].id).to.be.equal(items[index].id);
+      expect(response.body[index].left ?? null).to.be.equal(items[index].stock);
+    }
   });
 });

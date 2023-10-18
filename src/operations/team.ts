@@ -26,6 +26,13 @@ const teamInclusions = {
   },
 };
 
+export const getPositionInQueue = (team: Team): Promise<number | undefined> => {
+  if (!team.enteredQueueAt) return null;
+  return database.team.count({
+    where: { AND: [{ enteredQueueAt: { not: null } }, { enteredQueueAt: { lte: team.enteredQueueAt } }] },
+  });
+};
+
 export const formatTeam = (
   team: PrimitiveTeam & { users: RawUserWithCartItems[]; askingUsers: RawUserWithCartItems[] },
 ): Team => {
@@ -137,6 +144,7 @@ export const createTeam = async (
   name: string,
   tournamentId: string,
   captainId: string,
+  pokemonPlayerId: string | undefined,
   userType: UserType,
 ): Promise<Team> => {
   // Update the user to create a transaction update (update the user AND create the team)
@@ -146,6 +154,7 @@ export const createTeam = async (
         create: {
           id: nanoid(),
           name,
+          pokemonPlayerId,
           captain: {
             connect: {
               id: captainId,
@@ -199,13 +208,6 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
 };
 
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
-  // We check the amount of coaches at that point
-  const teamCoachCount = await countCoaches(teamId);
-  if (userType === UserType.coach && teamCoachCount >= teamMaxCoachCount)
-    throw Object.assign(new Error('Query cannot be executed: max count of coach reached already'), {
-      code: 'API_COACH_MAX_TEAM',
-    });
-
   // Then we create the join request when it is alright
   const updatedUser = await database.user.update({
     data: {

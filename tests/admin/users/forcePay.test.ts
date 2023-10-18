@@ -12,11 +12,7 @@ import * as teamOperations from '../../../src/operations/team';
 import * as userOperations from '../../../src/operations/user';
 import * as tournamentOperations from '../../../src/operations/tournament';
 
-// eslint-disable-next-line func-names
-describe('POST /admin/users/:userId/force-pay', function () {
-  // The setup is slow
-  this.timeout(30000);
-
+describe('POST /admin/users/:userId/force-pay', () => {
   let user: User;
   let admin: User;
   let adminToken: string;

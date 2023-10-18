@@ -8,12 +8,13 @@ import { fetchPartners, updatePartner } from '../../../operations/partner';
 
 export default [
   // Middlewares
-  ...hasPermission(Permission.anim),
+  ...hasPermission(Permission.admin),
   validateBody(
     Joi.object({
       name: Joi.string().optional(),
       link: Joi.string().optional(),
       display: Joi.boolean().optional(),
+      position: Joi.number().optional(),
     }),
   ),
 

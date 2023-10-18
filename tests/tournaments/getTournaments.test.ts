@@ -31,7 +31,19 @@ describe('GET /tournaments', () => {
   });
 
   it('should return 200 with an array of tournaments', async () => {
-    const tournaments = await database.tournament.findMany();
+    const tournaments = await tournamentOperations.fetchTournaments();
+
+    await Promise.all(
+      tournaments.map(({ id }) =>
+        database.tournament.update({
+          data: {
+            casters: { create: { id: `caster-${id}`, name: `un caster pour ${id}` } },
+            cashprize: 42,
+          },
+          where: { id },
+        }),
+      ),
+    );
 
     await Promise.all(
       tournaments.map(({ id }) =>
@@ -75,6 +87,7 @@ describe('GET /tournaments', () => {
       'infos',
       'format',
       'cashprizeDetails',
+      'position',
     ]);
     expect(response.body[0].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.a('number');
@@ -84,7 +97,7 @@ describe('GET /tournaments', () => {
   });
 
   it('should return 200 with an array of tournaments with the right fields', async () => {
-    const tournaments = await database.tournament.findMany();
+    const tournaments = await tournamentOperations.fetchTournaments();
 
     await database.tournament.update({
       where: {
@@ -113,6 +126,7 @@ describe('GET /tournaments', () => {
       'infos',
       'format',
       'cashprizeDetails',
+      'position',
     ]);
     expect(response.body[1].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.null;

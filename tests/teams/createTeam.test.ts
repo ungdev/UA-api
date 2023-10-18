@@ -22,6 +22,12 @@ describe('POST /teams', () => {
     userType: UserType.player,
   };
 
+  const teamBodyPokemon = {
+    name: 'ZeBest2',
+    tournamentId: 'pokemon',
+    userType: UserType.player,
+  };
+
   before(async () => {
     user = await createFakeUser();
     token = generateToken(user);
@@ -78,7 +84,7 @@ describe('POST /teams', () => {
       .post('/teams')
       .send({ ...teamBody, tournamentId: 'factorio' })
       .set('Authorization', `Bearer ${token}`)
-      .expect(404, { error: 'Le tournoi est introuvable' }));
+      .expect(404, { error: Error.TournamentNotFound }));
 
   it('should fail with an internal server error (test nested check)', () => {
     sandbox.stub(teamOperations, 'createTeam').throws('Unexpected error');
@@ -96,6 +102,39 @@ describe('POST /teams', () => {
       .send(teamBody)
       .set('Authorization', `Bearer ${token}`)
       .expect(500, { error: Error.InternalServerError });
+  });
+
+  it('should fail as the pokemonId is required for pokemon tournament', async () => {
+    const pokemonUser = await createFakeUser();
+    const pokemonToken = generateToken(pokemonUser);
+
+    return request(app)
+      .post('/teams')
+      .send({ ...teamBodyPokemon })
+      .set('Authorization', `Bearer ${pokemonToken}`)
+      .expect(400, { error: Error.NoPokemonIdProvided });
+  });
+
+  it('should fail as the pokemonId is not a number', async () => {
+    const pokemonUser = await createFakeUser();
+    const pokemonToken = generateToken(pokemonUser);
+
+    return request(app)
+      .post('/teams')
+      .send({ ...teamBodyPokemon, pokemonPlayerId: 'test' })
+      .set('Authorization', `Bearer ${pokemonToken}`)
+      .expect(400);
+  });
+
+  it('should successfully create a pokemon team', async () => {
+    const pokemonUser = await createFakeUser();
+    const pokemonToken = generateToken(pokemonUser);
+
+    return request(app)
+      .post('/teams')
+      .send({ ...teamBodyPokemon, pokemonPlayerId: '1' })
+      .set('Authorization', `Bearer ${pokemonToken}`)
+      .expect(201);
   });
 
   it('should successfully create a team (as a player)', async () => {
@@ -193,28 +232,6 @@ describe('POST /teams', () => {
       })
       .set('Authorization', `Bearer ${coachToken}`)
       .expect(403, { error: Error.HasAlreadyPaidForAnotherTicket });
-  });
-
-  it('should error as the tournament is full', async () => {
-    await createFakeTeam({ members: 5, locked: true });
-    const otherUser = await createFakeUser();
-    const otherToken = generateToken(otherUser);
-
-    // We limit the tournament to only one team (as only one has locked)
-    await database.tournament.update({
-      data: {
-        maxPlayers: 5,
-      },
-      where: {
-        id: 'lol',
-      },
-    });
-
-    return request(app)
-      .post('/teams')
-      .send({ name: 'otherName', tournamentId: teamBody.tournamentId, userType: teamBody.userType })
-      .set('Authorization', `Bearer ${otherToken}`)
-      .expect(410, { error: Error.TournamentFull });
   });
 
   it('should deny orga captain type', async () => {

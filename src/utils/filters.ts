@@ -53,10 +53,35 @@ export const filterUserWithTeamAndTournamentInfo = (user: UserWithTeamAndTournam
 };
 
 export const filterAdminItem = (item: Item) =>
-  pick(item, ['id', 'name', 'category', 'attribute', 'price', 'reducedPrice', 'infos', 'image', 'left', 'stock']);
+  pick(item, [
+    'id',
+    'name',
+    'category',
+    'attribute',
+    'price',
+    'reducedPrice',
+    'infos',
+    'image',
+    'left',
+    'stock',
+    'availableFrom',
+    'availableUntil',
+  ]);
 
 export const filterItem = (item: Item) =>
-  pick(item, ['id', 'name', 'category', 'attribute', 'price', 'reducedPrice', 'infos', 'image', 'left']);
+  pick(item, [
+    'id',
+    'name',
+    'category',
+    'attribute',
+    'price',
+    'reducedPrice',
+    'infos',
+    'image',
+    'left',
+    'availableFrom',
+    'availableUntil',
+  ]);
 
 export const filterCartItem = (cartItem: CartItem) =>
   pick(cartItem, [
@@ -141,6 +166,7 @@ export const filterTournamentRestricted = (tournament: Tournament) => {
     'cashprizeDetails',
     'format',
     'infos',
+    'position',
   );
 
   return {

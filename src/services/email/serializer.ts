@@ -44,7 +44,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
       highlight: "Bienvenue à l'UTT Arena&nbsp;🔥&nbsp;!",
     },
     reason:
-      "Tu as reçu cet email car tu es inscrit à l'UTT Arena 2022. Si ce n'est pas le cas, contacte-nous et change le mot de passe de ta boîte mail.",
+      "Tu as reçu cet email car tu es inscrit à l'UTT Arena 2023. Si ce n'est pas le cas, contacte-nous et change le mot de passe de ta boîte mail.",
     receiver: cart.user.email,
     sections: [
       {
@@ -64,7 +64,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
       },
       {
         title: 'Billet',
-        components: ["Tu reçevras ton *billet personnalisé* par mail quelques jours avant l'UTT Arena&nbsp;!"],
+        components: ["Tu recevras ton *billet personnalisé* par mail quelques jours avant l'UTT Arena&nbsp;!"],
       },
       {
         title: 'Confirmation de commande',
@@ -130,7 +130,7 @@ export const generateValidationEmail = (user: Omit<RawUser, 'permissions'>) =>
   serialize({
     receiver: user.email,
     reason:
-      "Tu as reçu ce mail car tu as envoyé une demande de création de compte à l'UTT Arena. Si ce n'est pas toi, ignore ce message ou contacte nous.",
+      "Tu as reçu ce mail car tu as envoyé une demande de création de compte à l'UTT Arena. Si ce n'est pas toi, ignore ce message ou contacte-nous.",
     title: {
       topic: 'Code de validation',
       banner: 'Création du compte',

@@ -30,6 +30,7 @@ describe('GET /admin/partners', () => {
         name: faker.company.name(),
         link: faker.internet.url(),
         display: true,
+        position: index,
       });
     }
 
@@ -80,7 +81,7 @@ describe('GET /admin/partners', () => {
     expect(response.body).to.have.lengthOf(partners.length);
     // Not to have tournaments[0] because it has display false
     expect(response.body).not.to.have.deep.members([partners[0]]);
-    expect(response.body[0]).to.have.all.keys(['id', 'name', 'link', 'display']);
+    expect(response.body[0]).to.have.all.keys(['id', 'name', 'link', 'display', 'position']);
     expect(response.body[0].name).to.be.a('string');
     expect(response.body[0].link).to.be.a('string');
   });

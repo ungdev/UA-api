@@ -193,8 +193,8 @@
 
 /admin/items/:itemId:
   patch:
-    summary: Change le stock disponible de l'item.
-    description: Change le stock disponible de l'item. via le `PATCH admin/items/:itemId`<br/>
+    summary: Change les informations de l'item.
+    description: Change les informations de l'item ":" nom, catégorie, attribut, prix, informations, image, stock, dates de disponibilité.
       **Permission 'admin' requise.**
     tags:
       - Admin
@@ -205,11 +205,40 @@
       content:
         application/json:
           schema:
-            type: Object
+            type: object
             properties:
-              newStock:
+              name:
+                type: string
+                description: Le nouveau nom de l'item
+              category:
+                type: string
+                description: La nouvelle catégorie de l'item
+              attribute:
+                type: string
+                description: Le nouvel attribut de l'item
+              price:
+                type: string
+                description: Le nouveau prix de l'item
+              reducedPrice:
+                type: string
+                description: Le nouveau prix pour les étudiants UT de l'item (si `null`, il n'y a pas de prix pour les étudiants)
+              infos:
+                type: string
+                description: Les nouvelles informations de l'item
+              image:
+                type: string
+                description: Le lien vers la nouvelle image de l'item
+              stockDifference:
                 type: integer
-                description: Le nouveau stock disponible de l'item
+                description: La différence de stock de l'item (par exemple, pour passer d'un stock total de 50 à 40, on aurait la valeur -10)
+              availableFrom:
+                type: string
+                format: date-time
+                description: La nouvelle date à partir de laquelle l'item sera disponible à la vente
+              availableUntil:
+                type: string
+                format: date-time
+                description: La nouvelle date à partir de laquelle l'item ne sera plus disponible à la vente
     responses:
       200:
         description: Change le stock disponible de l'item.
@@ -301,7 +330,7 @@
       404:
         $ref: '#/components/responses/404UserNotFound'
 
-/admin/parners:
+/admin/partners:
   get:
     summary: Renvoie tous les partenaires de la base de données.
     description: Renvoie toutes les propriétés des partenaires.<br/>
@@ -323,7 +352,7 @@
         $ref: '#/components/responses/401Unauthenticated'
       403:
         $ref: '#/components/responses/403Unauthorized'
-post:
+  post:
     summary: Crée un partenaire
     description: Crée un partenaire.<br/>
       **Permission 'admin' requise.**
@@ -366,6 +395,60 @@ post:
               error: L'utilisateur n'est pas authentifié
       403:
         $ref: '#/components/responses/403Unauthorized'
+  patch:
+    summary: Modifie la position des partenaires
+    description: Modifie la position des partenaires.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            description: La liste des partenaires avec leur nouvelle position
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: L'identifiant du partenaire
+                position:
+                  type: integer
+                  description: La nouvelle position du partenaire
+    responses:
+      200:
+        description: Les partenaires ont bien été modifiés. Leur nouvelle position est renvoyée.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: L'identifiant du partenaire
+                  position:
+                    type: integer
+                    description: La nouvelle position du partenaire
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
 
 /admin/partners/{partnerId}:
   patch:
@@ -759,6 +842,60 @@ post:
         $ref: '#/components/responses/401Unauthenticated'
       403:
         $ref: '#/components/responses/403Unauthorized'
+  patch:
+    summary: Modifie la position des tournois
+    description: Modifie la position des tournois.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            description: La liste des tournois avec leur nouvelle position
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: L'identifiant du tournoi
+                position:
+                  type: integer
+                  description: La nouvelle position du tournoi
+    responses:
+      200:
+        description: Les tournois ont bien été modifiés. Leur nouvelle position est renvoyée.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: L'identifiant du tournoi
+                  position:
+                    type: integer
+                    description: La nouvelle position du tournoi
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
 
 /admin/tournaments/{tournamentId}:
   patch:
@@ -840,7 +977,7 @@ post:
         $ref: '#/components/responses/403Unauthorized'
 
 /admin/upload:
-  post: 
+  post:
     summary: Upload un fichier
     description: Upload un fichier<br/>
       **Permission 'admin' requise.**

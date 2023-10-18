@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
+import { ItemCategory } from '@prisma/client';
 import { fetchUser } from '../src/operations/user';
 import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
@@ -8,6 +9,7 @@ import database from '../src/services/database';
 import nanoid from '../src/utils/nanoid';
 import env from '../src/utils/env';
 import { serializePermissions } from '../src/utils/helpers';
+import { fetchTournament } from '../src/operations/tournament';
 
 export const generateFakeDiscordId = () => `${Math.floor(Date.now() * (1 + Math.random()))}`;
 
@@ -140,3 +142,64 @@ export const createFakeTeam = async ({
   logger.verbose(`Created team ${team.name}`);
   return fetchTeam(team.id);
 };
+
+export const createFakeTournament = async ({
+  id,
+  name,
+  playersPerTeam,
+  maxTeams,
+}: {
+  id: string;
+  name: string;
+  playersPerTeam: number;
+  maxTeams: number;
+}) => {
+  await database.tournament.create({ data: { id, name, maxPlayers: playersPerTeam * maxTeams, playersPerTeam } });
+  logger.verbose(`Created tournament ${name}`);
+  return fetchTournament(id);
+};
+
+export const createFakeItem = ({
+  name,
+  category = 'supplement',
+  price = 1000,
+  stock,
+  availableFrom,
+  availableUntil,
+}: {
+  name: string;
+  category?: ItemCategory;
+  price?: number;
+  stock?: number;
+  availableFrom?: Date;
+  availableUntil?: Date;
+}) => database.item.create({ data: { id: nanoid(), category, name, price, stock, availableFrom, availableUntil } });
+
+export const createFakeCart = ({
+  userId,
+  transactionState = 'paid',
+  items,
+}: {
+  userId: string;
+  transactionState?: TransactionState;
+  items: Array<{ itemId: string; quantity: number; price: number }>;
+}) =>
+  database.cart.create({
+    data: {
+      id: nanoid(),
+      userId,
+      transactionState,
+      transactionId: 123,
+      cartItems: {
+        createMany: {
+          data: items.map(({ itemId, quantity, price }) => ({
+            id: nanoid(),
+            itemId,
+            quantity,
+            price,
+            forUserId: userId,
+          })),
+        },
+      },
+    },
+  });

@@ -74,6 +74,11 @@
                 description: Type d'utilisateur
                 type: string
                 enum: [player, coach]
+              pokemonPlayerId:
+                description: Identifiant du Pokémon du joueur (obligatoire si tournamentId est pokemon)
+                optional: true
+                type: string
+                example: "1"
     responses:
       201:
         description: L'équipe a bien été créée. Ses informations sont retournées.
@@ -87,8 +92,6 @@
         $ref: '#/components/responses/401Unauthenticated'
       409:
         description: Le nom de l'équipe existe déjà
-      410:
-        description: Le tournoi est plein
 /teams/{teamId}:
   get:
     summary: Renvoie une équipe
@@ -164,7 +167,13 @@
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TeamWithUsers'
+              allOf:
+                - $ref: '#/components/schemas/TeamWithUsers'
+                - type: object
+                  properties:
+                    positionInQueue:
+                      type: integer
+                      example: 1
       401:
         $ref: '#/components/responses/401Unauthenticated'
       403:

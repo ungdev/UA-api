@@ -77,11 +77,7 @@ const createCartAndPayload = async (
   };
 };
 
-// eslint-disable-next-line func-names
-describe('POST /etupay/callback', function () {
-  // The setup is slow
-  this.timeout(30000);
-
+describe('POST /etupay/callback', () => {
   let cart: Cart;
   let paidPayload: string;
   let refusedPayload: string;
@@ -91,12 +87,12 @@ describe('POST /etupay/callback', function () {
   let lolPlayer1: User;
   let lolPlayer2: User;
 
-  let csgoTeam: Team;
-  let csgoPlayer: User;
+  let cs2Team: Team;
+  let cs2Player: User;
 
   let lolTicket1Payload: string;
-  let lolAndCsgoTicketsCart: Cart;
-  let lolAndCsgoTicketsPayload: string;
+  let lolAndCs2TicketsCart: Cart;
+  let lolAndCs2TicketsPayload: string;
   let lolTicket2Cart: Cart;
   let lolTicket2Payload: string;
 
@@ -146,10 +142,10 @@ describe('POST /etupay/callback', function () {
     [lolPlayer1, lolPlayer2] = lolTeam.players;
     for (const player of lolTeam.players.slice(2)) await cartOperations.forcePay(player);
 
-    const csgoTournament = await tournamentOperations.fetchTournament('cs2');
-    csgoTeam = await createFakeTeam({ members: csgoTournament.playersPerTeam, tournament: 'cs2' });
-    [csgoPlayer] = csgoTeam.players;
-    for (const player of csgoTeam.players.slice(1)) promises.push(cartOperations.forcePay(player));
+    const cs2Tournament = await tournamentOperations.fetchTournament('cs2');
+    cs2Team = await createFakeTeam({ members: cs2Tournament.playersPerTeam, tournament: 'cs2' });
+    [cs2Player] = cs2Team.players;
+    for (const player of cs2Team.players.slice(1)) promises.push(cartOperations.forcePay(player));
 
     // Await all the operations
     await Promise.all(promises);
@@ -170,7 +166,7 @@ describe('POST /etupay/callback', function () {
       'checkout',
       'PAID',
     ));
-    ({ cart: lolAndCsgoTicketsCart, payload: lolAndCsgoTicketsPayload } = await createCartAndPayload(
+    ({ cart: lolAndCs2TicketsCart, payload: lolAndCs2TicketsPayload } = await createCartAndPayload(
       lolPlayer2.id,
       [
         {
@@ -183,7 +179,7 @@ describe('POST /etupay/callback', function () {
           itemId: 'ticket-player',
           quantity: 1,
           price: (await itemOperations.fetchAllItems()).find((item) => item.id === 'ticket-player').price,
-          forUserId: csgoPlayer.id,
+          forUserId: cs2Player.id,
         },
       ],
       'checkout',
@@ -307,31 +303,31 @@ describe('POST /etupay/callback', function () {
     expect(lolTeamFromDatabase.lockedAt).to.be.null;
     expect(lolTeamFromDatabase.enteredQueueAt).to.be.null;
     // There is no reason it would change, but we're better safe than sorry
-    const csgoTeamFromDatabase = await database.team.findUnique({ where: { id: csgoTeam.id } });
-    expect(csgoTeamFromDatabase.lockedAt).to.be.null;
-    expect(csgoTeamFromDatabase.enteredQueueAt).to.be.null;
+    const cs2TeamFromDatabase = await database.team.findUnique({ where: { id: cs2Team.id } });
+    expect(cs2TeamFromDatabase.lockedAt).to.be.null;
+    expect(cs2TeamFromDatabase.enteredQueueAt).to.be.null;
   });
 
-  it('should respond api ok, lock the csgo team but not and place the lol team in the queue', async () => {
+  it('should respond api ok, lock the cs2 team but not and place the lol team in the queue', async () => {
     sandbox.stub(network, 'getIp').returns('10.0.0.0');
     sandbox.stub(emailOperations, 'sendEmail').resolves();
 
-    await request(app).post(`/etupay/callback?payload=${lolAndCsgoTicketsPayload}`).expect(200, { api: 'ok' });
+    await request(app).post(`/etupay/callback?payload=${lolAndCs2TicketsPayload}`).expect(200, { api: 'ok' });
     const lolTeamFromDatabase = await database.team.findUnique({ where: { id: lolTeam.id } });
     expect(lolTeamFromDatabase.lockedAt).to.be.null;
     expect(lolTeamFromDatabase.enteredQueueAt).to.not.be.null;
-    const csgoTeamFromDatabase = await database.team.findUnique({ where: { id: csgoTeam.id } });
-    expect(csgoTeamFromDatabase.lockedAt).to.be.not.null;
-    expect(csgoTeamFromDatabase.enteredQueueAt).to.be.null;
+    const cs2TeamFromDatabase = await database.team.findUnique({ where: { id: cs2Team.id } });
+    expect(cs2TeamFromDatabase.lockedAt).to.be.not.null;
+    expect(cs2TeamFromDatabase.enteredQueueAt).to.be.null;
 
     // Cancel the payment
-    lolAndCsgoTicketsCart = await cartOperations.updateCart(
-      lolAndCsgoTicketsCart.id,
-      lolAndCsgoTicketsCart.transactionId,
+    lolAndCs2TicketsCart = await cartOperations.updateCart(
+      lolAndCs2TicketsCart.id,
+      lolAndCs2TicketsCart.transactionId,
       TransactionState.canceled,
     );
     await teamOperations.unlockTeam(lolTeam.id);
-    await teamOperations.unlockTeam(csgoTeam.id);
+    await teamOperations.unlockTeam(cs2Team.id);
   });
 
   it('should respond api ok, and not lock the LOL team because the team is not full', async () => {

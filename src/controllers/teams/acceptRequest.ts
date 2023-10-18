@@ -34,6 +34,10 @@ export default [
         return forbidden(response, Error.TeamFull);
       }
 
+      if (team.coaches.length >= Math.min(tournament.playersPerTeam, 2) && askingUser.type === UserType.coach) {
+        return forbidden(response, Error.TeamMaxCoachReached);
+      }
+
       await joinTeam(team.id, askingUser, askingUser.type);
 
       const updatedTeam = await fetchTeam(team.id);
