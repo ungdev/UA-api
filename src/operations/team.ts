@@ -103,6 +103,9 @@ export const lockTeam = async (teamId: string) => {
   );
 
   const team = await fetchTeam(teamId);
+  // Don't relock the team, to avoid spamming messages (and also channel creation lol) (no that didn't happen :eyes:)
+  if (team.lockedAt || team.enteredQueueAt) return team;
+  
   const tournament = await fetchTournament(team.tournamentId);
   let updatedTeam: PrimitiveTeamWithPrimitiveUsers;
 
@@ -254,16 +257,25 @@ export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise
   });
 
 export const unlockTeam = async (teamId: string) => {
-  const updatedTeam = await database.team.update({
+  // We use the updateMany, because we may update no team
+  const updateCount = await database.team.updateMany({
     data: {
       lockedAt: null,
       enteredQueueAt: null,
     },
     where: {
       id: teamId,
+       // If the team is not locked nor in the queue, then we don't want to modify it, that allows us to have updatedTeam === undefined;
+       NOT: {
+        lockedAt: null,
+        enteredQueueAt: null,
+      },
     },
-    include: teamInclusions,
   });
+
+  if (updateCount.count === 0) return null;
+
+  const updatedTeam = await fetchTeam(teamId);
 
   const tournament = await fetchTournament(updatedTeam.tournamentId);
 
@@ -297,9 +309,10 @@ export const unlockTeam = async (teamId: string) => {
       await lockTeam(firstTeamInQueue.id);
     }
   }
-  await sendDiscordTeamUnlock(formatTeam(updatedTeam), tournament);
 
-  return formatTeam(updatedTeam);
+  await sendDiscordTeamUnlock(updatedTeam, tournament);
+
+  return updatedTeam;
 };
 
 const prismaRequestJoinTeam = (teamId: string, user: User, newUserType?: UserType): PrismaPromise<RawUser> =>
