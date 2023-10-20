@@ -12,7 +12,7 @@ import {
 } from '../types';
 import nanoid from '../utils/nanoid';
 import { formatUser, userInclusions } from './user';
-import { sendDiscordTeamLockout, sendDiscordTeamUnlock, setupDiscordTeam } from '../utils/discord';
+import { deleteDiscordTeam, sendDiscordTeamLockout, sendDiscordTeamUnlock, setupDiscordTeam } from '../utils/discord';
 import { fetchTournament } from './tournament';
 
 const teamInclusions = {
@@ -281,7 +281,6 @@ export const unlockTeam = async (teamId: string) => {
   const updatedTeam = await fetchTeam(teamId);
 
   const tournament = await fetchTournament(updatedTeam.tournamentId);
-
   // We freed a place, so there is at least one place left
   // (except if the team was already in the queue, but then we want to skip the condition, so that's fine)
   if (tournament.placesLeft === 1) {
@@ -313,7 +312,9 @@ export const unlockTeam = async (teamId: string) => {
     }
   }
 
-  await sendDiscordTeamUnlock(updatedTeam, tournament);
+  // TODO : understand why we can't put awaits here
+  deleteDiscordTeam(updatedTeam);
+  sendDiscordTeamUnlock(updatedTeam, tournament);
 
   return updatedTeam;
 };
