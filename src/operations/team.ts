@@ -266,8 +266,8 @@ export const unlockTeam = async (teamId: string) => {
     },
     where: {
       id: teamId,
-       // If the team is not locked nor in the queue, then we don't want to modify it, that allows us to have updatedTeam === undefined;
-       NOT: {
+      // If the team is not locked nor in the queue, then we don't want to modify it, that allows us to have updatedTeam === undefined;
+      NOT: {
         lockedAt: null,
         enteredQueueAt: null,
       },
