@@ -77,11 +77,7 @@ const createCartAndPayload = async (
   };
 };
 
-// eslint-disable-next-line func-names
-describe('POST /etupay/callback', function () {
-  // The setup is slow
-  this.timeout(30000);
-
+describe('POST /etupay/callback', () => {
   let cart: Cart;
   let paidPayload: string;
   let refusedPayload: string;

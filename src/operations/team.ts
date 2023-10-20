@@ -11,11 +11,9 @@ import {
   PrimitiveTeamWithPartialTournament,
 } from '../types';
 import nanoid from '../utils/nanoid';
-import { countCoaches, formatUser, userInclusions } from './user';
-import { setupDiscordTeam } from '../utils/discord';
+import { formatUser, userInclusions } from './user';
+import { sendDiscordTeamLockout, sendDiscordTeamUnlock, setupDiscordTeam } from '../utils/discord';
 import { fetchTournament } from './tournament';
-
-const teamMaxCoachCount = 2;
 
 const teamInclusions = {
   users: {
@@ -121,6 +119,9 @@ export const lockTeam = async (teamId: string) => {
     });
     // Setup team on Discord
     await setupDiscordTeam(team, tournament);
+
+    // Inform inform the Discord channel that the team has been locked out
+    await sendDiscordTeamLockout(team, await fetchTournament(tournament.id));
   } else {
     // Put the team in the waiting list
     updatedTeam = await database.team.update({
@@ -205,13 +206,6 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
 };
 
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
-  // We check the amount of coaches at that point
-  const teamCoachCount = await countCoaches(teamId);
-  if (userType === UserType.coach && teamCoachCount >= teamMaxCoachCount)
-    throw Object.assign(new Error('Query cannot be executed: max count of coach reached already'), {
-      code: 'API_COACH_MAX_TEAM',
-    });
-
   // Then we create the join request when it is alright
   const updatedUser = await database.user.update({
     data: {
@@ -272,6 +266,7 @@ export const unlockTeam = async (teamId: string) => {
   });
 
   const tournament = await fetchTournament(updatedTeam.tournamentId);
+
   // We freed a place, so there is at least one place left
   // (except if the team was already in the queue, but then we want to skip the condition, so that's fine)
   if (tournament.placesLeft === 1) {
@@ -302,6 +297,7 @@ export const unlockTeam = async (teamId: string) => {
       await lockTeam(firstTeamInQueue.id);
     }
   }
+  await sendDiscordTeamUnlock(formatTeam(updatedTeam), tournament);
 
   return formatTeam(updatedTeam);
 };

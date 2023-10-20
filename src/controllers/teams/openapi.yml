@@ -92,8 +92,6 @@
         $ref: '#/components/responses/401Unauthenticated'
       409:
         description: Le nom de l'équipe existe déjà
-      410:
-        description: Le tournoi est plein
 /teams/{teamId}:
   get:
     summary: Renvoie une équipe
