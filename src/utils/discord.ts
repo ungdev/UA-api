@@ -9,8 +9,8 @@ import {
   fetchGuildMembers,
   addMemberRole,
   fetchGuildMember,
-  removeMemberRole,
-} from '../services/discord';
+  removeMemberRole, deleteDiscordChannel, deleteDiscordRole
+} from "../services/discord";
 import {
   DiscordChannelPermission,
   DiscordChannelPermissionType,
@@ -73,7 +73,7 @@ export const setupDiscordTeam = async (team: Team, tournament: Tournament) => {
 
     logger.debug(`Create discord channels for ${team.name}`);
     // Create the channels and update in the database the role.
-    await Promise.all([
+    const [textChannel, voiceChannel] = await Promise.all([
       createDiscordTeamChannel(
         team.name,
         DiscordChannelType.GUILD_TEXT,
@@ -88,8 +88,11 @@ export const setupDiscordTeam = async (team: Team, tournament: Tournament) => {
         role,
         tournament.discordVocalCategoryId,
       ),
-      database.team.update({ data: { discordRoleId: role.id }, where: { id: team.id } }),
     ]);
+    database.team.update({
+      data: { discordRoleId: role.id, discordTextChannelId: textChannel.id, discordVoiceChannelId: voiceChannel.id },
+      where: { id: team.id },
+    });
   }
 };
 
@@ -172,6 +175,16 @@ export const removeDiscordRoles = async (fromUser: User) => {
     // Or the role has been deleted - but don't care as we wanted to remove it
     // You have left the server. How dare you ?!
   }
+};
+
+export const deleteDiscordTeam = async (team: Team) => {
+  if (!env.discord.token) {
+    logger.warn('Discord token missing. It will skip discord calls');
+    return;
+  }
+  deleteDiscordRole(team.discordRoleId);
+  deleteDiscordChannel(team.discordTextChannelId);
+  deleteDiscordChannel(team.discordVoiceChannelId);
 };
 
 export const getWebhookEnvFromString = (name: string) => {

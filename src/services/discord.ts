@@ -110,6 +110,14 @@ export const createDiscordChannel = async (requestBody: DiscordCreateChannelRequ
   return response.data;
 };
 
+export const deleteDiscordChannel = async (channelId: string) => {
+  const response = await bot.delete<DiscordChannel>(`channels/${channelId}`);
+
+  return response.data;
+};
+
+export const deleteDiscordRole = (roleId: string) => bot.delete(`guilds/${env.discord.server}/roles/${roleId}`);
+
 /**
  * Create a discord role
  */

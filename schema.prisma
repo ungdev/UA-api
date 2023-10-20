@@ -73,20 +73,22 @@ model Setting {
 }
 
 model Team {
-  id              String     @id
-  name            String
-  tournamentId    String
-  captainId       String     @unique
-  lockedAt        DateTime?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @default(now()) @updatedAt
-  discordRoleId   String?
-  pokemonPlayerId String?
-  captain         User       @relation(fields: [captainId], references: [id])
-  tournament      Tournament @relation(fields: [tournamentId], references: [id])
-  askingUsers     User[]     @relation("teamAskingUsers")
-  users           User[]     @relation("teamUsers")
-  enteredQueueAt  DateTime?
+  id                    String     @id
+  name                  String
+  tournamentId          String
+  captainId             String     @unique
+  lockedAt              DateTime?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @default(now()) @updatedAt
+  discordRoleId         String?
+  discordTextChannelId  String?
+  discordVoiceChannelId String?
+  pokemonPlayerId       String?
+  captain               User       @relation(fields: [captainId], references: [id])
+  tournament            Tournament @relation(fields: [tournamentId], references: [id])
+  askingUsers           User[]     @relation("teamAskingUsers")
+  users                 User[]     @relation("teamUsers")
+  enteredQueueAt        DateTime?
 
   @@unique([name, tournamentId])
   @@index([id])
