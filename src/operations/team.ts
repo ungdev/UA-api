@@ -281,8 +281,6 @@ export const unlockTeam = async (teamId: string) => {
   const updatedTeam = await fetchTeam(teamId);
 
   const tournament = await fetchTournament(updatedTeam.tournamentId);
-  deleteDiscordTeam(updatedTeam);
-  sendDiscordTeamUnlock(updatedTeam, tournament);
   // We freed a place, so there is at least one place left
   // (except if the team was already in the queue, but then we want to skip the condition, so that's fine)
   if (tournament.placesLeft === 1) {
@@ -314,6 +312,7 @@ export const unlockTeam = async (teamId: string) => {
     }
   }
 
+  await deleteDiscordTeam(updatedTeam);
   await sendDiscordTeamUnlock(updatedTeam, tournament);
 
   return updatedTeam;

@@ -9,8 +9,10 @@ import {
   fetchGuildMembers,
   addMemberRole,
   fetchGuildMember,
-  removeMemberRole, deleteDiscordChannel, deleteDiscordRole
-} from "../services/discord";
+  removeMemberRole,
+  deleteDiscordChannel,
+  deleteDiscordRole,
+} from '../services/discord';
 import {
   DiscordChannelPermission,
   DiscordChannelPermissionType,
@@ -182,9 +184,9 @@ export const deleteDiscordTeam = async (team: Team) => {
     logger.warn('Discord token missing. It will skip discord calls');
     return;
   }
-  deleteDiscordRole(team.discordRoleId);
-  deleteDiscordChannel(team.discordTextChannelId);
-  deleteDiscordChannel(team.discordVoiceChannelId);
+  await deleteDiscordRole(team.discordRoleId);
+  await deleteDiscordChannel(team.discordTextChannelId);
+  await deleteDiscordChannel(team.discordVoiceChannelId);
 };
 
 export const getWebhookEnvFromString = (name: string) => {
