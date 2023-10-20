@@ -93,7 +93,7 @@ export const lockTeam = async (teamId: string) => {
 
   await database.$transaction(
     askingUsers.map((user) =>
-      database.user.update({
+      user.type === UserType.player && database.user.update({
         data: {
           askingTeam: {
             disconnect: true,
