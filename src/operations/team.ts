@@ -92,18 +92,20 @@ export const lockTeam = async (teamId: string) => {
   if (team.lockedAt || team.enteredQueueAt) return team;
 
   await database.$transaction(
-    askingUsers.map((user) =>
-      user.type === UserType.player && database.user.update({
-        data: {
-          askingTeam: {
-            disconnect: true,
+    askingUsers.map(
+      (user) =>
+        user.type === UserType.player &&
+        database.user.update({
+          data: {
+            askingTeam: {
+              disconnect: true,
+            },
           },
-        },
-        where: {
-          id: user.id,
-          type: UserType.player,
-        },
-      }),
+          where: {
+            id: user.id,
+            type: UserType.player,
+          },
+        }),
     ),
   );
 
