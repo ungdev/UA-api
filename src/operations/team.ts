@@ -87,6 +87,10 @@ export const lockTeam = async (teamId: string) => {
     },
   });
 
+  const team = await fetchTeam(teamId);
+  // Don't relock the team, to avoid spamming messages (and also channel creation lol) (no that didn't happen :eyes:)
+  if (team.lockedAt || team.enteredQueueAt) return team;
+
   await database.$transaction(
     askingUsers.map((user) =>
       database.user.update({
@@ -97,15 +101,12 @@ export const lockTeam = async (teamId: string) => {
         },
         where: {
           id: user.id,
+          type: UserType.player,
         },
       }),
     ),
   );
 
-  const team = await fetchTeam(teamId);
-  // Don't relock the team, to avoid spamming messages (and also channel creation lol) (no that didn't happen :eyes:)
-  if (team.lockedAt || team.enteredQueueAt) return team;
-  
   const tournament = await fetchTournament(team.tournamentId);
   let updatedTeam: PrimitiveTeamWithPrimitiveUsers;
 
