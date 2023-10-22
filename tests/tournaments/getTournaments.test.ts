@@ -112,6 +112,7 @@ describe('GET /tournaments', () => {
       'casters',
       'infos',
       'format',
+      'cashprizeDetails',
     ]);
     expect(response.body[1].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.null;
