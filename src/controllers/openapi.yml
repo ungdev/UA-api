@@ -93,8 +93,6 @@ components:
         placesLeft:
           type: integer
           example: 5
-        position:
-          type: integer
 
     UserRestricted:
       type: object
@@ -758,8 +756,6 @@ components:
         discordVocalCategoryId:
           type: string
           nullable: true
-        position:
-          type: integer
         teams:
           type: array
           items:
@@ -776,8 +772,6 @@ components:
           type: string
         display:
           type: boolean
-        position:
-          type: integer
 
   responses:
     400Errored:
