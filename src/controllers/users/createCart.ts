@@ -196,14 +196,18 @@ export default [
         }
       }
 
-      // Checks if the item is available
-      if (items.some((item) => item.availableFrom !== null && item.availableFrom > new Date())) {
-        return gone(response, ResponseError.ItemNotAvailableYet);
-      }
+      // Check availability of items
+      for (const cartItem of cartItems) {
+        const item = items.find((pItem) => pItem.id === cartItem.itemId);
+        // Checks if the item is available
+        if (item.availableFrom !== null && item.availableFrom > new Date()) {
+          return gone(response, ResponseError.ItemNotAvailableYet);
+        }
 
-      // Checks if the item is not available anymore
-      if (items.some((item) => item.availableUntil !== null && item.availableUntil < new Date())) {
-        return badRequest(response, ResponseError.ItemNotAvailableAnymore);
+        // Checks if the item is not available anymore
+        if (item.availableUntil !== null && item.availableUntil < new Date()) {
+          return badRequest(response, ResponseError.ItemNotAvailableAnymore);
+        }
       }
 
       // Defines the cart
