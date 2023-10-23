@@ -88,6 +88,9 @@ components:
         playersPerTeam:
           type: integer
           example: 5
+        coachesPerTeam:
+          type: integer
+          example: 2
         lockedTeamsCount:
           type: integer
         placesLeft:
@@ -717,6 +720,9 @@ components:
         playersPerTeam:
           type: integer
           example: 5
+        coachesPerTeam:
+          type: integer
+          example: 2
         cashprize:
           type: integer
           nullable: true

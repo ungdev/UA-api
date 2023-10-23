@@ -15,6 +15,7 @@ export default [
       name: Joi.string().optional(),
       maxPlayers: Joi.number().optional(),
       playersPerTeam: Joi.number().optional(),
+      coachesPerTeam: Joi.number().optional(),
       cashprize: Joi.number().optional(),
       cashprizeDetails: Joi.string().optional(),
       displayCashprize: Joi.boolean().optional(),
