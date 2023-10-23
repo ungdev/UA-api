@@ -26,6 +26,7 @@ describe('GET /teams/current', () => {
       id: 'smalltournament',
       name: 'Small tournament',
       playersPerTeam: 2,
+      coachesPerTeam: 2,
       maxTeams: 1,
     });
     team = await createFakeTeam({ members: 2, tournament: tournament.id, locked: true, paid: true });

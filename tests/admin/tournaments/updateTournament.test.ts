@@ -18,6 +18,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     name: 'anothertestname',
     maxPlayers: 100,
     playersPerTeam: 5,
+    coachesPerTeam: 2,
     cashprize: 100,
     cashprizeDetails: 'test',
     displayCashprize: true,
@@ -39,7 +40,13 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     nonAdminUser = await createFakeUser();
     adminToken = generateToken(admin);
 
-    tournament = await createFakeTournament({ id: 'test', name: 'test', playersPerTeam: 1, maxTeams: 1 });
+    tournament = await createFakeTournament({
+      id: 'test',
+      name: 'test',
+      playersPerTeam: 1,
+      coachesPerTeam: 1,
+      maxTeams: 1,
+    });
   });
 
   it('should error as the user is not authenticated', () =>
@@ -95,6 +102,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     expect(tournamentDatabase.name).to.equal(validBody.name);
     expect(tournamentDatabase.maxPlayers).to.equal(validBody.maxPlayers);
     expect(tournamentDatabase.playersPerTeam).to.equal(validBody.playersPerTeam);
+    expect(tournamentDatabase.coachesPerTeam).to.equal(validBody.coachesPerTeam);
     expect(tournamentDatabase.cashprize).to.equal(validBody.cashprize);
     expect(tournamentDatabase.cashprizeDetails).to.equal(validBody.cashprizeDetails);
     expect(tournamentDatabase.displayCashprize).to.equal(validBody.displayCashprize);

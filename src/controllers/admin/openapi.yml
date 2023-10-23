@@ -929,6 +929,9 @@
               playersPerTeam:
                 type: integer
                 description: Le nombre de joueurs par équipe
+              coachesPerTeam:
+                type: integer
+                description: Le nombre maximal de coach par équipe
               cashprize:
                 type: integer
                 description: Le cashprize du tournoi
