@@ -147,14 +147,18 @@ export const createFakeTournament = async ({
   id,
   name,
   playersPerTeam,
+  coachesPerTeam,
   maxTeams,
 }: {
   id: string;
   name: string;
   playersPerTeam: number;
+  coachesPerTeam: number;
   maxTeams: number;
 }) => {
-  await database.tournament.create({ data: { id, name, maxPlayers: playersPerTeam * maxTeams, playersPerTeam } });
+  await database.tournament.create({
+    data: { id, name, maxPlayers: playersPerTeam * maxTeams, playersPerTeam, coachesPerTeam },
+  });
   logger.verbose(`Created tournament ${name}`);
   return fetchTournament(id);
 };
