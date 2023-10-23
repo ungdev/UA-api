@@ -121,6 +121,7 @@ const env = {
       channel_tft: process.env.DISCORD_WEBHOOK_TOURNAMENT_TFT,
       channel_open: process.env.DISCORD_WEBHOOK_TOURNAMENT_OPEN,
       channel_other: process.env.DISCORD_WEBHOOK_TOURNAMENT_OTHER,
+      contact: process.env.DISCORD_WEBHOOK_CONTACT,
     },
   },
   log: {
