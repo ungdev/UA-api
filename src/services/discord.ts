@@ -200,3 +200,13 @@ export const fetchGuildMembers = async () => {
   } while (chunkSize === 1000);
   return members;
 };
+
+export const callWebhook = async (webhook: string, embeds: any[]) => {
+  const data = JSON.stringify({ embeds });
+  try {
+    // Send request
+    await axios.post(webhook, data, { headers: { 'Content-Type': 'application/json' } });
+  } catch {
+    logger.warn(`An error occurred while sending a message on a webhook discord (${webhook}). What was tried to be sent : ${data}`);
+  }
+}
