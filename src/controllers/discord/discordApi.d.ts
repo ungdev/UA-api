@@ -241,3 +241,21 @@ export declare interface DiscordGuildMember extends DiscordMember {
   readonly mute: boolean;
   readonly deaf: boolean;
 }
+
+export declare interface DiscordEmbedFooter {
+  readonly text: string;
+  readonly icon_url?: string;
+}
+
+export declare interface DiscordEmbedField {
+  readonly name: string;
+  readonly value: string;
+}
+
+export declare interface DiscordEmbed {
+  readonly title?: string;
+  readonly description?: string;
+  readonly color?: number;
+  readonly footer?: DiscordEmbedFooter;
+  readonly fields?: DiscordEmbedField[];
+}

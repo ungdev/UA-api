@@ -1,6 +1,5 @@
 /* eslint-disable default-case */
 /* eslint-disable import/no-unresolved */
-import axios from 'axios';
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
 import { fetchTeam, fetchTeams } from '../operations/team';
 import {
@@ -267,7 +266,7 @@ export const sendDiscordTeamLockout = async (team: Team, tournament: Tournament)
         fields: [...playersList, ...coachsList],
       },
     ];
-    callWebhook(webhook, embeds);
+    await callWebhook(webhook, embeds);
   }
 };
 
@@ -297,18 +296,23 @@ export const sendDiscordTeamUnlock = async (team: Team, tournament: Tournament) 
   }
 };
 
-export const sendDiscordContact = async ({name, email, subject, message}: Contact) => {
+export const sendDiscordContact = async ({ name, email, subject, message }: Contact) => {
   const webhook = env.discord.webhooks.contact;
   if (!webhook) {
     logger.warn('Discord webhook for contact is missing. It will skip discord messages for contacts.');
-    logger.warn(`User ${name} (${email}) tried sending a message with subject ${subject} and the following content : ${message}. The message could not be sent to Discord.`);
+    logger.warn(
+      `User ${name} (${email}) tried sending a message with subject ${subject} and the following content : ${message}. The message could not be sent to Discord.`,
+    );
     return;
   }
   const embeds = [
     {
       title: `Nouveau message de ${name} (${email})`,
-      fields: [{name: 'Sujet', value: subject}, {name: 'Message', value: message}],
-    }
-  ]
+      fields: [
+        { name: 'Sujet', value: subject },
+        { name: 'Message', value: message },
+      ],
+    },
+  ];
   await callWebhook(webhook, embeds);
 };

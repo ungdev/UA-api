@@ -22,7 +22,7 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       await sendSlackContact(request.body);
-      await sendDiscordContact(request.body)
+      await sendDiscordContact(request.body);
 
       return noContent(response);
     } catch (error) {

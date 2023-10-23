@@ -11,6 +11,7 @@ import type {
   DiscordRole,
   Snowflake,
   DiscordGuildMember,
+  DiscordEmbed,
 } from '../controllers/discord/discordApi';
 import { User } from '../types';
 import env from '../utils/env';
@@ -201,12 +202,14 @@ export const fetchGuildMembers = async () => {
   return members;
 };
 
-export const callWebhook = async (webhook: string, embeds: any[]) => {
+export const callWebhook = async (webhook: string, embeds: DiscordEmbed[]) => {
   const data = JSON.stringify({ embeds });
   try {
     // Send request
     await axios.post(webhook, data, { headers: { 'Content-Type': 'application/json' } });
   } catch {
-    logger.warn(`An error occurred while sending a message on a webhook discord (${webhook}). What was tried to be sent : ${data}`);
+    logger.warn(
+      `An error occurred while sending a message on a webhook discord (${webhook}). What was tried to be sent : ${data}`,
+    );
   }
-}
+};
