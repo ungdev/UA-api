@@ -190,6 +190,61 @@
         $ref: '#/components/responses/401Unauthenticated'
       403:
         $ref: '#/components/responses/403Unauthorized'
+  patch:
+    summary: Modifie la position des items
+    description: Modifie la position des items.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: array
+            description: La liste des items avec leur nouvelle position
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: L'identifiant de l'item
+                position:
+                  type: integer
+                  description: La nouvelle position de l'item
+
+    responses:
+      200:
+        description: Les items ont bien été modifiés. Leur nouvelle position est renvoyée.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: L'identifiant de l'item
+                  position:
+                    type: integer
+                    description: La nouvelle position de l'item
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+              example:
+                error: L'utilisateur n'est pas authentifié
+      403:
+        $ref: '#/components/responses/403Unauthorized'
+      404:
+        $ref: '#/components/responses/404UserNotFound'
 
 /admin/items/:itemId:
   patch:
