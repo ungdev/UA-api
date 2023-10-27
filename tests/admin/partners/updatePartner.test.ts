@@ -29,6 +29,7 @@ describe('PATCH /admin/partners/{partnerId}', () => {
       partnersList.push({
         id: nanoid(),
         name: faker.company.name(),
+        description: faker.lorem.paragraph(),
         link: faker.internet.url(),
         display: true,
         position: index,
