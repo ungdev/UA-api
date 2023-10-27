@@ -36,7 +36,7 @@ export const formatUser = (user: RawUserWithCartItems): User => {
     throw new Error('Error just to make sure of something');
 
   const hasPaid = user.cartItems.some(
-    (cartItem) => cartItem.itemId === `ticket-${user.type}` && cartItem.cart.transactionState === TransactionState.paid,
+    (cartItem) => cartItem.itemId.startsWith(`ticket-`) && cartItem.cart.transactionState === TransactionState.paid,
   );
 
   return {

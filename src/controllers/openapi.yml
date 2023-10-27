@@ -88,13 +88,14 @@ components:
         playersPerTeam:
           type: integer
           example: 5
+        coachesPerTeam:
+          type: integer
+          example: 2
         lockedTeamsCount:
           type: integer
         placesLeft:
           type: integer
           example: 5
-        position:
-          type: integer
 
     UserRestricted:
       type: object
@@ -719,6 +720,9 @@ components:
         playersPerTeam:
           type: integer
           example: 5
+        coachesPerTeam:
+          type: integer
+          example: 2
         cashprize:
           type: integer
           nullable: true
@@ -758,8 +762,6 @@ components:
         discordVocalCategoryId:
           type: string
           nullable: true
-        position:
-          type: integer
         teams:
           type: array
           items:
@@ -776,8 +778,6 @@ components:
           type: string
         display:
           type: boolean
-        position:
-          type: integer
 
   responses:
     400Errored:

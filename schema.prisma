@@ -101,6 +101,7 @@ model Tournament {
   name                   String   @unique
   maxPlayers             Int
   playersPerTeam         Int
+  coachesPerTeam         Int
   cashprize              Int?
   cashprizeDetails       String?
   displayCashprize       Boolean  @default(false)

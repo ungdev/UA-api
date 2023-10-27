@@ -19,12 +19,12 @@ INSERT INTO `settings` (`id`, `value`) VALUES
 ('shop', 0),
 ('trombi', 0);
 
-INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`, `cashprize`, `position`) VALUES
-('lol', 'League of Legends', 160, 5, 0, 1),
-('ssbu', 'Super Smash Bros. Ultimate', 64, 1, 0, 2),
-('cs2', 'Counter-Strike 2', 80, 5, 0, 3),
-('rl', 'Rocket League', 60, 3, 0, 4),
-('osu', 'Osu!', 64, 1, 0, 5),
-('tft', 'Teamfight Tactics', 32, 1, 0, 6),
-('open', 'Libre', 40, 1, 0, 7),
-('pokemon', 'Pokémon', 24, 1, 0, 8);
+INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`, `coachesPerTeam`, `cashprize`, `position`) VALUES
+('lol', 'League of Legends', 160, 5, 2, 0, 1),
+('ssbu', 'Super Smash Bros. Ultimate', 64, 1, 1, 0, 2),
+('cs2', 'Counter-Strike 2', 80, 5, 2, 0, 3),
+('rl', 'Rocket League', 60, 3, 2, 0, 4),
+('osu', 'Osu!', 64, 1, 1, 0, 5),
+('tft', 'Teamfight Tactics', 32, 1, 1, 0, 6),
+('open', 'Libre', 40, 1, 1, 0, 7),
+('pokemon', 'Pokémon', 24, 1, 1, 0, 8);

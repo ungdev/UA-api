@@ -34,7 +34,7 @@ export default [
         return forbidden(response, Error.TeamFull);
       }
 
-      if (team.coaches.length >= Math.min(tournament.playersPerTeam, 2) && askingUser.type === UserType.coach) {
+      if (team.coaches.length >= tournament.coachesPerTeam && askingUser.type === UserType.coach) {
         return forbidden(response, Error.TeamMaxCoachReached);
       }
 
