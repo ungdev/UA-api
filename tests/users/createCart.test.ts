@@ -650,14 +650,15 @@ describe('POST /users/current/carts', () => {
 
     // Check that the stale cart has been deleted
     const staleSpectatorCarts = await cartOperations.fetchCarts(staleSpectator.id);
-    expect(staleSpectatorCarts).to.have.lengthOf(0);
+    expect(staleSpectatorCarts).to.have.lengthOf(1);
+    expect(staleSpectatorCarts[0].transactionState).to.be.equal(TransactionState.stale);
 
     const spectatorTickets = await database.cartItem.findMany({
       where: {
         itemId: 'ticket-spectator',
       },
     });
-    expect(spectatorTickets).to.have.lengthOf(1);
+    expect(spectatorTickets).to.have.lengthOf(2);
     expect(spectatorTickets[0].forUserId).to.be.equal(spectator.id);
 
     // Restore actual stock
