@@ -428,6 +428,9 @@
               link:
                 type: string
                 description: L'url du partenaire
+              description:
+                type: string
+                description: La description du partenaire
               display:
                 type: boolean
                 description: Si le partenaire doit être affiché ou non
@@ -534,6 +537,9 @@
               link:
                 type: string
                 description: L'url du partenaire
+              description:
+                type: string
+                description: La description du partenaire
               display:
                 type: boolean
                 description: Si le partenaire doit être affiché ou non

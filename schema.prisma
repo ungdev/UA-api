@@ -131,11 +131,12 @@ model Caster {
 }
 
 model Partner {
-  id       String  @id
-  name     String
-  link     String
-  display  Boolean
-  position Int     @default(0)
+  id          String  @id
+  name        String
+  link        String
+  description String
+  display     Boolean
+  position    Int     @default(0)
 
   @@map("partners")
 }

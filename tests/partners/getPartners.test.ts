@@ -21,6 +21,7 @@ describe('GET /partners', () => {
       partnersList.push({
         id: nanoid(),
         name: faker.company.name(),
+        description: faker.lorem.paragraph(),
         link: faker.internet.url(),
         display: true,
         position: index,
@@ -56,7 +57,7 @@ describe('GET /partners', () => {
     expect(response.body).to.have.lengthOf(partners.length - 1);
     // Not to have tournaments[0] because it has display false
     expect(response.body).not.to.have.deep.members([partners[0]]);
-    expect(response.body[0]).to.have.all.keys(['id', 'name', 'link']);
+    expect(response.body[0]).to.have.all.keys(['id', 'name', 'description', 'link']);
     expect(response.body[0].name).to.be.a('string');
     expect(response.body[0].link).to.be.a('string');
   });
