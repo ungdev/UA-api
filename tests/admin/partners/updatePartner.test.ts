@@ -85,6 +85,13 @@ describe('PATCH /admin/partners/{partnerId}', () => {
       .patch(`/admin/partners/${partners[0].id}`)
       .send({ name: 'test', link: 'test', display: false })
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200, { id: partners[0].id, name: 'test', description: partners[0].description, link: 'test', display: false, position: 0 });
+      .expect(200, {
+        id: partners[0].id,
+        name: 'test',
+        description: partners[0].description,
+        link: 'test',
+        display: false,
+        position: 0,
+      });
   });
 });

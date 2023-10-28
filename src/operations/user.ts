@@ -406,8 +406,8 @@ export const countCoaches = (teamId: string) =>
  * Fetches the users that have paid for a ticket. It should get each spectators that have paid, and each players and coachs that have paid only if they are in a team.
  * @returns the users that have paid for a ticket
  */
-export const getPaidAndValidatedUsers = () => {
-  return database.user.findMany({
+export const getPaidAndValidatedUsers = () =>
+  database.user.findMany({
     where: {
       discordId: {
         not: null,
@@ -442,4 +442,3 @@ export const getPaidAndValidatedUsers = () => {
       },
     },
   });
-}

@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeTeam, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, TransactionState, User, UserType } from '../../../src/types';
+import { Error, Permission, User, UserType } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
@@ -11,24 +11,24 @@ import { forcePay } from '../../../src/operations/carts';
 import { lockTeam } from '../../../src/operations/team';
 
 describe('GET /admin/scan/', () => {
-  let users: User[] = [];
+  const users: User[] = [];
   let admin: User;
   let adminToken: string;
 
   before(async () => {
-    for(let i = 0; i < 10; i++) {
+    for (let index = 0; index < 10; index++) {
       const team = await createFakeTeam({
         members: 1,
       });
       users.push(...team.players);
-      await forcePay(users[i]);
+      await forcePay(users[index]);
       await lockTeam(team.id);
     }
 
     // add 3 spectators
-    for(let i = 0; i < 3; i++) {
+    for (let index = 0; index < 3; index++) {
       const user = await createFakeUser({
-        type: UserType.spectator
+        type: UserType.spectator,
       });
       await forcePay(user);
       users.push(user);
@@ -36,7 +36,7 @@ describe('GET /admin/scan/', () => {
 
     // scan first and last user
     await userOperations.scanUser(users[0].id);
-    await userOperations.scanUser(users[users.length - 1].id);
+    await userOperations.scanUser(users.at(-1).id);
 
     admin = await createFakeUser({ permissions: [Permission.entry] });
     adminToken = generateToken(admin);
@@ -72,10 +72,7 @@ describe('GET /admin/scan/', () => {
   });
 
   it('should return scan stats', async () => {
-    const userData = await request(app)
-      .get('/admin/scan')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200);
+    const userData = await request(app).get('/admin/scan').set('Authorization', `Bearer ${adminToken}`).expect(200);
     expect(userData.body.totalToScan).to.be.equal(13);
     expect(userData.body.alreadyScanned).to.be.equal(2);
   });

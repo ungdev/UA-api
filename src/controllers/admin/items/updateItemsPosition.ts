@@ -4,7 +4,6 @@ import { hasPermission } from '../../../middlewares/authentication';
 import { validateBody } from '../../../middlewares/validation';
 import { notFound, success } from '../../../utils/responses';
 import { Error, Permission } from '../../../types';
-import { fetchPartners, updatePartnersPosition } from '../../../operations/partner';
 import { fetchAllItems, updateItemsPosition } from '../../../operations/item';
 
 export default [
@@ -30,7 +29,7 @@ export default [
       const items = await fetchAllItems();
 
       for (const item of request.body.items) {
-        if (!items.some((i) => i.id === item.id)) {
+        if (!items.some((index) => index.id === item.id)) {
           return notFound(response, Error.NotFound);
         }
       }

@@ -109,11 +109,11 @@ describe('PATCH /admin/items', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(
-      result.body.find((a: { id: string; position: number }) => a.id === validBody.items[0].id).position,
-    ).to.equal(validBody.items[0].position);
-    expect(
-      result.body.find((a: { id: string; position: number }) => a.id === validBody.items[1].id).position,
-    ).to.equal(validBody.items[1].position);
+    expect(result.body.find((a: { id: string; position: number }) => a.id === validBody.items[0].id).position).to.equal(
+      validBody.items[0].position,
+    );
+    expect(result.body.find((a: { id: string; position: number }) => a.id === validBody.items[1].id).position).to.equal(
+      validBody.items[1].position,
+    );
   });
 });
