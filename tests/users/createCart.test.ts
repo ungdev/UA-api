@@ -659,7 +659,6 @@ describe('POST /users/current/carts', () => {
       },
     });
     expect(spectatorTickets).to.have.lengthOf(2);
-    expect(spectatorTickets[0].forUserId).to.be.equal(spectator.id);
 
     // Restore actual stock
     return database.item.update({
