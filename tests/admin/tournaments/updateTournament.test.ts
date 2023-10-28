@@ -157,10 +157,10 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     await database.tournament.update({ where: { id: tournament.id }, data: { maxPlayers: 5 } });
     // Decrease it once (check that nothing goes wrong if the tournament will still have places left after the operation)
     // And then twice (check that nothing goes wrong if the tournament is full after the operation)
-    for (const i of [4, 3]) {
+    for (const maxPlayers of [4, 3]) {
       await request(app)
         .patch(`/admin/tournaments/${tournament.id}`)
-        .send({ maxPlayers: i })
+        .send({ maxPlayers })
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
