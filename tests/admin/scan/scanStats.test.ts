@@ -3,11 +3,12 @@ import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeTeam, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User, UserType } from '../../../src/types';
+import { Error, Permission, TransactionState, User, UserType } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { forcePay } from '../../../src/operations/carts';
+import { lockTeam } from '../../../src/operations/team';
 
 describe('GET /admin/scan/', () => {
   let users: User[] = [];
@@ -21,6 +22,7 @@ describe('GET /admin/scan/', () => {
       });
       users.push(...team.players);
       await forcePay(users[i]);
+      await lockTeam(team.id);
     }
 
     // add 3 spectators
@@ -41,7 +43,6 @@ describe('GET /admin/scan/', () => {
   });
 
   after(async () => {
-    console.error(JSON.stringify(users));
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();

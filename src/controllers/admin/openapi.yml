@@ -783,6 +783,29 @@
               error: Ce joueur n'a pas été scanné ou son inscription n'a pas été bloquée
 
 /admin/scan/:
+  get:
+    summary: Renvoie les statistiques de scan de billets
+    description: Renvoie les statistiques de scan de billets<br/>
+       **Permission 'entry' ou 'admin' requise.**<br/>
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Renvoie les statistiques de scan de billets
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alreadyScanned:
+                  type: integer
+                  description: Le nombre de billets déjà scannés
+                totalToScan:
+                  type: integer
+                  description: Le nombre de billets total à scanner
+
   post:
     summary: Scanne le billet d'un utilisateur
     description: Renvoie les informations de l'utilisateur.<br/>
