@@ -2,7 +2,7 @@
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ path: process.env.NODE_ENV === 'test' ? '.env.test' : undefined });
 
 // Load dotenv only if we are not in testing
 // The testing must be able to be loaded without any environment variable except the DATABASE
