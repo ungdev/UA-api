@@ -317,6 +317,7 @@ export const enum Error {
   NotYourItem = "Cet item n'est pas le tiens",
   AlreadyHaveComputer = 'Tu as déjà un ordinateur stocké',
   AlreadyPickedUp = "L'objet a déjà été récupéré",
+  TooMuchLockedTeams = "Il y a plus d'équipes inscrites que le nombre d'équipes maximal souhaité",
 
   // 404
   // The server can't find the requested resource

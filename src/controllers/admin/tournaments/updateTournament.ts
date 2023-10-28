@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { Request, Response, NextFunction } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { validateBody } from '../../../middlewares/validation';
-import { conflict, notFound, success } from '../../../utils/responses';
+import { conflict, forbidden, notFound, success } from '../../../utils/responses';
 import { Error, Permission } from '../../../types';
 import { fetchTournaments, updateTournament } from '../../../operations/tournament';
 import { addCasterToTournament, removeAllCastersFromTournament } from '../../../operations/caster';
@@ -14,8 +14,6 @@ export default [
     Joi.object({
       name: Joi.string().optional(),
       maxPlayers: Joi.number().optional(),
-      playersPerTeam: Joi.number().optional(),
-      coachesPerTeam: Joi.number().optional(),
       cashprize: Joi.number().optional(),
       cashprizeDetails: Joi.string().optional(),
       displayCashprize: Joi.boolean().optional(),
@@ -24,7 +22,6 @@ export default [
       casters: Joi.array().items(Joi.string()).optional(),
       displayCasters: Joi.boolean().optional(),
       display: Joi.boolean().optional(),
-      position: Joi.number().optional(),
     }),
   ),
 
@@ -32,15 +29,14 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const allTournaments = await fetchTournaments();
-      if (!allTournaments.some((tournament) => tournament.id === request.params.tournamentId)) {
+      const tournament = allTournaments.find((t) => t.id === request.params.tournamentId);
+      if (!tournament) {
         return notFound(response, Error.NotFound);
       }
 
       if (
         request.body.name &&
-        allTournaments.some(
-          (tournament) => tournament.name === request.body.name && tournament.id !== request.params.tournamentId,
-        )
+        allTournaments.some((t) => t.name === request.body.name && t.id !== request.params.tournamentId)
       ) {
         return conflict(response, Error.TournamentNameAlreadyExists);
       }
@@ -53,6 +49,13 @@ export default [
         }
       }
       request.body.casters = undefined;
+
+      if (
+        request.body.maxPlayers !== undefined &&
+        tournament.placesLeft < (tournament.maxPlayers - request.body.maxPlayers) / tournament.playersPerTeam
+      ) {
+        return forbidden(response, Error.TooMuchLockedTeams);
+      }
 
       const result = await updateTournament(request.params.tournamentId as string, request.body);
 

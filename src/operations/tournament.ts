@@ -1,4 +1,4 @@
-import { Caster, PrismaPromise } from '@prisma/client';
+import { Caster } from '@prisma/client';
 import database from '../services/database';
 import { PrimitiveTournament, Tournament } from '../types';
 import { fetchTeams } from './team';
@@ -53,13 +53,11 @@ export const fetchTournaments = async (): Promise<Tournament[]> => {
   return Promise.all(tournaments.map(formatTournament));
 };
 
-export const updateTournament = (
+export const updateTournament = async (
   id: string,
   data: {
     name?: string;
     maxPlayers?: number;
-    playersPerTeam?: number;
-    coachesPerTeam?: number;
     cashprize?: number;
     cashprizeDetails?: string;
     displayCashprize?: boolean;
@@ -67,13 +65,29 @@ export const updateTournament = (
     infos?: string;
     displayCasters?: boolean;
     display?: boolean;
-    position?: number;
   },
-): PrismaPromise<PrimitiveTournament> =>
-  database.tournament.update({
+): Promise<PrimitiveTournament> => {
+  const oldTournament = await fetchTournament(id);
+  if (oldTournament.maxPlayers < data.maxPlayers) {
+    const teamsToUpdate = await database.team.findMany({
+      where: { enteredQueueAt: { not: null } },
+      orderBy: { enteredQueueAt: 'asc' },
+      take: (data.maxPlayers - oldTournament.maxPlayers) / oldTournament.playersPerTeam,
+    });
+    await database.$transaction(
+      teamsToUpdate.map((team) =>
+        database.team.update({
+          where: { id: team.id },
+          data: { lockedAt: team.enteredQueueAt, enteredQueueAt: null },
+        }),
+      ),
+    );
+  }
+  return database.tournament.update({
     where: { id },
     data: { ...data },
   });
+};
 
 export const updateTournamentsPosition = (tournaments: { id: string; position: number }[]) =>
   Promise.all(
