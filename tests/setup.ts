@@ -21,7 +21,12 @@ export const sandbox = sinon.createSandbox();
 before(async () => {
   // Reset and seed the database
   execSync('pnpm test:schema:push --force-reset');
-  await Promise.all(readFileSync(`seed.sql`, 'utf-8').split(';').slice(0, -1).map(database.$executeRawUnsafe));
+  await Promise.all(
+    readFileSync(`seed.sql`, 'utf-8')
+      .split(';')
+      .slice(0, -1)
+      .map((command) => database.$executeRawUnsafe(command)),
+  );
   chai.use(chaiString);
   await setLoginAllowed(true);
   await setShopAllowed(true);
