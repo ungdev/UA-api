@@ -2,6 +2,8 @@
 /* eslint-disable import/first*/
 process.env.NODE_ENV = 'test';
 
+// Load the environment variables before loading prisma
+import env from '../src/utils/env';
 import chai, { expect } from 'chai';
 import chaiString from 'chai-string';
 import sinon from 'sinon';
@@ -19,12 +21,19 @@ before(async () => {
   await setShopAllowed(true);
 
   // Delete the data to make the command idempotent
+  await database.repoLog.deleteMany();
+  await database.repoItem.deleteMany();
+  await database.cartItem.deleteMany();
   await database.cart.deleteMany();
   await database.team.deleteMany();
   await database.user.deleteMany();
 
   enableFakeDiscordApi();
   enableFakeUploadApi();
+
+  // Verify environment variables have been loaded correctly
+  expect(process.env.API_PORT).to.be.undefined;
+  expect(env.api.port).to.be.undefined;
 });
 
 afterEach('Restore the sandbox after every tests', () => {
@@ -61,4 +70,8 @@ after(async () => {
 
   await database.$disconnect();
   transporter.close();
+
+  // Verify environment variables have not changed
+  expect(process.env.API_PORT).to.be.undefined;
+  expect(env.api.port).to.be.undefined;
 });
