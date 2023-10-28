@@ -24,10 +24,8 @@ describe('PATCH /admin/partners', () => {
 
   before(async () => {
     for (let index = 0; index < 10; index++) {
-      await createFakePartner({});
+      partners.push(await createFakePartner({}));
     }
-
-    partners = await fetchPartners();
 
     validBody = {
       partners: [

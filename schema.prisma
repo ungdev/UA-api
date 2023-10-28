@@ -132,7 +132,7 @@ model Caster {
 
 model Partner {
   id          String  @id
-  name        String
+  name        String @unique
   link        String
   description String  @db.Text
   display     Boolean

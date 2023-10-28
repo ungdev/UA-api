@@ -23,10 +23,8 @@ describe('DELETE /admin/partners/{partnerId}', () => {
 
   before(async () => {
     for (let index = 0; index < 10; index++) {
-      await createFakePartner({});
+      partners.push(await createFakePartner({}));
     }
-
-    partners = await fetchPartners();
 
     admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
     nonAdminUser = await createFakeUser();
