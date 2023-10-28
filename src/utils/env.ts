@@ -5,13 +5,13 @@ import dotenv, { DotenvPopulateInput } from 'dotenv';
 if (process.env.NODE_ENV === 'test') {
   // Make sure to only load the 3 accepted variables in test
   const environmentVariables: DotenvPopulateInput = {};
-  dotenv.config({ path: process.env.NODE_ENV === 'test' ? '.env.test' : undefined, processEnv: environmentVariables });
-  process.env.DATABASE_URL = environmentVariables.DATABASE_URL;
-  process.env.LOG_LEVEL = environmentVariables.LOG_LEVEL;
-  process.env.LOG_IN_TEST = environmentVariables.LOG_IN_TEST;
+  dotenv.config({ path: '.env.test', processEnv: environmentVariables });
+  process.env.DATABASE_URL = environmentVariables.DATABASE_URL ?? process.env.DATABASE_URL;
+  process.env.LOG_LEVEL = environmentVariables.LOG_LEVEL ?? process.env.DATABASE_URL;
+  process.env.LOG_IN_TEST = environmentVariables.LOG_IN_TEST ?? process.env.DATABASE_URL;
 } else {
   // Load everything in another environment
-  dotenv.config({ path: process.env.NODE_ENV === 'test' ? '.env.test' : undefined });
+  dotenv.config();
 }
 
 const loadEnv = (key: string) => process.env[key];
