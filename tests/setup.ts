@@ -13,21 +13,23 @@ import { setLoginAllowed, setShopAllowed } from '../src/operations/settings';
 import { transporter } from '../src/services/email';
 import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 import { disableFakeUploadApi, enableFakeUploadApi } from './upload';
+import { execSync } from 'child_process';
+import { readFileSync } from 'fs';
 
 export const sandbox = sinon.createSandbox();
 
 before(async () => {
+  // Reset and seed the database
+  execSync('pnpm test:schema:push --force-reset');
+  await Promise.all(
+    readFileSync(`seed.sql`, 'utf-8')
+      .split(';')
+      .slice(0, -1)
+      .map(async (command) => await database.$executeRawUnsafe(command)),
+  );
   chai.use(chaiString);
   await setLoginAllowed(true);
   await setShopAllowed(true);
-
-  // Delete the data to make the command idempotent
-  await database.repoLog.deleteMany();
-  await database.repoItem.deleteMany();
-  await database.cartItem.deleteMany();
-  await database.cart.deleteMany();
-  await database.team.deleteMany();
-  await database.user.deleteMany();
 
   enableFakeDiscordApi();
   enableFakeUploadApi();
