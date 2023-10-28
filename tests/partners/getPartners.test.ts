@@ -1,13 +1,11 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import { faker } from '@faker-js/faker';
-import { Partner } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as partnerOperations from '../../src/operations/partner';
 import database from '../../src/services/database';
 import { Error } from '../../src/types';
-import nanoid from '../../src/utils/nanoid';
+import { createFakePartner } from '../utils';
 
 describe('GET /partners', () => {
   after(async () => {
@@ -15,22 +13,9 @@ describe('GET /partners', () => {
   });
 
   before(async () => {
-    const partnersList = [] as Partner[];
-
     for (let index = 0; index < 10; index++) {
-      partnersList.push({
-        id: nanoid(),
-        name: faker.company.name(),
-        description: faker.lorem.paragraph(),
-        link: faker.internet.url(),
-        display: true,
-        position: index,
-      });
+      await createFakePartner({});
     }
-
-    await database.partner.createMany({
-      data: partnersList,
-    });
   });
 
   it('should fail with an internal server error', async () => {

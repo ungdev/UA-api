@@ -1,15 +1,12 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import { faker } from '@faker-js/faker';
-import { Partner } from '@prisma/client';
 import app from '../../../src/app';
 import { sandbox } from '../../setup';
 import * as partnerOperations from '../../../src/operations/partner';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
-import nanoid from '../../../src/utils/nanoid';
 import { generateToken } from '../../../src/utils/users';
-import { createFakeUser } from '../../utils';
+import { createFakePartner, createFakeUser } from '../../utils';
 
 describe('GET /admin/partners', () => {
   let nonAdminUser: User;
@@ -22,22 +19,9 @@ describe('GET /admin/partners', () => {
   });
 
   before(async () => {
-    const partnersList = [] as Partner[];
-
     for (let index = 0; index < 10; index++) {
-      partnersList.push({
-        id: nanoid(),
-        name: faker.company.name(),
-        description: faker.lorem.paragraph(),
-        link: faker.internet.url(),
-        display: true,
-        position: index,
-      });
+      await createFakePartner({});
     }
-
-    await database.partner.createMany({
-      data: partnersList,
-    });
 
     admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
     nonAdminUser = await createFakeUser();
