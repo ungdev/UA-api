@@ -3,10 +3,10 @@
 process.env.NODE_ENV = 'test';
 
 // Load the environment variables before loading prisma
-import env from '../src/utils/env';
 import chai, { expect } from 'chai';
 import chaiString from 'chai-string';
 import sinon from 'sinon';
+import env from '../src/utils/env';
 import database from '../src/services/database';
 import { setLoginAllowed, setShopAllowed } from '../src/operations/settings';
 import { transporter } from '../src/services/email';
