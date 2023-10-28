@@ -7,7 +7,7 @@ import database from '../../../src/services/database';
 import { Error, Permission, Team, Tournament, User, UserType } from '../../../src/types';
 import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
-import { lockTeam } from '../../../src/operations/team';
+import { fetchTeam, lockTeam } from '../../../src/operations/team';
 
 describe('PATCH /admin/tournaments/{tournamentId}', () => {
   let nonAdminUser: User;
@@ -147,6 +147,34 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
           teams[indexTeam].enteredQueueAt?.toISOString(),
         );
         expect(tournamentDatabase.teams[indexDatabase].enteredQueueAt).to.be.null;
+      }
+      teams[indexTeam] = await fetchTeam(teams[indexTeam].id);
+    }
+  });
+
+  it('should successfully decrease the size of the tournament', async () => {
+    // First increase the size, to be able to decrease it
+    await database.tournament.update({ where: { id: tournament.id }, data: { maxPlayers: 5 } });
+    // Decrease it once (check that nothing goes wrong if the tournament will still have places left after the operation)
+    // And then twice (check that nothing goes wrong if the tournament is full after the operation)
+    for (const i of [4, 3]) {
+      await request(app)
+        .patch(`/admin/tournaments/${tournament.id}`)
+        .send({ maxPlayers: i })
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      const tournamentDatabase = await tournamentOperations.fetchTournament(tournament.id);
+      // Check what happened with queued teams
+      for (let indexDatabase = 0; indexDatabase < 4; indexDatabase++) {
+        const indexTeam = teams.findIndex((team) => team.id === tournamentDatabase.teams[indexDatabase].id);
+        // Team should not have changed
+        expect(tournamentDatabase.teams[indexDatabase].lockedAt?.toISOString()).to.be.equal(
+          teams[indexTeam].lockedAt?.toISOString(),
+        );
+        expect(tournamentDatabase.teams[indexDatabase].enteredQueueAt?.toISOString()).to.be.equal(
+          teams[indexTeam].enteredQueueAt?.toISOString(),
+        );
       }
     }
   });
