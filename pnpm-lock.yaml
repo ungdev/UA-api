@@ -83,6 +83,9 @@ dependencies:
   qs:
     specifier: ^6.11.2
     version: 6.11.2
+  rate-limiter-flexible:
+    specifier: ^3.0.2
+    version: 3.0.2
   sharp:
     specifier: ^0.32.6
     version: 0.32.6
@@ -6146,6 +6149,10 @@ packages:
   /range-parser@1.2.1:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /rate-limiter-flexible@3.0.2:
+    resolution: {integrity: sha512-5kQnZBfQ025dBL7cjqLxrCk0ud8DWEMZJH06VJyhch+Es0gQ/lny9yiIRf6mcbBj8aMTSCn2Xp9KDDao3Raq6g==}
     dev: false
 
   /raw-body@2.5.1:
