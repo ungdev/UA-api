@@ -19,7 +19,7 @@ describe('Test middlewares', () => {
       delete require.cache[require.resolve('../src/utils/env')];
       process.env.NODE_ENV = 'development';
       const { default: nonTestApp } = await import('../src/app');
-      await Promise.all([...Array(12).keys()].map(async () => request(nonTestApp).get('/').expect(200)));
+      await Promise.all([...new Array(12).keys()].map(() => request(nonTestApp).get('/').expect(200)));
       await request(nonTestApp).get('/').expect(429, 'Too Many Requests');
       // ANNNNNDDDD... for some reason you don't need to delete the new cache :)
       process.env.NODE_ENV = 'test';
