@@ -95,14 +95,15 @@ Open MySQL/MariaDB, and run the following command to create the database :
 CREATE DATABASE arena_test CHARACTER SET utf8;
 ```
 
-Then, come back to your terminal :
+What follows is mostly there for information purposes. It is done automatically during the tests. From what we know, there is no reason to use these commands.
+Come back to your terminal :
 
 ```
 # Push the schema to the database :
 pnpm test:schema:push
 
 # Seed the database :
-mysql -u DATABASE_USER -p arena --protocol tcp < seed.sql
+mysql -u DATABASE_USER -p arena_test --protocol tcp < seed.sql
 ```
 
 ### Run the tests
