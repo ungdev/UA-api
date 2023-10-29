@@ -63,12 +63,14 @@ Edit the file .env with your values
 ## Commands
 
 ```
-pnpm dev       # start development server
-pnpm build     # builds the typescript to javascript
-pnpm start     # start production server
-pnpm lint      # checks if the code is correct
-pnpm lint-fix  # try to fix lint errors and warnings
-pnpm fake      # populate the database with fake data
+pnpm dev              # start development server
+pnpm build            # builds the typescript to javascript
+pnpm start            # start production server
+pnpm lint             # checks if the code is correct
+pnpm lint-fix         # try to fix lint errors and warnings
+pnpm fake             # populate the database with fake data
+pnpm schema:push      # push the schema.prisma to the database
+pnpm test:schema:push # push the schema.prisma to the test database (done automatically in tests)
 ```
 
 ## Prisma config
