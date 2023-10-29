@@ -13,7 +13,7 @@ describe('DELETE /admin/partners/{partnerId}', () => {
   let nonAdminUser: User;
   let admin: User;
   let adminToken: string;
-  let partners: Partner[];
+  const partners: Partner[] = [];
 
   after(async () => {
     await database.user.deleteMany();

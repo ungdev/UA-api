@@ -13,7 +13,7 @@ describe('PATCH /admin/partners', () => {
   let nonAdminUser: User;
   let admin: User;
   let adminToken: string;
-  let partners: Partner[];
+  const partners: Partner[] = [];
   let validBody: { partners: { id: string; position: number }[] };
 
   after(async () => {
