@@ -143,6 +143,34 @@ export const createFakeTeam = async ({
   return fetchTeam(team.id);
 };
 
+export const createFakePartner = async ({
+  name = faker.company.name(),
+  description = faker.lorem.paragraph(),
+  link = faker.internet.url(),
+  display = true,
+  position = 0,
+}: {
+  name?: string;
+  description?: string;
+  link?: string;
+  display?: boolean;
+  position?: number;
+}) => {
+  const partner = await database.partner.create({
+    data: {
+      id: nanoid(),
+      name,
+      description,
+      link,
+      display,
+      position,
+    },
+  });
+
+  logger.verbose(`Created partner ${name}`);
+  return partner;
+};
+
 export const createFakeTournament = async ({
   id,
   name,

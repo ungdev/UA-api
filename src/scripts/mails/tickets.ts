@@ -1,45 +1,11 @@
-import { UserType, TransactionState } from '@prisma/client';
+import { TransactionState } from '@prisma/client';
 import { MailGoal } from '.';
 import database from '../../services/database';
 import { generateTicket } from '../../utils/pdf';
+import { getPaidAndValidatedUsers } from '../../operations/user';
 
 export const ticketsGoal: MailGoal = {
-  collector: () =>
-    database.user.findMany({
-      where: {
-        discordId: {
-          not: null,
-        },
-        email: {
-          not: null,
-        },
-        OR: [
-          {
-            team: {
-              lockedAt: {
-                not: null,
-              },
-            },
-          },
-          {
-            type: UserType.spectator,
-          },
-        ],
-        cartItems: {
-          some: {
-            itemId: {
-              startsWith: 'ticket-',
-            },
-            cart: {
-              paidAt: {
-                not: null,
-              },
-              transactionState: TransactionState.paid,
-            },
-          },
-        },
-      },
-    }),
+  collector: () => getPaidAndValidatedUsers(),
   sections: [
     {
       title: "Ton ticket pour l'UTT Arena",

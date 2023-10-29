@@ -33,12 +33,15 @@ export const dropStale = () =>
         },
       },
     }),
-    database.cart.deleteMany({
+    database.cart.updateMany({
+      data: {
+        transactionState: TransactionState.stale,
+      },
       where: {
         createdAt: {
           lt: new Date(Date.now() - env.api.cartLifespan),
         },
-        transactionState: 'pending',
+        transactionState: TransactionState.pending,
       },
     }),
   ]);

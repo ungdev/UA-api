@@ -1,13 +1,11 @@
 import { expect } from 'chai';
 import request from 'supertest';
-import { faker } from '@faker-js/faker';
-import { Partner } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as partnerOperations from '../../src/operations/partner';
 import database from '../../src/services/database';
 import { Error } from '../../src/types';
-import nanoid from '../../src/utils/nanoid';
+import { createFakePartner } from '../utils';
 
 describe('GET /partners', () => {
   after(async () => {
@@ -15,21 +13,9 @@ describe('GET /partners', () => {
   });
 
   before(async () => {
-    const partnersList = [] as Partner[];
-
     for (let index = 0; index < 10; index++) {
-      partnersList.push({
-        id: nanoid(),
-        name: faker.company.name(),
-        link: faker.internet.url(),
-        display: true,
-        position: index,
-      });
+      await createFakePartner({});
     }
-
-    await database.partner.createMany({
-      data: partnersList,
-    });
   });
 
   it('should fail with an internal server error', async () => {
@@ -56,7 +42,7 @@ describe('GET /partners', () => {
     expect(response.body).to.have.lengthOf(partners.length - 1);
     // Not to have tournaments[0] because it has display false
     expect(response.body).not.to.have.deep.members([partners[0]]);
-    expect(response.body[0]).to.have.all.keys(['id', 'name', 'link']);
+    expect(response.body[0]).to.have.all.keys(['id', 'name', 'description', 'link']);
     expect(response.body[0].name).to.be.a('string');
     expect(response.body[0].link).to.be.a('string');
   });
