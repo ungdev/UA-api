@@ -2,6 +2,9 @@
 /* eslint-disable import/first*/
 process.env.NODE_ENV = 'test';
 
+// Load the environment variables before loading prisma
+/* eslint-disable import/order */
+import env from '../src/utils/env';
 import chai, { expect } from 'chai';
 import chaiString from 'chai-string';
 import sinon from 'sinon';
@@ -10,21 +13,30 @@ import { setLoginAllowed, setShopAllowed } from '../src/operations/settings';
 import { transporter } from '../src/services/email';
 import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 import { disableFakeUploadApi, enableFakeUploadApi } from './upload';
+import { execSync } from 'child_process';
+import { readFileSync } from 'fs';
 
 export const sandbox = sinon.createSandbox();
 
 before(async () => {
+  // Reset and seed the database
+  execSync('pnpm test:schema:push --force-reset');
+  await Promise.all(
+    readFileSync(`seed.sql`, 'utf-8')
+      .split(';')
+      .slice(0, -1)
+      .map((command) => database.$executeRawUnsafe(command)),
+  );
   chai.use(chaiString);
   await setLoginAllowed(true);
   await setShopAllowed(true);
 
-  // Delete the data to make the command idempotent
-  await database.cart.deleteMany();
-  await database.team.deleteMany();
-  await database.user.deleteMany();
-
   enableFakeDiscordApi();
   enableFakeUploadApi();
+
+  // Verify environment variables have been loaded correctly
+  expect(process.env.API_PORT).to.be.undefined;
+  expect(env.api.port).to.be.undefined;
 });
 
 afterEach('Restore the sandbox after every tests', () => {
@@ -61,4 +73,8 @@ after(async () => {
 
   await database.$disconnect();
   transporter.close();
+
+  // Verify environment variables have not changed
+  expect(process.env.API_PORT).to.be.undefined;
+  expect(env.api.port).to.be.undefined;
 });
