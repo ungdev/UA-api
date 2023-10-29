@@ -249,7 +249,8 @@
 /admin/items/:itemId:
   patch:
     summary: Change les informations de l'item.
-    description: Change les informations de l'item ":" nom, catégorie, attribut, prix, informations, image, stock, dates de disponibilité.
+    description:
+      Change les informations de l'item ":" nom, catégorie, attribut, prix, informations, image, stock, dates de disponibilité.
       **Permission 'admin' requise.**
     tags:
       - Admin
@@ -593,7 +594,6 @@
               error: L'utilisateur n'est pas authentifié
       403:
         $ref: '#/components/responses/403Unauthorized'
-
 
 /admin/repo/user:
   get:
@@ -1010,12 +1010,6 @@
               maxPlayers:
                 type: integer
                 description: Le nombre maximum de joueurs
-              playersPerTeam:
-                type: integer
-                description: Le nombre de joueurs par équipe
-              coachesPerTeam:
-                type: integer
-                description: Le nombre maximal de coach par équipe
               cashprize:
                 type: integer
                 description: Le cashprize du tournoi
