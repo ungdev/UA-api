@@ -7,7 +7,6 @@ import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import { createFakePartner, createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
-import { fetchPartners } from '../../../src/operations/partner';
 
 describe('PATCH /admin/partners/{partnerId}', () => {
   let nonAdminUser: User;
