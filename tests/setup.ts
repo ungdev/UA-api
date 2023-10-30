@@ -24,7 +24,8 @@ before(async () => {
   await Promise.all(
     readFileSync(`seed.sql`, 'utf-8')
       .split(';')
-      .slice(0, -1)
+      // TODO : put that back to -1 and remove tournaments from seeding (or add a seed-test.sql without the tournaments)
+      .slice(0, -2) //-1)
       .map((command) => database.$executeRawUnsafe(command)),
   );
   chai.use(chaiString);
@@ -70,6 +71,9 @@ after(async () => {
 
   const repoLogCount = await database.repoLog.count();
   expect(repoLogCount).to.be.equal(0);
+
+  const tournamentCount = await database.tournament.count();
+  expect(tournamentCount).to.be.equal(0);
 
   await database.$disconnect();
   transporter.close();

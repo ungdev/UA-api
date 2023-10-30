@@ -10,6 +10,7 @@ import nanoid from '../src/utils/nanoid';
 import env from '../src/utils/env';
 import { serializePermissions } from '../src/utils/helpers';
 import { fetchTournament } from '../src/operations/tournament';
+import { assert } from 'chai';
 
 export const generateFakeDiscordId = () => `${Math.floor(Date.now() * (1 + Math.random()))}`;
 
@@ -112,10 +113,10 @@ export const createFakeTeam = async ({
   name?: string;
   userPassword?: string;
 } = {}) => {
+  assert(members >= 1, 'Cannot create a team with less than 1 member');
   const salt = genSalt(env.bcrypt.rounds);
   const [captainData, ...memberData] = await Promise.all(
-    // eslint-disable-next-line unicorn/no-new-array
-    new Array(members).fill(0).map(() => generateFakeUserData({ password: userPassword, paid }, salt)),
+    Array.from({ length: members }).map(() => generateFakeUserData({ password: userPassword, paid }, salt)),
   );
 
   const team = await database.team.create({
@@ -172,16 +173,16 @@ export const createFakePartner = async ({
 };
 
 export const createFakeTournament = async ({
-  id,
-  name,
+  id = nanoid(),
+  name = faker.word.noun(),
   playersPerTeam,
-  coachesPerTeam,
+  coachesPerTeam = 1,
   maxTeams,
 }: {
-  id: string;
-  name: string;
+  id?: string;
+  name?: string;
   playersPerTeam: number;
-  coachesPerTeam: number;
+  coachesPerTeam?: number;
   maxTeams: number;
 }) => {
   await database.tournament.create({
