@@ -31,6 +31,7 @@
     "prisma": "^5.4.2",
     "qrcode": "^1.5.3",
     "qs": "^6.11.2",
+    "rate-limiter-flexible": "^3.0.2",
     "sharp": "^0.32.6",
     "split": "^1.0.1",
     "swagger-jsdoc": "^6.2.8",
@@ -68,6 +69,7 @@
     "chai-string": "^1.5.0",
     "cpy-cli": "^5.0.0",
     "dbdocs": "^0.8.3",
+    "dotenv-cli": "^7.3.0",
     "eslint": "^8.51.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.0.0",
@@ -101,6 +103,8 @@
     "test": "mocha",
     "test:coverage": "nyc pnpm test",
     "send:mail:discord": "node build/src/scripts/sendDiscordMails.js",
-    "send:mails": "node build/src/scripts/mails"
+    "send:mails": "node build/src/scripts/mails",
+    "schema:push": "prisma db push",
+    "test:schema:push": "dotenv -e .env.test -e .env -- prisma db push"
   }
 }

@@ -88,6 +88,9 @@ components:
         playersPerTeam:
           type: integer
           example: 5
+        coachesPerTeam:
+          type: integer
+          example: 2
         lockedTeamsCount:
           type: integer
         placesLeft:
@@ -605,6 +608,22 @@ components:
           type: integer
           description: Le stock total de l'item.
           nullable: true
+        availableFrom:
+          type: string
+          format: date-time
+          nullable: true
+        availableUntil:
+          type: string
+          format: date-time
+          nullable: true
+        position:
+          type: integer
+          description: La position de l'item dans la liste des items
+          nullable: true
+        display:
+          type: boolean
+          description: Si l'item est affiché ou non
+          nullable: true
 
     Log:
       type: object
@@ -717,6 +736,9 @@ components:
         playersPerTeam:
           type: integer
           example: 5
+        coachesPerTeam:
+          type: integer
+          example: 2
         cashprize:
           type: integer
           nullable: true
@@ -768,10 +790,14 @@ components:
           type: string
         name:
           type: string
+        description:
+          type: string
         link:
           type: string
         display:
           type: boolean
+        position:
+          type: integer
 
   responses:
     400Errored:

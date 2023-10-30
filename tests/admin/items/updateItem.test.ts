@@ -35,7 +35,7 @@ describe('PATCH /admin/items/:itemId', () => {
     user = await createFakeUser();
     // Buy this item. Buy it once per transaction state, to test them all
     await Promise.all(
-      (['paid', 'pending', 'authorization', 'refused', 'canceled', 'refunded'] as TransactionState[]).map(
+      (['paid', 'pending', 'authorization', 'refused', 'canceled', 'refunded', 'stale'] as TransactionState[]).map(
         (transactionState) =>
           createFakeCart({
             userId: user.id,

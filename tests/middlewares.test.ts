@@ -13,6 +13,22 @@ describe('Test middlewares', () => {
     await database.user.deleteMany();
   });
 
+  describe('Test rate limiter', () => {
+    it('should return a too many requests error', async () => {
+      delete require.cache[require.resolve('../src/app')];
+      delete require.cache[require.resolve('../src/utils/env')];
+      // Backup the environment variables
+      const envBackup = { ...process.env };
+      process.env.NODE_ENV = 'development';
+      const { default: nonTestApp } = await import('../src/app');
+      await Promise.all(Array.from({ length: 12 }).map(() => request(nonTestApp).get('/').expect(200)));
+      await request(nonTestApp).get('/').expect(429, 'Too Many Requests');
+      // ANNNNNDDDD... for some reason you don't need to delete the new cache :)
+      // We still need to rollback the process.env tho
+      process.env = envBackup;
+    });
+  });
+
   describe('Test general middleware', () => {
     it('should return a not found error', () =>
       request(app).get('/randomRoute').expect(404, { error: Error.RouteNotFound }));

@@ -1,6 +1,5 @@
 /* eslint-disable default-case */
 /* eslint-disable import/no-unresolved */
-import axios from 'axios';
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
 import { fetchTeam, fetchTeams } from '../operations/team';
 import {
@@ -12,6 +11,7 @@ import {
   removeMemberRole,
   deleteDiscordChannel,
   deleteDiscordRole,
+  callWebhook,
 } from '../services/discord';
 import {
   DiscordChannelPermission,
@@ -21,7 +21,7 @@ import {
   Snowflake,
 } from '../controllers/discord/discordApi';
 import database from '../services/database';
-import { Team, Tournament, User } from '../types';
+import { Team, Tournament, User, Contact } from '../types';
 import env from './env';
 import logger from './logger';
 
@@ -266,15 +266,7 @@ export const sendDiscordTeamLockout = async (team: Team, tournament: Tournament)
         fields: [...playersList, ...coachsList],
       },
     ];
-
-    try {
-      const data = JSON.stringify({ embeds });
-
-      // Send request
-      await axios.post(webhook, data, { headers: { 'Content-Type': 'application/json' } });
-    } catch {
-      logger.warn('An error occurred while sending a message on a webhook discord (team lock)');
-    }
+    await callWebhook(webhook, embeds);
   }
 };
 
@@ -300,14 +292,27 @@ export const sendDiscordTeamUnlock = async (team: Team, tournament: Tournament) 
         },
       },
     ];
-
-    try {
-      const data = JSON.stringify({ embeds });
-
-      // Send request
-      await axios.post(webhook, data, { headers: { 'Content-Type': 'application/json' } });
-    } catch {
-      logger.warn('An error occurred while sending a message on a webhook discord (team unlock)');
-    }
+    await callWebhook(webhook, embeds);
   }
+};
+
+export const sendDiscordContact = async ({ name, email, subject, message }: Contact) => {
+  const webhook = env.discord.webhooks.contact;
+  if (!webhook) {
+    logger.warn('Discord webhook for contact is missing. It will skip discord messages for contacts.');
+    logger.warn(
+      `User ${name} (${email}) tried sending a message with subject ${subject} and the following content : ${message}. The message could not be sent to Discord.`,
+    );
+    return;
+  }
+  const embeds = [
+    {
+      title: `Nouveau message de ${name} (${email})`,
+      fields: [
+        { name: 'Sujet', value: subject },
+        { name: 'Message', value: message },
+      ],
+    },
+  ];
+  await callWebhook(webhook, embeds);
 };

@@ -90,7 +90,12 @@ describe('GET /items', () => {
   });
 
   describe('should return 200 with an array of items with the "discount-switch-ssbu" item because user has a cart containing it, but it was not paid nor it is pending', () => {
-    for (const transactionState of [TransactionState.canceled, TransactionState.refunded, TransactionState.refused]) {
+    for (const transactionState of [
+      TransactionState.canceled,
+      TransactionState.refunded,
+      TransactionState.refused,
+      TransactionState.stale,
+    ]) {
       it(`should return 200 with array of items with the "discount-switch-ssbu" item because user has a cart containing it, but it was ${transactionState}`, async () => {
         // update cart's transactionState
         await cartOperations.updateCart(thirdCaptainCart.id, 123, transactionState);

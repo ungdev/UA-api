@@ -111,6 +111,12 @@
         "mocha/no-exclusive-tests": "error",
         "mocha/no-skipped-tests": "error"
       }
+    },
+    {
+      "files": "tests/setup.ts",
+      "rules": {
+        "no-unused-expressions": "off"
+      }
     }
   ]
 }

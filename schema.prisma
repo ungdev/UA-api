@@ -100,7 +100,8 @@ model Tournament {
   id                     String   @id
   name                   String   @unique
   maxPlayers             Int
-  playersPerTeam         Int
+  playersPerTeam         Int      @default(1)
+  coachesPerTeam         Int      @default(0)
   cashprize              Int?
   cashprizeDetails       String?
   displayCashprize       Boolean  @default(false)
@@ -130,11 +131,12 @@ model Caster {
 }
 
 model Partner {
-  id       String  @id
-  name     String
-  link     String
-  display  Boolean
-  position Int     @default(0)
+  id          String  @id
+  name        String @unique
+  link        String
+  description String  @db.Text
+  display     Boolean
+  position    Int     @default(0)
 
   @@map("partners")
 }
@@ -225,6 +227,7 @@ enum TransactionState {
   refused
   refunded
   authorization
+  stale
 }
 
 enum ItemCategory {

@@ -148,3 +148,17 @@ export const updateAdminItem = async (
   const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
   return { ...item, left: item.stock - count };
 };
+
+export const updateItemsPosition = (items: { id: string; position: number }[]) =>
+  Promise.all(
+    items.map((item) =>
+      database.item.update({
+        where: {
+          id: item.id,
+        },
+        data: {
+          position: item.position,
+        },
+      }),
+    ),
+  );
