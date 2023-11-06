@@ -91,7 +91,7 @@ export const setupDiscordTeam = async (team: Team, tournament: Tournament) => {
         tournament.discordVocalCategoryId,
       ),
     ]);
-    database.team.update({
+    await database.team.update({
       data: { discordRoleId: role.id, discordTextChannelId: textChannel.id, discordVoiceChannelId: voiceChannel.id },
       where: { id: team.id },
     });
@@ -184,48 +184,14 @@ export const deleteDiscordTeam = async (team: Team) => {
     logger.warn('Discord token missing. It will skip discord calls');
     return;
   }
+
   await deleteDiscordRole(team.discordRoleId);
   await deleteDiscordChannel(team.discordTextChannelId);
   await deleteDiscordChannel(team.discordVoiceChannelId);
 };
 
 export const getWebhookEnvFromString = (name: string) => {
-  let envValue = env.discord.webhooks.channel_other;
-  switch (name) {
-    case 'lol': {
-      envValue = env.discord.webhooks.channel_lol;
-      break;
-    }
-    case 'ssbu': {
-      envValue = env.discord.webhooks.channel_ssbu;
-      break;
-    }
-    case 'cs2': {
-      envValue = env.discord.webhooks.channel_cs2;
-      break;
-    }
-    case 'pokemon': {
-      envValue = env.discord.webhooks.channel_pokemon;
-      break;
-    }
-    case 'rl': {
-      envValue = env.discord.webhooks.channel_rl;
-      break;
-    }
-    case 'osu': {
-      envValue = env.discord.webhooks.channel_osu;
-      break;
-    }
-    case 'tft': {
-      envValue = env.discord.webhooks.channel_tft;
-      break;
-    }
-    case 'open': {
-      envValue = env.discord.webhooks.channel_open;
-      break;
-    }
-  }
-  return envValue;
+  return env.discord.webhooks['channel_' + name] ?? env.discord.webhooks.channel_other;
 };
 
 export const sendDiscordTeamLockout = async (team: Team, tournament: Tournament) => {
