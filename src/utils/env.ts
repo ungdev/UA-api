@@ -76,6 +76,9 @@ const env = {
       name: loadEnv('EMAIL_SENDER_NAME') || 'UTT Arena',
       address: loadEnv('EMAIL_SENDER_ADDRESS') || 'arena@utt.fr',
     },
+    gmail: loadEnv('GMAIL') === 'true',
+    username: loadEnv('GMAIL_USERNAME') || null,
+    password: loadEnv('GMAIL_PASSWORD') || null,
     partners: ['utt.fr', 'utc.fr', 'utbm.fr'],
   },
   etupay: {

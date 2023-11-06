@@ -8,7 +8,15 @@ import type { SerializedMail } from './types';
 // eslint-disable-next-line import/no-unresolved
 export type { Component, Mail, SerializedMail } from './types';
 
-export const transporter = nodemailer.createTransport(env.email.uri);
+const emailOptions = env.email.gmail ? {
+  service: 'gmail',
+  auth: {
+    user: env.email.username,
+    pass: env.email.password,
+  }
+} : env.email.uri; 
+
+export const transporter = nodemailer.createTransport(emailOptions);
 
 /**
  * Sends a mail (using the smtp server).
