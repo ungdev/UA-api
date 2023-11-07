@@ -134,7 +134,7 @@ model Partner {
   id          String  @id
   name        String  @unique
   link        String
-  description String  @default("") @db.Text
+  description String  @db.Text
   display     Boolean
   position    Int     @default(0)
 
