@@ -20,24 +20,29 @@ export const uploadFile = async (file: any, path: string, name: string) => {
   formData.append('path', path);
   formData.append('name', name);
 
-  const result = await axios.post(`${env.front.website}/uploads/files/api`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      Accept: 'application/json',
-      Authorization: `Bearer ${env.upload.token}`,
+  const result = await axios.post(
+    `${env.front.website}/uploads/files/api?authorization=${env.upload.token}`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Accept: 'application/json',
+      },
     },
-  });
+  );
 
   return result.data;
 };
 
 export const deleteFile = async (path: string) => {
-  const result = await axios.delete(`${env.front.website}/uploads/files/api?path=${encodeURIComponent(path)}`, {
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Bearer ${env.upload.token}`,
+  const result = await axios.delete(
+    `${env.front.website}/uploads/files/api?authorization=${env.upload.token}&path=${encodeURIComponent(path)}`,
+    {
+      headers: {
+        Accept: 'application/json',
+      },
     },
-  });
+  );
 
   return result.data;
 };
