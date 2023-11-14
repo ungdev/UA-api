@@ -47,7 +47,7 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
      * https://github.com/faker-js/faker/blob/main/src/modules/internet/index.ts#L129)
      * We update the result to match our username regular expression:
      * replace dots with dashes and remove trailing chars */
-    username: data.username || faker.internet.userName().replace('.', '-').slice(0, 16),
+    username: data.username || faker.internet.userName().replace('.', '-').slice(0, 12) + nanoid(4),
     firstname: data.firstname || faker.person.firstName(),
     lastname: data.lastname || faker.person.lastName(),
     email: data.email || faker.internet.email(),
@@ -102,7 +102,7 @@ export const createFakeTeam = async ({
   tournament = 'lol',
   paid = false,
   locked = false,
-  name = faker.internet.userName(),
+  name = faker.internet.userName() + faker.number.int(),
   userPassword,
 }: {
   members?: number;

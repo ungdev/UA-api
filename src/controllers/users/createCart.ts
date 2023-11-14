@@ -106,17 +106,19 @@ export default [
         }
 
         // Checks if the tournament is full (if the user is a coach or an attendant, they can still have their place bought)
-        if (tournament.placesLeft <= 0 && !team.lockedAt) {
+        if (ticketUser.type === UserType.player && tournament.placesLeft <= 0 && !team.lockedAt) {
           return forbidden(response, ResponseError.TournamentFull);
         }
 
         // Checks whether the user can have an attendant because he is an adult
-        if (user.age !== UserAge.child && body.tickets.attendant)
+        if (user.age !== UserAge.child && body.tickets.attendant) {
           return forbidden(response, ResponseError.AttendantNotAllowed);
+        }
 
         // Checks whether a child has already registered an attendant
-        if (user.attendantId && body.tickets.attendant)
+        if (user.attendantId && body.tickets.attendant) {
           return forbidden(response, ResponseError.AttendantAlreadyRegistered);
+        }
 
         const item = (await fetchUserItems(team, ticketUser)).find((currentItem) => currentItem.id === itemId);
 

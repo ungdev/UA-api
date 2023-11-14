@@ -4,14 +4,11 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as itemOperations from '../../src/operations/item';
 import * as cartOperations from '../../src/operations/carts';
-import * as tournamentOperations from '../../src/operations/tournament';
-import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, User, Team, TransactionState, Cart, Item } from '../../src/types';
 import { createFakeTeam } from '../utils';
 import { getCaptain } from '../../src/utils/teams';
 import { generateToken } from '../../src/utils/users';
-import { fetchTournament } from '../../src/operations/tournament';
 
 describe('GET /items', () => {
   let captain: User;
@@ -24,15 +21,8 @@ describe('GET /items', () => {
   let thirdTeam: Team;
   let thirdCaptainToken: string;
   let thirdCaptainCart: Cart;
-  let unluckyCaptain: User;
-  let unluckyTeam: Team;
-  let unluckyCaptainToken: string;
-  let initialSsbuPlayers: number;
 
   before(async () => {
-    const ssbu = await tournamentOperations.fetchTournament('ssbu');
-    initialSsbuPlayers = ssbu.maxPlayers;
-    await tournamentOperations.updateTournament('ssbu', { maxPlayers: 2 });
     // This user should have the ssbu discount
     team = await createFakeTeam({ tournament: 'ssbu' });
     captain = getCaptain(team);
@@ -50,18 +40,12 @@ describe('GET /items', () => {
     thirdCaptainCart = await cartOperations.createCart(thirdCaptain.id, [
       { itemId: 'discount-switch-ssbu', quantity: 1, price: -3, forUserId: thirdCaptain.id },
     ]);
-
-    // This user unfortunately arrives too late. Too bad :(
-    unluckyTeam = await createFakeTeam({ tournament: 'ssbu' });
-    unluckyCaptain = getCaptain(unluckyTeam);
-    unluckyCaptainToken = generateToken(unluckyCaptain);
   });
 
   after(async () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
     await database.user.deleteMany();
-    await tournamentOperations.updateTournament('ssbu', { maxPlayers: initialSsbuPlayers });
   });
 
   it('should fail with an internal server error', async () => {
@@ -133,20 +117,6 @@ describe('GET /items', () => {
 
     // without the "discount-switch-ssbu" item and the "ticket-player-ssbu" but with "pc" (in rent category)
     expect(response.body).to.have.lengthOf(items.length - 2);
-  });
-
-  it('should return 200 with an array of items with the "discount-switch-ssbu" but without a ticket as the tournament is full', async () => {
-    const items = await database.item.findMany();
-    await teamOperations.lockTeam(team.id);
-    await teamOperations.lockTeam(thirdTeam.id);
-    const response = await request(app).get('/items').set('Authorization', `Bearer ${unluckyCaptainToken}`).expect(200);
-
-    // Without the "discount-switch-ssbu" item and the "ticket-player*" items
-    expect(response.body).to.have.lengthOf(items.length - 3);
-
-    // Unlock back teams
-    await teamOperations.unlockTeam(team.id);
-    await teamOperations.unlockTeam(thirdTeam.id);
   });
 
   it('should return items with their stock', async () => {

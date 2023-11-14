@@ -205,7 +205,7 @@ describe('POST /teams', () => {
   });
 
   it('should fail to create a team because user as already paid another ticket', async () => {
-    const ssbuUser = await createFakeUser({ paid: true });
+    const ssbuUser = await createFakeUser({ paid: true, type: UserType.player });
     const ssbuUserToken = generateToken(ssbuUser);
 
     return request(app)

@@ -396,7 +396,7 @@ describe('POST /users/current/carts', () => {
 
     const users = await database.user.findMany();
 
-    const coach = users.find((findUser) => findUser.type === UserType.coach);
+    const coach = users.find((findUser) => findUser.type === UserType.coach && findUser.teamId === user.teamId);
     const attendant = users.find((findUser) => findUser.type === UserType.attendant);
 
     expect(body.url).to.startWith(env.etupay.url);
@@ -571,15 +571,16 @@ describe('POST /users/current/carts', () => {
     const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator')?.stock;
 
     await database.item.update({
-      data: { stock: 1 },
+      data: { stock: 0 },
       where: { id: 'ticket-spectator' },
     });
 
     const spectator = await createFakeUser({ type: UserType.spectator });
+    const spectatorToken = generateToken(spectator);
 
     await request(app)
       .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${spectatorToken}`)
       .send({
         tickets: { userIds: [spectator.id] },
         supplements: [],
@@ -606,10 +607,11 @@ describe('POST /users/current/carts', () => {
     });
 
     const spectator = await createFakeUser({ type: UserType.spectator });
+    const spectatorToken = generateToken(spectator);
 
     const { body } = await request(app)
       .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${spectatorToken}`)
       .send({
         tickets: { userIds: [spectator.id] },
         supplements: [],
@@ -666,10 +668,11 @@ describe('POST /users/current/carts', () => {
     // We create another spectator who will try to buy a spectator ticket
     // This operation should succeed.
     const spectator = await createFakeUser({ type: UserType.spectator });
+    const spectatorToken = generateToken(spectator);
 
     const { body } = await request(app)
       .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${spectatorToken}`)
       .send({
         tickets: { userIds: [spectator.id] },
         supplements: [],
@@ -698,18 +701,19 @@ describe('POST /users/current/carts', () => {
     });
   });
 
-  it('should fail as a player is trying to pay his place in a full tournament', () =>
-    request(app)
+  it('should fail as a player is trying to pay his place in a full tournament', async () => {
+    await request(app)
       .post('/users/current/carts')
       .set('Authorization', `Bearer ${tokenInFullTournament}`)
       .send({
         tickets: { userIds: [captainInFullTournament.id] },
         supplements: [],
       })
-      .expect(403, { error: Error.TournamentFull }));
+      .expect(403, { error: Error.TournamentFull });
+  });
 
-  it('should fail as we are trying to buy the place of a coach in an unlocked team in a full tournament', () => {
-    request(app)
+  it('should fail as we are trying to buy the place of a coach in an unlocked team in a full tournament', async () => {
+    await request(app)
       .post('/users/current/carts')
       .set('Authorization', `Bearer ${tokenInFullTournament}`)
       .send({

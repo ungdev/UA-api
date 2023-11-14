@@ -69,13 +69,11 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
     items = items.filter((element) => element.category !== ItemCategory.rent);
   }
 
-  const tournament = team && (await (await import('./tournament')).fetchTournament(team.tournamentId));
-  const ticketsLeft = !team || tournament?.placesLeft > 0;
   const currentTicket =
     items.find((item) => item.id === `ticket-player-${team?.tournamentId}`) ??
     items.find((item) => item.id === 'ticket-player');
   // Remove every ticket-player* item except the currentTicket
-  items = items.filter((item) => !item.id.startsWith('ticket-player') || (ticketsLeft && item.id === currentTicket.id));
+  items = items.filter((item) => !item.id.startsWith('ticket-player') || item.id === currentTicket.id);
   // Update the currentTicket id
   currentTicket.id = 'ticket-player';
 
