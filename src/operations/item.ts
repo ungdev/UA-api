@@ -1,7 +1,6 @@
 import database from '../services/database';
 import { Item, ItemCategory, Team, TransactionState, User, UserType } from '../types';
 import { isPartnerSchool } from '../utils/helpers';
-import * as tournamentOperations from './tournament';
 
 export const fetchAllItems = async (): Promise<Item[]> => {
   // fetches the items
@@ -70,8 +69,8 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
     items = items.filter((element) => element.category !== ItemCategory.rent);
   }
 
-  const tournament = team && (await tournamentOperations.fetchTournament(team.tournamentId));
-  const ticketsLeft = user.type === 'spectator' || tournament.placesLeft > 0;
+  const tournament = team && (await (await import('./tournament')).fetchTournament(team.tournamentId));
+  const ticketsLeft = !team || tournament?.placesLeft > 0;
   const currentTicket =
     items.find((item) => item.id === `ticket-player-${team?.tournamentId}`) ??
     items.find((item) => item.id === 'ticket-player');

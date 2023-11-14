@@ -11,6 +11,7 @@ import { Error, User, Team, TransactionState, Cart, Item } from '../../src/types
 import { createFakeTeam } from '../utils';
 import { getCaptain } from '../../src/utils/teams';
 import { generateToken } from '../../src/utils/users';
+import { fetchTournament } from "../../src/operations/tournament";
 
 describe('GET /items', () => {
   let captain: User;
@@ -141,7 +142,11 @@ describe('GET /items', () => {
     const response = await request(app).get('/items').set('Authorization', `Bearer ${unluckyCaptainToken}`).expect(200);
 
     // Without the "discount-switch-ssbu" item and the "ticket-player*" items
-    expect(response.body).to.have.lengthOf(items.length - 2);
+    expect(response.body).to.have.lengthOf(items.length - 3);
+
+    // Unlock back teams
+    await teamOperations.unlockTeam(team.id);
+    await teamOperations.unlockTeam(thirdTeam.id);
   });
 
   it('should return items with their stock', async () => {
