@@ -26,7 +26,10 @@ const listen = () => {
     .persist()
 
     // Upload file
-    .post('/api')
+    .post(`/api`)
+    .query({
+      authorization: env.upload.token,
+    })
     .reply((_, body) => {
       // Awful code to parse the formData
       const encodedHexData = body;
@@ -108,12 +111,13 @@ const listen = () => {
     })
 
     // Delete file
-    .delete('/api')
+    .delete(`/api`)
     .query({
       path: /.*/,
+      authorization: env.upload.token,
     })
     .reply((uri) => {
-      const path = uri.split('?')[1].split('=')[1];
+      const path = uri.split('?')[1].split('=')[2];
       if (!path) return [200, { status: 1, message: 'Paramètres manquants' }];
 
       const index = existingFiles.indexOf(decodeURIComponent(path));
