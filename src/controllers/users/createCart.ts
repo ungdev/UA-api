@@ -12,6 +12,7 @@ import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
 import { isShopAllowed } from '../../middlewares/settings';
 import { isAuthenticated } from '../../middlewares/authentication';
+import { fetchTournament } from '../../operations/tournament';
 
 export interface PayBody {
   tickets: {
@@ -68,6 +69,8 @@ export default [
 
       const cartItems: PrimitiveCartItem[] = [];
 
+      const tournament = team && await fetchTournament(team.tournamentId);
+
       // Manage the ticket part
       // We use sequential order to be able to send a response in case of bad userId
       for (const userId of body.tickets.userIds) {
@@ -76,24 +79,6 @@ export default [
         if (!ticketUser) {
           return notFound(response, ResponseError.UserNotFound);
         }
-
-        // Checks if the buyer and the user are in the same team
-        if (ticketUser.teamId !== user.teamId) {
-          return forbidden(response, ResponseError.NotInSameTeam);
-        }
-
-        // Checks if the user has already paid
-        if (ticketUser.hasPaid) {
-          return forbidden(response, ResponseError.AlreadyPaid);
-        }
-
-        // Checks whether the user can have an attendant because he is an adult
-        if (user.age !== UserAge.child && body.tickets.attendant)
-          return forbidden(response, ResponseError.AttendantNotAllowed);
-
-        // Checks whether a child has already registered an attendant
-        if (user.attendantId && body.tickets.attendant)
-          return forbidden(response, ResponseError.AttendantAlreadyRegistered);
 
         // Defines the ticket id to be either a player or a coach
         let itemId: string;
@@ -109,6 +94,29 @@ export default [
             return forbidden(response, ResponseError.NotPlayerOrCoachOrSpectator);
           }
         }
+
+        // Checks if the user has already paid
+        if (ticketUser.hasPaid) {
+          return forbidden(response, ResponseError.AlreadyPaid);
+        }
+
+        // Checks if the buyer and the user are in the same team
+        if (ticketUser.teamId !== user.teamId) {
+          return forbidden(response, ResponseError.NotInSameTeam);
+        }
+
+        // Checks if the tournament is full (if the user is a coach or an attendant, they can still have their place bought)
+        if (tournament.placesLeft <= 0 && !team.lockedAt) {
+          return forbidden(response, ResponseError.TournamentFull);
+        }
+
+        // Checks whether the user can have an attendant because he is an adult
+        if (user.age !== UserAge.child && body.tickets.attendant)
+          return forbidden(response, ResponseError.AttendantNotAllowed);
+
+        // Checks whether a child has already registered an attendant
+        if (user.attendantId && body.tickets.attendant)
+          return forbidden(response, ResponseError.AttendantAlreadyRegistered);
 
         const item = (await fetchUserItems(team, ticketUser)).find((currentItem) => currentItem.id === itemId);
 

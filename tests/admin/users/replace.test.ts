@@ -24,8 +24,8 @@ describe('POST /admin/users/:userId/replace', () => {
     team = await createFakeTeam({ locked: true });
     registerRole(team.discordRoleId!);
     user = getCaptain(team);
-    targetUser = await createFakeUser({ paid: true });
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    targetUser = await createFakeUser({ paid: true, type: UserType.player });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
 
     validBody = { replacingUserId: targetUser.id };
@@ -121,7 +121,7 @@ describe('POST /admin/users/:userId/replace', () => {
   });
 
   it('should error as the target user has not paid', async () => {
-    const notPaidUser = await createFakeUser();
+    const notPaidUser = await createFakeUser({type: UserType.player});
 
     return request(app)
       .post(`/admin/users/${user.id}/replace`)

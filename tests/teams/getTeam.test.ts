@@ -10,6 +10,7 @@ import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchTeam, lockTeam } from '../../src/operations/team';
 import { sleep } from '../../src/utils/helpers';
+import { UserType } from "@prisma/client";
 
 describe('GET /teams/current', () => {
   let tournament: Tournament;
@@ -57,7 +58,7 @@ describe('GET /teams/current', () => {
   });
 
   it('should error as the logged user is not is a team', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({type: UserType.player});
     const otherUserToken = generateToken(otherUser);
 
     await request(app)

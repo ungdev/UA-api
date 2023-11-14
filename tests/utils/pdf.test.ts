@@ -8,6 +8,7 @@ import database from '../../src/services/database';
 import { TransactionState } from '../../src/types';
 import { fetchAllItems } from '../../src/operations/item';
 import { updateAdminUser } from '../../src/operations/user';
+import { UserType } from "@prisma/client";
 
 describe('Tests the PDF utils', () => {
   after(async () => {
@@ -48,7 +49,7 @@ describe('Tests the PDF utils', () => {
 
   it(`should generate a PDF ticket for a non team user`, async () => {
     // Create a fake user and add it in a random team
-    const user = await createFakeUser();
+    const user = await createFakeUser({type: UserType.player});
 
     const createdCart = await createCart(user.id, [
       {

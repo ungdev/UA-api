@@ -7,13 +7,14 @@ import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { fetchAllItems } from '../../src/operations/item';
+import { UserType } from "@prisma/client";
 
-describe('POST /users/current/carts', () => {
+describe('GET /users/current/carts', () => {
   let user: User;
   let token: string;
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({type: UserType.player});
     token = generateToken(user);
   });
 

@@ -29,7 +29,7 @@ describe('POST /teams', () => {
   };
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({type: UserType.player});
     token = generateToken(user);
 
     const lol = await tournamentOperations.fetchTournament('lol');
@@ -105,7 +105,7 @@ describe('POST /teams', () => {
   });
 
   it('should fail as the pokemonId is required for pokemon tournament', async () => {
-    const pokemonUser = await createFakeUser();
+    const pokemonUser = await createFakeUser({type: UserType.player});
     const pokemonToken = generateToken(pokemonUser);
 
     return request(app)
@@ -116,7 +116,7 @@ describe('POST /teams', () => {
   });
 
   it('should fail as the pokemonId is not a number', async () => {
-    const pokemonUser = await createFakeUser();
+    const pokemonUser = await createFakeUser({type: UserType.player});
     const pokemonToken = generateToken(pokemonUser);
 
     return request(app)
@@ -127,7 +127,7 @@ describe('POST /teams', () => {
   });
 
   it('should successfully create a pokemon team', async () => {
-    const pokemonUser = await createFakeUser();
+    const pokemonUser = await createFakeUser({type: UserType.player});
     const pokemonToken = generateToken(pokemonUser);
 
     return request(app)
@@ -154,7 +154,7 @@ describe('POST /teams', () => {
   });
 
   it('should successfully create a team (as a coach)', async () => {
-    const newUser = await createFakeUser();
+    const newUser = await createFakeUser({type: UserType.player});
     const newToken = generateToken(newUser);
 
     const response = await request(app)
@@ -174,7 +174,7 @@ describe('POST /teams', () => {
   });
 
   it('fail to create a team as it already exists in the tournament', async () => {
-    const newUser = await createFakeUser();
+    const newUser = await createFakeUser({type: UserType.player});
     const newToken = generateToken(newUser);
 
     return request(app)
@@ -185,7 +185,7 @@ describe('POST /teams', () => {
   });
 
   it('should success to create a team with the same name but in a different tournament', async () => {
-    const newUser = await createFakeUser();
+    const newUser = await createFakeUser({type: UserType.player});
     const newToken = generateToken(newUser);
 
     const { body } = await request(app)
@@ -235,7 +235,7 @@ describe('POST /teams', () => {
   });
 
   it('should deny orga captain type', async () => {
-    const newUser = await createFakeUser();
+    const newUser = await createFakeUser({type: UserType.player});
     const newToken = generateToken(newUser);
 
     return request(app)
@@ -249,7 +249,7 @@ describe('POST /teams', () => {
   });
 
   it("should fail if captain hasn't chosen a type", async () => {
-    const newUser = await createFakeUser();
+    const newUser = await createFakeUser({type: UserType.player});
     const newToken = generateToken(newUser);
 
     return request(app)
@@ -263,7 +263,7 @@ describe('POST /teams', () => {
   });
 
   it('should fail because user has no linked discord account', async () => {
-    const newUser = await createFakeUser();
+    const newUser = await createFakeUser({type: UserType.player});
     const newToken = generateToken(newUser);
     await userOperations.updateAdminUser(newUser.id, { discordId: null });
 
@@ -279,7 +279,7 @@ describe('POST /teams', () => {
   });
 
   it('should fail as the user is not whitelisted for osu!', async () => {
-    const osuPlayer = await createFakeUser();
+    const osuPlayer = await createFakeUser({type: UserType.player});
     const newToken = generateToken(osuPlayer);
     return request(app)
       .post('/teams')

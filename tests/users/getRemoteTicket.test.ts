@@ -10,6 +10,7 @@ import { generateToken } from '../../src/utils/users';
 import { fetchUserItems } from '../../src/operations/item';
 import { filterItem } from '../../src/utils/filters';
 import { forcePay } from '../../src/operations/carts';
+import { UserType } from "@prisma/client";
 
 describe('GET /users/:userId/ticket', () => {
   let token: string;
@@ -35,7 +36,7 @@ describe('GET /users/:userId/ticket', () => {
   });
 
   it('should fail because the user is not in a team', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({type: UserType.player});
     const otherToken = generateToken(otherUser);
 
     await request(app)
@@ -45,7 +46,7 @@ describe('GET /users/:userId/ticket', () => {
   });
 
   it('should fail because the user is not in the same team', async () => {
-    const outerUser = await createFakeUser();
+    const outerUser = await createFakeUser({type: UserType.player});
 
     await request(app)
       .get(`/users/${outerUser.id}/ticket`)

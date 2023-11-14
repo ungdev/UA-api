@@ -38,11 +38,11 @@ describe('PATCH /admin/users/:userId', () => {
   };
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
     registerMember(user.discordId!);
-    const admin = await createFakeUser({ permissions: [Permission.admin] });
+    const admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
-    const anim = await createFakeUser({ permissions: [Permission.anim] });
+    const anim = await createFakeUser({ permissions: [Permission.anim], type: UserType.player });
     animToken = generateToken(anim);
   });
 
@@ -320,7 +320,7 @@ describe('PATCH /admin/users/:userId', () => {
       .expect(403, { error: Error.NoPermission }));
 
   it('should allow an anim to alter a user', async () => {
-    const randomUser = await createFakeUser();
+    const randomUser = await createFakeUser({type: UserType.player});
     delete validAnimBody.permissions;
 
     const { body } = await request(app)
@@ -355,7 +355,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should remove all permissions from the user', async () => {
-    const permissibleUser = await createFakeUser({ permissions: [Permission.stream] });
+    const permissibleUser = await createFakeUser({ permissions: [Permission.stream], type: UserType.player });
 
     const { body } = await request(app)
       .patch(`/admin/users/${permissibleUser.id}`)
@@ -377,7 +377,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should add permissions to the user', async () => {
-    const permissibleUser = await createFakeUser();
+    const permissibleUser = await createFakeUser({type: UserType.player});
 
     const { body } = await request(app)
       .patch(`/admin/users/${permissibleUser.id}`)

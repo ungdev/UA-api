@@ -38,7 +38,7 @@ describe('GET /admin/scan/', () => {
     await userOperations.scanUser(users[0].id);
     await userOperations.scanUser(users.at(-1).id);
 
-    admin = await createFakeUser({ permissions: [Permission.entry] });
+    admin = await createFakeUser({ permissions: [Permission.entry], type: UserType.player });
     adminToken = generateToken(admin);
   });
 

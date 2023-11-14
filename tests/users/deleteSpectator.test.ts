@@ -13,7 +13,7 @@ describe('DELETE /users/current/spectate', () => {
   let token: string;
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({type: UserType.player});
     token = generateToken(user);
   });
 

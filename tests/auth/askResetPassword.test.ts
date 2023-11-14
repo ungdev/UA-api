@@ -7,13 +7,14 @@ import { setLoginAllowed } from '../../src/operations/settings';
 import database from '../../src/services/database';
 import { sandbox } from '../setup';
 import { createFakeUser } from '../utils';
+import { UserType } from "@prisma/client";
 
 describe('POST /auth/reset-password/ask', () => {
   let user: User;
 
   before(async () => {
     // Creates a fake user with email validated
-    user = await createFakeUser();
+    user = await createFakeUser({type: UserType.player});
   });
 
   after(async () => {

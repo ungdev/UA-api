@@ -40,7 +40,7 @@ describe('PATCH /admin/partners', () => {
     };
 
     admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser();
+    nonAdminUser = await createFakeUser({type: UserType.player});
     adminToken = generateToken(admin);
   });
 

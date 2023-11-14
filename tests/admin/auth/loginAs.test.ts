@@ -13,8 +13,8 @@ describe('POST /admin/auth/login', () => {
   let adminToken: string;
 
   before(async () => {
-    user = await createFakeUser();
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    user = await createFakeUser({type: UserType.player});
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = userUtils.generateToken(admin);
   });
 
@@ -44,7 +44,7 @@ describe('POST /admin/auth/login', () => {
   });
 
   it('should error because the user is not confirmed', async () => {
-    const notConfirmedUser = await createFakeUser({ confirmed: false });
+    const notConfirmedUser = await createFakeUser({ confirmed: false, type: UserType.player });
 
     await request(app)
       .post(`/admin/auth/login/${notConfirmedUser.id}`)
