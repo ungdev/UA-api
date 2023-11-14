@@ -13,7 +13,7 @@ describe('POST /users/current/spectate', () => {
   let token: string;
 
   before(async () => {
-    user = await createFakeUser({type: UserType.player});
+    user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
   });
 

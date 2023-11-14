@@ -320,7 +320,7 @@ describe('PATCH /admin/users/:userId', () => {
       .expect(403, { error: Error.NoPermission }));
 
   it('should allow an anim to alter a user', async () => {
-    const randomUser = await createFakeUser({type: UserType.player});
+    const randomUser = await createFakeUser({ type: UserType.player });
     delete validAnimBody.permissions;
 
     const { body } = await request(app)
@@ -377,7 +377,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should add permissions to the user', async () => {
-    const permissibleUser = await createFakeUser({type: UserType.player});
+    const permissibleUser = await createFakeUser({ type: UserType.player });
 
     const { body } = await request(app)
       .patch(`/admin/users/${permissibleUser.id}`)

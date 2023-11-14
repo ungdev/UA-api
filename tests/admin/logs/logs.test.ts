@@ -39,7 +39,7 @@ describe('GET /admin/logs', () => {
     request(app).get('/admin/logs').set('Authorization', `Bearer ${adminToken}`).expect(400));
 
   it('should return generated user logs', async () => {
-    user = await createFakeUser({type: UserType.player});
+    user = await createFakeUser({ type: UserType.player });
     await request(app)
       .post('/auth/reset-password/ask')
       .send({

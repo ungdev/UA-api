@@ -14,7 +14,7 @@ import env from '../../src/utils/env';
 import { setShopAllowed } from '../../src/operations/settings';
 import { getCaptain } from '../../src/utils/teams';
 import { createAttendant, deleteUser, updateAdminUser } from '../../src/operations/user';
-import { joinTeam } from "../../src/operations/team";
+import { joinTeam } from '../../src/operations/team';
 
 describe('POST /users/current/carts', () => {
   let user: User;
@@ -125,7 +125,7 @@ describe('POST /users/current/carts', () => {
     token = generateToken(user);
 
     const coach = await createFakeUser({ type: UserType.coach });
-    const partnerUser = await createFakeUser({type: UserType.player, email: 'toto@utt.fr'});
+    const partnerUser = await createFakeUser({ type: UserType.player, email: 'toto@utt.fr' });
     await joinTeam(team.id, coach, UserType.coach);
     await joinTeam(team.id, partnerUser, UserType.player);
 
@@ -156,7 +156,7 @@ describe('POST /users/current/carts', () => {
     teamInFullTournament = await createFakeTeam({ members: 1, tournament: 'test' });
     captainInFullTournament = getCaptain(teamInFullTournament);
     tokenInFullTournament = generateToken(captainInFullTournament);
-    coachInFullTournament = await createFakeUser({type: UserType.coach});
+    coachInFullTournament = await createFakeUser({ type: UserType.coach });
     await joinTeam(teamInFullTournament.id, coachInFullTournament, UserType.coach);
   });
 

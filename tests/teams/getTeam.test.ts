@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as responses from '../../src/utils/responses';
@@ -10,7 +11,6 @@ import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchTeam, lockTeam } from '../../src/operations/team';
 import { sleep } from '../../src/utils/helpers';
-import { UserType } from "@prisma/client";
 
 describe('GET /teams/current', () => {
   let tournament: Tournament;
@@ -58,7 +58,7 @@ describe('GET /teams/current', () => {
   });
 
   it('should error as the logged user is not is a team', async () => {
-    const otherUser = await createFakeUser({type: UserType.player});
+    const otherUser = await createFakeUser({ type: UserType.player });
     const otherUserToken = generateToken(otherUser);
 
     await request(app)

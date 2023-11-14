@@ -13,7 +13,7 @@ describe('POST /admin/auth/login', () => {
   let adminToken: string;
 
   before(async () => {
-    user = await createFakeUser({type: UserType.player});
+    user = await createFakeUser({ type: UserType.player });
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = userUtils.generateToken(admin);
   });

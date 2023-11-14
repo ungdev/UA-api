@@ -16,7 +16,7 @@ describe('POST /teams/:teamId/join-requests', () => {
 
   before(async () => {
     team = await createFakeTeam();
-    user = await createFakeUser({type: UserType.player});
+    user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
   });
 

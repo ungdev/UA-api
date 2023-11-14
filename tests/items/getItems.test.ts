@@ -11,7 +11,7 @@ import { Error, User, Team, TransactionState, Cart, Item } from '../../src/types
 import { createFakeTeam } from '../utils';
 import { getCaptain } from '../../src/utils/teams';
 import { generateToken } from '../../src/utils/users';
-import { fetchTournament } from "../../src/operations/tournament";
+import { fetchTournament } from '../../src/operations/tournament';
 
 describe('GET /items', () => {
   let captain: User;

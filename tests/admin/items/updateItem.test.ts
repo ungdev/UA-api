@@ -4,7 +4,7 @@ import { Item, ItemCategory, TransactionState } from '@prisma/client';
 import app from '../../../src/app';
 import { createFakeCart, createFakeItem, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User, UserType } from "../../../src/types";
+import { Error, Permission, User, UserType } from '../../../src/types';
 import { generateToken } from '../../../src/utils/users';
 
 describe('PATCH /admin/items/:itemId', () => {
@@ -32,7 +32,7 @@ describe('PATCH /admin/items/:itemId', () => {
       availableFrom: new Date(1970, 1, 1),
       availableUntil: new Date(1971, 1, 1),
     });
-    user = await createFakeUser({type: UserType.player});
+    user = await createFakeUser({ type: UserType.player });
     // Buy this item. Buy it once per transaction state, to test them all
     await Promise.all(
       (['paid', 'pending', 'authorization', 'refused', 'canceled', 'refunded', 'stale'] as TransactionState[]).map(

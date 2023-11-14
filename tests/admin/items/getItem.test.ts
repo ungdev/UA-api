@@ -4,7 +4,7 @@ import { Item } from '@prisma/client';
 import app from '../../../src/app';
 import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User, UserType } from "../../../src/types";
+import { Error, Permission, User, UserType } from '../../../src/types';
 import { generateToken } from '../../../src/utils/users';
 import { fetchAllItems } from '../../../src/operations/item';
 
@@ -16,7 +16,7 @@ describe('GET /admin/items/:itemId', () => {
 
   before(async () => {
     [item] = await fetchAllItems();
-    user = await createFakeUser({type: UserType.player});
+    user = await createFakeUser({ type: UserType.player });
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
   });

@@ -59,7 +59,7 @@ describe('DELETE /teams/current/users/:userId', () => {
   });
 
   it('should fail because the user is a random with no rights', async () => {
-    const randomUser = await createFakeUser({type: UserType.player});
+    const randomUser = await createFakeUser({ type: UserType.player });
     const randomUserToken = generateToken(randomUser);
 
     await request(app)

@@ -39,7 +39,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
 
   before(async () => {
     admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser({type: UserType.player});
+    nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
 
     tournament = await createFakeTournament({

@@ -18,7 +18,7 @@ describe('DELETE /teams/current/join-requests/:userId', () => {
 
   before(async () => {
     team = await createFakeTeam({ members: 2 });
-    user = await createFakeUser({type: UserType.player});
+    user = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
 
     captain = getCaptain(team);
@@ -35,7 +35,7 @@ describe('DELETE /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail because the user is a random with no rights', async () => {
-    const randomUser = await createFakeUser({type: UserType.player});
+    const randomUser = await createFakeUser({ type: UserType.player });
     const randomUserToken = generateToken(randomUser);
 
     await request(app)

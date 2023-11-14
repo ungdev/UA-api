@@ -134,7 +134,7 @@ describe('POST /admin/scan/:qrcode', () => {
   });
 
   it('should scan a user with his id only', async () => {
-    const scannableUser = await createFakeUser({type: UserType.player});
+    const scannableUser = await createFakeUser({ type: UserType.player });
     await forcePay(scannableUser);
     const body = {
       userId: scannableUser.id,

@@ -23,11 +23,11 @@ describe('POST /admin/users/:userId/force-pay', () => {
   let player2: User;
 
   before(async () => {
-    user = await createFakeUser({type: UserType.player});
+    user = await createFakeUser({ type: UserType.player });
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
     // Store the promises, to wait them all at the same time
-    const promises = [];
+    const promises = [] as Promise<Team>[];
 
     tournament = await tournamentOperations.fetchTournament('lol');
     team = await createFakeTeam({ members: tournament.playersPerTeam, tournament: 'lol' });
@@ -97,7 +97,7 @@ describe('POST /admin/users/:userId/force-pay', () => {
       .expect(403, { error: Error.AlreadyPaid }));
 
   it('should force pay the user and scan his ticket at the same time', async () => {
-    const otherUser = await createFakeUser({type: UserType.player});
+    const otherUser = await createFakeUser({ type: UserType.player });
     const { body } = await request(app)
       .post(`/admin/users/${otherUser.id}/force-pay`)
       .send({

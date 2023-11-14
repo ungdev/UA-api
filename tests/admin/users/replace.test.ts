@@ -121,7 +121,7 @@ describe('POST /admin/users/:userId/replace', () => {
   });
 
   it('should error as the target user has not paid', async () => {
-    const notPaidUser = await createFakeUser({type: UserType.player});
+    const notPaidUser = await createFakeUser({ type: UserType.player });
 
     return request(app)
       .post(`/admin/users/${user.id}/replace`)

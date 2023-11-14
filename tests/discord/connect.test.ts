@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import database from '../../src/services/database';
 import { User, Error } from '../../src/types';
 import { createFakeUser } from '../utils';
@@ -8,14 +9,13 @@ import env from '../../src/utils/env';
 import { encrypt } from '../../src/utils/helpers';
 import { sandbox } from '../setup';
 import * as discordService from '../../src/services/discord';
-import { UserType } from "@prisma/client";
 
 describe('GET /discord/connect', () => {
   let user: User;
   let token: string;
 
   before(async () => {
-    user = await createFakeUser({type: UserType.player});
+    user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
     env.discord.client = '01234567890123';
   });

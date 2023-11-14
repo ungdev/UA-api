@@ -69,7 +69,7 @@ export default [
 
       const cartItems: PrimitiveCartItem[] = [];
 
-      const tournament = team && await fetchTournament(team.tournamentId);
+      const tournament = team && (await fetchTournament(team.tournamentId));
 
       // Manage the ticket part
       // We use sequential order to be able to send a response in case of bad userId
