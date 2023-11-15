@@ -106,7 +106,11 @@ export default [
         }
 
         // Checks if the tournament is full (if the user is a coach or an attendant, they can still have their place bought)
-        if ((ticketUser.type === UserType.player || ticketUser.type === UserType.coach) && tournament.placesLeft <= 0 && !team.lockedAt) {
+        if (
+          (ticketUser.type === UserType.player || ticketUser.type === UserType.coach) &&
+          tournament.placesLeft <= 0 &&
+          !team.lockedAt
+        ) {
           return forbidden(response, ResponseError.TournamentFull);
         }
 
