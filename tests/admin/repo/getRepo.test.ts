@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeUser, createFakeTeam } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User, Team } from '../../../src/types';
+import { Error, Permission, User, Team, UserType } from '../../../src/types';
 import * as userUtils from '../../../src/utils/users';
 import * as teamUtils from '../../../src/utils/teams';
 import { encrypt } from '../../../src/utils/helpers';
@@ -19,9 +19,9 @@ describe('GET /admin/repo/user', () => {
   let captain: User;
 
   before(async () => {
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = userUtils.generateToken(admin);
-    nonAdmin = await createFakeUser();
+    nonAdmin = await createFakeUser({ type: UserType.player });
     nonAdminToken = userUtils.generateToken(nonAdmin);
     team = await createFakeTeam();
     captain = teamUtils.getCaptain(team);

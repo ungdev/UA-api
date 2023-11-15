@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { RepoLogAction } from '@prisma/client';
 import { scanUser } from '../../../src/operations/user';
 import database from '../../../src/services/database';
-import { Error, Permission, Team, User } from '../../../src/types';
+import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
 import { createFakeTeam, createFakeUser } from '../../utils';
@@ -19,9 +19,9 @@ describe('DELETE /admin/repo/user/:userId/items/:itemId', () => {
   let captain: User;
 
   before(async () => {
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
-    nonAdmin = await createFakeUser();
+    nonAdmin = await createFakeUser({ type: UserType.player });
     nonAdminToken = generateToken(nonAdmin);
     team = await createFakeTeam();
     captain = getCaptain(team);

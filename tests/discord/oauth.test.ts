@@ -1,5 +1,6 @@
 import request from 'supertest';
 import * as sentryOperations from '@sentry/node';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { createFakeUser, generateFakeDiscordId } from '../utils';
 import database from '../../src/services/database';
@@ -15,7 +16,7 @@ describe('GET /discord/oauth', () => {
   let discordId: string;
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
   });
 
   after(() => {
@@ -124,7 +125,7 @@ describe('GET /discord/oauth', () => {
   });
 
   it('should fail if discord account is already bound to another account', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     return request(app)
       .get('/discord/oauth')
       .query({

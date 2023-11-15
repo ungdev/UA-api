@@ -318,6 +318,7 @@ export const enum Error {
   AlreadyHaveComputer = 'Tu as déjà un ordinateur stocké',
   AlreadyPickedUp = "L'objet a déjà été récupéré",
   TooMuchLockedTeams = "Il y a plus d'équipes inscrites que le nombre d'équipes maximal souhaité",
+  TournamentFull = "Le tournoi est plein, attends qu'une place se libère pour payer un ticket",
 
   // 404
   // The server can't find the requested resource

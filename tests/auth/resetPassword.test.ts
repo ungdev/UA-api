@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import database from '../../src/services/database';
 import * as userOperations from '../../src/operations/user';
@@ -13,7 +14,7 @@ describe('POST /auth/reset-password/:uuid', () => {
 
   before(async () => {
     // Creates a fake user
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
 
     // Generate a reset token as if we asked to reset the password
     const updatedUser = await userOperations.generateResetToken(user.id);

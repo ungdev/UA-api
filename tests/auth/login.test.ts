@@ -13,7 +13,7 @@ describe('POST /auth/login', () => {
   let user: User;
 
   before(async () => {
-    user = await createFakeUser({ password });
+    user = await createFakeUser({ password, type: UserType.player });
   });
 
   after(async () => {

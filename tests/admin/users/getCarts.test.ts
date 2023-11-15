@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User } from '../../../src/types';
+import { Error, Permission, User, UserType } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
@@ -15,8 +15,8 @@ describe('GET /admin/users/:userId/carts', () => {
   let adminToken: string;
 
   before(async () => {
-    user = await createFakeUser();
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    user = await createFakeUser({ type: UserType.player });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
   });
 
@@ -113,6 +113,7 @@ describe('GET /admin/users/:userId/carts', () => {
     // Create price-reduced account
     const partnerSchoolUser = await createFakeUser({
       email: 'someone@utt.fr',
+      type: UserType.player,
     });
 
     // Create a cart, containing a reduced-price ticket, a full-price ticket and another

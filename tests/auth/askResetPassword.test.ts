@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import * as userOperations from '../../src/operations/user';
 import { Error, User } from '../../src/types';
@@ -13,7 +14,7 @@ describe('POST /auth/reset-password/ask', () => {
 
   before(async () => {
     // Creates a fake user with email validated
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
   });
 
   after(async () => {

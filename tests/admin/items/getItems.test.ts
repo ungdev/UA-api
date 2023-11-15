@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '../../../src/app';
 import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Item, Permission, User } from '../../../src/types';
+import { Error, Item, Permission, User, UserType } from '../../../src/types';
 import { generateToken } from '../../../src/utils/users';
 import { fetchAllItems } from '../../../src/operations/item';
 
@@ -15,8 +15,8 @@ describe('GET /admin/items', () => {
 
   before(async () => {
     items = await fetchAllItems();
-    user = await createFakeUser();
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    user = await createFakeUser({ type: UserType.player });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
   });
 

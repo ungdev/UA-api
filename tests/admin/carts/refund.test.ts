@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeTeam, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Cart, Error, Permission, User, TransactionState, Team } from '../../../src/types';
+import { Cart, Error, Permission, User, TransactionState, Team, UserType } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import * as teamOperations from '../../../src/operations/team';
 import * as tournamentOperations from '../../../src/operations/tournament';
@@ -21,9 +21,9 @@ describe('POST /admin/carts/:cartId/refund', () => {
 
   before(async () => {
     const tournament = await tournamentOperations.fetchTournament('lol');
-    user = await createFakeUser();
-    const coach = await createFakeUser();
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    user = await createFakeUser({ type: UserType.player });
+    const coach = await createFakeUser({ type: UserType.player });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
     const team = await createFakeTeam({
       members: tournament.playersPerTeam - 1,
