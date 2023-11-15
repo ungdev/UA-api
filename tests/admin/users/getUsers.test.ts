@@ -21,6 +21,7 @@ describe('GET /admin/users', () => {
       email: 'email@gmail.com',
       username: 'username',
       paid: true,
+      type: UserType.player,
     });
     admin = await createFakeUser({
       firstname: 'admin',
@@ -106,7 +107,7 @@ describe('GET /admin/users', () => {
   });
 
   it('should fetch one user per place', async () => {
-    const placedUser = await userOperations.updateAdminUser((await createFakeUser()).id, {
+    const placedUser = await userOperations.updateAdminUser((await createFakeUser({ type: UserType.player })).id, {
       place: 'A21',
     });
 

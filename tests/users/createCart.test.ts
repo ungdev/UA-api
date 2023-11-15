@@ -6,14 +6,15 @@ import * as userOperations from '../../src/operations/user';
 import * as itemOperations from '../../src/operations/item';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
-import { Error, User, Team, UserAge, UserType, TransactionState } from '../../src/types';
-import { createFakeUser, createFakeTeam } from '../utils';
+import { Error, User, Team, UserAge, UserType, TransactionState, Tournament } from '../../src/types';
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { PayBody } from '../../src/controllers/users/createCart';
 import env from '../../src/utils/env';
 import { setShopAllowed } from '../../src/operations/settings';
 import { getCaptain } from '../../src/utils/teams';
 import { createAttendant, deleteUser, updateAdminUser } from '../../src/operations/user';
+import { joinTeam } from '../../src/operations/team';
 
 describe('POST /users/current/carts', () => {
   let user: User;
@@ -30,6 +31,12 @@ describe('POST /users/current/carts', () => {
   let annoyingTeamWithSwitchDiscount: Team;
   let annoyingUserWithSwitchDiscount: User;
   let annoyingTokenWithSwitchDiscount: string;
+
+  let fullTournament: Tournament;
+  let teamInFullTournament: Team;
+  let captainInFullTournament: User;
+  let tokenInFullTournament: string;
+  let coachInFullTournament: User;
 
   const validCart: PayBody = {
     tickets: {
@@ -113,15 +120,17 @@ describe('POST /users/current/carts', () => {
   };
 
   before(async () => {
-    user = await createFakeUser();
+    const team = await createFakeTeam({ members: 1, tournament: 'cs2', name: 'dontcare' });
+    user = getCaptain(team);
     token = generateToken(user);
 
     const coach = await createFakeUser({ type: UserType.coach });
-    const partnerUser = await createFakeUser({ email: 'toto@utt.fr' });
-    const spectator = await createFakeUser({ type: UserType.spectator });
+    const partnerUser = await createFakeUser({ type: UserType.player, email: 'toto@utt.fr' });
+    await joinTeam(team.id, coach, UserType.coach);
+    await joinTeam(team.id, partnerUser, UserType.player);
 
     // Add three tickets
-    validCart.tickets.userIds.push(user.id, coach.id, partnerUser.id, spectator.id);
+    validCart.tickets.userIds.push(user.id, coach.id, partnerUser.id);
 
     teamWithSwitchDiscount = await createFakeTeam({ tournament: 'ssbu' });
     userWithSwitchDiscount = getCaptain(teamWithSwitchDiscount);
@@ -136,6 +145,19 @@ describe('POST /users/current/carts', () => {
     annoyingTeamWithSwitchDiscount = await createFakeTeam({ tournament: 'ssbu' });
     annoyingUserWithSwitchDiscount = getCaptain(annoyingTeamWithSwitchDiscount);
     annoyingTokenWithSwitchDiscount = generateToken(annoyingUserWithSwitchDiscount);
+
+    fullTournament = await createFakeTournament({
+      id: 'test',
+      name: 'test',
+      playersPerTeam: 1,
+      coachesPerTeam: 1,
+      maxTeams: 0,
+    });
+    teamInFullTournament = await createFakeTeam({ members: 1, tournament: 'test' });
+    captainInFullTournament = getCaptain(teamInFullTournament);
+    tokenInFullTournament = generateToken(captainInFullTournament);
+    coachInFullTournament = await createFakeUser({ type: UserType.coach });
+    await joinTeam(teamInFullTournament.id, coachInFullTournament, UserType.coach);
   });
 
   after(async () => {
@@ -143,6 +165,7 @@ describe('POST /users/current/carts', () => {
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.delete({ where: { id: fullTournament.id } });
   });
 
   it('should fail as the shop is deactivated', async () => {
@@ -303,7 +326,7 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should fail as the user is already paid', async () => {
-    const paidUser = await createFakeUser({ paid: true });
+    const paidUser = await createFakeUser({ paid: true, type: UserType.player });
 
     await request(app)
       .post(`/users/current/carts`)
@@ -326,7 +349,15 @@ describe('POST /users/current/carts', () => {
     return request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
-      .send(validCart)
+      .send({
+        tickets: { userIds: [] },
+        supplements: [
+          {
+            itemId: 'ethernet-7',
+            quantity: 4,
+          },
+        ],
+      } as PayBody)
       .expect(500, { error: Error.InternalServerError });
   });
 
@@ -341,6 +372,7 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should successfuly create a cart', async () => {
+    const oldUserCount = await database.user.count();
     const { body } = await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${token}`)
@@ -364,23 +396,22 @@ describe('POST /users/current/carts', () => {
 
     const users = await database.user.findMany();
 
-    const coach = users.find((findUser) => findUser.type === UserType.coach);
+    const coach = users.find((findUser) => findUser.type === UserType.coach && findUser.teamId === user.teamId);
     const attendant = users.find((findUser) => findUser.type === UserType.attendant);
-    const spectator = users.find((findUser) => findUser.type === UserType.spectator);
 
     expect(body.url).to.startWith(env.etupay.url);
 
-    // player place + player reduced price + coach place + attendant place + spectator place + 4 * ethernet-7
-    expect(body.price).to.be.equal(2500 + 2000 + 1500 + 1500 + 1000 + 4 * 1000);
+    // player place + player reduced price + coach place + attendant place + 4 * ethernet-7
+    // TODO : do it better (use directly values in the database)
+    expect(body.price).to.be.equal(2500 + 2000 + 1500 + 1500 + 4 * 1000);
 
     expect(carts).to.have.lengthOf(1);
-    expect(cartItems).to.have.lengthOf(6);
-    expect(users).to.have.lengthOf(8);
+    expect(cartItems).to.have.lengthOf(5);
+    expect(users).to.have.lengthOf(oldUserCount + 1);
 
     expect(cartItems.filter((cartItem) => cartItem.forUserId === user.id)).to.have.lengthOf(2);
     expect(cartItems.filter((cartItem) => cartItem.forUserId === coach?.id)).to.have.lengthOf(1);
     expect(cartItems.filter((cartItem) => cartItem.forUserId === attendant?.id)).to.have.lengthOf(1);
-    expect(cartItems.filter((cartItem) => cartItem.forUserId === spectator?.id)).to.have.lengthOf(1);
 
     expect(supplement?.quantity).to.be.equal(validCart.supplements[0].quantity);
 
@@ -540,15 +571,16 @@ describe('POST /users/current/carts', () => {
     const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator')?.stock;
 
     await database.item.update({
-      data: { stock: 1 },
+      data: { stock: 0 },
       where: { id: 'ticket-spectator' },
     });
 
     const spectator = await createFakeUser({ type: UserType.spectator });
+    const spectatorToken = generateToken(spectator);
 
     await request(app)
       .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${spectatorToken}`)
       .send({
         tickets: { userIds: [spectator.id] },
         supplements: [],
@@ -575,10 +607,11 @@ describe('POST /users/current/carts', () => {
     });
 
     const spectator = await createFakeUser({ type: UserType.spectator });
+    const spectatorToken = generateToken(spectator);
 
     const { body } = await request(app)
       .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${spectatorToken}`)
       .send({
         tickets: { userIds: [spectator.id] },
         supplements: [],
@@ -635,10 +668,11 @@ describe('POST /users/current/carts', () => {
     // We create another spectator who will try to buy a spectator ticket
     // This operation should succeed.
     const spectator = await createFakeUser({ type: UserType.spectator });
+    const spectatorToken = generateToken(spectator);
 
     const { body } = await request(app)
       .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${spectatorToken}`)
       .send({
         tickets: { userIds: [spectator.id] },
         supplements: [],
@@ -665,5 +699,27 @@ describe('POST /users/current/carts', () => {
       data: { stock: currentSpectatorStock },
       where: { id: 'ticket-spectator' },
     });
+  });
+
+  it('should fail as a player is trying to pay his place in a full tournament', async () => {
+    await request(app)
+      .post('/users/current/carts')
+      .set('Authorization', `Bearer ${tokenInFullTournament}`)
+      .send({
+        tickets: { userIds: [captainInFullTournament.id] },
+        supplements: [],
+      })
+      .expect(403, { error: Error.TournamentFull });
+  });
+
+  it('should fail as we are trying to buy the place of a coach in an unlocked team in a full tournament', async () => {
+    await request(app)
+      .post('/users/current/carts')
+      .set('Authorization', `Bearer ${tokenInFullTournament}`)
+      .send({
+        tickets: { userIds: [coachInFullTournament.id] },
+        supplements: [],
+      })
+      .expect(403, { error: Error.TournamentFull });
   });
 });

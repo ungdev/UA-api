@@ -26,7 +26,7 @@ describe('PATCH /admin/settings', () => {
     await setShopAllowed(false);
     await setTrombiAllowed(false);
     admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser();
+    nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
   });
 

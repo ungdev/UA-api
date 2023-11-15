@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import database from '../../src/services/database';
 import { User, Error } from '../../src/types';
 import { createFakeUser } from '../utils';
@@ -14,7 +15,7 @@ describe('GET /discord/connect', () => {
   let token: string;
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
     env.discord.client = '01234567890123';
   });

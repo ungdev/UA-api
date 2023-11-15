@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as cartOperations from '../../src/operations/carts';
@@ -8,12 +9,12 @@ import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { fetchAllItems } from '../../src/operations/item';
 
-describe('POST /users/current/carts', () => {
+describe('GET /users/current/carts', () => {
   let user: User;
   let token: string;
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
   });
 

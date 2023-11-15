@@ -12,8 +12,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { user } = getRequestInfo(response);
-      const { team } = getRequestInfo(response);
+      const { user, team } = getRequestInfo(response);
       const items = await fetchUserItems(team, user || undefined);
 
       const result = items.map(filterItem);

@@ -2,7 +2,7 @@ import request from 'supertest';
 import app from '../../src/app';
 import database from '../../src/services/database';
 import * as userOperations from '../../src/operations/user';
-import { Error, User } from '../../src/types';
+import { Error, User, UserType } from '../../src/types';
 import { setLoginAllowed } from '../../src/operations/settings';
 import { sandbox } from '../setup';
 import { createFakeUser } from '../utils';
@@ -13,7 +13,7 @@ describe('POST /auth/validate/{token}', () => {
 
   before(async () => {
     // Creates a fake user not confirmed
-    user = await createFakeUser({ password, confirmed: false });
+    user = await createFakeUser({ password, confirmed: false, type: UserType.player });
   });
 
   after(async () => {
