@@ -260,10 +260,31 @@ enum UserAge {
   child
 }
 
+/// _ is the separators between commissions and subcommissions
+/// On the front it will be useful to know how to group commissions
 enum Commission {
+  animation
+  animation_console
+  animation_cs2
+  animation_lol
+  animation_open
+  animation_pokemon
+  animation_rl
+  animation_ssbu
+  animation_tft
+  communication
   coord
+  decoration
+  design
   dev
+  electricity
+  logistique
+  mediatik
+  partners
+  restauration
   rozo
+  security
+  ssl
 }
 
 enum RoleInCommission {

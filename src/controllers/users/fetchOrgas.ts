@@ -6,19 +6,6 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const orgas = await fetchOrgas();
-      /* const result = Object.fromEntries(
-        Object.keys(Commission).map((commission) => [
-          commission,
-          Object.fromEntries<Array<{ id: string; firstname: string; lastname: string }>>(
-            Object.keys(RoleInCommission).map((role) => [role, []]),
-          ),
-        ]),
-      );
-      for (const orga of orgas) {
-        for (const role of orga.orgaRoles) {
-          result[role.commissionRole][role.commission].push(orga);
-        }
-      }*/
       const result = orgas.map((orga) => ({
         id: orga.id,
         firstname: orga.firstname,
