@@ -28,10 +28,11 @@ describe('GET /admin/users', () => {
       lastname: 'admin',
       email: 'admin@gmail.com',
       username: 'admin',
-      type: UserType.orga,
       permissions: [Permission.admin],
     });
     adminToken = generateToken(admin);
+    // We need a coach
+    await createFakeUser({ type: UserType.coach });
   });
 
   after(async () => {
@@ -101,7 +102,7 @@ describe('GET /admin/users', () => {
 
     expect(body.itemsPerPage).to.be.equal(env.api.itemsPerPage);
     expect(body.currentPage).to.be.equal(1);
-    expect(body.totalItems).to.be.equal(2);
+    expect(body.totalItems).to.be.equal(3);
     expect(body.totalPages).to.be.equal(1);
     expect(body.users).to.have.lengthOf(0);
   });
@@ -167,7 +168,7 @@ describe('GET /admin/users', () => {
   });
 
   describe('Test type field', () => {
-    for (const type of ['player', 'orga'])
+    for (const type of ['player', 'coach'])
       it(`should fetch the user with type ${type}`, async () => {
         const { body } = await request(app)
           .get(`/admin/users?type=${type}`)
@@ -308,7 +309,7 @@ describe('GET /admin/users', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(body.users.length).to.be.equal(1);
+      expect(body.users.length).to.be.equal(2);
     });
   });
 
@@ -343,13 +344,13 @@ describe('GET /admin/users', () => {
       expect(body.users.length).to.be.equal(1);
     });
 
-    it('should return two non scanned user (including the admin)', async () => {
+    it('should return 3 non scanned user (including the admin)', async () => {
       await database.user.update({ data: { scannedAt: null }, where: { id: user.id } });
       const { body } = await request(app)
         .get(`/admin/users?scan=false`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
-      expect(body.users.length).to.be.equal(2);
+      expect(body.users.length).to.be.equal(3);
     });
   });
 });

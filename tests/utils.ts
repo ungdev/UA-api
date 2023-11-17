@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
-import { ItemCategory } from '@prisma/client';
+import { Commission, ItemCategory, RoleInCommission } from '@prisma/client';
 import { fetchUser } from '../src/operations/user';
 import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
@@ -33,6 +33,7 @@ type FakeUserData = {
   customMessage?: string;
   /** @default UserAge.adult */
   age?: UserAge;
+  orgaRoles?: Array<{ commission: Commission; role: RoleInCommission }>;
 };
 
 const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
@@ -78,6 +79,9 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
           },
         }
       : undefined,
+    orgaRoles: {
+      create: data.orgaRoles?.map((role) => ({ commission: role.commission, commissionRole: role.role })),
+    },
   }));
 };
 

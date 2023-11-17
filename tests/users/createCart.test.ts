@@ -310,21 +310,6 @@ describe('POST /users/current/carts', () => {
       .expect(404, { error: Error.ItemNotFound });
   });
 
-  it('should fail as you try to order a ticket for an orga', async () => {
-    const orga = await createFakeUser({ type: UserType.orga });
-    await request(app)
-      .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        tickets: { userIds: [orga.id] },
-        supplements: [],
-      })
-      .expect(403, { error: Error.NotPlayerOrCoachOrSpectator });
-
-    // Delete the user to not make the results wrong for the success test
-    await database.user.delete({ where: { id: orga.id } });
-  });
-
   it('should fail as the user is already paid', async () => {
     const paidUser = await createFakeUser({ paid: true, type: UserType.player });
 

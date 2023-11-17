@@ -19,9 +19,6 @@ export const fetchRemoteTicket = [
       // Check if the user exists. Return the same error if the player is not in the same team
       if (!remoteUser || remoteUser.teamId !== user.teamId) return notFound(response, ResponseError.UserNotFound);
 
-      // The item `ticket-orga` does not exist, filter them out !
-      if (remoteUser.type === 'orga') return forbidden(response, ResponseError.IsOrga);
-
       // Check if the user has already paid
       if (remoteUser.hasPaid) return forbidden(response, ResponseError.AlreadyPaid);
 

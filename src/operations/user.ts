@@ -213,6 +213,13 @@ export const fetchUsers = async (
   return [users.map(formatUserWithTeamAndTournament), count];
 };
 
+/** Returns orga users */
+export const fetchOrgas = () =>
+  database.user.findMany({
+    where: { permissions: { contains: 'orga' } },
+    select: { id: true, firstname: true, lastname: true, orgaRoles: true },
+  });
+
 export const createUser = async (user: {
   username: string;
   firstname: string;

@@ -84,14 +84,6 @@ describe('POST /teams/:teamId/join-requests', () => {
       .expect(403, { error: Error.TeamLocked });
   });
 
-  it('should not allow orga userType', async () => {
-    await request(app)
-      .post(`/teams/${team.id}/join-requests`)
-      .send({ userType: UserType.orga })
-      .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: "L'utilisateur doit être un joueur ou un coach" });
-  });
-
   it('should succesfully request to join a team as a coach', async () => {
     const { body } = await request(app)
       .post(`/teams/${team.id}/join-requests`)

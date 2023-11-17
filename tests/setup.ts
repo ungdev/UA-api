@@ -71,6 +71,9 @@ after(async () => {
   const repoLogCount = await database.repoLog.count();
   expect(repoLogCount).to.be.equal(0);
 
+  const orgaRoleCount = await database.orgaRole.count();
+  expect(orgaRoleCount).to.be.equal(0);
+
   await database.$disconnect();
   transporter.close();
 
