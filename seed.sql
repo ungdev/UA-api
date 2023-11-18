@@ -28,3 +28,27 @@ INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`, `coache
 ('tft', 'Teamfight Tactics', 32, 1, 1, 0, 6),
 ('open', 'Libre', 40, 1, 1, 0, 7),
 ('pokemon', 'Pokémon', 24, 1, 1, 0, 8);
+
+INSERT INTO `commission` (`id`, `name`, `position`, `masterCommissionId`) VALUES
+('animation', 'Animation', 1, NULL),
+('animation_console', 'Animation stand console', 2, 'animation'),
+('animation_cs2', 'Animation CS2', 3, 'animation'),
+('animation_lol', 'Animation LoL', 4, 'animation'),
+('animation_open', 'Animation tournois libre', 5, 'animation'),
+('animation_pokemon', 'animation Pokémon', 6, 'animation'),
+('animation_rl', 'Animation Rocket League', 7, 'animation'),
+('animation_ssbu', 'Animation SSBU', 8, 'animation'),
+('animation_tft', 'Animation TFT', 9, 'animation'),
+('communication', 'Communication', 10, NULL),
+('coord', 'Coordinateur', 0, NULL),
+('decoration', 'Décoration', 11, NULL),
+('design', 'Graphisme', 12, NULL),
+('dev', 'Développement', 13, NULL),
+('electricity', 'Électricité', 14, NULL),
+('logistique', 'Logistique', 15, NULL),
+('mediatik', 'Médiatik', 16, NULL),
+('partners', 'Partenaires', 17, NULL),
+('restauration', 'Restauration', 18, NULL),
+('rozo', 'Réseau', 19, NULL),
+('security', 'Sécurité', 20, NULL),
+('ssl', 'Scène, son et lumière', 21, NULL);

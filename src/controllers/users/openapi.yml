@@ -262,16 +262,30 @@
                 properties:
                   id:
                     type: string
-                  firstname:
+                  name:
                     type: string
-                  lastname:
-                    type: string
-                  commissions:
+                  roles:
                     type: object
                     properties:
-                      dev:
-                        type: string
-                        example: respo
-                      anim:
-                        type: string
-                        example: member
+                      respo:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            firstname:
+                              type: string
+                            lastname:
+                              type: string
+                      member:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            firstname:
+                              type: string
+                            lastname:
+                              type: string

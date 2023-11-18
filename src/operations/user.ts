@@ -217,7 +217,12 @@ export const fetchUsers = async (
 export const fetchOrgas = () =>
   database.user.findMany({
     where: { permissions: { contains: 'orga' } },
-    select: { id: true, firstname: true, lastname: true, orgaRoles: true },
+    select: {
+      id: true,
+      firstname: true,
+      lastname: true,
+      orgaRoles: { select: { commission: true, commissionRole: true } },
+    },
   });
 
 export const createUser = async (user: {
