@@ -8,6 +8,7 @@ import { sandbox } from '../setup';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
 import { fetchCommission } from '../../src/operations/commission';
+import { fetchSetting, setTrombiAllowed } from "../../src/operations/settings";
 
 describe('GET /users/orgas', () => {
   let developmentRespo: User;
@@ -50,6 +51,12 @@ describe('GET /users/orgas', () => {
     sandbox.stub(userOperations, 'fetchOrgas').throws('Unexpected error');
 
     return request(app).get(`/users/orgas`).send().expect(500, { error: Error.InternalServerError });
+  });
+
+  it('should fail as the trombi is not enabled', async () => {
+    await setTrombiAllowed(false);
+    await request(app).get('/users/orgas').send().expect(403, { error: Error.TrombiNotAllowed });
+    await setTrombiAllowed(true);
   });
 
   it('should successfully return the list of organisers, along with their commissions and role in each one of them', async () => {

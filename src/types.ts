@@ -277,6 +277,7 @@ export const enum Error {
   LoginNotAllowed = 'Tu ne peux pas te connecter actuellement',
   NotAdmin = "Tu n'es pas administrateur",
   ShopNotAllowed = 'La billetterie est fermée',
+  TrombiNotAllowed = "Le trombinoscope n'est pas encore disponible",
   EmailNotConfirmed = "Le compte n'est pas confirmé",
   EmailAlreadyConfirmed = 'Le compte est déjà confirmé',
   NoPermission = "Tu n'as pas la permission d'accéder à cette ressource",

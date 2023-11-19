@@ -1,11 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { fetchOrgas } from '../../operations/user';
-import { success } from '../../utils/responses';
+import { forbidden, success } from "../../utils/responses";
 import database from '../../services/database';
+import { fetchSetting } from "../../operations/settings";
+import { Error } from "../../types";
 
 export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
+      if (!(await fetchSetting('trombi')).value) return forbidden(response, Error.TrombiNotAllowed);
       const orgas = await fetchOrgas();
       const commissions = await database.commission.findMany();
       const resultInObject = Object.fromEntries(
