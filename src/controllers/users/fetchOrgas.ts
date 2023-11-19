@@ -18,6 +18,7 @@ export default [
             id: commission.id,
             name: commission.name,
             position: commission.position,
+            color: commission.color,
             masterCommission: commission.masterCommissionId,
             roles: { respo: [], member: [] },
           },

@@ -264,6 +264,8 @@
                     type: string
                   name:
                     type: string
+                  color:
+                    type: string
                   masterCommission:
                     type: string
                   roles:

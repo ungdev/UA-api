@@ -235,9 +235,10 @@ model OrgaRole {
 }
 
 model Commission {
-  id String                       @id
-  name String
-  position Int
+  id                 String       @id
+  name               String
+  position           Int
+  color              String
   masterCommissionId String?
   masterCommission   Commission?  @relation("masterCommission", fields: [masterCommissionId], references: [id])
   subCommissions     Commission[] @relation("masterCommission")
