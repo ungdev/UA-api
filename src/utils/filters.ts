@@ -34,6 +34,7 @@ export const filterUser = (user: User) =>
     'attendant.firstname',
     'attendant.lastname',
     'attendant.id',
+    'orgaRoles',
   ]);
 
 export const filterAdminAccount = (user: ParsedPermissionsHolder<RawUser>) =>

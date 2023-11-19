@@ -111,6 +111,24 @@ components:
           nullable: true
         hasPaid:
           type: boolean
+        orgaRoles:
+          type: array
+          items:
+            type: object
+            properties:
+              commissionRole:
+                type: string
+              commission:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  color:
+                    type: string
+                  masterCommissionId:
+                    type: string
 
     MailButton:
       type: object

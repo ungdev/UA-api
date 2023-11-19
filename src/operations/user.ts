@@ -27,6 +27,12 @@ export const userInclusions = {
   },
   attendant: true,
   attended: true,
+  orgaRoles: {
+    select: {
+      commissionRole: true,
+      commission: { select: { id: true, name: true, color: true, masterCommissionId: true } },
+    },
+  },
 };
 
 export const formatUser = (user: RawUserWithCartItems): User => {
