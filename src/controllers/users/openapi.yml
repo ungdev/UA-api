@@ -264,6 +264,8 @@
                     type: string
                   name:
                     type: string
+                  masterCommission:
+                    type: string
                   roles:
                     type: object
                     properties:
@@ -289,3 +291,5 @@
                               type: string
                             lastname:
                               type: string
+      403:
+        $ref: '#/components/responses/403Unauthorized'

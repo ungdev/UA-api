@@ -70,6 +70,7 @@ describe('GET /users/orgas', () => {
       expect(commission.position).to.be.greaterThanOrEqual(lastCommissionPosition);
       expect(['dev', 'rozo']).to.contain(commission.id);
       expect(bodyCommission.name).to.be.equal(commission.name);
+      expect(bodyCommission.masterCommission).to.be.equal(commission.masterCommissionId);
       expect(bodyCommission.roles.respo).to.have.length(1);
       if (commission.id === 'dev') {
         expect(bodyCommission.roles.respo[0].id).to.be.equal(developmentRespo.id);
