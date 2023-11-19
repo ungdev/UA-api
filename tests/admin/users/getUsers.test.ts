@@ -91,6 +91,7 @@ describe('GET /admin/users', () => {
       username: user.username,
       hasPaid: user.hasPaid,
       customMessage: null,
+      orgaRoles: [],
     });
   });
 
@@ -140,6 +141,7 @@ describe('GET /admin/users', () => {
       username: placedUser.username,
       hasPaid: false,
       customMessage: null,
+      orgaRoles: [],
     });
 
     return database.user.delete({ where: { id: placedUser.id } });
