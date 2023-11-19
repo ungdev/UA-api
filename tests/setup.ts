@@ -9,7 +9,7 @@ import chai, { expect } from 'chai';
 import chaiString from 'chai-string';
 import sinon from 'sinon';
 import database from '../src/services/database';
-import { setLoginAllowed, setShopAllowed, setTrombiAllowed } from "../src/operations/settings";
+import { setLoginAllowed, setShopAllowed, setTrombiAllowed } from '../src/operations/settings';
 import { transporter } from '../src/services/email';
 import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 import { disableFakeUploadApi, enableFakeUploadApi } from './upload';

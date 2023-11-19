@@ -8,7 +8,7 @@ import { sandbox } from '../setup';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
 import { fetchCommission } from '../../src/operations/commission';
-import { fetchSetting, setTrombiAllowed } from "../../src/operations/settings";
+import { setTrombiAllowed } from '../../src/operations/settings';
 
 describe('GET /users/orgas', () => {
   let developmentRespo: User;
