@@ -27,14 +27,13 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const team = await fetchTeam(request.params.teamId);
+      const { user } = getRequestInfo(response);
 
       // Check if the team exists
       if (!team) return notFound(response, ResponseError.TeamNotFound);
 
       // Check if the team is not locked
-      if (team.lockedAt) return forbidden(response, ResponseError.TeamLocked);
-
-      const { user } = getRequestInfo(response);
+      if (team.lockedAt && user.type !== UserType.coach) return forbidden(response, ResponseError.TeamLocked);
 
       // Check if the user is already asking for a team
       if (user.askingTeamId) return forbidden(response, ResponseError.AlreadyAskedATeam);
