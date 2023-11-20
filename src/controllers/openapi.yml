@@ -47,6 +47,8 @@ tags:
     description: Routes liées aux tournois
   - name: Users
     description: Routes liées aux utilisateurs
+  - name: Commissions
+    description: Routes liées aux commissions
 
 components:
   securitySchemes:
@@ -119,16 +121,7 @@ components:
               commissionRole:
                 type: string
               commission:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  name:
-                    type: string
-                  color:
-                    type: string
-                  masterCommissionId:
-                    type: string
+                $ref: '#components/schemas/Commission'
 
     MailButton:
       type: object
@@ -816,6 +809,18 @@ components:
           type: boolean
         position:
           type: integer
+
+    Commission:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+        masterCommissionId:
+          type: string
 
   responses:
     400Errored:

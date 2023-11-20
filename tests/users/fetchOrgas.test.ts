@@ -20,7 +20,7 @@ describe('GET /users/orgas', () => {
     const transactions: Promise<User>[] = [
       // Create a random user
       createFakeUser(),
-      // Create the respo of commission dev
+      // Create the respo of commissions dev
       createFakeUser({
         permissions: [Permission.orga, Permission.admin],
         orgaRoles: [{ commission: 'dev', role: RoleInCommission.respo }],
@@ -62,7 +62,7 @@ describe('GET /users/orgas', () => {
   it('should successfully return the list of organisers, along with their commissions and role in each one of them', async () => {
     const { body } = await request(app).get('/users/orgas').send().expect(200);
     expect(body).to.be.an('array').with.length(2);
-    // Make sure we don't get the same commission twice (if this ever fails. Please. Call me)
+    // Make sure we don't get the same commissions twice (if this ever fails. Please. Call me)
     expect(body[0].id).to.be.not.equal(body[1].id);
     const lastCommissionPosition = Number.NEGATIVE_INFINITY;
     for (const bodyCommission of body) {
