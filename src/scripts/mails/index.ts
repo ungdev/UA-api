@@ -6,7 +6,8 @@ import { Mail } from '../../services/email/types';
 import { EmailAttachement } from '../../types';
 import logger from '../../utils/logger';
 // import { ticketsGoal } from './tickets';
-import { notPaidGoal } from './notpaid';
+// import { notPaidGoal } from './notpaid';
+import { notPaidSSBUGoal } from './notpaidssbu';
 // import { discordGoal } from './discord';
 // import { minorGoal } from './minor';
 // import { unlockedPlayersGoal } from './unlocked';
@@ -22,7 +23,8 @@ const goals: Array<MailGoal> = [
   // discordGoal, minorGoal,
   // ticketsGoal,
   // unlockedPlayersGoal
-  notPaidGoal,
+  // notPaidGoal,
+  notPaidSSBUGoal,
 ];
 
 (async () => {
