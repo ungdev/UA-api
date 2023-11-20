@@ -875,6 +875,15 @@ components:
           example:
             error: Le panier est introuvable
 
+    404CommissionNotFound:
+      description: La commission est introuvable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: La commission n'existe pas
+
     409UsernameAlreadyExists:
       description: Le nom d'utilisateur existe déjà
       content:

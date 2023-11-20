@@ -177,7 +177,7 @@ export type UserPatchBody = Partial<
     | 'firstname'
     | 'lastname'
     | 'email'
-  >
+  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }> }
 >;
 
 export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
@@ -334,6 +334,7 @@ export const enum Error {
   TournamentNotFound = 'Le tournoi est introuvable',
   TicketNotFound = 'Le ticket est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
+  CommissionNotFound = "La commission n'existe pas",
 
   // 405
   // The request method is known by the server but is not supported by the target resource

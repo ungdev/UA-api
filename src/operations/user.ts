@@ -306,6 +306,28 @@ export const updateAdminUser = async (userId: string, updates: UserPatchBody): P
               disconnect: true,
             }
           : undefined,
+      orgaRoles: {
+        connectOrCreate: updates.orgaRoles?.map((orgaRole) => ({
+          where: {
+            userId_commissionId: { userId, commissionId: orgaRole.commission },
+          },
+          create: { commissionRole: orgaRole.commissionRole, commission: { connect: { id: orgaRole.commission } } },
+        })),
+        update: updates.orgaRoles?.map((orgaRole) => ({
+          where: {
+            userId_commissionId: { userId, commissionId: orgaRole.commission },
+          },
+          data: { commissionRole: orgaRole.commissionRole },
+        })),
+        deleteMany: {
+          userId,
+          NOT: {
+            OR: updates.orgaRoles?.map((orgaRole) => ({
+              commissionId: orgaRole.commission,
+            })),
+          },
+        },
+      },
     },
     where: { id: userId },
     include: userInclusions,

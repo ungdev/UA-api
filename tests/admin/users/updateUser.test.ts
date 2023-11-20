@@ -13,6 +13,7 @@ import { deleteRole, kickMember, registerMember, registerRole, resetFakeDiscord 
 describe('PATCH /admin/users/:userId', () => {
   let user: User;
   let adminToken: string;
+  let anim: User;
   let animToken: string;
   let tournamentDiscordId: string;
 
@@ -42,13 +43,14 @@ describe('PATCH /admin/users/:userId', () => {
     registerMember(user.discordId!);
     const admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
-    const anim = await createFakeUser({ permissions: [Permission.anim], type: UserType.player });
+    anim = await createFakeUser({ permissions: [Permission.anim], type: UserType.player });
     animToken = generateToken(anim);
   });
 
   after(async () => {
     // Delete the user created
     resetFakeDiscord();
+    await database.orgaRole.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.user.deleteMany();
@@ -319,6 +321,15 @@ describe('PATCH /admin/users/:userId', () => {
       })
       .expect(403, { error: Error.NoPermission }));
 
+  it('should return an error as the commission does not exist', () =>
+    request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        orgaRoles: [{ commissionRole: 'member', commission: 'random' }],
+      })
+      .expect(404, { error: Error.CommissionNotFound }));
+
   it('should allow an anim to alter a user', async () => {
     const randomUser = await createFakeUser({ type: UserType.player });
     delete validAnimBody.permissions;
@@ -396,5 +407,37 @@ describe('PATCH /admin/users/:userId', () => {
     expect(body.type).to.be.equal(permissibleUser.type);
     expect(body.age).to.be.equal(permissibleUser.age);
     expect(body.customMessage).to.be.equal(permissibleUser.customMessage);
+  });
+
+  it('should add 2 commissions to the anim orga', async () => {
+    const { body } = await request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        orgaRoles: [
+          { commissionRole: 'member', commission: 'animation_ssbu' },
+          { commissionRole: 'member', commission: 'animation_cs2' },
+        ],
+      })
+      .expect(200);
+    expect(body.orgaRoles).to.have.length(2);
+  });
+
+  it('should remove 1 commission to the anim orga, add 1 new commission and promote the orga in one commission', async () => {
+    const { body } = await request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        orgaRoles: [
+          { commissionRole: 'respo', commission: 'animation_ssbu' },
+          { commissionRole: 'member', commission: 'animation_lol' },
+        ],
+      })
+      .expect(200);
+    expect(body.orgaRoles).to.have.length(2);
+    expect(body.orgaRoles[0].commission.id).to.be.equal('animation_lol');
+    expect(body.orgaRoles[0].commissionRole).to.be.equal('member');
+    expect(body.orgaRoles[1].commission.id).to.be.equal('animation_ssbu');
+    expect(body.orgaRoles[1].commissionRole).to.be.equal('respo');
   });
 });
