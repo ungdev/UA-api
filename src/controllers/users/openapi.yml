@@ -247,7 +247,7 @@
 
 /users/orgas:
   get:
-    summary: Retourne la liste des organisateurs, avec leurs commissions et rôle dans chaque commissions
+    summary: Retourne la liste des organisateurs, avec leurs commissions et rôle dans chaque commission
     tags:
       - Users
     responses:
