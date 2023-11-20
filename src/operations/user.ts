@@ -163,7 +163,7 @@ export const fetchUsers = async (
 
       id: query.userId || undefined,
       type: query.type || undefined,
-      permissions: query.permission ? { contains: query.permission } : undefined,
+      AND: query.permissions?.split(',').map((permission) => ({ permissions: { contains: permission } })),
       place: query.place ? { startsWith: query.place } : undefined,
 
       // Checks first if scanned exists, and then if it is true of false

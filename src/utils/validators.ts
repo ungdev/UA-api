@@ -30,6 +30,9 @@ export const place = Joi.string().regex(placeRegex).error(new Error(ResponseErro
 export const permission = Joi.string()
   .valid(...Object.keys(Permission))
   .error(new Error(ResponseError.InvalidPermission));
+export const permissions = Joi.string().regex(
+  new RegExp(`^((${Object.keys(Permission).join('|')})(,(${Object.keys(Permission).join('|')}))*)?$`),
+);
 export const stringBoolean = Joi.string().valid('true', 'false').error(new Error(ResponseError.stringBooleanError));
 
 // Team
