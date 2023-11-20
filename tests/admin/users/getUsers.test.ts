@@ -208,7 +208,6 @@ describe('GET /admin/users', () => {
       expect(body.users.length).to.be.equal(1);
     });
 
-
     it(`should not fetch fetch the user because the permission is incorrect`, () =>
       request(app)
         .get(`/admin/users?permissions=orga,random`)
