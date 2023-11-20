@@ -137,23 +137,23 @@ export const fetchUsers = async (
             },
           }
         : // eslint-disable-next-line unicorn/no-nested-ternary
-        query.payment === 'false'
-        ? {
-            cartItems: {
-              none: {
-                cart: {
-                  transactionState: 'paid',
-                },
-                itemId: {
-                  startsWith: 'ticket-',
-                },
-                quantity: {
-                  gt: 0,
+          query.payment === 'false'
+          ? {
+              cartItems: {
+                none: {
+                  cart: {
+                    transactionState: 'paid',
+                  },
+                  itemId: {
+                    startsWith: 'ticket-',
+                  },
+                  quantity: {
+                    gt: 0,
+                  },
                 },
               },
-            },
-          }
-        : {}),
+            }
+          : {}),
 
       id: query.userId || undefined,
       type: query.type || undefined,
