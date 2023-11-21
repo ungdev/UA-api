@@ -5,7 +5,7 @@ import updateUser from './updateUser';
 import getUser from './getUser';
 import { become, leave } from './spectate';
 import { fetchRemoteTicket } from './getRemoteTicket';
-import fetchOrgas from './fetchOrgas';
+import fetchOrgas from './getOrgas';
 
 const router = Router();
 
