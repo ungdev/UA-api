@@ -33,7 +33,8 @@ export default [
       if (!team) return notFound(response, ResponseError.TeamNotFound);
 
       // Check if the team is not locked
-      if (team.lockedAt && user.type !== UserType.coach) return forbidden(response, ResponseError.TeamLocked);
+      if (team.lockedAt && request.body.userType !== UserType.coach)
+        return forbidden(response, ResponseError.TeamLocked);
 
       // Check if the user is already asking for a team
       if (user.askingTeamId) return forbidden(response, ResponseError.AlreadyAskedATeam);
