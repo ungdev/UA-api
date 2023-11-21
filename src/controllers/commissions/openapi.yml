@@ -1,0 +1,14 @@
+/commissions:
+  get:
+    summary: Renvoie la liste des commissions
+    tags:
+      - Commissions
+    responses:
+      200:
+        description: Renvoie la liste des commissions
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Commission'

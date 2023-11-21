@@ -234,20 +234,6 @@ describe('POST /teams', () => {
       .expect(403, { error: Error.HasAlreadyPaidForAnotherTicket });
   });
 
-  it('should deny orga captain type', async () => {
-    const newUser = await createFakeUser({ type: UserType.player });
-    const newToken = generateToken(newUser);
-
-    return request(app)
-      .post('/teams')
-      .send({
-        ...teamBody,
-        userType: UserType.orga,
-      })
-      .set('Authorization', `Bearer ${newToken}`)
-      .expect(400, { error: Error.InvalidUserType });
-  });
-
   it("should fail if captain hasn't chosen a type", async () => {
     const newUser = await createFakeUser({ type: UserType.player });
     const newToken = generateToken(newUser);

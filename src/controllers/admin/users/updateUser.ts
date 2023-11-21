@@ -9,6 +9,7 @@ import { validateBody } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
 import { removeDiscordRoles } from '../../../utils/discord';
 import { getRequestInfo } from '../../../utils/users';
+import { fetchCommissions } from '../../../operations/commission';
 
 export default [
   // Middlewares
@@ -25,6 +26,14 @@ export default [
       lastname: validators.lastname.optional(),
       firstname: validators.firstname.optional(),
       email: validators.email.optional(),
+      orgaRoles: Joi.array()
+        .items(
+          Joi.object({
+            commissionRole: Joi.string().allow('respo', 'member'),
+            commission: Joi.string(),
+          }),
+        )
+        .optional(),
     }),
   ),
 
@@ -38,8 +47,28 @@ export default [
         return notFound(response, Error.UserNotFound);
       }
 
-      const { type, place, permissions, discordId, customMessage, age, email, username, firstname, lastname } =
-        request.body as UserPatchBody;
+      const {
+        type,
+        place,
+        permissions,
+        discordId,
+        customMessage,
+        age,
+        email,
+        username,
+        firstname,
+        lastname,
+        orgaRoles,
+      } = request.body as UserPatchBody;
+
+      // Check that every commission of the user does exist
+      const commissions = await fetchCommissions();
+      if (
+        orgaRoles &&
+        !orgaRoles.every((orgaRole) => commissions.some((commission) => orgaRole.commission === commission.id))
+      ) {
+        return notFound(response, Error.CommissionNotFound);
+      }
 
       // Check that the user type hasn't changed if the user is paid
       if (type && user.hasPaid && user.type !== type) {
@@ -64,6 +93,7 @@ export default [
         username,
         firstname,
         lastname,
+        orgaRoles,
       });
 
       // Discard current team/tournament roles if the discordId has been updated

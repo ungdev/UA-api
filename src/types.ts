@@ -64,6 +64,7 @@ export enum Permission {
   anim = 'anim',
   admin = 'admin',
   repo = 'repo',
+  orga = 'orga',
 }
 
 export { TransactionState, UserAge, UserType, ItemCategory, Log, RepoItemType } from '@prisma/client';
@@ -155,7 +156,7 @@ export type UserSearchQuery = {
   userId: string;
   search: string;
   type: UserType;
-  permission: Permission;
+  permissions: string;
   tournament: string;
   locked: string;
   payment: string;
@@ -176,7 +177,7 @@ export type UserPatchBody = Partial<
     | 'firstname'
     | 'lastname'
     | 'email'
-  >
+  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }> }
 >;
 
 export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
@@ -276,6 +277,7 @@ export const enum Error {
   LoginNotAllowed = 'Tu ne peux pas te connecter actuellement',
   NotAdmin = "Tu n'es pas administrateur",
   ShopNotAllowed = 'La billetterie est fermée',
+  TrombiNotAllowed = "Le trombinoscope n'est pas encore disponible",
   EmailNotConfirmed = "Le compte n'est pas confirmé",
   EmailAlreadyConfirmed = 'Le compte est déjà confirmé',
   NoPermission = "Tu n'as pas la permission d'accéder à cette ressource",
@@ -332,6 +334,7 @@ export const enum Error {
   TournamentNotFound = 'Le tournoi est introuvable',
   TicketNotFound = 'Le ticket est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
+  CommissionNotFound = "La commission n'existe pas",
 
   // 405
   // The request method is known by the server but is not supported by the target resource
