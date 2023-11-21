@@ -819,7 +819,7 @@ components:
           type: string
         color:
           type: string
-        masterCommissionId:
+        masterCommission:
           type: string
 
   responses:

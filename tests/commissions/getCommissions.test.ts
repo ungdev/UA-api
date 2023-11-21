@@ -25,7 +25,7 @@ describe('GET /commissions', () => {
       expect(databaseCommission).to.not.be.undefined;
       expect(commission.name).to.be.equal(databaseCommission.name);
       expect(commission.color).to.be.equal(databaseCommission.color);
-      expect(commission.masterCommissionId).to.be.equal(databaseCommission.masterCommissionId);
+      expect(commission.masterCommission).to.be.equal(databaseCommission.masterCommissionId);
       expect(commission).to.not.have.key('position');
       expect(lastPosition).to.be.lessThanOrEqual(databaseCommission.position);
       lastPosition = databaseCommission.position;
