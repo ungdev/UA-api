@@ -34,7 +34,7 @@ INSERT INTO `commission` (`id`, `name`, `position`, `color`, `masterCommissionId
 ('animation_console', 'Animation stand console', 2, '#123456', 'animation'),
 ('animation_cs2', 'Animation CS2', 3, '#123456', 'animation'),
 ('animation_lol', 'Animation LoL', 4, '#123456', 'animation'),
-('animation_open', 'Animation tournois libre', 5, '#123456', 'animation'),
+('animation_open', 'Animation tournoi libre', 5, '#123456', 'animation'),
 ('animation_pokemon', 'animation Pokémon', 6, '#123456', 'animation'),
 ('animation_rl', 'Animation Rocket League', 7, '#123456', 'animation'),
 ('animation_ssbu', 'Animation SSBU', 8, '#123456', 'animation'),
