@@ -93,7 +93,7 @@ export const fetchUsers = async (
   query: UserSearchQuery,
   page: number,
 ): Promise<[UserWithTeamAndTournamentInfo[], number]> => {
-  const filter: Omit<Prisma.UserFindManyArgs, 'select' | 'include'> = {
+  const filter: Omit<Prisma.UserFindManyArgs, 'select' | 'include' | 'distinct'> = {
     where: {
       ...(query.search
         ? {
