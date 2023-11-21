@@ -27,6 +27,12 @@ export const userInclusions = {
   },
   attendant: true,
   attended: true,
+  orgaRoles: {
+    select: {
+      commissionRole: true,
+      commission: { select: { id: true, name: true, color: true, masterCommissionId: true } },
+    },
+  },
 };
 
 export const formatUser = (user: RawUserWithCartItems): User => {
@@ -157,7 +163,7 @@ export const fetchUsers = async (
 
       id: query.userId || undefined,
       type: query.type || undefined,
-      permissions: query.permission ? { contains: query.permission } : undefined,
+      AND: query.permissions?.split(',').map((permission) => ({ permissions: { contains: permission } })),
       place: query.place ? { startsWith: query.place } : undefined,
 
       // Checks first if scanned exists, and then if it is true of false
@@ -212,6 +218,18 @@ export const fetchUsers = async (
 
   return [users.map(formatUserWithTeamAndTournament), count];
 };
+
+/** Returns orga users */
+export const fetchOrgas = () =>
+  database.user.findMany({
+    where: { permissions: { contains: 'orga' } },
+    select: {
+      id: true,
+      firstname: true,
+      lastname: true,
+      orgaRoles: { select: { commission: true, commissionRole: true } },
+    },
+  });
 
 export const createUser = async (user: {
   username: string;
@@ -288,6 +306,28 @@ export const updateAdminUser = async (userId: string, updates: UserPatchBody): P
               disconnect: true,
             }
           : undefined,
+      orgaRoles: {
+        connectOrCreate: updates.orgaRoles?.map((orgaRole) => ({
+          where: {
+            userId_commissionId: { userId, commissionId: orgaRole.commission },
+          },
+          create: { commissionRole: orgaRole.commissionRole, commission: { connect: { id: orgaRole.commission } } },
+        })),
+        update: updates.orgaRoles?.map((orgaRole) => ({
+          where: {
+            userId_commissionId: { userId, commissionId: orgaRole.commission },
+          },
+          data: { commissionRole: orgaRole.commissionRole },
+        })),
+        deleteMany: {
+          userId,
+          NOT: {
+            OR: updates.orgaRoles?.map((orgaRole) => ({
+              commissionId: orgaRole.commission,
+            })),
+          },
+        },
+      },
     },
     where: { id: userId },
     include: userInclusions,

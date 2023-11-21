@@ -25,7 +25,7 @@ describe('DELETE /admin/partners/{partnerId}', () => {
       partners.push(await createFakePartner({}));
     }
 
-    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
+    admin = await createFakeUser({ permissions: [Permission.admin] });
     nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
   });

@@ -54,22 +54,6 @@ describe('GET /users/:userId/ticket', () => {
       .expect(404, { error: Error.UserNotFound });
   });
 
-  it('should fail as remote user is an orga', async () => {
-    await userOperations.updateAdminUser(remotePlayer.id, {
-      type: 'orga',
-    });
-    return request(app)
-      .get(`/users/${remotePlayer.id}/ticket`)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(403, { error: Error.IsOrga })
-      .then(async (result) => {
-        await userOperations.updateAdminUser(remotePlayer.id, {
-          type: 'player',
-        });
-        return result;
-      });
-  });
-
   it('should throw an unexpected error', async () => {
     sandbox.stub(itemOperations, 'fetchUserItems').throws('Unexpected error');
 

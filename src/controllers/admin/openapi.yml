@@ -1310,7 +1310,8 @@
       **Permission 'admin' ou 'anim' requise.**<br/><br/>
       **Désambiguïsation:** le champ `permissions` écrase (si renseigné) complètement les anciennes permissions.
       Pour cette raison, il ne faut pas oublier d'y ajouter également les permissions actuelles de l'utilisateur !
-      <br/>Les orgas qui ont uniquement la permission 'anim' **doivent omettre** ce champ dans la requête !
+      De même pour le champ `orgaRoles`.
+      <br/>Les orgas qui ont uniquement la permission 'anim' **doivent omettre** le champ `permissions` dans la requête !
     tags:
       - Admin
     security:
@@ -1367,6 +1368,15 @@
               lastname:
                 type: string
                 optional: true
+              orgaRoles:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    commission:
+                      type: string
+                    commissionRole:
+                      type: string
     responses:
       200:
         description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.
@@ -1380,8 +1390,10 @@
         $ref: '#/components/responses/401Unauthenticated'
       403:
         $ref: '#/components/responses/403Unauthorized'
-      404:
+      404UserNotFound:
         $ref: '#/components/responses/404UserNotFound'
+      404CommissionNotFound:
+        $ref: '#/components/responses/404CommissionNotFound'
       409:
         $ref: '#/components/responses/409PlaceAlreadyAttributed'
 

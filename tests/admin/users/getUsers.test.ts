@@ -28,10 +28,13 @@ describe('GET /admin/users', () => {
       lastname: 'admin',
       email: 'admin@gmail.com',
       username: 'admin',
-      type: UserType.orga,
-      permissions: [Permission.admin],
+      permissions: [Permission.orga, Permission.admin],
     });
     adminToken = generateToken(admin);
+    // We need a coach
+    await createFakeUser({ type: UserType.coach });
+    // We also need an orga, but not admin
+    await createFakeUser({ permissions: [Permission.orga] });
   });
 
   after(async () => {
@@ -90,6 +93,7 @@ describe('GET /admin/users', () => {
       username: user.username,
       hasPaid: user.hasPaid,
       customMessage: null,
+      orgaRoles: [],
     });
   });
 
@@ -101,7 +105,7 @@ describe('GET /admin/users', () => {
 
     expect(body.itemsPerPage).to.be.equal(env.api.itemsPerPage);
     expect(body.currentPage).to.be.equal(1);
-    expect(body.totalItems).to.be.equal(2);
+    expect(body.totalItems).to.be.equal(4);
     expect(body.totalPages).to.be.equal(1);
     expect(body.users).to.have.lengthOf(0);
   });
@@ -139,6 +143,7 @@ describe('GET /admin/users', () => {
       username: placedUser.username,
       hasPaid: false,
       customMessage: null,
+      orgaRoles: [],
     });
 
     return database.user.delete({ where: { id: placedUser.id } });
@@ -167,7 +172,7 @@ describe('GET /admin/users', () => {
   });
 
   describe('Test type field', () => {
-    for (const type of ['player', 'orga'])
+    for (const type of ['player', 'coach'])
       it(`should fetch the user with type ${type}`, async () => {
         const { body } = await request(app)
           .get(`/admin/users?type=${type}`)
@@ -177,7 +182,7 @@ describe('GET /admin/users', () => {
         expect(body.users.length).to.be.equal(1);
       });
 
-    it(`should not fetch fetch the user because the type is incorrect`, () =>
+    it(`should not fetch the user because the type is incorrect`, () =>
       request(app)
         .get(`/admin/users?type=random`)
         .set('Authorization', `Bearer ${adminToken}`)
@@ -185,19 +190,27 @@ describe('GET /admin/users', () => {
   });
 
   describe('Test permission field', () => {
-    for (const permission of ['admin'])
-      it(`should fetch the user with type ${permission}`, async () => {
-        const { body } = await request(app)
-          .get(`/admin/users?permission=${permission}`)
-          .set('Authorization', `Bearer ${adminToken}`)
-          .expect(200);
+    it("should fetch the users with permissions ['orga']", async () => {
+      const { body } = await request(app)
+        .get(`/admin/users?permissions=orga`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
 
-        expect(body.users.length).to.be.equal(1);
-      });
+      expect(body.users.length).to.be.equal(2);
+    });
+
+    it(`should fetch the user with permissions ['orga', 'admin']`, async () => {
+      const { body } = await request(app)
+        .get(`/admin/users?permissions=orga,admin`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(body.users.length).to.be.equal(1);
+    });
 
     it(`should not fetch fetch the user because the permission is incorrect`, () =>
       request(app)
-        .get(`/admin/users?permission=random`)
+        .get(`/admin/users?permissions=orga,random`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400, { error: Error.InvalidQueryParameters }));
   });
@@ -308,7 +321,7 @@ describe('GET /admin/users', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(body.users.length).to.be.equal(1);
+      expect(body.users.length).to.be.equal(3);
     });
   });
 
@@ -343,13 +356,13 @@ describe('GET /admin/users', () => {
       expect(body.users.length).to.be.equal(1);
     });
 
-    it('should return two non scanned user (including the admin)', async () => {
+    it('should return 4 non scanned user (including the admin)', async () => {
       await database.user.update({ data: { scannedAt: null }, where: { id: user.id } });
       const { body } = await request(app)
         .get(`/admin/users?scan=false`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
-      expect(body.users.length).to.be.equal(2);
+      expect(body.users.length).to.be.equal(4);
     });
   });
 });

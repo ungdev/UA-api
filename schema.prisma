@@ -182,6 +182,7 @@ model User {
   carts         Cart[]
   logs          Log[]
   captainTeam   Team?
+  orgaRoles     OrgaRole[] @relation("orgaRoleUser")
   repoItems     RepoItem[] @relation("repoItemUser")
   repoLogs      RepoLog[]  @relation("repoLogUser")
   attended      User?      @relation("attendantUser")
@@ -220,6 +221,33 @@ model RepoLog {
   @@map("repoLog")
 }
 
+model OrgaRole {
+  userId         String
+  commissionId   String
+  commissionRole RoleInCommission
+  user           User             @relation("orgaRoleUser", fields: [userId], references: [id])
+  commission     Commission       @relation("orgaRoleCommission", fields: [commissionId], references: [id])
+
+  @@id([userId, commissionId])
+  @@index([userId])
+  @@index([commissionId])
+  @@map("orgaRole")
+}
+
+model Commission {
+  id                 String       @id
+  name               String
+  position           Int
+  color              String
+  masterCommissionId String?
+  masterCommission   Commission?  @relation("masterCommission", fields: [masterCommissionId], references: [id])
+  subCommissions     Commission[] @relation("masterCommission")
+  orgas              OrgaRole[]   @relation("orgaRoleCommission")
+
+  @@index([masterCommissionId])
+  @@map("commission")
+}
+
 enum TransactionState {
   pending
   paid
@@ -238,7 +266,6 @@ enum ItemCategory {
 
 enum UserType {
   player
-  orga
   coach
   spectator
   attendant
@@ -247,6 +274,11 @@ enum UserType {
 enum UserAge {
   adult
   child
+}
+
+enum RoleInCommission {
+  respo
+  member
 }
 
 enum RepoItemType {
