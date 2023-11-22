@@ -10,6 +10,7 @@ import nanoid from '../src/utils/nanoid';
 import env from '../src/utils/env';
 import { serializePermissions } from '../src/utils/helpers';
 import { fetchTournament } from '../src/operations/tournament';
+import sharp from "sharp";
 
 export const generateFakeDiscordId = () => `${Math.floor(Date.now() * (1 + Math.random()))}`;
 
@@ -34,6 +35,10 @@ type FakeUserData = {
   /** @default UserAge.adult */
   age?: UserAge;
   orgaRoles?: Array<{ commission: string; role: RoleInCommission }>;
+  orgaDisplayPhoto?: boolean;
+  orgaDisplayName?: boolean;
+  orgaDisplayUsername?: boolean;
+  orgaPhotoFilename?: string;
 };
 
 const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
@@ -59,6 +64,10 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
     permissions: serializePermissions(data.permissions),
     customMessage: data.customMessage,
     age: data.age || UserAge.adult,
+    orgaDisplayPhoto: data.orgaDisplayPhoto,
+    orgaDisplayName: data.orgaDisplayName,
+    orgaPhotoFilename: data.orgaPhotoFilename,
+    orgaDisplayUsername: data.orgaDisplayUsername,
     carts: data.paid
       ? {
           create: {
@@ -244,3 +253,17 @@ export const createFakeCart = ({
       },
     },
   });
+
+export function generateDummyJpgBuffer(size: number) {
+  const sizeInPixels = Math.ceil(Math.sqrt(size / 3));
+  return sharp({
+    create: {
+      width: sizeInPixels,
+      height: sizeInPixels,
+      channels: 3,
+      background: { r: 255, g: 255, b: 255 },
+    },
+  })
+    .jpeg()
+    .toBuffer();
+}

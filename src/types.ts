@@ -180,6 +180,22 @@ export type UserPatchBody = Partial<
   > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }> }
 >;
 
+export type RawOrga = Pick<
+  User,
+  'id' | 'firstname' | 'lastname' | 'username' | 'orgaPhotoFilename' | 'orgaDisplayName' | 'orgaDisplayUsername' | 'orgaDisplayPhoto'
+> & { orgaRoles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }> };
+
+export type Orga = {
+  id: string;
+  name: string;
+  username: string;
+  photoFilename?: string;
+  roles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }>;
+  displayName: boolean;
+  displayPhoto: boolean;
+  displayUsername: boolean;
+};
+
 export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
   users: RawUserWithCartItems[];
   askingUsers: RawUserWithCartItems[];
@@ -244,6 +260,7 @@ export const enum Error {
   InvalidPlace = 'Numéro de place invalide',
   InvalidPermission = "Ces permissions n'existent pas",
   stringBooleanError = "Ce n'est pas du texte",
+  ShowNameOrPseudo = 'Vous devez au moins afficher le nom ou le pseudo',
 
   InvalidTeamName = "Nom d'équipe invalide !",
 

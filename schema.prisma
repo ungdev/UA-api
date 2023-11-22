@@ -173,6 +173,10 @@ model User {
   attendantId   String?    @unique
   teamId        String?
   askingTeamId  String?
+  orgaPhotoFilename String?
+  orgaDisplayName Boolean @default(false)
+  orgaDisplayUsername Boolean @default(true)
+  orgaDisplayPhoto Boolean @default(false)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @default(now()) @updatedAt
   askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])

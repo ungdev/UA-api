@@ -1,31 +1,16 @@
 import request from 'supertest';
-import sharp from 'sharp';
 import app from '../../../src/app';
 import { sandbox } from '../../setup';
 import * as uploadOperation from '../../../src/operations/upload';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
-import { createFakeUser } from '../../utils';
+import { createFakeUser, generateDummyJpgBuffer } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
 
 describe('POST /admin/upload', () => {
   let nonAdminUser: User;
   let admin: User;
   let adminToken: string;
-
-  function generateDummyJpgBuffer(size: number) {
-    const sizeInPixels = Math.ceil(Math.sqrt(size / 3));
-    return sharp({
-      create: {
-        width: sizeInPixels,
-        height: sizeInPixels,
-        channels: 3,
-        background: { r: 255, g: 255, b: 255 },
-      },
-    })
-      .jpeg()
-      .toBuffer();
-  }
 
   const validObject = {
     name: 'test',

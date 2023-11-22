@@ -15,9 +15,11 @@ import {
   RawUserWithTeamAndTournamentInfo,
   UserWithTeamAndTournamentInfo,
   Permission,
-} from '../types';
+  Orga, RawOrga
+} from "../types";
 import { deserializePermissions, serializePermissions } from '../utils/helpers';
 import { fetchAllItems } from './item';
+import { deleteFile } from './upload';
 
 export const userInclusions = {
   cartItems: {
@@ -62,6 +64,17 @@ export const formatUserWithTeamAndTournament = (
     team: primitiveUser.team,
   };
 };
+
+export const formatOrga = (orga: RawOrga): Orga => ({
+  id: orga.id,
+  name: orga.orgaDisplayName ? `${orga.firstname} ${orga.lastname}` : undefined,
+  username: orga.orgaDisplayUsername ? orga.username : undefined,
+  photoFilename: orga.orgaDisplayPhoto ? orga.orgaPhotoFilename : undefined,
+  roles: orga.orgaRoles,
+  displayName: orga.orgaDisplayName,
+  displayPhoto: orga.orgaDisplayPhoto,
+  displayUsername: orga.orgaDisplayUsername,
+});
 
 export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentId: string, userType: UserType) => {
   const currentTickets = user.cartItems.filter(
@@ -220,16 +233,23 @@ export const fetchUsers = async (
 };
 
 /** Returns orga users */
-export const fetchOrgas = () =>
-  database.user.findMany({
+export const fetchOrgas = async (): Promise<Orga[]> => {
+  const orgas = await database.user.findMany({
     where: { permissions: { contains: 'orga' } },
     select: {
       id: true,
       firstname: true,
       lastname: true,
+      username: true,
+      orgaDisplayName: true,
+      orgaDisplayUsername: true,
+      orgaDisplayPhoto: true,
+      orgaPhotoFilename: true,
       orgaRoles: { select: { commission: true, commissionRole: true } },
     },
   });
+  return orgas.map(formatOrga);
+};
 
 export const createUser = async (user: {
   username: string;
@@ -482,3 +502,34 @@ export const getPaidAndValidatedUsers = () =>
       },
     },
   });
+
+/** Generates a file name to store the photo of an orga.
+ * The file name is in the form :
+ * <lastname>-<firstname>-<userId>-<randomString>
+ * We append a random string to make sure you can't find it easily (without an admin access to the file manager)
+ */
+export const generateOrgaPhotoFilename = (user: User) =>
+  `${user.lastname.replaceAll(/\W/g, '')}-${user.firstname.replaceAll(/\W/g, '')}-${user.id}-${nanoid() + nanoid()}`;
+
+export const updateTrombi = async (
+  user: User,
+  displayName: boolean,
+  displayPhoto: boolean,
+  displayUsername: boolean,
+) => {
+  // First delete the old file, if any
+  if (user.orgaPhotoFilename) {
+    await deleteFile(`orgas/${user.orgaPhotoFilename}.png`);
+  }
+  const filename = generateOrgaPhotoFilename(user);
+  await database.user.update({
+    where: { id: user.id },
+    data: {
+      orgaDisplayName: displayName,
+      orgaDisplayPhoto: displayPhoto,
+      orgaPhotoFilename: filename,
+      orgaDisplayUsername: displayUsername,
+    },
+  });
+  return filename;
+};

@@ -1302,6 +1302,43 @@
       409:
         $ref: '#/components/responses/409PlaceAlreadyAttributed'
 
+/admin/users/trombi:
+  patch:
+    summary: Modifie les préférences de confidentialité d'un organisateur et renvoie le nom d'un fichier dans lequel il peut stocker sa photo.
+    description: |-
+      L'organisateur peut opt-in pour afficher son nom et son prénom, ainsi que pour montrer sa photo de profil.
+      Un nom de fichier est renvoyé, qui permet à l'organisateur de stocker son nom de fichier dans
+      "<uploads url>/orgas/<nom du fichier>.png".
+      Si un fichier existait déjà, ce fichier est supprimé. Le nom de fichier généré est aléatoire, et ne sera pas le même entre 2 appels de la route.
+    tags:
+      - Admin
+    security:
+      BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              displayName:
+                type: string
+              displayPhoto:
+                type: string
+    responses:
+      200:
+        description: Retourne le nom du fichier (sans extension) dans lequel l'utilisateur devrait stocker son image
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                  example: dupont-jean-ABCDEF-KJSDOGMEFBQJ
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+
 /admin/users/{userId}:
   patch:
     summary: Modifie les informations d'un utilisateur
