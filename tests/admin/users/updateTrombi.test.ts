@@ -4,21 +4,23 @@ import app from '../../../src/app';
 import { sandbox } from '../../setup';
 import * as userOperation from '../../../src/operations/user';
 import database from '../../../src/services/database';
-import { Error, Permission, User, UserType } from '../../../src/types';
+import { Error, Permission, RawOrgaWithUserData, User, UserType } from '../../../src/types';
 import { createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
-import { fetchUser } from '../../../src/operations/user';
+import { fetchOrga } from '../../../src/operations/user';
 import * as uploads from '../../upload';
 
 describe('PATCH /admin/users/trombi', () => {
   let nonOrgaUser: User;
-  let orga: User;
+  let orgaUser: User;
+  let orgaOrganizerInfo: RawOrgaWithUserData;
   let orgaToken: string;
 
   before(async () => {
-    orga = await createFakeUser({ permissions: [Permission.orga] });
+    orgaUser = await createFakeUser({ permissions: [Permission.orga] });
+    orgaOrganizerInfo = await fetchOrga(orgaUser);
     nonOrgaUser = await createFakeUser({ type: UserType.player });
-    orgaToken = generateToken(orga);
+    orgaToken = generateToken(orgaUser);
   });
 
   after(async () => {
@@ -54,31 +56,31 @@ describe('PATCH /admin/users/trombi', () => {
       .expect(400, { error: Error.ShowNameOrPseudo }));
 
   it('should successfully update the user and give back the filename', async () => {
-    expect(orga.orgaDisplayName).to.be.false;
-    expect(orga.orgaDisplayPhoto).to.be.false;
-    expect(orga.orgaDisplayUsername).to.be.true;
+    expect(orgaOrganizerInfo.displayName).to.be.false;
+    expect(orgaOrganizerInfo.displayPhoto).to.be.false;
+    expect(orgaOrganizerInfo.displayUsername).to.be.true;
     const { body } = await request(app)
       .patch(`/admin/users/trombi`)
       .set('Authorization', `Bearer ${orgaToken}`)
       .send({ displayName: true, displayPhoto: true, displayUsername: false })
       .expect(200);
-    orga = await fetchUser(orga.id);
-    expect(orga.orgaDisplayName).to.be.true;
-    expect(orga.orgaDisplayPhoto).to.be.true;
-    expect(orga.orgaDisplayUsername).to.be.false;
-    expect(body.filename).to.startWith(orga.lastname);
-    expect(body.filename).to.be.equal(orga.orgaPhotoFilename);
+    orgaOrganizerInfo = await fetchOrga(orgaUser);
+    expect(orgaOrganizerInfo.displayName).to.be.true;
+    expect(orgaOrganizerInfo.displayPhoto).to.be.true;
+    expect(orgaOrganizerInfo.displayUsername).to.be.false;
+    expect(body.filename).to.startWith(orgaUser.lastname);
+    expect(body.filename).to.be.equal(orgaOrganizerInfo.photoFilename);
   });
 
   it('should successfully update the user and delete the old image', async () => {
     // First actually add the file at the specified location
-    uploads.existingFiles.push(`orgas/${orga.orgaPhotoFilename}.png`);
+    uploads.existingFiles.push(`orgas/${orgaOrganizerInfo.photoFilename}.png`);
     const { body } = await request(app)
       .patch(`/admin/users/trombi`)
       .send({ displayName: true, displayPhoto: true, displayUsername: true })
       .set('Authorization', `Bearer ${orgaToken}`)
       .expect(200);
-    expect(body.filename).to.be.not.equal(orga.orgaPhotoFilename);
-    expect(uploads.existingFiles).to.not.include(`orgas/${orga.orgaPhotoFilename}.png`);
+    expect(body.filename).to.be.not.equal(orgaOrganizerInfo.photoFilename);
+    expect(uploads.existingFiles).to.not.include(`orgas/${orgaOrganizerInfo.photoFilename}.png`);
   });
 });
