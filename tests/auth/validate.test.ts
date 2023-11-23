@@ -18,7 +18,8 @@ describe('POST /auth/validate/{token}', () => {
 
   after(async () => {
     // Delete the user created
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should get an error as the login is not allowed', async () => {

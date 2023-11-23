@@ -48,7 +48,8 @@ describe('POST /users/:userId/carts', () => {
   after(async () => {
     // Delete the user created
     await database.cart.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
   it("should fail because cart item doesn't belong to the user", async () => {
     const otherUser = await createFakeUser({ type: UserType.player });

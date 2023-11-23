@@ -15,7 +15,8 @@ describe('GET /teams', () => {
 
   after(async () => {
     await database.team.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should fail with an internal server error', async () => {

@@ -40,7 +40,8 @@ describe('POST /teams', () => {
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
 
     await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lol' } });
   });
@@ -251,7 +252,7 @@ describe('POST /teams', () => {
   it('should fail because user has no linked discord account', async () => {
     const newUser = await createFakeUser({ type: UserType.player });
     const newToken = generateToken(newUser);
-    await userOperations.updateAdminUser(newUser.id, { discordId: null });
+    await userOperations.updateAdminUser(newUser, { discordId: null });
 
     return request(app)
       .post('/teams')

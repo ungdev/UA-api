@@ -19,7 +19,8 @@ describe('POST /auth/reset-password/ask', () => {
 
   after(async () => {
     // Delete the user created
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should return an error because the login is not allowed', async () => {

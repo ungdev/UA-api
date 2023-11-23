@@ -17,7 +17,8 @@ describe('PATCH /admin/partners', () => {
   let validBody: { partners: { id: string; position: number }[] };
 
   after(async () => {
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
     await database.partner.deleteMany();
   });
 

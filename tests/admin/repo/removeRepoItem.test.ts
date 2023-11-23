@@ -30,7 +30,8 @@ describe('DELETE /admin/repo/user/:userId/items/:itemId', () => {
     await database.repoLog.deleteMany();
     await database.repoItem.deleteMany();
     await database.team.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should fail as user is not authenticated', async () => {

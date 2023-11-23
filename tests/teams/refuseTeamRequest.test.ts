@@ -27,7 +27,8 @@ describe('DELETE /teams/current/join-requests/:userId', () => {
 
   after(async () => {
     await database.team.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should fail because the token is not provided', async () => {

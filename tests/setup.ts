@@ -82,5 +82,8 @@ after(async () => {
   // Verify environment variables have not changed
   expect(process.env.API_PORT).to.be.undefined;
   expect(env.api.port).to.be.undefined;
-  expect(uploads.existingFiles).to.be.deep.equal(uploads.INITIAL_EXISTING_FILES);
+  expect(uploads.existingFiles).to.have.length(uploads.INITIAL_EXISTING_FILES.length);
+  for (const file of uploads.INITIAL_EXISTING_FILES) {
+    expect(uploads.existingFiles).to.include(file);
+  }
 });

@@ -24,7 +24,8 @@ describe('POST /auth/reset-password/:uuid', () => {
 
   after(async () => {
     // Delete the user created
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should return a bad request if the login is disabled', async () => {

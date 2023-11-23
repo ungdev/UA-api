@@ -19,7 +19,8 @@ import { createFakeTeam, createFakeUser } from './utils';
   await database.cart.deleteMany();
   await database.log.deleteMany();
   await database.team.deleteMany();
-  await database.user.deleteMany();
+  await database.orga.deleteMany();
+await database.user.deleteMany();
 
   // For each tournaments, create fake teams
   const tournaments = await fetchTournaments();

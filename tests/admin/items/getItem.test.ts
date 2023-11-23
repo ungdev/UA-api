@@ -23,7 +23,8 @@ describe('GET /admin/items/:itemId', () => {
 
   after(async () => {
     // Delete the user created
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>

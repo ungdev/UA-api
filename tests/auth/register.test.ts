@@ -11,7 +11,8 @@ describe('POST /auth/register', () => {
   // After, delete all users and disable login
   after(async () => {
     // Delete all the users created
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   const userData = {

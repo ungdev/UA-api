@@ -82,7 +82,7 @@ export default [
         return forbidden(response, Error.NoPermission);
       }
 
-      const updatedUser = await updateAdminUser(user.id, {
+      const updatedUser = await updateAdminUser(user, {
         type,
         permissions,
         place,

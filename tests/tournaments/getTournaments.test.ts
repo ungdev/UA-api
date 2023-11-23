@@ -10,7 +10,8 @@ import { createFakeTeam } from '../utils';
 describe('GET /tournaments', () => {
   after(async () => {
     await database.team.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
     await database.caster.deleteMany();
   });
 

@@ -20,7 +20,8 @@ describe('DELETE /users/current/spectate', () => {
   after(async () => {
     // Delete the user created
     await database.cart.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should fail as user is not authenticated', () =>
@@ -34,7 +35,7 @@ describe('DELETE /users/current/spectate', () => {
       .expect(403, { error: Error.CannotUnSpectate }));
 
   it('should fail with a server error', async () => {
-    user = await userOperations.updateAdminUser(user.id, { type: UserType.spectator });
+    user = await userOperations.updateAdminUser(user, { type: UserType.spectator });
     sandbox.stub(userOperations, 'updateAdminUser').throws('Unexpected error');
 
     return request(app)

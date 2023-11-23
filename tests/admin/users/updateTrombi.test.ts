@@ -24,7 +24,8 @@ describe('PATCH /admin/users/trombi', () => {
   });
 
   after(async () => {
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>

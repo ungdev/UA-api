@@ -9,6 +9,7 @@ import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { forcePay } from '../../../src/operations/carts';
 import { deleteRole, kickMember, registerMember, registerRole, resetFakeDiscord } from '../../discord';
+import { fetchOrga } from '../../../src/operations/user';
 
 describe('PATCH /admin/users/:userId', () => {
   let user: User;
@@ -41,9 +42,9 @@ describe('PATCH /admin/users/:userId', () => {
   before(async () => {
     user = await createFakeUser({ type: UserType.player });
     registerMember(user.discordId!);
-    const admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
+    const admin = await createFakeUser({ permissions: [Permission.admin, Permission.orga], type: UserType.player });
     adminToken = generateToken(admin);
-    anim = await createFakeUser({ permissions: [Permission.anim], type: UserType.player });
+    anim = await createFakeUser({ permissions: [Permission.anim, Permission.orga], type: UserType.player });
     animToken = generateToken(anim);
   });
 
@@ -53,6 +54,7 @@ describe('PATCH /admin/users/:userId', () => {
     await database.orgaRole.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -410,7 +412,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should add 2 commissions to the anim orga', async () => {
-    const { body } = await request(app)
+    await request(app)
       .patch(`/admin/users/${anim.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
@@ -420,11 +422,12 @@ describe('PATCH /admin/users/:userId', () => {
         ],
       })
       .expect(200);
-    expect(body.orgaRoles).to.have.length(2);
+    const orga = await fetchOrga(anim);
+    expect(orga.roles).to.have.length(2);
   });
 
   it('should remove 1 commission to the anim orga, add 1 new commission and promote the orga in one commission', async () => {
-    const { body } = await request(app)
+    await request(app)
       .patch(`/admin/users/${anim.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
@@ -434,10 +437,11 @@ describe('PATCH /admin/users/:userId', () => {
         ],
       })
       .expect(200);
-    expect(body.orgaRoles).to.have.length(2);
-    expect(body.orgaRoles[0].commission.id).to.be.equal('animation_lol');
-    expect(body.orgaRoles[0].commissionRole).to.be.equal('member');
-    expect(body.orgaRoles[1].commission.id).to.be.equal('animation_ssbu');
-    expect(body.orgaRoles[1].commissionRole).to.be.equal('respo');
+    const orga = await fetchOrga(anim);
+    expect(orga.roles).to.have.length(2);
+    expect(orga.roles[0].commission.id).to.be.equal('animation_lol');
+    expect(orga.roles[0].commissionRole).to.be.equal('member');
+    expect(orga.roles[1].commission.id).to.be.equal('animation_ssbu');
+    expect(orga.roles[1].commissionRole).to.be.equal('respo');
   });
 });

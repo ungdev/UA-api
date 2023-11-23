@@ -1347,7 +1347,7 @@
       **Permission 'admin' ou 'anim' requise.**<br/><br/>
       **Désambiguïsation:** le champ `permissions` écrase (si renseigné) complètement les anciennes permissions.
       Pour cette raison, il ne faut pas oublier d'y ajouter également les permissions actuelles de l'utilisateur !
-      De même pour le champ `orgaRoles`.
+      De même pour le champ `roles`.
       <br/>Les orgas qui ont uniquement la permission 'anim' **doivent omettre** le champ `permissions` dans la requête !
     tags:
       - Admin
@@ -1405,7 +1405,7 @@
               lastname:
                 type: string
                 optional: true
-              orgaRoles:
+              roles:
                 type: array
                 items:
                   type: object

@@ -299,8 +299,14 @@ export const updateUser = async (
   return formatUser(user);
 };
 
-export const updateAdminUser = async (userId: string, updates: UserPatchBody): Promise<User> => {
-  const user = await database.user.update({
+export const updateAdminUser = async (user: User, updates: UserPatchBody): Promise<User> => {
+  const userId = user.id;
+  if (updates.permissions && !updates.permissions.includes(Permission.orga)) {
+    await database.orga.deleteMany({ where: { userId } });
+  }
+  const shouldConnectToOrga =
+    updates.permissions?.includes(Permission.orga) || (!updates.permissions && updates.orgaRoles);
+  const updatedUser = await database.user.update({
     data: {
       type: updates.type,
       permissions: updates.permissions ? serializePermissions(updates.permissions) : undefined,
@@ -319,18 +325,13 @@ export const updateAdminUser = async (userId: string, updates: UserPatchBody): P
             }
           : undefined,
       orga: {
-        delete: updates.permissions.includes(Permission.orga)
-          ? undefined
-          : {
-              userId,
-            },
-        connectOrCreate: updates.permissions.includes(Permission.orga)
+        connectOrCreate: shouldConnectToOrga
           ? {
               where: { userId },
               create: {},
             }
           : undefined,
-        update: updates.permissions.includes(Permission.orga)
+        update: shouldConnectToOrga
           ? {
               where: {
                 userId,
@@ -370,7 +371,7 @@ export const updateAdminUser = async (userId: string, updates: UserPatchBody): P
     include: userInclusions,
   });
 
-  return formatUser(user);
+  return formatUser(updatedUser);
 };
 
 export const createAttendant = (
@@ -528,19 +529,16 @@ export const getPaidAndValidatedUsers = () =>
 export const generateOrgaPhotoFilename = (user: User) =>
   `${user.lastname.replaceAll(/\W/g, '')}-${user.firstname.replaceAll(/\W/g, '')}-${user.id}-${nanoid() + nanoid()}`;
 
-export const fetchOrga = async (user: User): Promise<RawOrgaWithUserData> => ({
-  ...user,
-  ...(await database.orga.findUnique({
-    where: { userId: user.id },
-    select: {
-      displayName: true,
-      displayUsername: true,
-      displayPhoto: true,
-      photoFilename: true,
-      roles: { select: { commissionRole: true, commission: true } },
-    },
-  })),
-});
+export const fetchOrgaData = (userId: string): Promise<RawOrgaWithDetailedRoles> =>
+  database.orga.findUnique({
+    where: { userId },
+    include: { roles: { select: { commissionRole: true, commission: true } } },
+  }) ?? null;
+
+export const fetchOrga = async (user: RawUser | User): Promise<RawOrgaWithUserData> => {
+  const orga = await fetchOrgaData(user.id);
+  return orga ? { ...user, ...orga } : null;
+};
 
 export const updateTrombi = async (
   user: User,

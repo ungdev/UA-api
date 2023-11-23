@@ -164,7 +164,8 @@ describe('POST /users/current/carts', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
     await database.tournament.delete({ where: { id: fullTournament.id } });
   });
 
@@ -219,7 +220,7 @@ describe('POST /users/current/carts', () => {
       .expect(403, { error: Error.AttendantNotAllowed }));
 
   it('should fail because child account already has an attendant', async () => {
-    user = await updateAdminUser(user.id, {
+    user = await updateAdminUser(user, {
       age: UserAge.child,
     });
     user = userOperations.formatUser(await createAttendant(user.id, 'Jean-François', 'Poisson'));

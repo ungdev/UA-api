@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
 import { ItemCategory, RoleInCommission } from '@prisma/client';
 import sharp from 'sharp';
-import { fetchUser } from '../src/operations/user';
+import { fetchOrga, fetchUser } from "../src/operations/user";
 import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
 import logger from '../src/utils/logger';
@@ -65,10 +65,6 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
     permissions,
     customMessage: data.customMessage,
     age: data.age || UserAge.adult,
-    orgaDisplayPhoto: data.orgaDisplayPhoto,
-    orgaDisplayName: data.orgaDisplayName,
-    orgaPhotoFilename: data.orgaPhotoFilename,
-    orgaDisplayUsername: data.orgaDisplayUsername,
     carts: data.paid
       ? {
           create: {
@@ -92,6 +88,10 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
     orga: permissions?.includes(Permission.orga)
       ? {
           create: {
+            displayPhoto: data.orgaDisplayPhoto,
+            displayName: data.orgaDisplayName,
+            photoFilename: data.orgaPhotoFilename,
+            displayUsername: data.orgaDisplayUsername,
             roles: {
               create: data.orgaRoles?.map((role) => ({
                 commission: { connect: { id: role.commission } },

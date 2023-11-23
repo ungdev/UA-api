@@ -28,7 +28,8 @@ describe('GET /users/current', () => {
   after(async () => {
     await database.orgaRole.deleteMany();
     // Delete the user created
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should fail as the user is not authenticated', async () => {
@@ -50,15 +51,15 @@ describe('GET /users/current', () => {
     expect(body.username).to.be.equal('alban');
     expect(body.hasPaid).to.be.false;
     expect(body.createdAt).to.be.undefined;
-    expect(body.orgaRoles).to.be.empty;
+    expect(body.orga).to.be.null;
   });
 
   it('should return the organizer with its commissions', async () => {
     const { body } = await request(app).get('/users/current').set('Authorization', `Bearer ${orgaToken}`).expect(200);
 
-    expect(body.orgaRoles).to.be.of.length(1);
-    expect(body.orgaRoles[0].commissionRole).to.be.equal('respo');
-    expect(body.orgaRoles[0].commission.id).to.be.equal('dev');
-    expect(body.orgaRoles[0].commission.position).to.be.undefined;
+    expect(body.orga.roles).to.be.of.length(1);
+    expect(body.orga.roles[0].commissionRole).to.be.equal('respo');
+    expect(body.orga.roles[0].commission.id).to.be.equal('dev');
+    expect(body.orga.roles[0].commission.position).to.be.undefined;
   });
 });

@@ -40,7 +40,8 @@ describe('GET /admin/users', () => {
   after(async () => {
     // Delete the user created
     await database.cart.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>
@@ -93,7 +94,6 @@ describe('GET /admin/users', () => {
       username: user.username,
       hasPaid: user.hasPaid,
       customMessage: null,
-      orgaRoles: [],
     });
   });
 
@@ -111,7 +111,7 @@ describe('GET /admin/users', () => {
   });
 
   it('should fetch one user per place', async () => {
-    const placedUser = await userOperations.updateAdminUser((await createFakeUser({ type: UserType.player })).id, {
+    const placedUser = await userOperations.updateAdminUser(await createFakeUser({ type: UserType.player }), {
       place: 'A21',
     });
 
@@ -143,7 +143,6 @@ describe('GET /admin/users', () => {
       username: placedUser.username,
       hasPaid: false,
       customMessage: null,
-      orgaRoles: [],
     });
 
     return database.user.delete({ where: { id: placedUser.id } });

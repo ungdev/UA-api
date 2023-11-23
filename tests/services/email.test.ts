@@ -20,7 +20,8 @@ import { generateResetToken } from '../../src/operations/user';
 describe('Tests the email utils', () => {
   after(async () => {
     await database.cart.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('test sendEmail function by using an SMTP server', async () => {

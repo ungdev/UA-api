@@ -24,7 +24,8 @@ describe('POST /auth/resendEmail', () => {
 
   after(async () => {
     // Delete the user created
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should return a bad request because of incorrect body', async () => {

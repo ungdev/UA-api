@@ -46,7 +46,8 @@ describe('GET /admin/scan/', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
-    await database.user.deleteMany();
+    await database.orga.deleteMany();
+await database.user.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>
