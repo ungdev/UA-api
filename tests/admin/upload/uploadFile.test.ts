@@ -6,6 +6,7 @@ import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import { createFakeUser, generateDummyJpgBuffer } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
+import * as uploads from '../../upload';
 
 describe('POST /admin/upload', () => {
   let nonAdminUser: User;
@@ -97,5 +98,6 @@ describe('POST /admin/upload', () => {
       .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
+    uploads.existingFiles.splice(2, 1);
   });
 });

@@ -2,7 +2,6 @@ import { Router } from 'express';
 import multer = require('multer');
 import uploadFile from './uploadFile';
 import deleteFile from './deleteFile';
-import uploadPhoto from '../users/updateTrombi';
 
 const router = Router();
 

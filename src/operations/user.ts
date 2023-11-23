@@ -15,8 +15,9 @@ import {
   RawUserWithTeamAndTournamentInfo,
   UserWithTeamAndTournamentInfo,
   Permission,
-  Orga, RawOrga
-} from "../types";
+  Orga,
+  RawOrga,
+} from '../types';
 import { deserializePermissions, serializePermissions } from '../utils/helpers';
 import { fetchAllItems } from './item';
 import { deleteFile } from './upload';

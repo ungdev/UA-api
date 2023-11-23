@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
 import { ItemCategory, RoleInCommission } from '@prisma/client';
+import sharp from 'sharp';
 import { fetchUser } from '../src/operations/user';
 import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
@@ -10,7 +11,6 @@ import nanoid from '../src/utils/nanoid';
 import env from '../src/utils/env';
 import { serializePermissions } from '../src/utils/helpers';
 import { fetchTournament } from '../src/operations/tournament';
-import sharp from "sharp";
 
 export const generateFakeDiscordId = () => `${Math.floor(Date.now() * (1 + Math.random()))}`;
 

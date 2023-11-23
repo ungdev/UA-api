@@ -182,7 +182,14 @@ export type UserPatchBody = Partial<
 
 export type RawOrga = Pick<
   User,
-  'id' | 'firstname' | 'lastname' | 'username' | 'orgaPhotoFilename' | 'orgaDisplayName' | 'orgaDisplayUsername' | 'orgaDisplayPhoto'
+  | 'id'
+  | 'firstname'
+  | 'lastname'
+  | 'username'
+  | 'orgaPhotoFilename'
+  | 'orgaDisplayName'
+  | 'orgaDisplayUsername'
+  | 'orgaDisplayPhoto'
 > & { orgaRoles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }> };
 
 export type Orga = {

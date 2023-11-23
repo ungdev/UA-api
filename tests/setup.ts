@@ -15,7 +15,7 @@ import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 import { disableFakeUploadApi, enableFakeUploadApi } from './upload';
 import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
-import * as uploads from './upload'
+import * as uploads from './upload';
 
 export const sandbox = sinon.createSandbox();
 
