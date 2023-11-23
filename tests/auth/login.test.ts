@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../src/app';
 import * as userUtils from '../../src/utils/users';
-import { Error, User, UserType } from '../../src/types';
+import { Error, Permission, User, UserType } from '../../src/types';
 import { setLoginAllowed } from '../../src/operations/settings';
 import database from '../../src/services/database';
 import { sandbox } from '../setup';
@@ -11,9 +11,11 @@ import { createFakeUser } from '../utils';
 describe('POST /auth/login', () => {
   const password = 'bonjour123456';
   let user: User;
+  let orgaUser: User;
 
   before(async () => {
     user = await createFakeUser({ password, type: UserType.player });
+    orgaUser = await createFakeUser({ password, permissions: [Permission.orga] });
   });
 
   after(async () => {
@@ -125,6 +127,7 @@ describe('POST /auth/login', () => {
       .expect(200);
 
     expect(response.body.user).to.be.an('object');
+    expect(response.body.user.orga).to.be.null;
     expect(response.body.token).to.be.a('string');
 
     authorizationToken = response.body.token;
@@ -134,12 +137,13 @@ describe('POST /auth/login', () => {
     const response = await request(app)
       .post('/auth/login')
       .send({
-        login: user.username,
+        login: orgaUser.username,
         password,
       })
       .expect(200);
 
     expect(response.body.user).to.be.an('object');
+    expect(response.body.user.orga).to.be.an('object');
     expect(response.body.token).to.be.a('string');
 
     authorizationToken = response.body.token;
