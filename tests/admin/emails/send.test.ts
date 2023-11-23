@@ -28,7 +28,7 @@ describe('POST /admin/emails', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>

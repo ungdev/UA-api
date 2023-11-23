@@ -18,7 +18,7 @@ describe('PATCH /admin/partners', () => {
 
   after(async () => {
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
     await database.partner.deleteMany();
   });
 

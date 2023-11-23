@@ -57,7 +57,7 @@ describe('GET /users/orgas', () => {
   after(async () => {
     await database.orgaRole.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should fail with a server error', () => {

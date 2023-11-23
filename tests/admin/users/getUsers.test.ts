@@ -41,7 +41,7 @@ describe('GET /admin/users', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>

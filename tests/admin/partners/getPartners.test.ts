@@ -16,7 +16,7 @@ describe('GET /admin/partners', () => {
   after(async () => {
     await database.partner.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   before(async () => {

@@ -50,7 +50,7 @@ describe('DELETE /teams/current', () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should error as the token is missing', async () => {

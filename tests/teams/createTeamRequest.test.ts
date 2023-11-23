@@ -25,7 +25,7 @@ describe('POST /teams/:teamId/join-requests', () => {
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should fail because the team does not exists', async () => {

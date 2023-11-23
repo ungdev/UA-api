@@ -64,7 +64,7 @@ describe('PATCH /admin/items/:itemId', () => {
     await database.cart.deleteMany();
     // Delete the user created
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
     await database.item.delete({ where: { id: item.id } });
   });
 

@@ -17,7 +17,7 @@ describe('DELETE /admin/partners/{partnerId}', () => {
 
   after(async () => {
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
     await database.partner.deleteMany();
   });
 

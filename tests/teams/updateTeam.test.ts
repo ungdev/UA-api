@@ -24,7 +24,7 @@ describe('PUT /teams/current', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should error as the body is incorrect', async () => {

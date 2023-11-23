@@ -41,7 +41,7 @@ describe('POST /teams', () => {
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
 
     await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lol' } });
   });

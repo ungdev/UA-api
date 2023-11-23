@@ -19,7 +19,7 @@ describe('PATCH /admin/settings', () => {
     await setShopAllowed(true);
     await setTrombiAllowed(true);
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   before(async () => {

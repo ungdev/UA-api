@@ -29,7 +29,7 @@ describe('GET /users/current', () => {
     await database.orgaRole.deleteMany();
     // Delete the user created
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should fail as the user is not authenticated', async () => {

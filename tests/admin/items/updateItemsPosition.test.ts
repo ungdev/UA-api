@@ -19,7 +19,7 @@ describe('PATCH /admin/items', () => {
 
   after(async () => {
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   before(async () => {

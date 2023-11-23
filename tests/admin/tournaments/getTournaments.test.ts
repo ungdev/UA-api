@@ -16,7 +16,7 @@ describe('GET /admin/tournaments', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   before(async () => {

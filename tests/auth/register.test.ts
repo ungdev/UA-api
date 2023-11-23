@@ -12,7 +12,7 @@ describe('POST /auth/register', () => {
   after(async () => {
     // Delete all the users created
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   const userData = {

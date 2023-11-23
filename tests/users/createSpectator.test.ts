@@ -21,7 +21,7 @@ describe('POST /users/current/spectate', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should fail as user is not authenticated', () =>

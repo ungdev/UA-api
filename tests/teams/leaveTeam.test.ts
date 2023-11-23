@@ -56,7 +56,7 @@ describe('DELETE /teams/current/users/current', () => {
     // User have paid, so they each have a cart
     await database.cart.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should fail because the token is not provided', async () => {

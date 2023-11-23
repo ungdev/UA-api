@@ -34,7 +34,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     await database.cartItem.deleteMany();
     await database.team.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
     await database.tournament.delete({ where: { id: tournament.id } });
   });
 

@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
 import { ItemCategory, RoleInCommission } from '@prisma/client';
 import sharp from 'sharp';
-import { fetchOrga, fetchUser } from "../src/operations/user";
+import { fetchUser } from '../src/operations/user';
 import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
 import logger from '../src/utils/logger';

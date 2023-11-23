@@ -50,7 +50,7 @@ describe('GET /teams/current', () => {
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
     await database.tournament.delete({ where: { id: tournament.id } });
   });
 

@@ -11,7 +11,7 @@ import env from '../src/utils/env';
 describe('Test middlewares', () => {
   after(async () => {
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   describe('Test rate limiter', () => {

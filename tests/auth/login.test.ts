@@ -19,7 +19,7 @@ describe('POST /auth/login', () => {
   after(async () => {
     // Delete the user created
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should get an error as the login is not allowed', async () => {

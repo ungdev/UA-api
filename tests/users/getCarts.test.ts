@@ -22,7 +22,7 @@ describe('GET /users/current/carts', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should fail because the user is not authenticated', async () => {

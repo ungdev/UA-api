@@ -21,7 +21,7 @@ describe('POST /admin/auth/login', () => {
   after(async () => {
     // Delete the users created
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>

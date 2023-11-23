@@ -32,7 +32,7 @@ describe('PATCH /users/current', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('shoud fail because the body is empty', async () => {

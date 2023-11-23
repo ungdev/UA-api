@@ -21,7 +21,7 @@ describe('POST /admin/auth/login', () => {
   after(async () => {
     // Delete the user created
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
     await setLoginAllowed(true);
   });
 

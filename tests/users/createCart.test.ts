@@ -165,7 +165,7 @@ describe('POST /users/current/carts', () => {
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
     await database.tournament.delete({ where: { id: fullTournament.id } });
   });
 

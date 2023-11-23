@@ -29,7 +29,7 @@ describe('GET /users/:userId/ticket', () => {
     await database.cart.deleteMany();
     await database.team.deleteMany();
     await database.orga.deleteMany();
-await database.user.deleteMany();
+    await database.user.deleteMany();
   });
 
   it('should fail because the user is not authenticated', async () => {
