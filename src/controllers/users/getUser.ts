@@ -3,7 +3,7 @@ import { isAuthenticated } from '../../middlewares/authentication';
 import { filterUser } from '../../utils/filters';
 import { success } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
-import { fetchOrgaData } from '../../operations/user';
+import { fetchOrgaData, formatOrgaData } from "../../operations/user";
 
 export default [
   // Middlewares
@@ -18,16 +18,7 @@ export default [
 
       return success(response, {
         ...filterUser(user),
-        orga: orgaData
-          ? {
-              ...orgaData,
-              roles: orgaData?.roles.map((role) => {
-                const commissionWithoutPosition = { ...role.commission };
-                delete commissionWithoutPosition.position;
-                return { ...role, commission: commissionWithoutPosition };
-              }),
-            }
-          : null,
+        orga: formatOrgaData(orgaData),
       });
     } catch (error) {
       return next(error);

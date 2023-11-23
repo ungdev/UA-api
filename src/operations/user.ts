@@ -72,6 +72,18 @@ export const formatOrga = (orga: RawUser & { orga: RawOrgaWithDetailedRoles }): 
   displayUsername: orga.orga.displayUsername,
 });
 
+export const formatOrgaData = (orga: RawOrgaWithDetailedRoles) =>
+  orga
+    ? {
+        ...orga,
+        roles: orga.roles.map((role) => {
+          const commissionWithoutPosition = { ...role.commission };
+          delete commissionWithoutPosition.position;
+          return { ...role, commission: commissionWithoutPosition };
+        }),
+      }
+    : null;
+
 export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentId: string, userType: UserType) => {
   const currentTickets = user.cartItems.filter(
     (cartItem) =>

@@ -29,6 +29,7 @@ describe('GET /admin/users', () => {
       email: 'admin@gmail.com',
       username: 'admin',
       permissions: [Permission.orga, Permission.admin],
+      orgaRoles: [{ role: 'respo', commission: 'dev' }],
     });
     adminToken = generateToken(admin);
     // We need a coach
@@ -40,6 +41,7 @@ describe('GET /admin/users', () => {
   after(async () => {
     // Delete the user created
     await database.cart.deleteMany();
+    await database.orgaRole.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
   });
@@ -94,6 +96,7 @@ describe('GET /admin/users', () => {
       username: user.username,
       hasPaid: user.hasPaid,
       customMessage: null,
+      orga: null,
     });
   });
 
@@ -143,6 +146,7 @@ describe('GET /admin/users', () => {
       username: placedUser.username,
       hasPaid: false,
       customMessage: null,
+      orga: null,
     });
 
     return database.user.delete({ where: { id: placedUser.id } });
@@ -205,6 +209,10 @@ describe('GET /admin/users', () => {
         .expect(200);
 
       expect(body.users.length).to.be.equal(1);
+      expect(body.users[0].orga).to.not.be.null;
+      expect(body.users[0].orga.roles).to.have.length(1);
+      expect(body.users[0].orga.roles[0].commissionRole).to.be.equal('respo');
+      expect(body.users[0].orga.roles[0].commission.id).to.be.equal('dev');
     });
 
     it(`should not fetch fetch the user because the permission is incorrect`, () =>
