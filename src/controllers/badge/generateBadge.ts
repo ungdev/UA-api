@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { generateBadge } from '../../utils/pdf';
+import { generateBadge } from '../../utils/badge';
 import { fetchUsers } from '../../operations/user';
 import { User, UserSearchQuery } from '../../types';
 
