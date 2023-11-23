@@ -8,10 +8,10 @@ import env from '../src/utils/env';
  * routes of the upload api, check the {@link listen} function below)
  */
 
-const existingFiles = ['tournaments/lol-logo.png', 'tournaments/lol-background.jpg'];
+const existingFiles = ['tournaments/lol-logo.webp', 'tournaments/lol-background.webp'];
 
 const allowedPaths = ['tournaments', 'partners'];
-const allowedFileTypes = ['image/png', 'image/jpeg', 'application/pdf'];
+const allowedFileTypes = ['image/png', 'image/jpeg', 'application/pdf', 'image/webp'];
 const allowedExtensions = ['png', 'jpg', 'pdf'];
 
 const maxFileSize = 5000;

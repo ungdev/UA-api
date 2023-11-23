@@ -13,7 +13,7 @@ describe('DELETE /admin/upload', () => {
   let admin: User;
   let adminToken: string;
 
-  const path = encodeURIComponent('tournaments/lol-logo.png');
+  const path = encodeURIComponent('tournaments/lol-logo.webp');
 
   after(async () => {
     await database.user.deleteMany();
