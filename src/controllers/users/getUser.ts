@@ -3,7 +3,7 @@ import { isAuthenticated } from '../../middlewares/authentication';
 import { filterUser } from '../../utils/filters';
 import { success } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
-import { fetchOrgaData, formatOrgaData } from "../../operations/user";
+import { fetchOrgaData, filterOrgaData } from '../../operations/user';
 
 export default [
   // Middlewares
@@ -18,7 +18,7 @@ export default [
 
       return success(response, {
         ...filterUser(user),
-        orga: formatOrgaData(orgaData),
+        orga: filterOrgaData(orgaData),
       });
     } catch (error) {
       return next(error);

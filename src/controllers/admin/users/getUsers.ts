@@ -3,7 +3,7 @@ import Joi from 'joi';
 import { filterUserWithTeamAndTournamentInfo } from '../../../utils/filters';
 import { success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
-import { fetchOrgaData, fetchUsers, formatOrgaData } from "../../../operations/user";
+import { fetchOrgaData, fetchUsers, filterOrgaData } from "../../../operations/user";
 import { Permission, UserSearchQuery } from '../../../types';
 import { validateQuery } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
@@ -50,7 +50,7 @@ export default [
         users: await Promise.all(
           users.map(async (user) => ({
             ...filterUserWithTeamAndTournamentInfo(user),
-            orga: formatOrgaData(await fetchOrgaData(user.id)),
+            orga: filterOrgaData(await fetchOrgaData(user.id)),
           })),
         ),
       });

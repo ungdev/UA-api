@@ -72,10 +72,9 @@ export const formatOrga = (orga: RawUser & { orga: RawOrgaWithDetailedRoles }): 
   displayUsername: orga.orga.displayUsername,
 });
 
-export const formatOrgaData = (orga: RawOrgaWithDetailedRoles) =>
+export const filterOrgaData = (orga: RawOrgaWithDetailedRoles) =>
   orga
     ? {
-        ...orga,
         roles: orga.roles.map((role) => {
           const commissionWithoutPosition = { ...role.commission };
           delete commissionWithoutPosition.position;
@@ -317,7 +316,8 @@ export const updateAdminUser = async (user: User, updates: UserPatchBody): Promi
     await database.orga.deleteMany({ where: { userId } });
   }
   const shouldConnectToOrga =
-    updates.permissions?.includes(Permission.orga) || (!updates.permissions && updates.orgaRoles);
+    (!updates.permissions && user.permissions.includes(Permission.orga)) ||
+    (updates.permissions && updates.permissions.includes(Permission.orga));
   const updatedUser = await database.user.update({
     data: {
       type: updates.type,

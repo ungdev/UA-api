@@ -108,29 +108,29 @@ describe('PATCH /admin/users/:userId', () => {
 
     const updatedUser = await userOperations.fetchUser(teamMember.id);
 
-    expect(body.type).to.be.equal(validBody.type);
-    expect(body.place).to.be.equal(validBody.place);
-    expect(body.permissions).to.have.same.members(validBody.permissions!);
-    expect(body.age).to.be.equal(validBody.age);
+    expect(body.data.type).to.be.equal(validBody.type);
+    expect(body.data.place).to.be.equal(validBody.place);
+    expect(body.data.permissions).to.have.same.members(validBody.permissions!);
+    expect(body.data.age).to.be.equal(validBody.age);
     expect(body.customMessage).to.be.equal(validBody.customMessage);
-    expect(body.email).to.be.equal(validBody.email);
-    expect(body.firstname).to.be.equal(validBody.firstname);
-    expect(body.lastname).to.be.equal(validBody.lastname);
-    expect(body.username).to.be.equal(validBody.username);
-    expect(body.discordId).to.be.equal(validBody.discordId);
-    expect(body.teamId).to.be.equal(team.id);
+    expect(body.data.email).to.be.equal(validBody.email);
+    expect(body.data.firstname).to.be.equal(validBody.firstname);
+    expect(body.data.lastname).to.be.equal(validBody.lastname);
+    expect(body.data.username).to.be.equal(validBody.username);
+    expect(body.data.discordId).to.be.equal(validBody.discordId);
+    expect(body.data.teamId).to.be.equal(team.id);
 
-    expect(body.type).to.be.equal(updatedUser.type);
-    expect(body.place).to.be.equal(updatedUser.place);
-    expect(body.teamId).to.be.equal(updatedUser.teamId);
-    expect(body.permissions).to.have.same.members(updatedUser.permissions);
-    expect(body.age).to.be.equal(updatedUser.age);
+    expect(body.data.type).to.be.equal(updatedUser.type);
+    expect(body.data.place).to.be.equal(updatedUser.place);
+    expect(body.data.teamId).to.be.equal(updatedUser.teamId);
+    expect(body.data.permissions).to.have.same.members(updatedUser.permissions);
+    expect(body.data.age).to.be.equal(updatedUser.age);
     expect(body.customMessage).to.be.equal(updatedUser.customMessage);
-    expect(body.email).to.be.equal(updatedUser.email);
-    expect(body.firstname).to.be.equal(updatedUser.firstname);
-    expect(body.lastname).to.be.equal(updatedUser.lastname);
-    expect(body.username).to.be.equal(updatedUser.username);
-    expect(body.discordId).to.be.equal(updatedUser.discordId);
+    expect(body.data.email).to.be.equal(updatedUser.email);
+    expect(body.data.firstname).to.be.equal(updatedUser.firstname);
+    expect(body.data.lastname).to.be.equal(updatedUser.lastname);
+    expect(body.data.username).to.be.equal(updatedUser.username);
+    expect(body.data.discordId).to.be.equal(updatedUser.discordId);
   });
 
   it('should update the user and remove him from his team', async () => {
@@ -160,9 +160,9 @@ describe('PATCH /admin/users/:userId', () => {
 
     const updatedUser = await userOperations.fetchUser(teamMember!.id);
 
-    expect(body.type).to.be.equal(UserType.spectator);
-    expect(body.type).to.be.equal(updatedUser.type);
-    expect(body.teamId).to.be.equal(updatedUser.teamId);
+    expect(body.data.type).to.be.equal(UserType.spectator);
+    expect(body.data.type).to.be.equal(updatedUser.type);
+    expect(body.data.teamId).to.be.equal(updatedUser.teamId);
   });
 
   it('should work if body is incomplete', async () => {
@@ -175,7 +175,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.type).to.be.equal(UserType.coach);
+    expect(body.data.type).to.be.equal(UserType.coach);
   });
 
   it('should be able to update discordId only (no team)', async () => {
@@ -188,7 +188,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal(fakeGuildMemberId);
+    expect(body.data.discordId).to.be.equal(fakeGuildMemberId);
     kickMember(fakeGuildMemberId);
   });
 
@@ -209,7 +209,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal(newAccount);
+    expect(body.data.discordId).to.be.equal(newAccount);
     deleteRole(team.discordRoleId!);
   });
 
@@ -230,7 +230,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal(newAccount);
+    expect(body.data.discordId).to.be.equal(newAccount);
 
     deleteRole(team.discordRoleId!);
   });
@@ -252,7 +252,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal(newDiscordId);
+    expect(body.data.discordId).to.be.equal(newDiscordId);
   });
 
   it('should be able to update discordId only (team not locked)', async () => {
@@ -270,7 +270,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal(newDiscordId);
+    expect(body.data.discordId).to.be.equal(newDiscordId);
   });
 
   it('should be able to update customMessage only', async () => {
@@ -344,17 +344,17 @@ describe('PATCH /admin/users/:userId', () => {
 
     const updatedUser = await userOperations.fetchUser(randomUser.id);
 
-    expect(body.type).to.be.equal(validAnimBody.type);
-    expect(body.type).to.be.equal(updatedUser.type);
-    expect(body.teamId).to.be.equal(updatedUser.teamId);
-    expect(body.place).to.be.equal(validAnimBody.place);
-    expect(body.age).to.be.equal(validAnimBody.age);
+    expect(body.data.type).to.be.equal(validAnimBody.type);
+    expect(body.data.type).to.be.equal(updatedUser.type);
+    expect(body.data.teamId).to.be.equal(updatedUser.teamId);
+    expect(body.data.place).to.be.equal(validAnimBody.place);
+    expect(body.data.age).to.be.equal(validAnimBody.age);
     expect(body.customMessage).to.be.equal(validAnimBody.customMessage);
-    expect(body.email).to.be.equal(validAnimBody.email);
-    expect(body.firstname).to.be.equal(validAnimBody.firstname);
-    expect(body.lastname).to.be.equal(validAnimBody.lastname);
-    expect(body.username).to.be.equal(validAnimBody.username);
-    expect(body.discordId).to.be.equal(validAnimBody.discordId);
+    expect(body.data.email).to.be.equal(validAnimBody.email);
+    expect(body.data.firstname).to.be.equal(validAnimBody.firstname);
+    expect(body.data.lastname).to.be.equal(validAnimBody.lastname);
+    expect(body.data.username).to.be.equal(validAnimBody.username);
+    expect(body.data.discordId).to.be.equal(validAnimBody.discordId);
   });
 
   it('should fail as the user has already paid and wants to change its type', async () => {
@@ -380,13 +380,14 @@ describe('PATCH /admin/users/:userId', () => {
 
     const updatedUser = await userOperations.fetchUser(permissibleUser.id);
 
-    expect(body.permissions).to.have.lengthOf(0);
+    expect(body.data.permissions).to.have.lengthOf(0);
     expect(updatedUser.permissions).to.have.lengthOf(0);
-    expect(body.discordId).to.be.equal(permissibleUser.discordId);
-    expect(body.place).to.be.equal(permissibleUser.place);
-    expect(body.type).to.be.equal(permissibleUser.type);
-    expect(body.age).to.be.equal(permissibleUser.age);
+    expect(body.data.discordId).to.be.equal(permissibleUser.discordId);
+    expect(body.data.place).to.be.equal(permissibleUser.place);
+    expect(body.data.type).to.be.equal(permissibleUser.type);
+    expect(body.data.age).to.be.equal(permissibleUser.age);
     expect(body.customMessage).to.be.equal(permissibleUser.customMessage);
+    expect(body.data.orga).to.be.null;
   });
 
   it('should add permissions to the user', async () => {
@@ -402,17 +403,17 @@ describe('PATCH /admin/users/:userId', () => {
 
     const updatedUser = await userOperations.fetchUser(permissibleUser.id);
 
-    expect(body.permissions).to.include(Permission.stream);
+    expect(body.data.permissions).to.include(Permission.stream);
     expect(updatedUser.permissions).to.include(Permission.stream);
-    expect(body.discordId).to.be.equal(permissibleUser.discordId);
-    expect(body.place).to.be.equal(permissibleUser.place);
-    expect(body.type).to.be.equal(permissibleUser.type);
-    expect(body.age).to.be.equal(permissibleUser.age);
+    expect(body.data.discordId).to.be.equal(permissibleUser.discordId);
+    expect(body.data.place).to.be.equal(permissibleUser.place);
+    expect(body.data.type).to.be.equal(permissibleUser.type);
+    expect(body.data.age).to.be.equal(permissibleUser.age);
     expect(body.customMessage).to.be.equal(permissibleUser.customMessage);
   });
 
   it('should add 2 commissions to the anim orga', async () => {
-    await request(app)
+    const {body} = await request(app)
       .patch(`/admin/users/${anim.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
@@ -422,6 +423,7 @@ describe('PATCH /admin/users/:userId', () => {
         ],
       })
       .expect(200);
+    expect(body.data.orga).to.not.be.null;
     const orga = await fetchOrga(anim);
     expect(orga.roles).to.have.length(2);
   });
