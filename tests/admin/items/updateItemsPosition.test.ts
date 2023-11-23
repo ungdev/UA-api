@@ -18,6 +18,7 @@ describe('PATCH /admin/items', () => {
   let validBody: { items: { id: string; position: number }[] };
 
   after(async () => {
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

@@ -23,6 +23,7 @@ describe('DELETE /teams/current/join-requests/current', () => {
 
   after(async () => {
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

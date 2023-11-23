@@ -25,11 +25,12 @@ export default [
         ]),
       );
       for (const orga of orgas) {
-        for (const role of orga.orgaRoles) {
+        for (const role of orga.roles) {
           resultInObject[role.commission.id].roles[role.commissionRole].push({
             id: orga.id,
-            firstname: orga.firstname,
-            lastname: orga.lastname,
+            name: orga.name,
+            username: orga.username,
+            photoFilename: orga.photoFilename,
           });
         }
       }

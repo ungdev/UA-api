@@ -204,6 +204,7 @@ describe('POST /etupay/callback', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -465,6 +466,7 @@ describe('GET /etupay/callback', () => {
   after(async () => {
     // Delete the user created
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

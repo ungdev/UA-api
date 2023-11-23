@@ -23,6 +23,7 @@ describe('PATCH /admin/tournaments', () => {
   };
 
   after(async () => {
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

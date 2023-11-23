@@ -182,15 +182,25 @@ model User {
   carts         Cart[]
   logs          Log[]
   captainTeam   Team?
-  orgaRoles     OrgaRole[] @relation("orgaRoleUser")
   repoItems     RepoItem[] @relation("repoItemUser")
   repoLogs      RepoLog[]  @relation("repoLogUser")
   attended      User?      @relation("attendantUser")
+  orga          Orga?      @relation("userOrga")
 
   @@index([id])
   @@index([askingTeamId], map: "users_askingTeamId_fkey")
   @@index([teamId], map: "users_teamId_fkey")
   @@map("users")
+}
+
+model Orga {
+  userId String @id
+  photoFilename String?
+  displayName Boolean @default(false)
+  displayUsername Boolean @default(true)
+  displayPhoto Boolean @default(false)
+  roles     OrgaRole[] @relation("orgaRoleOrga")
+  user User @relation("userOrga", fields: [userId], references: [id])
 }
 
 model RepoItem {
@@ -225,7 +235,7 @@ model OrgaRole {
   userId         String
   commissionId   String
   commissionRole RoleInCommission
-  user           User             @relation("orgaRoleUser", fields: [userId], references: [id])
+  user           Orga             @relation("orgaRoleOrga", fields: [userId], references: [userId])
   commission     Commission       @relation("orgaRoleCommission", fields: [commissionId], references: [id])
 
   @@id([userId, commissionId])

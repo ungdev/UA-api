@@ -24,11 +24,19 @@ describe('GET /users/orgas', () => {
       createFakeUser({
         permissions: [Permission.orga, Permission.admin],
         orgaRoles: [{ commission: 'dev', role: RoleInCommission.respo }],
+        orgaDisplayName: false,
+        orgaDisplayUsername: true,
+        orgaDisplayPhoto: false,
+        orgaPhotoFilename: 'dev-respo',
       }),
       // Create 1 dev member
       createFakeUser({
         permissions: [Permission.orga],
         orgaRoles: [{ commission: 'dev', role: RoleInCommission.member }],
+        orgaDisplayName: true,
+        orgaDisplayUsername: true,
+        orgaDisplayPhoto: true,
+        orgaPhotoFilename: 'dev-member',
       }),
       // Create another dev member who is also respo rozo
       createFakeUser({
@@ -37,6 +45,10 @@ describe('GET /users/orgas', () => {
           { commission: 'rozo', role: RoleInCommission.respo },
           { commission: 'dev', role: RoleInCommission.member },
         ],
+        orgaDisplayName: false,
+        orgaDisplayUsername: true,
+        orgaDisplayPhoto: false,
+        orgaPhotoFilename: 'rozo-respo',
       }),
     ];
     [, developmentRespo, developmentMember, networkRespo] = await Promise.all(transactions);
@@ -44,6 +56,7 @@ describe('GET /users/orgas', () => {
 
   after(async () => {
     await database.orgaRole.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -74,22 +87,32 @@ describe('GET /users/orgas', () => {
       expect(bodyCommission.masterCommission).to.be.equal(commission.masterCommissionId);
       expect(bodyCommission.roles.respo).to.have.length(1);
       if (commission.id === 'dev') {
+        // Verify respo
         expect(bodyCommission.roles.respo[0].id).to.be.equal(developmentRespo.id);
-        expect(bodyCommission.roles.respo[0].firstname).to.be.equal(developmentRespo.firstname);
-        expect(bodyCommission.roles.respo[0].lastname).to.be.equal(developmentRespo.lastname);
+        expect(bodyCommission.roles.respo[0].name).to.be.undefined;
+        expect(bodyCommission.roles.respo[0].username).to.be.equal(developmentRespo.username);
+        expect(bodyCommission.roles.respo[0].photoFilename).to.be.undefined;
+        // Verify Members
         expect(bodyCommission.roles.member).to.have.length(2);
         const developmentMemberIndex = bodyCommission.roles.member[0].id === developmentMember.id ? 0 : 1;
         const networkRespoIndex = developmentMemberIndex === 0 ? 1 : 0;
+        // Member 1
         expect(bodyCommission.roles.member[developmentMemberIndex].id).to.be.equal(developmentMember.id);
-        expect(bodyCommission.roles.member[developmentMemberIndex].firstname).to.be.equal(developmentMember.firstname);
-        expect(bodyCommission.roles.member[developmentMemberIndex].lastname).to.be.equal(developmentMember.lastname);
+        expect(bodyCommission.roles.member[developmentMemberIndex].name).to.be.equal(
+          `${developmentMember.firstname} ${developmentMember.lastname}`,
+        );
+        expect(bodyCommission.roles.member[developmentMemberIndex].username).to.be.equal(developmentMember.username);
+        expect(bodyCommission.roles.member[developmentMemberIndex].photoFilename).to.be.equal('dev-member');
+        // Member 2
         expect(bodyCommission.roles.member[networkRespoIndex].id).to.be.equal(networkRespo.id);
-        expect(bodyCommission.roles.member[networkRespoIndex].firstname).to.be.equal(networkRespo.firstname);
-        expect(bodyCommission.roles.member[networkRespoIndex].lastname).to.be.equal(networkRespo.lastname);
+        expect(bodyCommission.roles.member[networkRespoIndex].name).to.be.undefined;
+        expect(bodyCommission.roles.member[networkRespoIndex].username).to.be.equal(networkRespo.username);
+        expect(bodyCommission.roles.member[networkRespoIndex].lastname).to.be.undefined;
       } else {
         expect(bodyCommission.roles.respo[0].id).to.be.equal(networkRespo.id);
-        expect(bodyCommission.roles.respo[0].firstname).to.be.equal(networkRespo.firstname);
-        expect(bodyCommission.roles.respo[0].lastname).to.be.equal(networkRespo.lastname);
+        expect(bodyCommission.roles.respo[0].name).to.be.undefined;
+        expect(bodyCommission.roles.respo[0].username).to.be.equal(networkRespo.username);
+        expect(bodyCommission.roles.respo[0].photoFilename).to.be.undefined;
         expect(bodyCommission.roles.member).to.be.empty;
       }
     }

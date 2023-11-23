@@ -24,6 +24,7 @@ describe('POST /admin/users', () => {
   };
 
   after(async () => {
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

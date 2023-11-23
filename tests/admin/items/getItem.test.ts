@@ -23,6 +23,7 @@ describe('GET /admin/items/:itemId', () => {
 
   after(async () => {
     // Delete the user created
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

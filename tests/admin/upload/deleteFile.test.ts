@@ -7,6 +7,7 @@ import { Error, Permission, User, UserType } from '../../../src/types';
 import { setLoginAllowed } from '../../../src/operations/settings';
 import { createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
+import * as uploads from '../../upload';
 
 describe('DELETE /admin/upload', () => {
   let nonAdminUser: User;
@@ -16,7 +17,9 @@ describe('DELETE /admin/upload', () => {
   const path = encodeURIComponent('tournaments/lol-logo.webp');
 
   after(async () => {
+    await database.orga.deleteMany();
     await database.user.deleteMany();
+    uploads.existingFiles.push('tournaments/lol-logo.webp');
   });
 
   before(async () => {

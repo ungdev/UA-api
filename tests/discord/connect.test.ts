@@ -22,6 +22,7 @@ describe('GET /discord/connect', () => {
 
   after(async () => {
     // Delete the user created
+    await database.orga.deleteMany();
     await database.user.deleteMany();
     delete env.discord.client;
   });

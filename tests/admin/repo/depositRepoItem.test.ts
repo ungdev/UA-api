@@ -35,6 +35,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
     await database.repoLog.deleteMany();
     await database.repoItem.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

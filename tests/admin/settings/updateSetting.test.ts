@@ -18,6 +18,7 @@ describe('PATCH /admin/settings', () => {
     await setLoginAllowed(true);
     await setShopAllowed(true);
     await setTrombiAllowed(true);
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

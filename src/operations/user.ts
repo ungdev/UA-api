@@ -15,9 +15,13 @@ import {
   RawUserWithTeamAndTournamentInfo,
   UserWithTeamAndTournamentInfo,
   Permission,
+  Orga,
+  RawOrgaWithUserData,
+  RawOrgaWithDetailedRoles,
 } from '../types';
 import { deserializePermissions, serializePermissions } from '../utils/helpers';
 import { fetchAllItems } from './item';
+import { deleteFile } from './upload';
 
 export const userInclusions = {
   cartItems: {
@@ -27,12 +31,6 @@ export const userInclusions = {
   },
   attendant: true,
   attended: true,
-  orgaRoles: {
-    select: {
-      commissionRole: true,
-      commission: { select: { id: true, name: true, color: true, masterCommissionId: true } },
-    },
-  },
 };
 
 export const formatUser = (user: RawUserWithCartItems): User => {
@@ -62,6 +60,28 @@ export const formatUserWithTeamAndTournament = (
     team: primitiveUser.team,
   };
 };
+
+export const formatOrga = (orga: RawUser & { orga: RawOrgaWithDetailedRoles }): Orga => ({
+  id: orga.id,
+  name: orga.orga.displayName ? `${orga.firstname} ${orga.lastname}` : undefined,
+  username: orga.orga.displayUsername ? orga.username : undefined,
+  photoFilename: orga.orga.displayPhoto ? orga.orga.photoFilename : undefined,
+  roles: orga.orga.roles,
+  displayName: orga.orga.displayName,
+  displayPhoto: orga.orga.displayPhoto,
+  displayUsername: orga.orga.displayUsername,
+});
+
+export const filterOrgaData = (orga: RawOrgaWithDetailedRoles) =>
+  orga
+    ? {
+        roles: orga.roles.map((role) => {
+          const commissionWithoutPosition = { ...role.commission };
+          delete commissionWithoutPosition.position;
+          return { ...role, commission: commissionWithoutPosition };
+        }),
+      }
+    : null;
 
 export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentId: string, userType: UserType) => {
   const currentTickets = user.cartItems.filter(
@@ -220,16 +240,19 @@ export const fetchUsers = async (
 };
 
 /** Returns orga users */
-export const fetchOrgas = () =>
-  database.user.findMany({
+export const fetchOrgas = async (): Promise<Orga[]> => {
+  const orgas = await database.user.findMany({
     where: { permissions: { contains: 'orga' } },
-    select: {
-      id: true,
-      firstname: true,
-      lastname: true,
-      orgaRoles: { select: { commission: true, commissionRole: true } },
+    include: {
+      orga: {
+        include: {
+          roles: { select: { commission: true, commissionRole: true } },
+        },
+      },
     },
   });
+  return orgas.map(formatOrga);
+};
 
 export const createUser = async (user: {
   username: string;
@@ -287,8 +310,15 @@ export const updateUser = async (
   return formatUser(user);
 };
 
-export const updateAdminUser = async (userId: string, updates: UserPatchBody): Promise<User> => {
-  const user = await database.user.update({
+export const updateAdminUser = async (user: User, updates: UserPatchBody): Promise<User> => {
+  const userId = user.id;
+  if (updates.permissions && !updates.permissions.includes(Permission.orga)) {
+    await database.orga.deleteMany({ where: { userId } });
+  }
+  const shouldConnectToOrga =
+    (!updates.permissions && user.permissions.includes(Permission.orga)) ||
+    (updates.permissions && updates.permissions.includes(Permission.orga));
+  const updatedUser = await database.user.update({
     data: {
       type: updates.type,
       permissions: updates.permissions ? serializePermissions(updates.permissions) : undefined,
@@ -306,34 +336,54 @@ export const updateAdminUser = async (userId: string, updates: UserPatchBody): P
               disconnect: true,
             }
           : undefined,
-      orgaRoles: {
-        connectOrCreate: updates.orgaRoles?.map((orgaRole) => ({
-          where: {
-            userId_commissionId: { userId, commissionId: orgaRole.commission },
-          },
-          create: { commissionRole: orgaRole.commissionRole, commission: { connect: { id: orgaRole.commission } } },
-        })),
-        update: updates.orgaRoles?.map((orgaRole) => ({
-          where: {
-            userId_commissionId: { userId, commissionId: orgaRole.commission },
-          },
-          data: { commissionRole: orgaRole.commissionRole },
-        })),
-        deleteMany: {
-          userId,
-          NOT: {
-            OR: updates.orgaRoles?.map((orgaRole) => ({
-              commissionId: orgaRole.commission,
-            })),
-          },
-        },
+      orga: {
+        connectOrCreate: shouldConnectToOrga
+          ? {
+              where: { userId },
+              create: {},
+            }
+          : undefined,
+        update: shouldConnectToOrga
+          ? {
+              where: {
+                userId,
+              },
+              data: {
+                roles: {
+                  connectOrCreate: updates.orgaRoles?.map((orgaRole) => ({
+                    where: {
+                      userId_commissionId: { userId, commissionId: orgaRole.commission },
+                    },
+                    create: {
+                      commissionRole: orgaRole.commissionRole,
+                      commission: { connect: { id: orgaRole.commission } },
+                    },
+                  })),
+                  update: updates.orgaRoles?.map((orgaRole) => ({
+                    where: {
+                      userId_commissionId: { userId, commissionId: orgaRole.commission },
+                    },
+                    data: { commissionRole: orgaRole.commissionRole },
+                  })),
+                  deleteMany: {
+                    userId,
+                    NOT: {
+                      OR: updates.orgaRoles?.map((orgaRole) => ({
+                        commissionId: orgaRole.commission,
+                      })),
+                    },
+                  },
+                },
+              },
+            }
+          : undefined,
       },
     },
     where: { id: userId },
     include: userInclusions,
   });
 
-  return formatUser(user);
+  return formatUser(updatedUser);
 };
 
 export const createAttendant = (
@@ -482,3 +532,46 @@ export const getPaidAndValidatedUsers = () =>
       },
     },
   });
+
+/** Generates a file name to store the photo of an orga.
+ * The file name is in the form :
+ * <lastname>-<firstname>-<userId>-<randomString>
+ * We append a random string to make sure you can't find it easily (without an admin access to the file manager)
+ */
+export const generateOrgaPhotoFilename = (user: User) =>
+  `${user.lastname.replaceAll(/\W/g, '')}-${user.firstname.replaceAll(/\W/g, '')}-${user.id}-${nanoid() + nanoid()}`;
+
+export const fetchOrgaData = (userId: string): Promise<RawOrgaWithDetailedRoles> =>
+  database.orga.findUnique({
+    where: { userId },
+    include: { roles: { select: { commissionRole: true, commission: true } } },
+  }) ?? null;
+
+export const fetchOrga = async (user: RawUser | User): Promise<RawOrgaWithUserData> => {
+  const orga = await fetchOrgaData(user.id);
+  return orga ? { ...user, ...orga } : null;
+};
+
+export const updateTrombi = async (
+  user: User,
+  displayName: boolean,
+  displayPhoto: boolean,
+  displayUsername: boolean,
+) => {
+  const orga = await fetchOrga(user);
+  // First delete the old file, if any
+  if (orga.photoFilename) {
+    await deleteFile(`orgas/${orga.photoFilename}.webp`);
+  }
+  const filename = generateOrgaPhotoFilename(user);
+  await database.orga.update({
+    where: { userId: user.id },
+    data: {
+      displayName,
+      displayPhoto,
+      photoFilename: filename,
+      displayUsername,
+    },
+  });
+  return filename;
+};

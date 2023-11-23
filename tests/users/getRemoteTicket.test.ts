@@ -28,6 +28,7 @@ describe('GET /users/:userId/ticket', () => {
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -73,7 +74,7 @@ describe('GET /users/:userId/ticket', () => {
   });
 
   it('should return the ticket of the remote coach', async () => {
-    await userOperations.updateAdminUser(remotePlayer.id, {
+    await userOperations.updateAdminUser(remotePlayer, {
       type: 'coach',
     });
     const item = filterItem((await fetchUserItems()).find((ticket) => ticket.id === 'ticket-coach') as Item);
@@ -83,7 +84,7 @@ describe('GET /users/:userId/ticket', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200, item)
       .then(async (result) => {
-        await userOperations.updateAdminUser(remotePlayer.id, {
+        await userOperations.updateAdminUser(remotePlayer, {
           type: 'player',
         });
         return result;

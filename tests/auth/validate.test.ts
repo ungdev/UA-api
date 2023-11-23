@@ -18,6 +18,7 @@ describe('POST /auth/validate/{token}', () => {
 
   after(async () => {
     // Delete the user created
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
