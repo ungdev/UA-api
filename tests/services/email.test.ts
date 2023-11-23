@@ -20,6 +20,7 @@ import { generateResetToken } from '../../src/operations/user';
 describe('Tests the email utils', () => {
   after(async () => {
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -83,7 +84,7 @@ describe('Tests the email utils', () => {
   // We also use this test to have a preview of the email generated in the artifacts
   it(`should generate a payment template`, async () => {
     // Create a fake user and add it in a random team
-    const user = await createFakeUser();
+    const user = await createFakeUser({ type: UserType.player });
     const spectator = await createFakeUser({ type: UserType.spectator });
     const coach = await createFakeUser({ type: UserType.coach });
 
@@ -138,7 +139,7 @@ describe('Tests the email utils', () => {
   });
 
   it(`should generate a password reset template`, async () => {
-    const user = await createFakeUser();
+    const user = await createFakeUser({ type: UserType.player });
     user.resetToken = (await generateResetToken(user.id)).resetToken;
 
     const passwordResetEmail = await generatePasswordResetEmail(user);

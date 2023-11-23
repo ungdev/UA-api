@@ -15,6 +15,7 @@ describe('PATCH /admin/partners/{partnerId}', () => {
   const partners: Partner[] = [];
 
   after(async () => {
+    await database.orga.deleteMany();
     await database.user.deleteMany();
     await database.partner.deleteMany();
   });
@@ -24,8 +25,8 @@ describe('PATCH /admin/partners/{partnerId}', () => {
       partners.push(await createFakePartner({}));
     }
 
-    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser();
+    admin = await createFakeUser({ permissions: [Permission.admin] });
+    nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
   });
 

@@ -64,6 +64,7 @@ export enum Permission {
   anim = 'anim',
   admin = 'admin',
   repo = 'repo',
+  orga = 'orga',
 }
 
 export { TransactionState, UserAge, UserType, ItemCategory, Log, RepoItemType } from '@prisma/client';
@@ -83,6 +84,7 @@ export type PrimitiveTeam = prisma.Team;
 export type PrimitiveTournament = prisma.Tournament;
 export type RepoItem = prisma.RepoItem;
 export type RepoLog = prisma.RepoLog & { item: RepoItem };
+export type RawOrga = prisma.Orga;
 
 export type Item = RawItem & {
   left?: number;
@@ -155,7 +157,7 @@ export type UserSearchQuery = {
   userId: string;
   search: string;
   type: UserType;
-  permission: Permission;
+  permissions: string;
   tournament: string;
   locked: string;
   payment: string;
@@ -176,8 +178,26 @@ export type UserPatchBody = Partial<
     | 'firstname'
     | 'lastname'
     | 'email'
-  >
+  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }> }
 >;
+
+export type RawOrgaWithDetailedRoles = RawOrga & {
+  roles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }>;
+};
+
+export type RawOrgaWithUserData = Pick<User, 'id' | 'firstname' | 'lastname' | 'username'> &
+  Omit<RawOrgaWithDetailedRoles, 'userId'>;
+
+export type Orga = {
+  id: string;
+  name: string;
+  username: string;
+  photoFilename?: string;
+  roles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }>;
+  displayName: boolean;
+  displayPhoto: boolean;
+  displayUsername: boolean;
+};
 
 export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
   users: RawUserWithCartItems[];
@@ -243,6 +263,7 @@ export const enum Error {
   InvalidPlace = 'Numéro de place invalide',
   InvalidPermission = "Ces permissions n'existent pas",
   stringBooleanError = "Ce n'est pas du texte",
+  ShowNameOrPseudo = 'Vous devez au moins afficher le nom ou le pseudo',
 
   InvalidTeamName = "Nom d'équipe invalide !",
 
@@ -276,6 +297,7 @@ export const enum Error {
   LoginNotAllowed = 'Tu ne peux pas te connecter actuellement',
   NotAdmin = "Tu n'es pas administrateur",
   ShopNotAllowed = 'La billetterie est fermée',
+  TrombiNotAllowed = "Le trombinoscope n'est pas encore disponible",
   EmailNotConfirmed = "Le compte n'est pas confirmé",
   EmailAlreadyConfirmed = 'Le compte est déjà confirmé',
   NoPermission = "Tu n'as pas la permission d'accéder à cette ressource",
@@ -318,6 +340,7 @@ export const enum Error {
   AlreadyHaveComputer = 'Tu as déjà un ordinateur stocké',
   AlreadyPickedUp = "L'objet a déjà été récupéré",
   TooMuchLockedTeams = "Il y a plus d'équipes inscrites que le nombre d'équipes maximal souhaité",
+  TournamentFull = "Le tournoi est plein, attends qu'une place se libère pour payer un ticket",
 
   // 404
   // The server can't find the requested resource
@@ -331,6 +354,7 @@ export const enum Error {
   TournamentNotFound = 'Le tournoi est introuvable',
   TicketNotFound = 'Le ticket est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
+  CommissionNotFound = "La commission n'existe pas",
 
   // 405
   // The request method is known by the server but is not supported by the target resource

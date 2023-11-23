@@ -23,7 +23,7 @@ describe('POST /admin/scan/:qrcode', () => {
       members: 1,
     });
     [user] = team.players;
-    admin = await createFakeUser({ permissions: [Permission.entry] });
+    admin = await createFakeUser({ permissions: [Permission.entry], type: UserType.player });
     adminToken = generateToken(admin);
 
     cart = await forcePay(user);
@@ -35,6 +35,7 @@ describe('POST /admin/scan/:qrcode', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -134,7 +135,7 @@ describe('POST /admin/scan/:qrcode', () => {
   });
 
   it('should scan a user with his id only', async () => {
-    const scannableUser = await createFakeUser();
+    const scannableUser = await createFakeUser({ type: UserType.player });
     await forcePay(scannableUser);
     const body = {
       userId: scannableUser.id,

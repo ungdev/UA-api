@@ -134,7 +134,7 @@ model Partner {
   id          String  @id
   name        String  @unique
   link        String
-  description String  @default("") @db.Text
+  description String  @db.Text
   display     Boolean
   position    Int     @default(0)
 
@@ -185,11 +185,22 @@ model User {
   repoItems     RepoItem[] @relation("repoItemUser")
   repoLogs      RepoLog[]  @relation("repoLogUser")
   attended      User?      @relation("attendantUser")
+  orga          Orga?      @relation("userOrga")
 
   @@index([id])
   @@index([askingTeamId], map: "users_askingTeamId_fkey")
   @@index([teamId], map: "users_teamId_fkey")
   @@map("users")
+}
+
+model Orga {
+  userId String @id
+  photoFilename String?
+  displayName Boolean @default(false)
+  displayUsername Boolean @default(true)
+  displayPhoto Boolean @default(false)
+  roles     OrgaRole[] @relation("orgaRoleOrga")
+  user User @relation("userOrga", fields: [userId], references: [id])
 }
 
 model RepoItem {
@@ -220,6 +231,33 @@ model RepoLog {
   @@map("repoLog")
 }
 
+model OrgaRole {
+  userId         String
+  commissionId   String
+  commissionRole RoleInCommission
+  user           Orga             @relation("orgaRoleOrga", fields: [userId], references: [userId])
+  commission     Commission       @relation("orgaRoleCommission", fields: [commissionId], references: [id])
+
+  @@id([userId, commissionId])
+  @@index([userId])
+  @@index([commissionId])
+  @@map("orgaRole")
+}
+
+model Commission {
+  id                 String       @id
+  name               String
+  position           Int
+  color              String
+  masterCommissionId String?
+  masterCommission   Commission?  @relation("masterCommission", fields: [masterCommissionId], references: [id])
+  subCommissions     Commission[] @relation("masterCommission")
+  orgas              OrgaRole[]   @relation("orgaRoleCommission")
+
+  @@index([masterCommissionId])
+  @@map("commission")
+}
+
 enum TransactionState {
   pending
   paid
@@ -238,7 +276,6 @@ enum ItemCategory {
 
 enum UserType {
   player
-  orga
   coach
   spectator
   attendant
@@ -247,6 +284,11 @@ enum UserType {
 enum UserAge {
   adult
   child
+}
+
+enum RoleInCommission {
+  respo
+  member
 }
 
 enum RepoItemType {

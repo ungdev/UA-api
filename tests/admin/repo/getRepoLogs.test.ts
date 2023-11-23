@@ -6,7 +6,7 @@ import { addRepoItem } from '../../../src/operations/repo';
 import { lockTeam } from '../../../src/operations/team';
 import { scanUser } from '../../../src/operations/user';
 import database from '../../../src/services/database';
-import { Error, Permission, Team, User } from '../../../src/types';
+import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
 import { createFakeTeam, createFakeUser } from '../../utils';
@@ -20,9 +20,9 @@ describe('GET /admin/repo/user/:userId/logs', () => {
   let captain: User;
 
   before(async () => {
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
-    nonAdmin = await createFakeUser();
+    nonAdmin = await createFakeUser({ type: UserType.player });
     nonAdminToken = generateToken(nonAdmin);
     team = await createFakeTeam();
     captain = getCaptain(team);
@@ -32,6 +32,7 @@ describe('GET /admin/repo/user/:userId/logs', () => {
     await database.repoLog.deleteMany();
     await database.repoItem.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

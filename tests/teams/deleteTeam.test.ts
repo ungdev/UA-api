@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
@@ -48,6 +49,7 @@ describe('DELETE /teams/current', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -56,7 +58,7 @@ describe('DELETE /teams/current', () => {
   });
 
   it('should error as the request made by a random', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     const otherUserToken = generateToken(otherUser);
 
     await request(app)

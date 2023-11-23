@@ -15,6 +15,7 @@ describe('GET /admin/tournaments', () => {
 
   after(async () => {
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -26,8 +27,8 @@ describe('GET /admin/tournaments', () => {
         displayCasters: true,
       },
     });
-    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser();
+    admin = await createFakeUser({ permissions: [Permission.admin] });
+    nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
   });
 

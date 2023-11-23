@@ -3,12 +3,13 @@ import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error, UserPatchBody } from '../../../types';
 import { conflict, forbidden, notFound, success } from '../../../utils/responses';
-import { fetchUser, updateAdminUser } from '../../../operations/user';
+import { fetchOrgaData, fetchUser, filterOrgaData, updateAdminUser } from '../../../operations/user';
 import { filterUser } from '../../../utils/filters';
 import { validateBody } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
 import { removeDiscordRoles } from '../../../utils/discord';
 import { getRequestInfo } from '../../../utils/users';
+import { fetchCommissions } from '../../../operations/commission';
 
 export default [
   // Middlewares
@@ -25,6 +26,14 @@ export default [
       lastname: validators.lastname.optional(),
       firstname: validators.firstname.optional(),
       email: validators.email.optional(),
+      orgaRoles: Joi.array()
+        .items(
+          Joi.object({
+            commissionRole: Joi.string().allow('respo', 'member'),
+            commission: Joi.string(),
+          }),
+        )
+        .optional(),
     }),
   ),
 
@@ -38,8 +47,28 @@ export default [
         return notFound(response, Error.UserNotFound);
       }
 
-      const { type, place, permissions, discordId, customMessage, age, email, username, firstname, lastname } =
-        request.body as UserPatchBody;
+      const {
+        type,
+        place,
+        permissions,
+        discordId,
+        customMessage,
+        age,
+        email,
+        username,
+        firstname,
+        lastname,
+        orgaRoles,
+      } = request.body as UserPatchBody;
+
+      // Check that every commission of the user does exist
+      const commissions = await fetchCommissions();
+      if (
+        orgaRoles &&
+        !orgaRoles.every((orgaRole) => commissions.some((commission) => orgaRole.commission === commission.id))
+      ) {
+        return notFound(response, Error.CommissionNotFound);
+      }
 
       // Check that the user type hasn't changed if the user is paid
       if (type && user.hasPaid && user.type !== type) {
@@ -53,7 +82,7 @@ export default [
         return forbidden(response, Error.NoPermission);
       }
 
-      const updatedUser = await updateAdminUser(user.id, {
+      const updatedUser = await updateAdminUser(user, {
         type,
         permissions,
         place,
@@ -64,6 +93,7 @@ export default [
         username,
         firstname,
         lastname,
+        orgaRoles,
       });
 
       // Discard current team/tournament roles if the discordId has been updated
@@ -78,7 +108,13 @@ export default [
       )
         await removeDiscordRoles(user);
 
-      return success(response, { ...filterUser(updatedUser), customMessage: updatedUser.customMessage });
+      return success(response, {
+        data: {
+          ...filterUser(updatedUser),
+          orga: filterOrgaData(await fetchOrgaData(updatedUser.id)),
+        },
+        customMessage: updatedUser.customMessage,
+      });
     } catch (error) {
       if (error.code === 'P2002' && error.meta) {
         // eslint-disable-next-line default-case

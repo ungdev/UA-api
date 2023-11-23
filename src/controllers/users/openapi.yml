@@ -244,3 +244,59 @@
         $ref: '#/components/responses/403Unauthorized'
       404:
         $ref: '#/components/responses/404UserNotFound'
+
+/users/orgas:
+  get:
+    summary: Retourne la liste des organisateurs, avec leurs commissions et rôle dans chaque commission
+    description: Les données ne sont pas retournées si l'organisateur a demandé à ne pas rendre ces données publiques.
+    tags:
+      - Users
+    responses:
+      200:
+        description: La liste des organisateurs
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  color:
+                    type: string
+                  masterCommission:
+                    type: string
+                  roles:
+                    type: object
+                    properties:
+                      respo:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            username:
+                              type: string
+                            photoFilename:
+                              type: string
+                      member:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            username:
+                              type: string
+                            photoFilename:
+                              type: string
+      403:
+        $ref: '#/components/responses/403Unauthorized'

@@ -57,6 +57,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -65,7 +66,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail because the user is a random with no rights', async () => {
-    const randomUser = await createFakeUser();
+    const randomUser = await createFakeUser({ type: UserType.player });
     const randomUserToken = generateToken(randomUser);
 
     await request(app)
@@ -111,7 +112,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail as the team is full', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(fullTeam.id, otherUser.id, UserType.player);
 
     await request(app)
@@ -121,7 +122,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should succeed to join a full team as a coach', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
 
     await teamOperations.askJoinTeam(fullTeam.id, otherUser.id, UserType.coach);
 
@@ -136,9 +137,9 @@ describe('POST /teams/current/join-requests/:userId', () => {
 
   it('should fail to join the team as a coach because there are already 2 coaches', async () => {
     // There is only one coach for the moment
-    const coach = await createFakeUser();
+    const coach = await createFakeUser({ type: UserType.player });
     await teamOperations.joinTeam(fullTeam.id, coach, UserType.coach);
-    const willNotJoinCoach = await createFakeUser();
+    const willNotJoinCoach = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(fullTeam.id, willNotJoinCoach.id, UserType.coach);
     await request(app)
       .post(`/teams/current/join-requests/${willNotJoinCoach.id}`)
@@ -150,7 +151,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should successfully join the 1-player team as a coach', async () => {
-    const coach = await createFakeUser();
+    const coach = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(onePlayerTeam.id, coach.id, UserType.coach);
     await request(app)
       .post(`/teams/current/join-requests/${coach.id}`)
@@ -162,7 +163,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail to join the 1-player team as a coach because there is already a coach', async () => {
-    const coach = await createFakeUser();
+    const coach = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(onePlayerTeam.id, coach.id, UserType.coach);
     await request(app)
       .post(`/teams/current/join-requests/${coach.id}`)

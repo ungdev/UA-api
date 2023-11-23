@@ -15,6 +15,7 @@ describe('GET /teams', () => {
 
   after(async () => {
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

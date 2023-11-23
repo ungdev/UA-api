@@ -127,13 +127,31 @@ export const syncRoles = async () => {
         // If the member doesn't have the tournament role, add it
         if (!member.roles.includes(tournament.discordRoleId)) {
           logger.debug(`Add ${tournament.id} tournament role to ${user.username}`);
-          await addMemberRole(member.user.id, tournament.discordRoleId);
+          try {
+            await addMemberRole(member.user.id, tournament.discordRoleId);
+          } catch (error) {
+            if (!error.response || error.response.status !== 404) throw error;
+            // Uh uh... It seems the discord member doesn't exist
+            // Or the role has been deleted - but don't care as we wanted to add it
+            // You have left the server. How dare you ?!
+
+            logger.error(`Cannot add ${tournament.id} tournament role to ${user.username}`);
+          }
         }
 
         // If the team has a role id (not for discord roles) and the member doesn't have it, add it
         if (team.discordRoleId && !member.roles.includes(team.discordRoleId)) {
           logger.debug(`Add ${team.name} team (${tournament.id}) role to ${user.username}`);
-          await addMemberRole(member.user.id, team.discordRoleId);
+          try {
+            await addMemberRole(member.user.id, team.discordRoleId);
+          } catch (error) {
+            if (!error.response || error.response.status !== 404) throw error;
+            // Uh uh... It seems the discord member doesn't exist
+            // Or the role has been deleted - but don't care as we wanted to add it
+            // You have left the server. How dare you ?!
+
+            logger.error(`Cannot add ${team.name} team (${tournament.id}) role to ${user.username}`);
+          }
         }
       }
     }

@@ -38,7 +38,7 @@ describe('GET /admin/scan/', () => {
     await userOperations.scanUser(users[0].id);
     await userOperations.scanUser(users.at(-1).id);
 
-    admin = await createFakeUser({ permissions: [Permission.entry] });
+    admin = await createFakeUser({ permissions: [Permission.entry], type: UserType.player });
     adminToken = generateToken(admin);
   });
 
@@ -46,6 +46,7 @@ describe('GET /admin/scan/', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
