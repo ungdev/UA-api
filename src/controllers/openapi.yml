@@ -113,15 +113,15 @@ components:
           nullable: true
         hasPaid:
           type: boolean
-        orgaRoles:
+
+    OrgaData:
+      type: object
+      description: Données spécifiques aux organisateurs
+      properties:
+        roles:
           type: array
           items:
-            type: object
-            properties:
-              commissionRole:
-                type: string
-              commission:
-                $ref: '#components/schemas/Commission'
+            $ref: '#/components/schemas/Commission'
 
     MailButton:
       type: object

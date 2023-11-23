@@ -56,6 +56,7 @@ describe('POST /admin/carts/:cartId/refund', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

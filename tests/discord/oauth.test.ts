@@ -90,7 +90,7 @@ describe('GET /discord/oauth', () => {
       .expect('Location', `${env.front.website}/oauth/discord/4`));
 
   it('should indicate the discord account was not linked already', async () => {
-    await updateAdminUser(user.id, { discordId: null });
+    await updateAdminUser(user, { discordId: null });
     discordId = generateFakeDiscordId();
     return request(app)
       .get('/discord/oauth')

@@ -1240,7 +1240,12 @@
                 users:
                   type: array
                   items:
-                    $ref: '#/components/schemas/UserWithTeamAndMessageAndTournamentInfo'
+                    allOf:
+                      - $ref: '#/components/schemas/UserWithTeamAndMessageAndTournamentInfo'
+                      - type: object
+                        properties:
+                          orga:
+                            $ref: '#/components/schemas/OrgaData'
       400:
         $ref: '#/components/responses/400Errored'
       401:
@@ -1302,6 +1307,43 @@
       409:
         $ref: '#/components/responses/409PlaceAlreadyAttributed'
 
+/admin/users/trombi:
+  patch:
+    summary: Modifie les préférences de confidentialité d'un organisateur et renvoie le nom d'un fichier dans lequel il peut stocker sa photo.
+    description: |-
+      L'organisateur peut opt-in pour afficher son nom et son prénom, ainsi que pour montrer sa photo de profil.
+      Un nom de fichier est renvoyé, qui permet à l'organisateur de stocker son nom de fichier dans
+      "<uploads url>/orgas/<nom du fichier>.webp".
+      Si un fichier existait déjà, ce fichier est supprimé. Le nom de fichier généré est aléatoire, et ne sera pas le même entre 2 appels de la route.
+    tags:
+      - Admin
+    security:
+      BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              displayName:
+                type: string
+              displayPhoto:
+                type: string
+    responses:
+      200:
+        description: Retourne le nom du fichier (sans extension) dans lequel l'utilisateur devrait stocker son image
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: string
+                  example: dupont-jean-ABCDEF-KJSDOGMEFBQJ
+      401:
+        $ref: '#/components/responses/401Unauthenticated'
+
 /admin/users/{userId}:
   patch:
     summary: Modifie les informations d'un utilisateur
@@ -1310,7 +1352,7 @@
       **Permission 'admin' ou 'anim' requise.**<br/><br/>
       **Désambiguïsation:** le champ `permissions` écrase (si renseigné) complètement les anciennes permissions.
       Pour cette raison, il ne faut pas oublier d'y ajouter également les permissions actuelles de l'utilisateur !
-      De même pour le champ `orgaRoles`.
+      De même pour le champ `roles`.
       <br/>Les orgas qui ont uniquement la permission 'anim' **doivent omettre** le champ `permissions` dans la requête !
     tags:
       - Admin
@@ -1330,53 +1372,50 @@
           schema:
             type: object
             properties:
-              permissions:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Permission'
-                optional: true
-              place:
-                type: string
-                example: A23
-                nullable: true
-                optional: true
-              type:
-                $ref: '#/components/schemas/Type'
-                optional: true
-              discordId:
-                type: string
-                example: '1420070400000'
-                optional: true
-                nullable: true
-              age:
-                $ref: '#/components/schemas/Age'
-                optional: true
+              data:
+                type: object
+                properties:
+                  permissions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Permission'
+                    optional: true
+                  place:
+                    type: string
+                    example: A23
+                    nullable: true
+                    optional: true
+                  type:
+                    $ref: '#/components/schemas/Type'
+                    optional: true
+                  discordId:
+                    type: string
+                    example: '1420070400000'
+                    optional: true
+                    nullable: true
+                  age:
+                    $ref: '#/components/schemas/Age'
+                    optional: true
+                  email:
+                    type: string
+                    format: email
+                    optional: true
+                  username:
+                    type: string
+                    optional: true
+                  firstname:
+                    type: string
+                    optional: true
+                  lastname:
+                    type: string
+                    optional: true
+                  orga:
+                    $ref: '#/components/schemas/OrgaData'
+                    optional: true
               customMessage:
                 type: string
                 nullable: true
                 optional: true
-              email:
-                type: string
-                format: email
-                optional: true
-              username:
-                type: string
-                optional: true
-              firstname:
-                type: string
-                optional: true
-              lastname:
-                type: string
-                optional: true
-              orgaRoles:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    commission:
-                      type: string
-                    commissionRole:
-                      type: string
     responses:
       200:
         description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.

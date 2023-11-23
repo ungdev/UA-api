@@ -23,6 +23,7 @@ describe('PUT /teams/current', () => {
 
   after(async () => {
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

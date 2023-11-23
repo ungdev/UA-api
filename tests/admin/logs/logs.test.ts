@@ -22,6 +22,7 @@ describe('GET /admin/logs', () => {
   after(async () => {
     // Delete the user created
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

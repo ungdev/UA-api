@@ -24,6 +24,7 @@ describe('POST /teams/:teamId/join-requests', () => {
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -145,7 +146,7 @@ describe('POST /teams/:teamId/join-requests', () => {
   });
 
   it('should fail because the user has no linked discord account', async () => {
-    await updateAdminUser(user.id, { discordId: null });
+    await updateAdminUser(user, { discordId: null });
     return request(app)
       .post(`/teams/${team.id}/join-requests`)
       .send({ userType: UserType.player })

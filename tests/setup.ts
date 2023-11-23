@@ -15,6 +15,7 @@ import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 import { disableFakeUploadApi, enableFakeUploadApi } from './upload';
 import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
+import * as uploads from './upload';
 
 export const sandbox = sinon.createSandbox();
 
@@ -81,4 +82,8 @@ after(async () => {
   // Verify environment variables have not changed
   expect(process.env.API_PORT).to.be.undefined;
   expect(env.api.port).to.be.undefined;
+  expect(uploads.existingFiles).to.have.length(uploads.INITIAL_EXISTING_FILES.length);
+  for (const file of uploads.INITIAL_EXISTING_FILES) {
+    expect(uploads.existingFiles).to.include(file);
+  }
 });

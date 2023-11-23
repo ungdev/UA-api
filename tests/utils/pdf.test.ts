@@ -14,6 +14,7 @@ describe('Tests the PDF utils', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -24,7 +25,7 @@ describe('Tests the PDF utils', () => {
       const team = await createFakeTeam({ tournament: tournamentId as string });
       const user = getCaptain(team);
 
-      await updateAdminUser(user.id, {
+      await updateAdminUser(user, {
         place: `A0${++placeId}`,
       });
 

@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error, UserPatchBody } from '../../../types';
 import { conflict, forbidden, notFound, success } from '../../../utils/responses';
-import { fetchUser, updateAdminUser } from '../../../operations/user';
+import { fetchOrgaData, fetchUser, filterOrgaData, updateAdminUser } from '../../../operations/user';
 import { filterUser } from '../../../utils/filters';
 import { validateBody } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
@@ -82,7 +82,7 @@ export default [
         return forbidden(response, Error.NoPermission);
       }
 
-      const updatedUser = await updateAdminUser(user.id, {
+      const updatedUser = await updateAdminUser(user, {
         type,
         permissions,
         place,
@@ -108,7 +108,13 @@ export default [
       )
         await removeDiscordRoles(user);
 
-      return success(response, { ...filterUser(updatedUser), customMessage: updatedUser.customMessage });
+      return success(response, {
+        data: {
+          ...filterUser(updatedUser),
+          orga: filterOrgaData(await fetchOrgaData(updatedUser.id)),
+        },
+        customMessage: updatedUser.customMessage,
+      });
     } catch (error) {
       if (error.code === 'P2002' && error.meta) {
         // eslint-disable-next-line default-case

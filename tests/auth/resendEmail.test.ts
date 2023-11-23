@@ -24,6 +24,7 @@ describe('POST /auth/resendEmail', () => {
 
   after(async () => {
     // Delete the user created
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

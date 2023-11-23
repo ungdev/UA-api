@@ -3,7 +3,7 @@ import bcrpyt from 'bcryptjs';
 import { filterUser } from './filters';
 import { forbidden, success, unauthenticated } from './responses';
 import { generateToken } from './users';
-import { fetchUser } from '../operations/user';
+import { fetchOrgaData, fetchUser, filterOrgaData } from '../operations/user';
 import { Error as ResponseError, UserType } from '../types';
 import * as validators from './validators';
 
@@ -52,7 +52,7 @@ export async function loginAccount(request: Request, response: Response, next: N
     const token = generateToken(user);
 
     return success(response, {
-      user: filterUser(user),
+      user: { ...filterUser(user), orga: filterOrgaData(await fetchOrgaData(user.id)) },
       token,
     });
   } catch (error) {
