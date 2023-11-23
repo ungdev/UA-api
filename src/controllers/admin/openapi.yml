@@ -1240,7 +1240,12 @@
                 users:
                   type: array
                   items:
-                    $ref: '#/components/schemas/UserWithTeamAndMessageAndTournamentInfo'
+                    allOf:
+                      - $ref: '#/components/schemas/UserWithTeamAndMessageAndTournamentInfo'
+                      - type: object
+                        properties:
+                          orga:
+                            $ref: '#/components/schemas/OrgaData'
       400:
         $ref: '#/components/responses/400Errored'
       401:
@@ -1367,53 +1372,50 @@
           schema:
             type: object
             properties:
-              permissions:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Permission'
-                optional: true
-              place:
-                type: string
-                example: A23
-                nullable: true
-                optional: true
-              type:
-                $ref: '#/components/schemas/Type'
-                optional: true
-              discordId:
-                type: string
-                example: '1420070400000'
-                optional: true
-                nullable: true
-              age:
-                $ref: '#/components/schemas/Age'
-                optional: true
+              data:
+                type: object
+                properties:
+                  permissions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Permission'
+                    optional: true
+                  place:
+                    type: string
+                    example: A23
+                    nullable: true
+                    optional: true
+                  type:
+                    $ref: '#/components/schemas/Type'
+                    optional: true
+                  discordId:
+                    type: string
+                    example: '1420070400000'
+                    optional: true
+                    nullable: true
+                  age:
+                    $ref: '#/components/schemas/Age'
+                    optional: true
+                  email:
+                    type: string
+                    format: email
+                    optional: true
+                  username:
+                    type: string
+                    optional: true
+                  firstname:
+                    type: string
+                    optional: true
+                  lastname:
+                    type: string
+                    optional: true
+                  orga:
+                    $ref: '#/components/schemas/OrgaData'
+                    optional: true
               customMessage:
                 type: string
                 nullable: true
                 optional: true
-              email:
-                type: string
-                format: email
-                optional: true
-              username:
-                type: string
-                optional: true
-              firstname:
-                type: string
-                optional: true
-              lastname:
-                type: string
-                optional: true
-              roles:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    commission:
-                      type: string
-                    commissionRole:
-                      type: string
     responses:
       200:
         description: L'utilisateur a bien été modifié. Ses informations sont renvoyées.

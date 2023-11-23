@@ -114,6 +114,15 @@ components:
         hasPaid:
           type: boolean
 
+    OrgaData:
+      type: object
+      description: Données spécifiques aux organisateurs
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Commission'
+
     MailButton:
       type: object
       description: Un bouton (sur lequel on peut cliquer - sauf sur windows xp)
