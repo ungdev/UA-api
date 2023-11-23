@@ -84,6 +84,7 @@ export type PrimitiveTeam = prisma.Team;
 export type PrimitiveTournament = prisma.Tournament;
 export type RepoItem = prisma.RepoItem;
 export type RepoLog = prisma.RepoLog & { item: RepoItem };
+export type RawOrga = prisma.Orga;
 
 export type Item = RawItem & {
   left?: number;
@@ -180,17 +181,12 @@ export type UserPatchBody = Partial<
   > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }> }
 >;
 
-export type RawOrga = Pick<
-  User,
-  | 'id'
-  | 'firstname'
-  | 'lastname'
-  | 'username'
-  | 'orgaPhotoFilename'
-  | 'orgaDisplayName'
-  | 'orgaDisplayUsername'
-  | 'orgaDisplayPhoto'
-> & { orgaRoles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }> };
+export type RawOrgaWithDetailedRoles = RawOrga & {
+  roles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }>;
+};
+
+export type RawOrgaWithUserData = Pick<User, 'id' | 'firstname' | 'lastname' | 'username'> &
+  Omit<RawOrgaWithDetailedRoles, 'userId'>;
 
 export type Orga = {
   id: string;
