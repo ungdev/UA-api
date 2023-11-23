@@ -413,7 +413,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should add 2 commissions to the anim orga', async () => {
-    const {body} = await request(app)
+    const { body } = await request(app)
       .patch(`/admin/users/${anim.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({

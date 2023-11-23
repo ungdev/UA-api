@@ -3,7 +3,7 @@ import Joi from 'joi';
 import { filterUserWithTeamAndTournamentInfo } from '../../../utils/filters';
 import { success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
-import { fetchOrgaData, fetchUsers, filterOrgaData } from "../../../operations/user";
+import { fetchOrgaData, fetchUsers, filterOrgaData } from '../../../operations/user';
 import { Permission, UserSearchQuery } from '../../../types';
 import { validateQuery } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
