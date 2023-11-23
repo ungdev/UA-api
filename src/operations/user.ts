@@ -561,7 +561,7 @@ export const updateTrombi = async (
   const orga = await fetchOrga(user);
   // First delete the old file, if any
   if (orga.photoFilename) {
-    await deleteFile(`orgas/${orga.photoFilename}.png`);
+    await deleteFile(`orgas/${orga.photoFilename}.webp`);
   }
   const filename = generateOrgaPhotoFilename(user);
   await database.orga.update({

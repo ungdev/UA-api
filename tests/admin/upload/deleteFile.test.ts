@@ -19,7 +19,7 @@ describe('DELETE /admin/upload', () => {
   after(async () => {
     await database.orga.deleteMany();
     await database.user.deleteMany();
-    uploads.existingFiles.push('tournaments/lol-logo.png');
+    uploads.existingFiles.push('tournaments/lol-logo.webp');
   });
 
   before(async () => {
