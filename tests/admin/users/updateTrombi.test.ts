@@ -69,7 +69,7 @@ describe('PATCH /admin/users/trombi', () => {
     expect(orgaOrganizerInfo.displayName).to.be.true;
     expect(orgaOrganizerInfo.displayPhoto).to.be.true;
     expect(orgaOrganizerInfo.displayUsername).to.be.false;
-    expect(body.filename).to.startWith(orgaUser.lastname);
+    expect(body.filename).to.startWith(orgaUser.lastname.replaceAll(/\W/g, ''));
     expect(body.filename).to.be.equal(orgaOrganizerInfo.photoFilename);
   });
 
