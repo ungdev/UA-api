@@ -47,7 +47,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
@@ -56,7 +56,7 @@ describe('POST /admin/upload', () => {
     await request(app)
       .post(`/admin/upload`)
       .field('name', validObject.name)
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(400);
   });
@@ -66,7 +66,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', await generateDummyJpgBuffer(100000000), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(100000000), 'test.webp')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: "La taille maximale d'un fichier est de 5MB" });
   });
@@ -86,7 +86,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', 'test')
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: "Le chemin n'est pas autorisé" });
   });
@@ -96,7 +96,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
     uploads.existingFiles.splice(2, 1);
