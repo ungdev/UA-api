@@ -2,9 +2,13 @@ import { readFileSync } from 'fs';
 import PDFkit from 'pdfkit';
 import { User } from '../types';
 
-const loadImageBadge = () => `data:image/png;base64,${readFileSync(`assets/badges/background.png`, 'base64')}`;
+const loadImageBadgeRestricted = () => `data:image/png;base64,${readFileSync(`assets/badges/badge-restricted.png`, 'base64')}`;
+const loadImageBadgeOrgaPrice = () => `data:image/png;base64,${readFileSync(`assets/badges/badge-orgaprice.png`, 'base64')}`;
+const loadImageBadgeFullAccess = () => `data:image/png;base64,${readFileSync(`assets/badges/badge-fullaccess.png`, 'base64')}`;
 
-const badgeBackground = loadImageBadge();
+const loadBackRestricted = () => `data:image/png;base64,${readFileSync(`assets/badges/back-restricted.png`, 'base64')}`;
+const loadBackOrgaPrice = () => `data:image/png;base64,${readFileSync(`assets/badges/back-orgaprice.png`, 'base64')}`;
+const loadBackFullAccess = () => `data:image/png;base64,${readFileSync(`assets/badges/back-fullaccess.png`, 'base64')}`;
 
 // Generate a pdf used as a badge for the user that is meant to be printed
 export const generateBadge = async (user: User) => {
@@ -17,7 +21,7 @@ export const generateBadge = async (user: User) => {
   const textX = 135;
   const textY = 505;
 
-  const background = badgeBackground;
+  const background = loadImageBadgeRestricted();
 
   const pdf = await new Promise<Buffer>(async (resolve, reject) => {
     // Create the document and the background
