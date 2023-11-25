@@ -199,6 +199,7 @@ model Orga {
   displayName Boolean @default(false)
   displayUsername Boolean @default(true)
   displayPhoto Boolean @default(false)
+  mainCommission String?
   roles     OrgaRole[] @relation("orgaRoleOrga")
   user User @relation("userOrga", fields: [userId], references: [id])
 }

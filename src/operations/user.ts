@@ -70,6 +70,7 @@ export const formatOrga = (orga: RawUser & { orga: RawOrgaWithDetailedRoles }): 
   displayName: orga.orga.displayName,
   displayPhoto: orga.orga.displayPhoto,
   displayUsername: orga.orga.displayUsername,
+  mainCommission: orga.orga.mainCommission,
 });
 
 export const filterOrgaData = (orga: RawOrgaWithDetailedRoles) =>

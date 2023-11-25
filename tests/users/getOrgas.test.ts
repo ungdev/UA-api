@@ -28,6 +28,7 @@ describe('GET /users/orgas', () => {
         orgaDisplayUsername: true,
         orgaDisplayPhoto: false,
         orgaPhotoFilename: 'dev-respo',
+        orgaMainCommission: undefined,
       }),
       // Create 1 dev member
       createFakeUser({
@@ -37,6 +38,7 @@ describe('GET /users/orgas', () => {
         orgaDisplayUsername: true,
         orgaDisplayPhoto: true,
         orgaPhotoFilename: 'dev-member',
+        orgaMainCommission: 'dev',
       }),
       // Create another dev member who is also respo rozo
       createFakeUser({
@@ -49,6 +51,7 @@ describe('GET /users/orgas', () => {
         orgaDisplayUsername: true,
         orgaDisplayPhoto: false,
         orgaPhotoFilename: 'rozo-respo',
+        orgaMainCommission: 'rozo',
       }),
     ];
     [, developmentRespo, developmentMember, networkRespo] = await Promise.all(transactions);
@@ -116,5 +119,17 @@ describe('GET /users/orgas', () => {
         expect(bodyCommission.roles.member).to.be.empty;
       }
     }
+  });
+
+  it('should return only one commission for each orga', async () => {
+    const { body } = await request(app).get('/users/orgas?onlyMainCommission=true').send().expect(200);
+    expect(body).to.be.an('array').with.length(2);
+    const networkCommissionIndex = body[0].commissionId === 'rozo' ? 0 : 1;
+    const developmentCommissionIndex = networkCommissionIndex === 0 ? 1 : 0;
+    expect(body[networkCommissionIndex].roles.respo).to.be.an('array').with.length(1);
+    expect(body[networkCommissionIndex].roles.respo[0].id).to.be.equal(networkRespo.id);
+    expect(body[developmentCommissionIndex].roles.member).to.have.length(1);
+    expect(body[developmentCommissionIndex].roles.member[0].id).to.not.be.equal(networkRespo.id);
+    expect(body[developmentCommissionIndex].roles.respo).to.have.length(0);
   });
 });

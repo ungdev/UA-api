@@ -1,13 +1,22 @@
 import { NextFunction, Request, Response } from 'express';
+import Joi from 'joi';
 import { fetchOrgas } from '../../operations/user';
 import { forbidden, success } from '../../utils/responses';
 import database from '../../services/database';
 import { fetchSetting } from '../../operations/settings';
 import { Error } from '../../types';
+import { validateQuery } from '../../middlewares/validation';
 
 export default [
+  validateQuery(
+    Joi.object({
+      onlyMainCommission: Joi.boolean().default(false),
+    }).optional(),
+  ),
+
   async (request: Request, response: Response, next: NextFunction) => {
     try {
+      const { onlyMainCommission } = request.query;
       if (!(await fetchSetting('trombi')).value) return forbidden(response, Error.TrombiNotAllowed);
       const orgas = await fetchOrgas();
       const commissions = await database.commission.findMany();
@@ -26,6 +35,9 @@ export default [
       );
       for (const orga of orgas) {
         for (const role of orga.roles) {
+          if (onlyMainCommission && orga.mainCommission !== role.commission.id) {
+            continue;
+          }
           resultInObject[role.commission.id].roles[role.commissionRole].push({
             id: orga.id,
             name: orga.name,

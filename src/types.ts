@@ -197,6 +197,7 @@ export type Orga = {
   displayName: boolean;
   displayPhoto: boolean;
   displayUsername: boolean;
+  mainCommission?: string;
 };
 
 export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
