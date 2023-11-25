@@ -29,6 +29,7 @@ INSERT INTO `tournaments` (`id`, `name`, `maxPlayers`, `playersPerTeam`, `coache
 ('open', 'Libre', 40, 1, 1, 0, 7),
 ('pokemon', 'Pokémon', 24, 1, 1, 0, 8);
 
+<<<<<<< HEAD
 INSERT INTO `commission` (`id`, `name`, `nameOnBadge`, `position`, `color`, `masterCommissionId`) VALUES
 ('animation', 'Animation', 'Anim', 1, '#123456', NULL),
 ('animation_console', 'Animation stand console', 'Anim stand console', 2, '#123456', 'animation'),
@@ -54,3 +55,30 @@ INSERT INTO `commission` (`id`, `name`, `nameOnBadge`, `position`, `color`, `mas
 ('security', 'Sécurité', 'Sécu', 21, '#123456', NULL),
 ('ssl', 'Stream, son et lumière', 'SSL', 22, '#123456', NULL),
 ('vieux', 'Vieux', 'Vieux', 23, '#123456', NULL);
+=======
+INSERT INTO `commission` (`id`, `name`, `position`, `color`, `masterCommissionId`) VALUES
+('animation', 'Animation', 1, '#123456', NULL),
+('animation_console', 'Animation stand console', 2, '#123456', 'animation'),
+('animation_cs2', 'Animation CS2', 3, '#123456', 'animation'),
+('animation_lol', 'Animation LoL', 4, '#123456', 'animation'),
+('animation_open', 'Animation tournoi libre', 5, '#123456', 'animation'),
+('animation_osu', 'Animation osu!', 6, '#123456', 'animation'),
+('animation_pokemon', 'animation Pokémon', 7, '#123456', 'animation'),
+('animation_rl', 'Animation Rocket League', 8, '#123456', 'animation'),
+('animation_ssbu', 'Animation SSBU', 9, '#123456', 'animation'),
+('animation_tft', 'Animation TFT', 10, '#123456', 'animation'),
+('communication', 'Communication', 11, '#123456', NULL),
+('coord', 'Coordinateur', 0, '#123456', NULL),
+('decoration', 'Décoration', 12, '#123456', NULL),
+('design', 'Graphisme', 13, '#123456', NULL),
+('dev', 'Développement', 14, '#123456', NULL),
+('electricity', 'Électricité', 15, '#123456', NULL),
+('logistique', 'Logistique', 16, '#123456', NULL),
+('mediatik', 'Médiatik', 17, '#123456', NULL),
+('partners', 'Partenaires', 18, '#123456', NULL),
+('restauration', 'Restauration', 19, '#123456', NULL),
+('rozo', 'Réseau', 20, '#123456', NULL),
+('security', 'Sécurité', 21, '#123456', NULL),
+('ssl', 'Scène, son et lumière', 22, '#123456', NULL),
+('vieux', 'Vieux', 23, '#123456', NULL);
+>>>>>>> cfa4750 (fix: seed)
