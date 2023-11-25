@@ -23,8 +23,12 @@ export default [
     try {
       const initiator = getRequestInfo(response).user;
 
-      if (request.body.path !== 'orga' && !initiator.permissions.includes(Permission.admin) && !initiator.permissions.includes(Permission.anim)) {
-        return forbidden(response, Error.NoPermission)
+      if (
+        request.body.path !== 'orga' &&
+        !initiator.permissions.includes(Permission.admin) &&
+        !initiator.permissions.includes(Permission.anim)
+      ) {
+        return forbidden(response, Error.NoPermission);
       }
 
       const result = await uploadFile(request.file, request.body.path, request.body.name);
