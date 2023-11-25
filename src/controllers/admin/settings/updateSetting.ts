@@ -3,12 +3,12 @@ import { Request, Response, NextFunction } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { validateBody } from '../../../middlewares/validation';
 import { notFound, success } from '../../../utils/responses';
-import { Error } from '../../../types';
+import { Error, Permission } from '../../../types';
 import { setTrombiAllowed, setLoginAllowed, setShopAllowed } from '../../../operations/settings';
 
 export default [
   // Middlewares
-  ...hasPermission(),
+  ...hasPermission(Permission.admin),
   validateBody(
     Joi.object({
       value: Joi.boolean().required(),

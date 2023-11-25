@@ -20,7 +20,7 @@ export type MailGoal = {
 };
 
 const goals: Array<MailGoal> = [
-  // discordGoal, 
+  // discordGoal,
   minorGoal,
   // ticketsGoal,
   // unlockedPlayersGoal
