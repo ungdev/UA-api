@@ -17,10 +17,6 @@ const getCommisionPermission = (commissionRole: string, commissionId: string) =>
       return 'fullaccess';
     }
 
-    case 'animation_osu': {
-      if (commissionRole === 'member') return 'restricted';
-    }
-
     case 'security': {
       return 'fullaccess';
     }
@@ -98,7 +94,7 @@ export default [
                     // TODO: change URL
                     image: user.orga.photoFilename
                       ? `${env.front.website}/uploads/files/orga/${user.orga.photoFilename}.webp`
-                      : 'https://picsum.photos/300',
+                      : '',
                     commissionName: getCommissionName(
                       user.orga.roles[0].commissionRole,
                       user.orga.roles[0].commission.id,
@@ -117,7 +113,7 @@ export default [
                 firstName: '',
                 lastName: '',
                 // TODO: change URL
-                image: 'https://picsum.photos/300',
+                image: '',
                 commissionName: field.name ?? '',
               });
             }
@@ -154,9 +150,7 @@ export default [
                   firstName: user[0].firstname,
                   lastName: user[0].lastname,
                   // TODO: change URL
-                  image:
-                    `${env.front.website}/uploads/files/orga/${user[0].orga.photoFilename}.webp` ??
-                    'https://picsum.photos/300',
+                  image: `${env.front.website}/uploads/files/orga/${user[0].orga.photoFilename}.webp` ?? '',
                   commissionName: getCommissionName(
                     user[0].orga.roles[0].commissionRole,
                     user[0].orga.roles[0].commission.id,
@@ -173,7 +167,7 @@ export default [
               firstName: field.firstname ?? '',
               lastName: field.lastname ?? '',
               // TODO: change URL
-              image: 'https://picsum.photos/300',
+              image: '',
               commissionName: await database.commission
                 .findUnique({
                   where: { id: field.commissionId ?? 'vieux' },

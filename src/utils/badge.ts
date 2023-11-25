@@ -72,6 +72,19 @@ export const generateBadge = async (badges: Badge[]) => {
     // Create the document and the background
     const document = new PDFkit({ size: 'A4', margin: 0, layout: 'landscape' });
     const fetchImage = async (source: string) => {
+      // If the source is empty, return a new image 300x300 in a solid color
+      if (source === '')
+        return sharp({
+          create: {
+            width: 300,
+            height: 300,
+            channels: 4,
+            background: { r: 255, g: 255, b: 255, alpha: 1 },
+          },
+        })
+          .png()
+          .toBuffer();
+
       const response = await axios({
         method: 'GET',
         url: source,
