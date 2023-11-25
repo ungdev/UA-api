@@ -28,7 +28,7 @@ describe('GET /users/orgas', () => {
         orgaDisplayUsername: true,
         orgaDisplayPhoto: false,
         orgaPhotoFilename: 'dev-respo',
-        orgaMainCommission: undefined,
+        orgaMainCommissionId: undefined,
       }),
       // Create 1 dev member
       createFakeUser({
@@ -38,7 +38,7 @@ describe('GET /users/orgas', () => {
         orgaDisplayUsername: true,
         orgaDisplayPhoto: true,
         orgaPhotoFilename: 'dev-member',
-        orgaMainCommission: 'dev',
+        orgaMainCommissionId: 'dev',
       }),
       // Create another dev member who is also respo rozo
       createFakeUser({
@@ -51,7 +51,7 @@ describe('GET /users/orgas', () => {
         orgaDisplayUsername: true,
         orgaDisplayPhoto: false,
         orgaPhotoFilename: 'rozo-respo',
-        orgaMainCommission: 'rozo',
+        orgaMainCommissionId: 'rozo',
       }),
     ];
     [, developmentRespo, developmentMember, networkRespo] = await Promise.all(transactions);
@@ -83,13 +83,13 @@ describe('GET /users/orgas', () => {
     const lastCommissionPosition = Number.NEGATIVE_INFINITY;
     for (const bodyCommission of body) {
       const commission = await fetchCommission(bodyCommission.id);
-      expect(commission.position).to.be.greaterThanOrEqual(lastCommissionPosition);
-      expect(['dev', 'rozo']).to.contain(commission.id);
-      expect(bodyCommission.name).to.be.equal(commission.name);
-      expect(bodyCommission.color).to.be.equal(commission.color);
-      expect(bodyCommission.masterCommission).to.be.equal(commission.masterCommissionId);
+      expect(commission!.position).to.be.greaterThanOrEqual(lastCommissionPosition);
+      expect(['dev', 'rozo']).to.contain(commission!.id);
+      expect(bodyCommission.name).to.be.equal(commission!.name);
+      expect(bodyCommission.color).to.be.equal(commission!.color);
+      expect(bodyCommission.masterCommission).to.be.equal(commission!.masterCommissionId);
       expect(bodyCommission.roles.respo).to.have.length(1);
-      if (commission.id === 'dev') {
+      if (commission!.id === 'dev') {
         // Verify respo
         expect(bodyCommission.roles.respo[0].id).to.be.equal(developmentRespo.id);
         expect(bodyCommission.roles.respo[0].name).to.be.undefined;

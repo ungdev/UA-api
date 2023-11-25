@@ -42,7 +42,10 @@ export default [
       );
       for (const orga of orgas) {
         for (const role of orga.roles) {
-          if (onlyMainCommission && orga.mainCommission.id !== role.commission.id) {
+          if (
+            onlyMainCommission &&
+            ((orga.mainCommission && orga.mainCommission.id !== role.commission.id) || !orga.mainCommission)
+          ) {
             continue;
           }
           resultInObject[role.commission.id].roles[role.commissionRole].push({
@@ -53,6 +56,7 @@ export default [
           });
         }
       }
+
       return success(
         response,
         Object.values(resultInObject)

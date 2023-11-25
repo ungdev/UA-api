@@ -21,7 +21,7 @@ describe('GET /users/current', () => {
     orgaUser = await createFakeUser({
       permissions: [Permission.orga],
       orgaRoles: [{ role: 'respo', commission: 'dev' }],
-      orgaMainCommission: 'dev',
+      orgaMainCommissionId: 'dev',
     });
     orgaToken = generateToken(orgaUser);
   });

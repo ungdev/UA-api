@@ -470,7 +470,7 @@ describe('PATCH /admin/users/:userId', () => {
       .send({ orgaMainCommission: 'animation_ssbu' })
       .expect(200);
     const orga = await fetchOrga(anim);
-    expect(orga.mainCommission).to.be.equal('animation_ssbu');
+    expect(orga.mainCommission.id).to.be.equal('animation_ssbu');
   });
 
   it('should fail as we are trying to remove a commission to the orga, and that commission is its main one', () =>
