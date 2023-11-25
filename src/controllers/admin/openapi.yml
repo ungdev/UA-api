@@ -1119,7 +1119,7 @@
     parameters:
       - in: query
         name: path
-        description: Le chemin complet du fichier (exemple /tournaments/lol.jpg)
+        description: Le chemin complet du fichier (exemple /tournaments/lol.webp)
         schema:
           type: string
         required: true
