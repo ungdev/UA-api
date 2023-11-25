@@ -446,4 +446,37 @@ describe('PATCH /admin/users/:userId', () => {
     expect(orga.roles[1].commission.id).to.be.equal('animation_ssbu');
     expect(orga.roles[1].commissionRole).to.be.equal('respo');
   });
+
+  it('should fail as the main commission we are trying to set is not a commission of the orga', async () => {
+    await request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ orgaMainCommission: 'coord' })
+      .expect(403, { error: Error.UserDoesntHaveMainCommission });
+  });
+
+  it('should fail as we are trying to set the main commission to a commission we are removing', async () => {
+    await request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ orgaMainCommission: 'animation_ssbu', orgaRoles: [] })
+      .expect(403, { error: Error.UserDoesntHaveMainCommission });
+  });
+
+  it('should set the main commission to the orga', async () => {
+    await request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ orgaMainCommission: 'animation_ssbu' })
+      .expect(200);
+    const orga = await fetchOrga(anim);
+    expect(orga.mainCommission).to.be.equal('animation_ssbu');
+  });
+
+  it('should fail as we are trying to remove a commission to the orga, and that commission is its main one', () =>
+    request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ orgaRoles: [] })
+      .expect(403, { error: Error.TryingToRemoveMainCommission }));
 });

@@ -350,6 +350,7 @@ export const updateAdminUser = async (user: User, updates: UserPatchBody): Promi
                 userId,
               },
               data: {
+                mainCommission: updates.orgaMainCommission,
                 roles: {
                   connectOrCreate: updates.orgaRoles?.map((orgaRole) => ({
                     where: {

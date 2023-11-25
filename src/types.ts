@@ -178,7 +178,7 @@ export type UserPatchBody = Partial<
     | 'firstname'
     | 'lastname'
     | 'email'
-  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }> }
+  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }>; orgaMainCommission?: string }
 >;
 
 export type RawOrgaWithDetailedRoles = RawOrga & {
@@ -342,6 +342,8 @@ export const enum Error {
   AlreadyPickedUp = "L'objet a déjà été récupéré",
   TooMuchLockedTeams = "Il y a plus d'équipes inscrites que le nombre d'équipes maximal souhaité",
   TournamentFull = "Le tournoi est plein, attends qu'une place se libère pour payer un ticket",
+  UserDoesntHaveMainCommission = "L'utilisateur n'est pas assigné sur la commission spécifiée comme étant principale",
+  TryingToRemoveMainCommission = "Vous ne pouvez pas supprimer la commission principale de l'organisateur sans le supprimer de cette commission",
 
   // 404
   // The server can't find the requested resource

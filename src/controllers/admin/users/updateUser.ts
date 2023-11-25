@@ -2,8 +2,8 @@ import Joi from 'joi';
 import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error, UserPatchBody } from '../../../types';
-import { conflict, forbidden, notFound, success } from '../../../utils/responses';
-import { fetchOrgaData, fetchUser, filterOrgaData, updateAdminUser } from '../../../operations/user';
+import { badRequest, conflict, forbidden, notFound, success } from "../../../utils/responses";
+import { fetchOrga, fetchOrgaData, fetchUser, filterOrgaData, updateAdminUser } from '../../../operations/user';
 import { filterUser } from '../../../utils/filters';
 import { validateBody } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
@@ -34,6 +34,7 @@ export default [
           }),
         )
         .optional(),
+      orgaMainCommission: Joi.string().optional(),
     }),
   ),
 
@@ -59,6 +60,7 @@ export default [
         firstname,
         lastname,
         orgaRoles,
+        orgaMainCommission,
       } = request.body as UserPatchBody;
 
       // Check that every commission of the user does exist
@@ -82,6 +84,23 @@ export default [
         return forbidden(response, Error.NoPermission);
       }
 
+      // Check that the main commission of the user is a commission of this user
+      const orga = await fetchOrga(user);
+      if (
+        orgaMainCommission &&
+        !(orgaRoles
+          ? orgaRoles.find((role) => role.commission === orgaMainCommission)
+          : orga.roles.find((role) => role.commission.id === orgaMainCommission))
+      ) {
+        return forbidden(response, Error.UserDoesntHaveMainCommission);
+      }
+
+      // Check that we are not removing the main commission of the user
+      // At this point, we know that if orgaMainCommission is not undefined, the state will be correct
+      if (orgaRoles && orga.mainCommission && !orgaRoles.some((role) => role.commission === orga.mainCommission)) {
+        return forbidden(response, Error.TryingToRemoveMainCommission);
+      }
+
       const updatedUser = await updateAdminUser(user, {
         type,
         permissions,
@@ -94,6 +113,7 @@ export default [
         firstname,
         lastname,
         orgaRoles,
+        orgaMainCommission,
       });
 
       // Discard current team/tournament roles if the discordId has been updated
