@@ -199,9 +199,13 @@ model Orga {
   displayName Boolean @default(false)
   displayUsername Boolean @default(true)
   displayPhoto Boolean @default(false)
-  mainCommission String?
+  mainCommissionId String?
   roles     OrgaRole[] @relation("orgaRoleOrga")
   user User @relation("userOrga", fields: [userId], references: [id])
+  mainCommission Commission? @relation("orgaCommission", fields: [mainCommissionId], references: [id])
+
+  @@index([mainCommissionId])
+  // @@map("orgas")
 }
 
 model RepoItem {
@@ -254,6 +258,7 @@ model Commission {
   masterCommission   Commission?  @relation("masterCommission", fields: [masterCommissionId], references: [id])
   subCommissions     Commission[] @relation("masterCommission")
   orgas              OrgaRole[]   @relation("orgaRoleCommission")
+  orgaWhereMain      Orga[]       @relation("orgaCommission")
 
   @@index([masterCommissionId])
   @@map("commission")

@@ -76,7 +76,7 @@ export const formatOrga = (orga: RawUser & { orga: RawOrgaWithDetailedRoles }): 
 export const filterOrgaData = (orga: RawOrgaWithDetailedRoles) =>
   orga
     ? {
-        mainCommission: orga.mainCommission,
+        mainCommission: orga.mainCommissionId,
         roles: orga.roles.map((role) => {
           const commissionWithoutPosition = { ...role.commission };
           delete commissionWithoutPosition.position;
@@ -249,6 +249,7 @@ export const fetchOrgas = async (): Promise<Orga[]> => {
       orga: {
         include: {
           roles: { select: { commission: true, commissionRole: true } },
+          mainCommission: true,
         },
       },
     },
@@ -351,7 +352,7 @@ export const updateAdminUser = async (user: User, updates: UserPatchBody): Promi
                 userId,
               },
               data: {
-                mainCommission: updates.orgaMainCommission,
+                mainCommissionId: updates.orgaMainCommission,
                 roles: {
                   connectOrCreate: updates.orgaRoles?.map((orgaRole) => ({
                     where: {
@@ -547,7 +548,7 @@ export const generateOrgaPhotoFilename = (user: User) =>
 export const fetchOrgaData = (userId: string): Promise<RawOrgaWithDetailedRoles> =>
   database.orga.findUnique({
     where: { userId },
-    include: { roles: { select: { commissionRole: true, commission: true } } },
+    include: { roles: { select: { commissionRole: true, commission: true } }, mainCommission: true },
   }) ?? null;
 
 export const fetchOrga = async (user: RawUser | User): Promise<RawOrgaWithUserData> => {
