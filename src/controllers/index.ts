@@ -14,7 +14,6 @@ import etupay from './etupay';
 import discord from './discord';
 import admin from './admin';
 import commissions from './commissions';
-import badge from './admin/badges';
 
 const options = {
   definition: {

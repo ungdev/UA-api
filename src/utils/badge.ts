@@ -17,27 +17,45 @@ const loadBackFullAccess = () => `data:image/png;base64,${readFileSync(`assets/b
 
 type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess';
 
-const getBack = (permission: BadgePermission) => {
+const getBack = (permission: BadgePermission): string => {
   switch (permission) {
-    case 'restricted':
+    case 'restricted': {
       return loadBackRestricted();
-    case 'orgaprice':
-      return loadBackOrgaPrice();
-    case 'fullaccess':
-      return loadBackFullAccess();
-  }
-}
+    }
 
-const getBadge = (permission: BadgePermission) => {
-  switch (permission) {
-    case 'restricted':
-      return loadImageBadgeRestricted();
-    case 'orgaprice':
-      return loadImageBadgeOrgaPrice();
-    case 'fullaccess':
-      return loadImageBadgeFullAccess();
+    case 'orgaprice': {
+      return loadBackOrgaPrice();
+    }
+
+    case 'fullaccess': {
+      return loadBackFullAccess();
+    }
+
+    default: {
+      return loadBackRestricted();
+    }
   }
-}
+};
+
+const getBadge = (permission: BadgePermission): string => {
+  switch (permission) {
+    case 'restricted': {
+      return loadImageBadgeRestricted();
+    }
+
+    case 'orgaprice': {
+      return loadImageBadgeOrgaPrice();
+    }
+
+    case 'fullaccess': {
+      return loadImageBadgeFullAccess();
+    }
+
+    default: {
+      return loadImageBadgeRestricted();
+    }
+  }
+};
 
 // Generate a pdf used as a badge for the user that is meant to be printed
 export const generateBadge = async (badges: Badge[]) => {
@@ -54,7 +72,6 @@ export const generateBadge = async (badges: Badge[]) => {
     // Create the document and the background
     const document = new PDFkit({ size: 'A4', margin: 0, layout: 'landscape' });
     const fetchImage = async (source: string) => {
-      console.log(source);
       const response = await axios({
         method: 'GET',
         url: source,
@@ -65,7 +82,7 @@ export const generateBadge = async (badges: Badge[]) => {
 
     // Constants for the columns and rows
     const columns = 4;
-    const rows= 2;
+    const rows = 2;
 
     // For loop to do multiple pages
     // Page with 'RECTO' on it
@@ -79,14 +96,14 @@ export const generateBadge = async (badges: Badge[]) => {
         for (let row = 0; row < rows; row++) {
           const index = page * columns * rows + col * rows + row;
 
-          if(index >= badges.length) break;
+          if (index >= badges.length) break;
 
           // Informations about badge
           const image = await fetchImage(badges[index].image);
           // Coordonates
           const x = pictureX + col * columnOffsetImage;
           const y = pictureY + row * rowOffsetImage;
-          
+
           // if image is webp convert it to png using sharp
           if (badges[index].image.includes('.webp')) {
             const convertedImage = await sharp(image).toFormat('png').toBuffer();
@@ -94,7 +111,7 @@ export const generateBadge = async (badges: Badge[]) => {
           } else {
             document.image(image, x + 45, y + 30, { width: pictureSize - 90 }); // Before the background so it's behind
           }
-          
+
           // Background
           document.image(getBadge(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
         }
@@ -113,7 +130,7 @@ export const generateBadge = async (badges: Badge[]) => {
         for (let row = 0; row < rows; row++) {
           const index = page * columns * rows + col * rows + row;
 
-          if(index >= badges.length) break;
+          if (index >= badges.length) break;
 
           // Informations about badge
           const lastName = `${badges[index].lastName}`;
@@ -157,7 +174,7 @@ export const generateBadge = async (badges: Badge[]) => {
         for (let row = 0; row < rows; row++) {
           const index = page * columns * rows + col * rows + row;
 
-          if(index >= badges.length) break;
+          if (index >= badges.length) break;
 
           // Coordonates
           const x = pictureX + col * columnOffsetSecondImage;
@@ -169,7 +186,7 @@ export const generateBadge = async (badges: Badge[]) => {
       }
 
       // Add a new page if there is more badges
-      if(page * columns * rows + columns * rows < badges.length) document.addPage();
+      if (page * columns * rows + columns * rows < badges.length) document.addPage();
     }
 
     // Stop the document stream

@@ -266,7 +266,7 @@ export interface BadgeField {
   firstname?: string;
   lastname?: string;
   name?: string;
-} 
+}
 
 /**********/
 /** Misc **/

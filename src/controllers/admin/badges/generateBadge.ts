@@ -1,3 +1,4 @@
+/* eslint-disable no-fallthrough */
 import { NextFunction, Request, Response } from 'express';
 import { generateBadge } from '../../../utils/badge';
 import { Badge, BadgeField, Error, Permission } from '../../../types';
@@ -8,41 +9,50 @@ import { hasPermission } from '../../../middlewares/authentication';
 
 const getCommisionPermission = (commissionRole: string, commissionId: string) => {
   switch (commissionId) {
-    case 'vieux':
+    case 'vieux': {
       return 'restricted';
+    }
 
-    case 'coord':
+    case 'coord': {
       return 'fullaccess';
+    }
 
-    case 'animation_osu':
+    case 'animation_osu': {
       if (commissionRole === 'member') return 'restricted';
+    }
 
-    case 'security':
+    case 'security': {
       return 'fullaccess';
+    }
 
-    case 'logistique':
+    case 'logistique': {
       if (commissionRole === 'respo') return 'fullaccess';
-    
-    case 'rozo':
-      if (commissionRole === 'respo') return 'fullaccess';
-    
-    case 'electricity':
-      if (commissionRole === 'respo') return 'fullaccess';
+    }
 
-    case 'ssl':
+    case 'rozo': {
       if (commissionRole === 'respo') return 'fullaccess';
+    }
 
-    default:
+    case 'electricity': {
+      if (commissionRole === 'respo') return 'fullaccess';
+    }
+
+    case 'ssl': {
+      if (commissionRole === 'respo') return 'fullaccess';
+    }
+
+    default: {
       return 'orgaprice';
+    }
   }
-}
+};
 
 const getCommissionName = (commissionRole: string, commissionId: string, commissionName: string) => {
-  if(commissionId === 'coord' && commissionRole === 'respo') return 'Présidente';
+  if (commissionId === 'coord' && commissionRole === 'respo') return 'Présidente';
 
   if (commissionRole === 'respo') return `Respo ${commissionName}`;
-  else return commissionName;
-}
+  return commissionName;
+};
 
 export default [
   // Middlewares
@@ -56,12 +66,15 @@ export default [
         return notFound(response, Error.InvalidBody);
       }
 
-      let listBadgeToGenerate = [] as Badge[];
+      let hasError = false;
+
+      const listBadgeToGenerate = [] as Badge[];
 
       // Generate the list of badges to generate
       for (const field of request.body.fields as BadgeField[]) {
+        if (hasError) return false;
         switch (field.type) {
-          case 'orgas':
+          case 'orgas': {
             await database.user
               .findMany({
                 where: {
@@ -76,21 +89,29 @@ export default [
                 },
               })
               .then((users) => {
-                users.forEach((user) => {
-                  if(!user.orga || user.orga.roles.length === 0) return;
+                for (const user of users) {
+                  if (!user.orga || user.orga.roles.length === 0) continue;
                   listBadgeToGenerate.push({
                     type: getCommisionPermission(user.orga.roles[0].commissionRole, user.orga.roles[0].commission.id),
                     firstName: user.firstname,
                     lastName: user.lastname,
                     // TODO: change URL
-                    image: user.orga.photoFilename ? `${env.front.website}/uploads/files/orga/${user.orga.photoFilename}.webp` : 'https://picsum.photos/300',
-                    commissionName: user.orga.roles[0].commission.name,
+                    image: user.orga.photoFilename
+                      ? `${env.front.website}/uploads/files/orga/${user.orga.photoFilename}.webp`
+                      : 'https://picsum.photos/300',
+                    commissionName: getCommissionName(
+                      user.orga.roles[0].commissionRole,
+                      user.orga.roles[0].commission.id,
+                      user.orga.roles[0].commission.name,
+                    ),
                   });
-                });
+                }
               });
             break;
-          case 'custom':
-            for (let i = 0; i < field.quantity; i++) {
+          }
+
+          case 'custom': {
+            for (let index = 0; index < field.quantity; index++) {
               listBadgeToGenerate.push({
                 type: field.permission ?? 'restricted',
                 firstName: '',
@@ -101,7 +122,9 @@ export default [
               });
             }
             break;
-          case 'single':
+          }
+
+          case 'single': {
             await database.user
               .findMany({
                 where: {
@@ -117,35 +140,59 @@ export default [
                 },
               })
               .then((user) => {
-                if (user.length === 0) return notFound(response, `User (${field.email}) not found` as Error);
+                if (user.length === 0) {
+                  hasError = true;
+                  notFound(response, `User (${field.email}) not found` as Error);
+                  return;
+                }
 
                 listBadgeToGenerate.push({
-                  type: getCommisionPermission(user[0].orga.roles[0].commissionRole, user[0].orga.roles[0].commission.id),
+                  type: getCommisionPermission(
+                    user[0].orga.roles[0].commissionRole,
+                    user[0].orga.roles[0].commission.id,
+                  ),
                   firstName: user[0].firstname,
                   lastName: user[0].lastname,
                   // TODO: change URL
                   image:
                     `${env.front.website}/uploads/files/orga/${user[0].orga.photoFilename}.webp` ??
                     'https://picsum.photos/300',
-                  commissionName: user[0].orga.roles[0].commission.name,
+                  commissionName: getCommissionName(
+                    user[0].orga.roles[0].commissionRole,
+                    user[0].orga.roles[0].commission.id,
+                    user[0].orga.roles[0].commission.name,
+                  ),
                 });
               });
             break;
-          case 'singlecustom':
+          }
+
+          case 'singlecustom': {
             listBadgeToGenerate.push({
               type: getCommisionPermission(field.commissionRole ?? 'member', field.commissionId ?? 'vieux'),
               firstName: field.firstname ?? '',
               lastName: field.lastname ?? '',
               // TODO: change URL
               image: 'https://picsum.photos/300',
-              commissionName: await database.commission.findUnique({
-                where: { id: field.commissionId ?? 'vieux' },
-                select: { name: true },
-              }).then((commission) => commission?.name ?? ''),
+              commissionName: await database.commission
+                .findUnique({
+                  where: { id: field.commissionId ?? 'vieux' },
+                  select: { name: true },
+                })
+                .then((commission) =>
+                  getCommissionName(field.commissionRole ?? 'member', field.commissionId ?? 'vieux', commission.name),
+                ),
             });
             break;
+          }
+
+          default: {
+            break;
+          }
         }
       }
+
+      if (hasError) return false;
 
       const pdf: {
         content: Buffer;
@@ -154,7 +201,7 @@ export default [
 
       // display the pdf in the browser
       response.contentType('application/pdf');
-      response.send(pdf.content);
+      return response.send(pdf.content);
     } catch (error) {
       return next(error);
     }

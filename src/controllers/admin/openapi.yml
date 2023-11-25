@@ -96,21 +96,21 @@
                   properties:
                     type:
                       type: string
-                      enum: [orgas, custom, single, singlecustom];
+                      enum: [orgas, custom, single, singlecustom]
                       required: true
                     quantity:
                       type: integer
                       description: Le nombre de badges à créer
                     permission:
                       type: string
-                      enum: [restricted, orgaprice, fullaccess];
+                      enum: [restricted, orgaprice, fullaccess]
                       description: La permission associée au badge
                     email:
                       type: string
                       description: L'email associé au badge
                     commissionRole:
                       type: string
-                      enum: [respo, member];
+                      enum: [respo, member]
                       description: Le rôle dans la commission associé au badge
                     commissionId:
                       type: string
