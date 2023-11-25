@@ -14,6 +14,7 @@ import etupay from './etupay';
 import discord from './discord';
 import admin from './admin';
 import commissions from './commissions';
+import badge from './badge';
 
 const options = {
   definition: {
@@ -68,5 +69,8 @@ router.use('/admin', admin);
 
 // Commissions routes
 router.use('/commissions', commissions);
+
+// Badge routes
+router.use('/badge', badge);
 
 export default router;
