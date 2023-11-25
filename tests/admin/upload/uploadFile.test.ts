@@ -4,7 +4,7 @@ import { sandbox } from '../../setup';
 import * as uploadOperation from '../../../src/operations/upload';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
-import { createFakeUser, generateDummyJpgBuffer } from '../../utils';
+import { createFakeUser, generateDummyJpgBuffer, generateDummyPngBuffer } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
 import * as uploads from '../../upload';
 
@@ -119,14 +119,25 @@ describe('POST /admin/upload', () => {
       .expect(200, { status: 1, message: "Le chemin n'est pas autorisé" });
   });
 
-  it('should successfully upload the file', async () => {
+  it('should successfully upload the file with a jpg', async () => {
     await request(app)
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
+      .attach('file', await generateDummyJpgBuffer(1), { filename: 'test.jpg', contentType: 'image/jpeg' })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
-    uploads.existingFiles.splice(2, 1);
+    uploads.existingFiles.splice(uploads.existingFiles.indexOf('tournaments/test.webp'), 1);
+  });
+
+  it('should successfully upload the file with a png', async () => {
+    await request(app)
+      .post(`/admin/upload`)
+      .field('name', validObject.name)
+      .field('path', validObject.path)
+      .attach('file', await generateDummyPngBuffer(1), { filename: 'test.png', contentType: 'image/png' })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
+    uploads.existingFiles.splice(uploads.existingFiles.indexOf('tournaments/test.webp'), 1);
   });
 });

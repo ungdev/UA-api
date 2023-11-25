@@ -276,3 +276,17 @@ export function generateDummyJpgBuffer(size: number) {
     .jpeg()
     .toBuffer();
 }
+
+export function generateDummyPngBuffer(size: number) {
+  const sizeInPixels = Math.ceil(Math.sqrt(size / 4));
+  return sharp({
+    create: {
+      width: sizeInPixels,
+      height: sizeInPixels,
+      channels: 4,
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    },
+  })
+    .png()
+    .toBuffer();
+}
