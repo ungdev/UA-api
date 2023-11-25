@@ -10,6 +10,7 @@ import * as uploads from '../../upload';
 
 describe('POST /admin/upload', () => {
   let nonAdminUser: User;
+  let orga: User;
   let admin: User;
   let adminToken: string;
 
@@ -21,10 +22,12 @@ describe('POST /admin/upload', () => {
   after(async () => {
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    uploads.existingFiles.splice(uploads.existingFiles.indexOf('orga/test.webp'), 1);
   });
 
   before(async () => {
     admin = await createFakeUser({ permissions: [Permission.admin] });
+    orga = await createFakeUser({ permissions: [Permission.orga] });
     nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
   });
@@ -32,12 +35,37 @@ describe('POST /admin/upload', () => {
   it('should error as the user is not authenticated', () =>
     request(app).post(`/admin/upload`).expect(401, { error: Error.Unauthenticated }));
 
-  it('should error as the user is not an administrator', () => {
+  it('should error as the user is a player', async () => {
     const userToken = generateToken(nonAdminUser);
     return request(app)
       .post(`/admin/upload`)
+      .field('name', validObject.name)
+      .field('path', validObject.path)
+      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
       .set('Authorization', `Bearer ${userToken}`)
       .expect(403, { error: Error.NoPermission });
+  });
+
+  it('should error as the user is not an administrator', async () => {
+    const orgaToken = generateToken(orga);
+    return request(app)
+      .post(`/admin/upload`)
+      .field('name', validObject.name)
+      .field('path', validObject.path)
+      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .set('Authorization', `Bearer ${orgaToken}`)
+      .expect(403, { error: Error.NoPermission });
+  });
+
+  it('should succeed as the user is calling orga path', async () => {
+    const orgaToken = generateToken(orga);
+    return request(app)
+      .post(`/admin/upload`)
+      .field('name', validObject.name)
+      .field('path', 'orga')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .set('Authorization', `Bearer ${orgaToken}`)
+      .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
   });
 
   it('should fail with an internal server error', async () => {

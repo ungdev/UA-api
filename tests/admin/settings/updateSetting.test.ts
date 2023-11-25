@@ -11,6 +11,7 @@ import { generateToken } from '../../../src/utils/users';
 
 describe('PATCH /admin/settings', () => {
   let nonAdminUser: User;
+  let orga: User;
   let admin: User;
   let adminToken: string;
 
@@ -23,10 +24,11 @@ describe('PATCH /admin/settings', () => {
   });
 
   before(async () => {
-    await setLoginAllowed(false);
+    await setLoginAllowed(true);
     await setShopAllowed(false);
     await setTrombiAllowed(false);
     admin = await createFakeUser({ permissions: [Permission.admin] });
+    orga = await createFakeUser({ permissions: [Permission.orga] });
     nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
   });
@@ -34,13 +36,22 @@ describe('PATCH /admin/settings', () => {
   it('should error as the user is not authenticated', () =>
     request(app).patch(`/admin/settings/login`).send({ value: true }).expect(401, { error: Error.Unauthenticated }));
 
-  it('should error as the user is not an administrator', () => {
+  it('should error as the user is a player', () => {
     const userToken = generateToken(nonAdminUser);
     return request(app)
       .patch(`/admin/settings/login`)
-      .send({ value: true })
+      .send({ value: false })
       .set('Authorization', `Bearer ${userToken}`)
-      .expect(403, { error: Error.LoginNotAllowed });
+      .expect(403, { error: Error.NoPermission });
+  });
+
+  it('should error as the user is not an administrator', () => {
+    const orgaToken = generateToken(orga);
+    return request(app)
+      .patch(`/admin/settings/login`)
+      .send({ value: false })
+      .set('Authorization', `Bearer ${orgaToken}`)
+      .expect(403, { error: Error.NoPermission });
   });
 
   it('should fail with an internal server error', async () => {
@@ -48,7 +59,7 @@ describe('PATCH /admin/settings', () => {
 
     await request(app)
       .patch('/admin/settings/login')
-      .send({ value: true })
+      .send({ value: false })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
@@ -72,13 +83,13 @@ describe('PATCH /admin/settings', () => {
   it('should successfully update the settings', async () => {
     await request(app)
       .patch('/admin/settings/login')
-      .send({ value: true })
+      .send({ value: false })
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200, { id: 'login', value: true });
+      .expect(200, { id: 'login', value: false });
 
     const login = await settingsOperations.fetchSetting('login');
 
     expect(login.id).to.be.equal('login');
-    expect(login.value).to.be.equal(true);
+    expect(login.value).to.be.equal(false);
   });
 });

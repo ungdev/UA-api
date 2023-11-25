@@ -1060,10 +1060,7 @@
 /admin/upload:
   post:
     summary: Upload un fichier
-    description: Upload un fichier<br/>
-      **Permission 'admin' requise.**
-    tags:
-      - Admin
+    description: Upload un fichier
     security:
       - BearerAuth: []
     requestBody:
