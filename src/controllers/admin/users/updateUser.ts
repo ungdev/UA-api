@@ -97,7 +97,7 @@ export default [
 
       // Check that we are not removing the main commission of the user
       // At this point, we know that if orgaMainCommission is not undefined, the state will be correct
-      if (orgaRoles && orga.mainCommission && !orgaRoles.some((role) => role.commission === orga.mainCommission)) {
+      if (orgaRoles && orga.mainCommission && !orgaRoles.some((role) => role.commission === orga.mainCommissionId)) {
         return forbidden(response, Error.TryingToRemoveMainCommission);
       }
 

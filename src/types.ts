@@ -183,7 +183,7 @@ export type UserPatchBody = Partial<
 
 export type RawOrgaWithDetailedRoles = RawOrga & {
   roles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }>;
-  mainCommission: prisma.Commission,
+  mainCommission: prisma.Commission;
 };
 
 export type RawOrgaWithUserData = Pick<User, 'id' | 'firstname' | 'lastname' | 'username'> &
