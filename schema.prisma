@@ -205,6 +205,7 @@ model Orga {
   mainCommission Commission? @relation("orgaCommission", fields: [mainCommissionId], references: [id])
 
   @@index([mainCommissionId])
+  // TODO : uncomment that for next year, for 2023 it's too late
   // @@map("orgas")
 }
 
@@ -252,6 +253,7 @@ model OrgaRole {
 model Commission {
   id                 String       @id
   name               String
+  nameOnBadge        String
   position           Int
   color              String
   masterCommissionId String?
