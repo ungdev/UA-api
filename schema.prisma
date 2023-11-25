@@ -253,7 +253,7 @@ model OrgaRole {
 model Commission {
   id                 String       @id
   name               String
-  nameOnBadge        String
+  nameOnBadge        String      @default("")
   position           Int
   color              String
   masterCommissionId String?
