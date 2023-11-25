@@ -199,8 +199,14 @@ model Orga {
   displayName Boolean @default(false)
   displayUsername Boolean @default(true)
   displayPhoto Boolean @default(false)
+  mainCommissionId String?
   roles     OrgaRole[] @relation("orgaRoleOrga")
   user User @relation("userOrga", fields: [userId], references: [id])
+  mainCommission Commission? @relation("orgaCommission", fields: [mainCommissionId], references: [id])
+
+  @@index([mainCommissionId])
+  // TODO : uncomment that for next year, for 2023 it's too late
+  // @@map("orgas")
 }
 
 model RepoItem {
@@ -247,12 +253,14 @@ model OrgaRole {
 model Commission {
   id                 String       @id
   name               String
+  nameOnBadge        String      @default("")
   position           Int
   color              String
   masterCommissionId String?
   masterCommission   Commission?  @relation("masterCommission", fields: [masterCommissionId], references: [id])
   subCommissions     Commission[] @relation("masterCommission")
   orgas              OrgaRole[]   @relation("orgaRoleCommission")
+  orgaWhereMain      Orga[]       @relation("orgaCommission")
 
   @@index([masterCommissionId])
   @@map("commission")

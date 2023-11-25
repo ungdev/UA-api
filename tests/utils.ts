@@ -39,6 +39,7 @@ type FakeUserData = {
   orgaDisplayName?: boolean;
   orgaDisplayUsername?: boolean;
   orgaPhotoFilename?: string;
+  orgaMainCommissionId?: string;
 };
 
 const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
@@ -92,6 +93,7 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
             displayName: data.orgaDisplayName,
             photoFilename: data.orgaPhotoFilename,
             displayUsername: data.orgaDisplayUsername,
+            mainCommissionId: data.orgaMainCommissionId,
             roles: {
               create: data.orgaRoles?.map((role) => ({
                 commission: { connect: { id: role.commission } },

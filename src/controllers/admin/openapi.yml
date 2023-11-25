@@ -1412,6 +1412,10 @@
                   orga:
                     $ref: '#/components/schemas/OrgaData'
                     optional: true
+                  orgaMainCommission:
+                    type: string
+                    optional: true
+                    example: coord
               customMessage:
                 type: string
                 nullable: true
