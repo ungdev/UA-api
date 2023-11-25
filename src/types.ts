@@ -241,6 +241,33 @@ export type EtupayError = ErrorRequestHandler & {
   message: string;
 };
 
+/************/
+/** Badges **/
+/************/
+
+export type BadgeType = 'orgas' | 'custom' | 'single' | 'singlecustom';
+export type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess';
+
+export interface Badge {
+  type: BadgePermission;
+  firstName: string;
+  lastName: string;
+  image: string;
+  commissionName: string;
+}
+
+export interface BadgeField {
+  type: BadgeType;
+  quantity?: number;
+  permission?: BadgePermission;
+  email?: string;
+  commissionRole?: prisma.RoleInCommission;
+  commissionId?: string;
+  firstname?: string;
+  lastname?: string;
+  name?: string;
+} 
+
 /**********/
 /** Misc **/
 /**********/

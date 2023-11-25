@@ -1,9 +1,8 @@
 import { TransactionState } from '@prisma/client';
 import { MailGoal } from '.';
 import database from '../../services/database';
-import { generateTicket } from '../../utils/pdf';
-import { getNextPaidAndValidatedUserBatch } from '../../operations/user';
-import env from '../../utils/env';
+import { generateTicket } from '../../utils/ticket';
+import { getPaidAndValidatedUsers } from '../../operations/user';
 
 export const ticketsGoal: MailGoal = {
   collector: () => getNextPaidAndValidatedUserBatch(env.email.maxMailsPerBatch),

@@ -3,6 +3,6 @@ import generateBadge from './generateBadge';
 
 const router = Router();
 
-router.get('/', generateBadge);
+router.post('/', generateBadge);
 
 export default router;

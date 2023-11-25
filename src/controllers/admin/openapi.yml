@@ -71,7 +71,83 @@
         $ref: '#/components/responses/403Unauthorized'
       404:
         $ref: '#/components/responses/404UserNotFound'
-
+/admin/badges:
+  post:
+    summary: Crée des badges
+    description: Crée des badges.<br/>
+      **Permission 'admin' requise.**
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              fields:
+                type: array
+                description: La liste des badges à créer
+                required: true
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [orgas, custom, single, singlecustom];
+                      required: true
+                    quantity:
+                      type: integer
+                      description: Le nombre de badges à créer
+                    permission:
+                      type: string
+                      enum: [restricted, orgaprice, fullaccess];
+                      description: La permission associée au badge
+                    email:
+                      type: string
+                      description: L'email associé au badge
+                    commissionRole:
+                      type: string
+                      enum: [respo, member];
+                      description: Le rôle dans la commission associé au badge
+                    commissionId:
+                      type: string
+                      description: L'identifiant de la commission associée au badge
+                    firstname:
+                      type: string
+                      description: Le prénom associé au badge
+                    lastname:
+                      type: string
+                      description: Le nom associé au badge
+                    name:
+                      type: string
+                      description: Le nom associé au badge
+          
+    responses:
+      201:
+        description: Les badges ont bien été créés.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Badge'
+      400:
+        $ref: '#/components/responses/400Errored'
+      401:
+        description: L'utilisateur n'est pas authentifié
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: L'utilisateur n'est pas authentifié
+      404:
+        $ref: '#/components/responses/404UserNotFound'
+  
+      
 /admin/carts/{cartId}/refund:
   post:
     summary: Marque le panier comme étant remboursé

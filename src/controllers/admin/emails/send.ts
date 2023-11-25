@@ -66,8 +66,8 @@ export default [
                           },
                         }
                       : mail.locked === false
-                        ? { lockedAt: null }
-                        : {}),
+                      ? { lockedAt: null }
+                      : {}),
                     tournamentId: mail.tournamentId,
                   },
                 }),
