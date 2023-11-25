@@ -41,7 +41,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${userToken}`)
       .expect(403, { error: Error.NoPermission });
   });
@@ -52,7 +52,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${orgaToken}`)
       .expect(403, { error: Error.NoPermission });
   });
@@ -63,7 +63,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', 'orga')
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${orgaToken}`)
       .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
   });
