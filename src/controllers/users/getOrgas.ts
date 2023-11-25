@@ -20,6 +20,13 @@ export default [
       if (!(await fetchSetting('trombi')).value) return forbidden(response, Error.TrombiNotAllowed);
       const orgas = await fetchOrgas();
       const commissions = await database.commission.findMany();
+
+      // remove commission 'vieux' from the list
+      const index = commissions.findIndex((commission) => commission.id === 'vieux');
+      if (index !== -1) {
+        commissions.splice(index, 1);
+      }
+
       const resultInObject = Object.fromEntries(
         commissions.map((commission) => [
           commission.id,
