@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { NextFunction, Request, Response } from 'express';
 import { hasPermission } from '../../../middlewares/authentication';
 import { Permission, Error, UserPatchBody } from '../../../types';
-import { badRequest, conflict, forbidden, notFound, success } from "../../../utils/responses";
+import { conflict, forbidden, notFound, success } from '../../../utils/responses';
 import { fetchOrga, fetchOrgaData, fetchUser, filterOrgaData, updateAdminUser } from '../../../operations/user';
 import { filterUser } from '../../../utils/filters';
 import { validateBody } from '../../../middlewares/validation';

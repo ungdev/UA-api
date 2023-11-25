@@ -76,6 +76,7 @@ export const formatOrga = (orga: RawUser & { orga: RawOrgaWithDetailedRoles }): 
 export const filterOrgaData = (orga: RawOrgaWithDetailedRoles) =>
   orga
     ? {
+        mainCommission: orga.mainCommission,
         roles: orga.roles.map((role) => {
           const commissionWithoutPosition = { ...role.commission };
           delete commissionWithoutPosition.position;

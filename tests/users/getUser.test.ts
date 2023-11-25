@@ -21,6 +21,7 @@ describe('GET /users/current', () => {
     orgaUser = await createFakeUser({
       permissions: [Permission.orga],
       orgaRoles: [{ role: 'respo', commission: 'dev' }],
+      orgaMainCommission: 'dev',
     });
     orgaToken = generateToken(orgaUser);
   });
@@ -57,6 +58,7 @@ describe('GET /users/current', () => {
   it('should return the organizer with its commissions', async () => {
     const { body } = await request(app).get('/users/current').set('Authorization', `Bearer ${orgaToken}`).expect(200);
 
+    expect(body.orga.mainCommission).to.be.equal('dev');
     expect(body.orga.roles).to.be.of.length(1);
     expect(body.orga.roles[0].commissionRole).to.be.equal('respo');
     expect(body.orga.roles[0].commission.id).to.be.equal('dev');
