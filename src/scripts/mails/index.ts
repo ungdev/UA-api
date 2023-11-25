@@ -7,9 +7,9 @@ import { EmailAttachement } from '../../types';
 import logger from '../../utils/logger';
 // import { ticketsGoal } from './tickets';
 // import { notPaidGoal } from './notpaid';
-import { notPaidSSBUGoal } from './notpaidssbu';
+// import { notPaidSSBUGoal } from './notpaidssbu';
 // import { discordGoal } from './discord';
-// import { minorGoal } from './minor';
+import { minorGoal } from './minor';
 // import { unlockedPlayersGoal } from './unlocked';
 
 export type RecipientCollector = () => Promise<User[]>;
@@ -20,11 +20,12 @@ export type MailGoal = {
 };
 
 const goals: Array<MailGoal> = [
-  // discordGoal, minorGoal,
+  // discordGoal, 
+  minorGoal,
   // ticketsGoal,
   // unlockedPlayersGoal
   // notPaidGoal,
-  notPaidSSBUGoal,
+  // notPaidSSBUGoal,
 ];
 
 (async () => {
