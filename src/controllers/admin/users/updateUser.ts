@@ -87,6 +87,7 @@ export default [
       // Check that the main commission of the user is a commission of this user
       const orga = await fetchOrga(user);
       if (
+        orga &&
         orgaMainCommission &&
         !(orgaRoles
           ? orgaRoles.find((role) => role.commission === orgaMainCommission)
@@ -97,7 +98,12 @@ export default [
 
       // Check that we are not removing the main commission of the user
       // At this point, we know that if orgaMainCommission is not undefined, the state will be correct
-      if (orgaRoles && orga.mainCommission && !orgaRoles.some((role) => role.commission === orga.mainCommissionId)) {
+      if (
+        orgaRoles &&
+        orga &&
+        orga.mainCommission &&
+        !orgaRoles.some((role) => role.commission === orga.mainCommissionId)
+      ) {
         return forbidden(response, Error.TryingToRemoveMainCommission);
       }
 
