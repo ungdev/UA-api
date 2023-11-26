@@ -118,6 +118,8 @@ components:
       type: object
       description: Données spécifiques aux organisateurs
       properties:
+        mainCommission:
+          type: string
         roles:
           type: array
           items:

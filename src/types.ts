@@ -178,11 +178,12 @@ export type UserPatchBody = Partial<
     | 'firstname'
     | 'lastname'
     | 'email'
-  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }> }
+  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }>; orgaMainCommission?: string }
 >;
 
 export type RawOrgaWithDetailedRoles = RawOrga & {
   roles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }>;
+  mainCommission: prisma.Commission;
 };
 
 export type RawOrgaWithUserData = Pick<User, 'id' | 'firstname' | 'lastname' | 'username'> &
@@ -197,6 +198,7 @@ export type Orga = {
   displayName: boolean;
   displayPhoto: boolean;
   displayUsername: boolean;
+  mainCommission?: prisma.Commission;
 };
 
 export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
@@ -341,6 +343,8 @@ export const enum Error {
   AlreadyPickedUp = "L'objet a déjà été récupéré",
   TooMuchLockedTeams = "Il y a plus d'équipes inscrites que le nombre d'équipes maximal souhaité",
   TournamentFull = "Le tournoi est plein, attends qu'une place se libère pour payer un ticket",
+  UserDoesntHaveMainCommission = "L'utilisateur n'a pas la commission spécifiée comme commission principale",
+  TryingToRemoveMainCommission = "Vous ne pouvez pas supprimer la commission principale de l'organisateur sans le supprimer de cette commission",
 
   // 404
   // The server can't find the requested resource

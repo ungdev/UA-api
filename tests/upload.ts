@@ -11,9 +11,9 @@ import env from '../src/utils/env';
 export const INITIAL_EXISTING_FILES = ['tournaments/lol-logo.webp', 'tournaments/lol-background.webp'];
 
 export const existingFiles = [...INITIAL_EXISTING_FILES];
-const allowedPaths = ['tournaments', 'partners', 'orgas'];
+const allowedPaths = ['tournaments', 'partners', 'orga'];
 const allowedFileTypes = ['image/png', 'image/jpeg', 'application/pdf', 'image/webp'];
-const allowedExtensions = ['png', 'jpg', 'pdf'];
+const allowedExtensions = ['png', 'jpg', 'pdf', 'webp'];
 
 const maxFileSize = 5000;
 

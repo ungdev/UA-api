@@ -39,6 +39,7 @@ type FakeUserData = {
   orgaDisplayName?: boolean;
   orgaDisplayUsername?: boolean;
   orgaPhotoFilename?: string;
+  orgaMainCommissionId?: string;
 };
 
 const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
@@ -92,6 +93,7 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
             displayName: data.orgaDisplayName,
             photoFilename: data.orgaPhotoFilename,
             displayUsername: data.orgaDisplayUsername,
+            mainCommissionId: data.orgaMainCommissionId,
             roles: {
               create: data.orgaRoles?.map((role) => ({
                 commission: { connect: { id: role.commission } },
@@ -272,5 +274,19 @@ export function generateDummyJpgBuffer(size: number) {
     },
   })
     .jpeg()
+    .toBuffer();
+}
+
+export function generateDummyPngBuffer(size: number) {
+  const sizeInPixels = Math.ceil(Math.sqrt(size / 4));
+  return sharp({
+    create: {
+      width: sizeInPixels,
+      height: sizeInPixels,
+      channels: 4,
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    },
+  })
+    .png()
     .toBuffer();
 }
