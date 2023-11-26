@@ -479,4 +479,14 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ orgaRoles: [] })
       .expect(403, { error: Error.TryingToRemoveMainCommission }));
+
+  it('should change the main commission of the orga and remove the old one from the list of commissions', () =>
+    request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        orgaRoles: [{ commissionRole: 'respo', commission: 'animation_lol' }],
+        orgaMainCommission: 'animation_lol',
+      })
+      .expect(200));
 });

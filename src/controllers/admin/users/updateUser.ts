@@ -90,8 +90,8 @@ export default [
         orga &&
         orgaMainCommission &&
         !(orgaRoles
-          ? orgaRoles.find((role) => role.commission === orgaMainCommission)
-          : orga.roles.find((role) => role.commission.id === orgaMainCommission))
+          ? orgaRoles.some((role) => role.commission === orgaMainCommission)
+          : orga.roles.some((role) => role.commission.id === orgaMainCommission))
       ) {
         return forbidden(response, Error.UserDoesntHaveMainCommission);
       }
@@ -99,9 +99,10 @@ export default [
       // Check that we are not removing the main commission of the user
       // At this point, we know that if orgaMainCommission is not undefined, the state will be correct
       if (
-        orgaRoles &&
         orga &&
+        orgaRoles &&
         orga.mainCommission &&
+        !orgaMainCommission &&
         !orgaRoles.some((role) => role.commission === orga.mainCommissionId)
       ) {
         return forbidden(response, Error.TryingToRemoveMainCommission);
