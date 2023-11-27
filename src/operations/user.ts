@@ -22,6 +22,7 @@ import {
 import { deserializePermissions, serializePermissions } from '../utils/helpers';
 import { fetchAllItems } from './item';
 import { deleteFile } from './upload';
+import logger from '../utils/logger';
 
 export const userInclusions = {
   cartItems: {
@@ -565,7 +566,13 @@ export const updateTrombi = async (
   const orga = await fetchOrga(user);
   // First delete the old file, if any
   if (orga.photoFilename) {
-    await deleteFile(`orgas/${orga.photoFilename}.webp`);
+    try {
+      await deleteFile(`orgas/${orga.photoFilename}.webp`);
+    } catch {
+      logger.warn(
+        `Le fichier orgas/${orga.photoFilename}.webp n'existe pas. Cette erreur n'est pas forcément une erreur de l'API`,
+      );
+    }
   }
   const filename = generateOrgaPhotoFilename(user);
   await database.orga.update({
