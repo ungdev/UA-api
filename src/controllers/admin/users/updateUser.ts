@@ -86,25 +86,25 @@ export default [
 
       // Check that the main commission of the user is a commission of this user
       const orga = await fetchOrga(user);
-      if (
-        orga &&
-        orgaMainCommission &&
-        !(orgaRoles
-          ? orgaRoles.find((role) => role.commission === orgaMainCommission)
-          : orga.roles.find((role) => role.commission.id === orgaMainCommission))
-      ) {
-        return forbidden(response, Error.UserDoesntHaveMainCommission);
+
+      const newMainCommission = orgaMainCommission ?? (orga ? orga.mainCommissionId : null);
+      const newRoles =
+        orgaRoles ??
+        (orga
+          ? orga.roles.map((role) => ({ commissionRole: role.commissionRole, commission: role.commission.id }))
+          : []);
+      const isOrga = permissions ? permissions.includes(Permission.orga) : !!orga;
+
+      if (!isOrga && (newMainCommission || newRoles.length > 0)) {
+        return forbidden(response, Error.IsNotOrga);
       }
 
-      // Check that we are not removing the main commission of the user
-      // At this point, we know that if orgaMainCommission is not undefined, the state will be correct
-      if (
-        orgaRoles &&
-        orga &&
-        orga.mainCommission &&
-        !orgaRoles.some((role) => role.commission === orga.mainCommissionId)
-      ) {
-        return forbidden(response, Error.TryingToRemoveMainCommission);
+      if (newMainCommission && !newRoles.some((role) => role.commission === newMainCommission)) {
+        return forbidden(response, Error.MainCommissionMustBeInList);
+      }
+
+      if (!newMainCommission && newRoles.length > 0) {
+        return forbidden(response, Error.MustHaveMainCommission);
       }
 
       const updatedUser = await updateAdminUser(user, {
