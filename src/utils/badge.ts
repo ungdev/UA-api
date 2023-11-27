@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { readFileSync } from 'fs';
 import PDFkit from 'pdfkit';
 import sharp from 'sharp';
@@ -71,7 +71,7 @@ export const generateBadge = async (badges: Badge[]) => {
   const pdf = await new Promise<Buffer>(async (resolve, reject) => {
     // Create the document and the background
     const document = new PDFkit({ size: 'A4', margin: 0, layout: 'landscape' });
-    const fetchImage = async (source: string) => {
+    const fetchImage = async (source: string): Promise<ArrayBuffer> => {
       // If the source is empty, return a new image 300x300 in a solid color
       if (source === '')
         return sharp({
@@ -79,7 +79,7 @@ export const generateBadge = async (badges: Badge[]) => {
             width: 300,
             height: 300,
             channels: 4,
-            background: { r: 255, g: 255, b: 255, alpha: 1 },
+            background: { r: 0, g: 45, b: 64, alpha: 1 },
           },
         })
           .png()
@@ -89,8 +89,12 @@ export const generateBadge = async (badges: Badge[]) => {
         method: 'GET',
         url: source,
         responseType: 'arraybuffer',
+      }).catch((err) => {
+        console.log(source);
+        return false;
       });
-      return response.data;
+
+      return response ? (response as AxiosResponse).data : fetchImage('');
     };
 
     // Constants for the columns and rows
@@ -166,7 +170,7 @@ export const generateBadge = async (badges: Badge[]) => {
             offsetY - 255 - lastNameHeight - firstNameHeight / 2,
           );
           // Commission
-          const commission = `${badges[index].commissionName}`;
+          const commission = `${badges[index].commissionName.toUpperCase()}`;
           const commissionHeight = textFormat.heightOfString(commission);
           textFormat.text(
             commission,

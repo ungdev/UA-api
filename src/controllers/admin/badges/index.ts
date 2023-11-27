@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import generateBadge from './generateBadge';
+import generateBadges from './generateBadges';
 
 const router = Router();
 
-router.post('/', generateBadge);
+router.post('/', generateBadges);
 
 export default router;
