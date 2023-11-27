@@ -64,6 +64,7 @@
     // Security
     "security/detect-non-literal-regexp": "off",
     "security/detect-object-injection": "off",
+    "security/detect-non-literal-fs-filename": "off",
 
     // Unicorn
     "unicorn/consistent-function-scoping": "off",
