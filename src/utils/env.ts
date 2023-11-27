@@ -80,6 +80,7 @@ const env = {
     username: loadEnv('GMAIL_USERNAME') || '',
     password: loadEnv('GMAIL_PASSWORD') || '',
     partners: ['utt.fr', 'utc.fr', 'utbm.fr'],
+    maxMailsPerBatch: loadIntEnv('MAX_MAIL_PER_BATCH') || 100,
   },
   etupay: {
     id: loadIntEnv('ETUPAY_ID') || notInProduction(1),
