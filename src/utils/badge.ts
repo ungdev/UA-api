@@ -89,10 +89,7 @@ export const generateBadge = async (badges: Badge[]) => {
         method: 'GET',
         url: source,
         responseType: 'arraybuffer',
-      }).catch((err) => {
-        console.log(source);
-        return false;
-      });
+      }).catch(() => false);
 
       return response ? (response as AxiosResponse).data : fetchImage('');
     };

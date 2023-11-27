@@ -94,7 +94,10 @@ export default [
                   mainCommissionIndex = mainCommissionIndex === -1 ? 0 : mainCommissionIndex;
 
                   listBadgeToGenerate.push({
-                    type: getCommisionPermission(user.orga.roles[mainCommissionIndex].commissionRole, user.orga.roles[mainCommissionIndex].commission.id),
+                    type: getCommisionPermission(
+                      user.orga.roles[mainCommissionIndex].commissionRole,
+                      user.orga.roles[mainCommissionIndex].commission.id,
+                    ),
                     firstName: user.firstname,
                     lastName: user.lastname,
                     image: user.orga.photoFilename
