@@ -537,6 +537,52 @@ export const getPaidAndValidatedUsers = () =>
     },
   });
 
+export const getNextPaidAndValidatedUserBatch = async (batchMaxSize: number) => {
+  const users = await database.user.findMany({
+    where: {
+      discordId: {
+        not: null,
+      },
+      email: {
+        not: null,
+      },
+      ticketMailSent: false,
+      OR: [{ team: { lockedAt: { not: null } } }, { type: UserType.spectator }],
+      cartItems: {
+        some: {
+          itemId: {
+            startsWith: 'ticket-',
+          },
+          cart: {
+            paidAt: {
+              not: null,
+            },
+            transactionState: TransactionState.paid,
+          },
+        },
+      },
+    },
+    orderBy: {
+      place: {
+        sort: 'asc',
+        nulls: 'last',
+      },
+    },
+    take: batchMaxSize,
+  });
+  await database.user.updateMany({
+    where: {
+      id: {
+        in: users.map((user) => user.id),
+      },
+    },
+    data: {
+      ticketMailSent: true,
+    },
+  });
+  return users;
+};
+
 /** Generates a file name to store the photo of an orga.
  * The file name is in the form :
  * <lastname>-<firstname>-<userId>-<randomString>
