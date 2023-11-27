@@ -208,76 +208,75 @@ export const deleteDiscordTeam = async (team: Team) => {
   await deleteDiscordChannel(team.discordVoiceChannelId);
 };
 
-export const getWebhookEnvFromString = (name: string) => {
-  return env.discord.webhooks['channel_' + name] ?? env.discord.webhooks.channel_other;
-};
+export const getWebhookEnvFromString = (name: string) =>
+  env.discord.webhooks[`channel_${name}`] ?? env.discord.webhooks.channel_other;
 
 export const sendDiscordTeamLockout = async (team: Team, tournament: Tournament) => {
   // Get the webhook of the tournament
   const webhook = getWebhookEnvFromString(tournament.id.toString());
 
-  if (!webhook || webhook === undefined || webhook === '') {
+  if (!webhook) {
     logger.warn(
       `Discord webhook for team ${tournament.name} is missing. It will skip discord messages for team locking`,
     );
     logger.warn(`Team ${team.name} (id : ${team.id}) is now locked but no discord messages could be sent)`);
-  } else {
-    // Get the list of players in this team
-    const playersList = [];
-    for (const p of team.players) {
-      playersList.push({ name: `${p.username}`, value: `<@${p.discordId}>` });
-    }
-
-    const nbPlaces = tournament.maxPlayers / tournament.playersPerTeam;
-    const nbParticipants = tournament.lockedTeamsCount;
-
-    let coachsList = [{ name: 'Les coachs de cette équipe sont : ', value: '' }];
-    for (const c of team.coaches) {
-      coachsList.push({ name: `${c.username} - [coach]`, value: `<@${c.discordId}>` });
-    }
-    if (coachsList.length === 1) {
-      coachsList = [];
-    }
-
-    // An array of Discord Embeds.
-    const embeds = [
-      {
-        title: `L'équipe **${team.name}** est maintenant verrouillée ! 🚀\n\nCette équipe contient les joueurs : `,
-        color: 5174599,
-        footer: {
-          text: `Equipe pour ${tournament.name} complète, billets payés\n\n${nbParticipants} / ${nbPlaces} places occupées - ${tournament.name}`,
-        },
-        fields: [...playersList, ...coachsList],
-      },
-    ];
-    await callWebhook(webhook, embeds);
+    return;
   }
+  // Get the list of players in this team
+  const playersList = [];
+  for (const p of team.players) {
+    playersList.push({ name: `${p.username}`, value: `<@${p.discordId}>` });
+  }
+
+  const nbPlaces = tournament.maxPlayers / tournament.playersPerTeam;
+  const nbParticipants = tournament.lockedTeamsCount;
+
+  let coachsList = [{ name: 'Les coachs de cette équipe sont : ', value: '' }];
+  for (const c of team.coaches) {
+    coachsList.push({ name: `${c.username} - [coach]`, value: `<@${c.discordId}>` });
+  }
+  if (coachsList.length === 1) {
+    coachsList = [];
+  }
+
+  // An array of Discord Embeds.
+  const embeds = [
+    {
+      title: `L'équipe **${team.name}** est maintenant verrouillée ! 🚀\n\nCette équipe contient les joueurs : `,
+      color: 5174599,
+      footer: {
+        text: `Equipe pour ${tournament.name} complète, billets payés\n\n${nbParticipants} / ${nbPlaces} places occupées - ${tournament.name}`,
+      },
+      fields: [...playersList, ...coachsList],
+    },
+  ];
+  await callWebhook(webhook, embeds);
 };
 
 export const sendDiscordTeamUnlock = async (team: Team, tournament: Tournament) => {
   // Get the webhook of the tournament
   const webhook = getWebhookEnvFromString(tournament.id.toString());
-  if (!webhook || webhook === undefined || webhook === '') {
+  if (!webhook) {
     logger.warn(
       `Discord webhook for team ${tournament.name} is missing. It will skip discord messages for team unlocking`,
     );
     logger.warn(`Team ${team.name} (id : ${team.id}) is now unlocked but no discord messages could be sent)`);
-  } else {
-    const nbPlaces = tournament.maxPlayers / tournament.playersPerTeam;
-    const nbParticipants = tournament.lockedTeamsCount;
-
-    // An array of Discord Embeds.
-    const embeds = [
-      {
-        title: `L'équipe **${team.name}** n'est plus verrouillée ! ❌\n`,
-        color: 14177041,
-        footer: {
-          text: `Equipe pour ${tournament.name}. Après modification, cette équipe n'est plus verrouillée\n\n${nbParticipants} / ${nbPlaces} places occupées - ${tournament.name}`,
-        },
-      },
-    ];
-    await callWebhook(webhook, embeds);
+    return;
   }
+  const nbPlaces = tournament.maxPlayers / tournament.playersPerTeam;
+  const nbParticipants = tournament.lockedTeamsCount;
+
+  // An array of Discord Embeds.
+  const embeds = [
+    {
+      title: `L'équipe **${team.name}** n'est plus verrouillée ! ❌\n`,
+      color: 14177041,
+      footer: {
+        text: `Equipe pour ${tournament.name}. Après modification, cette équipe n'est plus verrouillée\n\n${nbParticipants} / ${nbPlaces} places occupées - ${tournament.name}`,
+      },
+    },
+  ];
+  await callWebhook(webhook, embeds);
 };
 
 export const sendDiscordContact = async ({ name, email, subject, message }: Contact) => {

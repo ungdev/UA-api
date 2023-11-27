@@ -16,7 +16,7 @@ import { generateFakeDiscordId } from './utils';
 
 let members: DiscordGuildMember[] = [];
 let roles: Snowflake[] = [];
-let channels: Snowflake[] = [];
+const channels: Snowflake[] = [];
 let userOauthCode: { [code in string]: { allow: boolean; userId?: Snowflake } } = {};
 let rateLimitRemainingRequests = 4;
 let firstRequestOfBatchTimestamp = 0;
