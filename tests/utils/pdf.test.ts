@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import { UserType } from '@prisma/client';
 import { createFakeTeam, createFakeUser } from '../utils';
 import { createCart, updateCart } from '../../src/operations/carts';
-import { generateTicket } from '../../src/utils/pdf';
+import { generateTicket } from '../../src/utils/ticket';
 import { getCaptain } from '../../src/utils/teams';
 import database from '../../src/services/database';
 import { TransactionState } from '../../src/types';

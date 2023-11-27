@@ -1,7 +1,7 @@
 import { TransactionState } from '@prisma/client';
 import { MailGoal } from '.';
 import database from '../../services/database';
-import { generateTicket } from '../../utils/pdf';
+import { generateTicket } from '../../utils/ticket';
 import { getNextPaidAndValidatedUserBatch } from '../../operations/user';
 import env from '../../utils/env';
 
