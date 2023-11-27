@@ -64,6 +64,7 @@ export enum Permission {
   anim = 'anim',
   admin = 'admin',
   repo = 'repo',
+  orga = 'orga',
 }
 
 export { TransactionState, UserAge, UserType, ItemCategory, Log, RepoItemType } from '@prisma/client';
@@ -83,6 +84,7 @@ export type PrimitiveTeam = prisma.Team;
 export type PrimitiveTournament = prisma.Tournament;
 export type RepoItem = prisma.RepoItem;
 export type RepoLog = prisma.RepoLog & { item: RepoItem };
+export type RawOrga = prisma.Orga;
 
 export type Item = RawItem & {
   left?: number;
@@ -155,7 +157,7 @@ export type UserSearchQuery = {
   userId: string;
   search: string;
   type: UserType;
-  permission: Permission;
+  permissions: string;
   tournament: string;
   locked: string;
   payment: string;
@@ -176,8 +178,28 @@ export type UserPatchBody = Partial<
     | 'firstname'
     | 'lastname'
     | 'email'
-  >
+  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }>; orgaMainCommission?: string }
 >;
+
+export type RawOrgaWithDetailedRoles = RawOrga & {
+  roles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }>;
+  mainCommission: prisma.Commission;
+};
+
+export type RawOrgaWithUserData = Pick<User, 'id' | 'firstname' | 'lastname' | 'username'> &
+  Omit<RawOrgaWithDetailedRoles, 'userId'>;
+
+export type Orga = {
+  id: string;
+  name: string;
+  username: string;
+  photoFilename?: string;
+  roles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }>;
+  displayName: boolean;
+  displayPhoto: boolean;
+  displayUsername: boolean;
+  mainCommission?: prisma.Commission;
+};
 
 export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
   users: RawUserWithCartItems[];
@@ -244,6 +266,7 @@ export const enum Error {
   InvalidPlace = 'Numéro de place invalide',
   InvalidPermission = "Ces permissions n'existent pas",
   stringBooleanError = "Ce n'est pas du texte",
+  ShowNameOrPseudo = 'Vous devez au moins afficher le nom ou le pseudo',
 
   InvalidTeamName = "Nom d'équipe invalide !",
 
@@ -277,6 +300,7 @@ export const enum Error {
   LoginNotAllowed = 'Tu ne peux pas te connecter actuellement',
   NotAdmin = "Tu n'es pas administrateur",
   ShopNotAllowed = 'La billetterie est fermée',
+  TrombiNotAllowed = "Le trombinoscope n'est pas encore disponible",
   EmailNotConfirmed = "Le compte n'est pas confirmé",
   EmailAlreadyConfirmed = 'Le compte est déjà confirmé',
   NoPermission = "Tu n'as pas la permission d'accéder à cette ressource",
@@ -318,6 +342,10 @@ export const enum Error {
   NotYourItem = "Cet item n'est pas le tiens",
   AlreadyHaveComputer = 'Tu as déjà un ordinateur stocké',
   AlreadyPickedUp = "L'objet a déjà été récupéré",
+  TooMuchLockedTeams = "Il y a plus d'équipes inscrites que le nombre d'équipes maximal souhaité",
+  TournamentFull = "Le tournoi est plein, attends qu'une place se libère pour payer un ticket",
+  UserDoesntHaveMainCommission = "L'utilisateur n'a pas la commission spécifiée comme commission principale",
+  TryingToRemoveMainCommission = "Vous ne pouvez pas supprimer la commission principale de l'organisateur sans le supprimer de cette commission",
 
   // 404
   // The server can't find the requested resource
@@ -331,6 +359,7 @@ export const enum Error {
   TournamentNotFound = 'Le tournoi est introuvable',
   TicketNotFound = 'Le ticket est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
+  CommissionNotFound = "La commission n'existe pas",
 
   // 405
   // The request method is known by the server but is not supported by the target resource
@@ -344,10 +373,10 @@ export const enum Error {
   TeamAlreadyExists = "Le nom de l'équipe existe déjà",
   PlaceAlreadyAttributed = 'Cette place est déjà attribuée',
   DiscordAccountAlreadyUsed = 'Ce compte discord est déjà lié à un compte',
+  TournamentNameAlreadyExists = 'Un tournoi a déjà ce nom',
 
   // 410
   // indicates that access to the target resource is no longer available at the server.
-  TournamentFull = 'Le tournoi est complet',
   ItemOutOfStock = "L'objet demandé n'est plus en stock",
   ItemNotAvailableAnymore = "L'objet demandé n'est plus disponible",
 

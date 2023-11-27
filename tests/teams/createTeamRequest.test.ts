@@ -16,7 +16,7 @@ describe('POST /teams/:teamId/join-requests', () => {
 
   before(async () => {
     team = await createFakeTeam();
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
   });
 
@@ -24,6 +24,7 @@ describe('POST /teams/:teamId/join-requests', () => {
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -54,39 +55,6 @@ describe('POST /teams/:teamId/join-requests', () => {
       .expect(403, { error: Error.AlreadyInTeam });
   });
 
-  it('should fail because coach limit is already reached (coach team members)', async () => {
-    const otherTeam = await createFakeTeam({ members: 2 });
-    const [user1, user2] = otherTeam.players;
-    await updateAdminUser(user1.id, { type: UserType.coach });
-    await updateAdminUser(user2.id, { type: UserType.coach });
-
-    const otherCoach = await createFakeUser();
-    const otherToken = generateToken(otherCoach);
-
-    return request(app)
-      .post(`/teams/${otherTeam.id}/join-requests`)
-      .send({ userType: UserType.coach })
-      .set('Authorization', `Bearer ${otherToken}`)
-      .expect(403, { error: Error.TeamMaxCoachReached });
-  });
-
-  it('should fail because coach limit is already reached (coach team member requests)', async () => {
-    const otherTeam = await createFakeTeam();
-    const [user1] = otherTeam.players;
-    const user2 = await createFakeUser();
-    await updateAdminUser(user1.id, { type: UserType.coach });
-    await teamOperations.askJoinTeam(otherTeam.id, user2.id, UserType.coach);
-
-    const otherCoach = await createFakeUser();
-    const otherToken = generateToken(otherCoach);
-
-    return request(app)
-      .post(`/teams/${otherTeam.id}/join-requests`)
-      .send({ userType: UserType.coach })
-      .set('Authorization', `Bearer ${otherToken}`)
-      .expect(403, { error: Error.TeamMaxCoachReached });
-  });
-
   it('should fail because the user is a spectator', async () => {
     const spectator = await createFakeUser({ type: UserType.spectator });
     const spectatorToken = generateToken(spectator);
@@ -115,14 +83,6 @@ describe('POST /teams/:teamId/join-requests', () => {
       .send({ userType: UserType.player })
       .set('Authorization', `Bearer ${token}`)
       .expect(403, { error: Error.TeamLocked });
-  });
-
-  it('should not allow orga userType', async () => {
-    await request(app)
-      .post(`/teams/${team.id}/join-requests`)
-      .send({ userType: UserType.orga })
-      .set('Authorization', `Bearer ${token}`)
-      .expect(400, { error: "L'utilisateur doit être un joueur ou un coach" });
   });
 
   it('should succesfully request to join a team as a coach', async () => {
@@ -186,7 +146,7 @@ describe('POST /teams/:teamId/join-requests', () => {
   });
 
   it('should fail because the user has no linked discord account', async () => {
-    await updateAdminUser(user.id, { discordId: null });
+    await updateAdminUser(user, { discordId: null });
     return request(app)
       .post(`/teams/${team.id}/join-requests`)
       .send({ userType: UserType.player })

@@ -1,24 +1,22 @@
 /* eslint-disable consistent-return */
 import crypto from 'crypto';
-import dotenv from 'dotenv';
+import dotenv, { DotenvPopulateInput } from 'dotenv';
 
-dotenv.config();
+if (process.env.NODE_ENV === 'test') {
+  // Make sure to only load the 3 accepted variables in test
+  const environmentVariables: DotenvPopulateInput = {};
+  dotenv.config({ path: '.env.test', processEnv: environmentVariables });
+  process.env.DATABASE_URL = environmentVariables.DATABASE_URL ?? process.env.DATABASE_URL;
+  process.env.LOG_LEVEL = environmentVariables.LOG_LEVEL ?? process.env.DATABASE_URL;
+  process.env.LOG_IN_TEST = environmentVariables.LOG_IN_TEST ?? process.env.DATABASE_URL;
+} else {
+  // Load everything in another environment
+  dotenv.config();
+}
 
-// Load dotenv only if we are not in testing
-// The testing must be able to be loaded without any environment variable except the DATABASE
-// We had to use a function to check if we are in testing environment instead of just loading dotenv if we are not
-// The reason is because prisma also loads dotenv and injects the variables
-// We however allow some variables like database credentials in testing environment
-const loadEnv = (key: string, allowedInTesting = false) => {
-  // If we are in test env, do not inject dotenv variables
-  if (process.env.NODE_ENV === 'test' && !allowedInTesting) {
-    return;
-  }
-  // Return the loaded environment key
-  return process.env[key];
-};
+const loadEnv = (key: string) => process.env[key];
 
-const loadIntEnv = (key: string, allowedInTesting = false) => Number(loadEnv(key, allowedInTesting));
+const loadIntEnv = (key: string) => Number(loadEnv(key));
 
 // Returns the key only if we are not in production
 // Used when you want to have a default option for only testing and dev environment
@@ -31,7 +29,7 @@ export const notInProduction = <T = string>(key: T) => {
 
 // Compute these values first to get the right environment variables
 const frontEndpoint = loadEnv('ARENA_WEBSITE') || 'https://arena.utt.fr';
-const apiEndpointPort = loadIntEnv('API_PORT') || 3000;
+const apiEndpointPort = loadIntEnv('API_PORT') || undefined;
 const apiEndpointPrefix = loadEnv('API_PREFIX') || '/';
 const apiEndpoint = `${frontEndpoint.replace(/:\d+$/, `:${apiEndpointPort}`)}${apiEndpointPrefix}`;
 const isTest = process.env.NODE_ENV === 'test';
@@ -78,6 +76,9 @@ const env = {
       name: loadEnv('EMAIL_SENDER_NAME') || 'UTT Arena',
       address: loadEnv('EMAIL_SENDER_ADDRESS') || 'arena@utt.fr',
     },
+    gmail: loadEnv('GMAIL') === 'true' || false,
+    username: loadEnv('GMAIL_USERNAME') || '',
+    password: loadEnv('GMAIL_PASSWORD') || '',
     partners: ['utt.fr', 'utc.fr', 'utbm.fr'],
   },
   etupay: {
@@ -111,12 +112,24 @@ const env = {
     syncKey: loadEnv('DISCORD_SYNC_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),
     teamRoleColor: Number.parseInt(loadEnv('DISCORD_TEAM_ROLE_COLOR')) || 0x3498db,
     oauthCallback: `${apiEndpoint}${apiEndpointPrefix === '/' ? '' : '/'}discord/oauth`,
+    webhooks: {
+      channel_lol: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_LOL') || '',
+      channel_ssbu: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_SSBU') || '',
+      channel_cs2: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_CS2') || '',
+      channel_pokemon: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_POKEMON') || '',
+      channel_rl: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_RL') || '',
+      channel_osu: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_OSU') || '',
+      channel_tft: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_TFT') || '',
+      channel_open: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_OPEN') || '',
+      channel_other: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_OTHER') || '',
+      contact: loadEnv('DISCORD_WEBHOOK_CONTACT') || '',
+    },
   },
   log: {
-    level: loadEnv('LOG_LEVEL', true) || 'silly',
+    level: loadEnv('LOG_LEVEL') || 'silly',
     // Colorize by default unless explicied false
     colorize: loadEnv('LOG_COLORIZE') !== 'false',
-    enabledInTest: loadEnv('LOG_IN_TEST', true) === 'true',
+    enabledInTest: loadEnv('LOG_IN_TEST') === 'true',
     sentryDsn: loadEnv('LOG_SENTRY_DSN'),
   },
 };

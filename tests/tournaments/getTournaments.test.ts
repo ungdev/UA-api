@@ -12,6 +12,7 @@ describe('GET /tournaments', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
     await database.tournament.delete({where: {id: "1p"}});
     await database.caster.deleteMany();
@@ -73,12 +74,12 @@ describe('GET /tournaments', () => {
       'teams',
       'placesLeft',
       'playersPerTeam',
+      'coachesPerTeam',
       'cashprize',
       'casters',
       'infos',
       'format',
       'cashprizeDetails',
-      'position',
     ]);
     expect(response.body[0].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.a('number');
@@ -112,12 +113,12 @@ describe('GET /tournaments', () => {
       'teams',
       'placesLeft',
       'playersPerTeam',
+      'coachesPerTeam',
       'cashprize',
       'casters',
       'infos',
       'format',
       'cashprizeDetails',
-      'position',
     ]);
     expect(response.body[1].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.null;

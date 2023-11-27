@@ -4,10 +4,7 @@ import { isPartnerSchool } from '../utils/helpers';
 
 export const fetchAllItems = async (): Promise<Item[]> => {
   // fetches the items
-  let items = await database.item.findMany();
-  const order = ['tshirt-s', 'tshirt-m', 'tshirt-l', 'tshirt-xl'];
-  // sort items according to size attribute
-  items = items.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+  const items = await database.item.findMany({ orderBy: [{ position: 'asc' }] });
 
   // Add a left property which tells how many items are there left
   return Promise.all(
@@ -75,13 +72,10 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
   const currentTicket =
     items.find((item) => item.id === `ticket-player-${team?.tournamentId}`) ??
     items.find((item) => item.id === 'ticket-player');
-  items = [
-    ...items.filter((item) => !item.id.startsWith('ticket-player')),
-    {
-      ...currentTicket,
-      id: 'ticket-player',
-    },
-  ];
+  // Remove every ticket-player* item except the currentTicket
+  items = items.filter((item) => !item.id.startsWith('ticket-player') || item.id === currentTicket.id);
+  // Update the currentTicket id
+  currentTicket.id = 'ticket-player';
 
   return items;
 };
@@ -154,3 +148,17 @@ export const updateAdminItem = async (
   const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
   return { ...item, left: item.stock - count };
 };
+
+export const updateItemsPosition = (items: { id: string; position: number }[]) =>
+  Promise.all(
+    items.map((item) =>
+      database.item.update({
+        where: {
+          id: item.id,
+        },
+        data: {
+          position: item.position,
+        },
+      }),
+    ),
+  );

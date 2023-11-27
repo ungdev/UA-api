@@ -8,11 +8,12 @@ import env from '../src/utils/env';
  * routes of the upload api, check the {@link listen} function below)
  */
 
-const existingFiles = ['tournaments/lol-logo.png', 'tournaments/lol-background.jpg'];
+export const INITIAL_EXISTING_FILES = ['tournaments/lol-logo.webp', 'tournaments/lol-background.webp'];
 
-const allowedPaths = ['tournaments', 'partners'];
-const allowedFileTypes = ['image/png', 'image/jpeg', 'application/pdf'];
-const allowedExtensions = ['png', 'jpg', 'pdf'];
+export const existingFiles = [...INITIAL_EXISTING_FILES];
+const allowedPaths = ['tournaments', 'partners', 'orga'];
+const allowedFileTypes = ['image/png', 'image/jpeg', 'application/pdf', 'image/webp'];
+const allowedExtensions = ['png', 'jpg', 'pdf', 'webp'];
 
 const maxFileSize = 5000;
 
@@ -26,7 +27,10 @@ const listen = () => {
     .persist()
 
     // Upload file
-    .post('/api')
+    .post(`/api`)
+    .query({
+      authorization: env.upload.token,
+    })
     .reply((_, body) => {
       // Awful code to parse the formData
       const encodedHexData = body;
@@ -108,12 +112,13 @@ const listen = () => {
     })
 
     // Delete file
-    .delete('/api')
+    .delete(`/api`)
     .query({
       path: /.*/,
+      authorization: env.upload.token,
     })
     .reply((uri) => {
-      const path = uri.split('?')[1].split('=')[1];
+      const path = uri.split('?')[1].split('=')[2];
       if (!path) return [200, { status: 1, message: 'Paramètres manquants' }];
 
       const index = existingFiles.indexOf(decodeURIComponent(path));

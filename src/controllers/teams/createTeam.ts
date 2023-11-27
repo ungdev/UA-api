@@ -9,7 +9,7 @@ import { fetchTournament } from '../../operations/tournament';
 import { hasUserAlreadyPaidForAnotherTicket } from '../../operations/user';
 import { Error as ResponseError, UserType } from '../../types';
 import { filterTeam } from '../../utils/filters';
-import { badRequest, conflict, created, forbidden, gone, notFound } from '../../utils/responses';
+import { badRequest, conflict, created, forbidden, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
 
@@ -40,11 +40,6 @@ export default [
 
       if (!tournament) {
         return notFound(response, ResponseError.TournamentNotFound);
-      }
-
-      // If there are more or equal teams than places, return a tournament full
-      if (tournament.placesLeft === 0) {
-        return gone(response, ResponseError.TournamentFull);
       }
 
       // Check whether the user has already paid for another ticket

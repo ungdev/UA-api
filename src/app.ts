@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import * as Sentry from '@sentry/node';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 
 import { notFound } from './utils/responses';
 import { Error } from './types';
@@ -12,14 +13,22 @@ import { initUserRequest } from './middlewares/user';
 import env from './utils/env';
 import errorHandler from './middlewares/errorHandler';
 import { enforceQueryString } from './middlewares/validation';
+import rateLimiter from './middlewares/ratelimiter';
 
 const app = express();
+
+// Handle rate limiter first, do not enable it in tests !
+if (!env.test) app.use(rateLimiter);
 
 // Initiate Sentry
 Sentry.init({ dsn: env.log.sentryDsn, environment: env.environment });
 app.use(Sentry.Handlers.requestHandler({}));
 
+// Enable morgan logger
 app.use(morgan());
+
+// Enable compression
+app.use(compression());
 
 // Security middlewares
 app.use(cors(), helmet());

@@ -1,6 +1,11 @@
-/* eslint-disable unicorn/no-process-exit */
-import { PrismaClient } from '@prisma/client';
+// Prisma auto loads the .env file, but it has already been loaded by the env module.
+// So we save the variables, import and initialize prisma, and the set the variables back.
 import env from '../utils/env';
+/* eslint-disable import/first */
+const envBackup = { ...process.env };
+
+// eslint-disable-next-line import/order
+import { PrismaClient } from '@prisma/client';
 import logger from '../utils/logger';
 
 const database = new PrismaClient({
@@ -21,6 +26,9 @@ const database = new PrismaClient({
     },
   ],
 });
+
+// Put back the .env
+process.env = envBackup;
 
 // If we are not in production, enables database logging
 // The logging level is reduced as prisma produces lots of logs

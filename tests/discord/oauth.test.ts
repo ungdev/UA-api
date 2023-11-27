@@ -1,5 +1,6 @@
 import request from 'supertest';
 import * as sentryOperations from '@sentry/node';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { createFakeUser, generateFakeDiscordId } from '../utils';
 import database from '../../src/services/database';
@@ -15,7 +16,7 @@ describe('GET /discord/oauth', () => {
   let discordId: string;
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
   });
 
   after(() => {
@@ -31,13 +32,10 @@ describe('GET /discord/oauth', () => {
         error_description: 'Description of this error here',
       })
       .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=4`));
+      .expect('Location', `${env.front.website}/oauth/discord/4`));
 
   it('should fail because no query params were provided', () =>
-    request(app)
-      .get('/discord/oauth')
-      .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=5`));
+    request(app).get('/discord/oauth').expect(302).expect('Location', `${env.front.website}/oauth/discord/5`));
 
   it('should fail because query params were incomplete', () =>
     request(app)
@@ -46,7 +44,7 @@ describe('GET /discord/oauth', () => {
         code: registerOauthCode(),
       })
       .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=5`));
+      .expect('Location', `${env.front.website}/oauth/discord/5`));
 
   it('should fail because the state used matches no user id', () =>
     request(app)
@@ -56,7 +54,7 @@ describe('GET /discord/oauth', () => {
         state: encrypt(user.id).toString('base64').slice(1),
       })
       .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=5`));
+      .expect('Location', `${env.front.website}/oauth/discord/5`));
 
   it('should fail with an unknown error', async () => {
     const stub = sandbox.stub(sentryOperations, 'setExtra').throws('Stub!');
@@ -67,7 +65,7 @@ describe('GET /discord/oauth', () => {
         state: encrypt(user.id).toString('base64'),
       })
       .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=6`);
+      .expect('Location', `${env.front.website}/oauth/discord/6`);
     return stub.restore();
   });
 
@@ -79,7 +77,7 @@ describe('GET /discord/oauth', () => {
         state: encrypt(user.id.slice(1)).toString('base64'),
       })
       .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=5`));
+      .expect('Location', `${env.front.website}/oauth/discord/5`));
 
   it('should fail when oauth is cancelled', () =>
     request(app)
@@ -89,10 +87,10 @@ describe('GET /discord/oauth', () => {
         state: encrypt(user.id).toString('base64'),
       })
       .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=4`));
+      .expect('Location', `${env.front.website}/oauth/discord/4`));
 
   it('should indicate the discord account was not linked already', async () => {
-    await updateAdminUser(user.id, { discordId: null });
+    await updateAdminUser(user, { discordId: null });
     discordId = generateFakeDiscordId();
     return request(app)
       .get('/discord/oauth')
@@ -101,7 +99,7 @@ describe('GET /discord/oauth', () => {
         state: encrypt(user.id).toString('base64'),
       })
       .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=0`);
+      .expect('Location', `${env.front.website}/oauth/discord/0`);
   });
 
   it('should indicate the linked account is still the same', () =>
@@ -112,7 +110,7 @@ describe('GET /discord/oauth', () => {
         state: encrypt(user.id).toString('base64'),
       })
       .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=2`));
+      .expect('Location', `${env.front.website}/oauth/discord/2`));
 
   it('should indicate the linked account has been updated', () => {
     discordId = generateFakeDiscordId();
@@ -123,11 +121,11 @@ describe('GET /discord/oauth', () => {
         state: encrypt(user.id).toString('base64'),
       })
       .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=1`);
+      .expect('Location', `${env.front.website}/oauth/discord/1`);
   });
 
   it('should fail if discord account is already bound to another account', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     return request(app)
       .get('/discord/oauth')
       .query({
@@ -135,6 +133,6 @@ describe('GET /discord/oauth', () => {
         state: encrypt(otherUser.id).toString('base64'),
       })
       .expect(302)
-      .expect('Location', `${env.front.website}/dashboard/account?action=oauth&state=3`);
+      .expect('Location', `${env.front.website}/oauth/discord/3`);
   });
 });

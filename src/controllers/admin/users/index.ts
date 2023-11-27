@@ -5,11 +5,13 @@ import getUsers from './getUsers';
 import updateUser from './updateUser';
 import replace from './replace';
 import createUser from './createUser';
+import updateTrombi from './updateTrombi';
 
 const router = Router();
 
 router.get('//', getUsers);
 router.post('/', createUser);
+router.patch('/trombi', updateTrombi);
 router.patch('/:userId', updateUser);
 router.get('/:userId/carts', getCarts);
 router.post('/:userId/force-pay', forcePay);

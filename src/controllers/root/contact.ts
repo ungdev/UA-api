@@ -4,6 +4,7 @@ import Joi from 'joi';
 import { validateBody } from '../../middlewares/validation';
 import { noContent } from '../../utils/responses';
 import { sendSlackContact } from '../../services/slack';
+import { sendDiscordContact } from '../../utils/discord';
 import * as validators from '../../utils/validators';
 
 export default [
@@ -21,6 +22,7 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       await sendSlackContact(request.body);
+      await sendDiscordContact(request.body);
 
       return noContent(response);
     } catch (error) {

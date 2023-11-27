@@ -10,11 +10,9 @@ import {
   PrimitiveTeamWithPartialTournament,
 } from '../types';
 import nanoid from '../utils/nanoid';
-import { countCoaches, formatUser, userInclusions } from './user';
-import { setupDiscordTeam } from '../utils/discord';
+import { formatUser, userInclusions } from './user';
+import { deleteDiscordTeam, sendDiscordTeamLockout, sendDiscordTeamUnlock, setupDiscordTeam } from '../utils/discord';
 import { fetchTournament } from './tournament';
-
-const teamMaxCoachCount = 2;
 
 const teamInclusions = {
   users: {
@@ -99,22 +97,28 @@ export const lockTeam = async (teamId: string) => {
     },
   });
 
+  const team = await fetchTeam(teamId);
+  // Don't relock the team, to avoid spamming messages (and also channel creation lol) (no that didn't happen :eyes:)
+  if (team.lockedAt || team.enteredQueueAt) return team;
+
   await database.$transaction(
-    askingUsers.map((user) =>
-      database.user.update({
-        data: {
-          askingTeam: {
-            disconnect: true,
+    askingUsers.map(
+      (user) =>
+        user.type === UserType.player &&
+        database.user.update({
+          data: {
+            askingTeam: {
+              disconnect: true,
+            },
           },
-        },
-        where: {
-          id: user.id,
-        },
-      }),
+          where: {
+            id: user.id,
+            type: UserType.player,
+          },
+        }),
     ),
   );
 
-  const team = await fetchTeam(teamId);
   const tournament = await fetchTournament(team.tournamentId);
   let updatedTeam: PrimitiveTeamWithPrimitiveUsers;
 
@@ -131,6 +135,9 @@ export const lockTeam = async (teamId: string) => {
     });
     // Setup team on Discord
     await setupDiscordTeam(team, tournament);
+
+    // Inform inform the Discord channel that the team has been locked out
+    await sendDiscordTeamLockout(team, await fetchTournament(tournament.id));
   } else {
     // Put the team in the waiting list
     updatedTeam = await database.team.update({
@@ -215,13 +222,6 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
 };
 
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
-  // We check the amount of coaches at that point
-  const teamCoachCount = await countCoaches(teamId);
-  if (userType === UserType.coach && teamCoachCount >= teamMaxCoachCount)
-    throw Object.assign(new Error('Query cannot be executed: max count of coach reached already'), {
-      code: 'API_COACH_MAX_TEAM',
-    });
-
   // Then we create the join request when it is alright
   const updatedUser = await database.user.update({
     data: {
@@ -270,16 +270,25 @@ export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise
   });
 
 export const unlockTeam = async (teamId: string) => {
-  const updatedTeam = await database.team.update({
+  // We use the updateMany, because we may update no team
+  const updateCount = await database.team.updateMany({
     data: {
       lockedAt: null,
       enteredQueueAt: null,
     },
     where: {
       id: teamId,
+      // If the team is not locked nor in the queue, then we don't want to modify it, that allows us to have updatedTeam === undefined;
+      NOT: {
+        lockedAt: null,
+        enteredQueueAt: null,
+      },
     },
-    include: teamInclusions,
   });
+
+  if (updateCount.count === 0) return null;
+
+  const updatedTeam = await fetchTeam(teamId);
 
   const tournament = await fetchTournament(updatedTeam.tournamentId);
   // We freed a place, so there is at least one place left
@@ -313,6 +322,9 @@ export const unlockTeam = async (teamId: string) => {
     }
   }
 
+  // TODO : understand why we can't put awaits here
+  deleteDiscordTeam(updatedTeam);
+  sendDiscordTeamUnlock(updatedTeam, tournament);
   return formatPrimitiveTeam(updatedTeam);
 };
 

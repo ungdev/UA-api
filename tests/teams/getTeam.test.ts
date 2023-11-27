@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as responses from '../../src/utils/responses';
@@ -26,6 +27,7 @@ describe('GET /teams/current', () => {
       id: 'smalltournament',
       name: 'Small tournament',
       playersPerTeam: 2,
+      coachesPerTeam: 2,
       maxTeams: 1,
     });
     team = await createFakeTeam({ members: 2, tournament: tournament.id, locked: true, paid: true });
@@ -47,6 +49,7 @@ describe('GET /teams/current', () => {
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
     await database.tournament.delete({ where: { id: tournament.id } });
   });
@@ -56,7 +59,7 @@ describe('GET /teams/current', () => {
   });
 
   it('should error as the logged user is not is a team', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     const otherUserToken = generateToken(otherUser);
 
     await request(app)

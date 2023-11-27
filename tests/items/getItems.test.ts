@@ -45,6 +45,7 @@ describe('GET /items', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -90,7 +91,12 @@ describe('GET /items', () => {
   });
 
   describe('should return 200 with an array of items with the "discount-switch-ssbu" item because user has a cart containing it, but it was not paid nor it is pending', () => {
-    for (const transactionState of [TransactionState.canceled, TransactionState.refunded, TransactionState.refused]) {
+    for (const transactionState of [
+      TransactionState.canceled,
+      TransactionState.refunded,
+      TransactionState.refused,
+      TransactionState.stale,
+    ]) {
       it(`should return 200 with array of items with the "discount-switch-ssbu" item because user has a cart containing it, but it was ${transactionState}`, async () => {
         // update cart's transactionState
         await cartOperations.updateCart(thirdCaptainCart.id, 123, transactionState);
@@ -115,10 +121,16 @@ describe('GET /items', () => {
   });
 
   it('should return items with their stock', async () => {
-    const items = await database.item.findMany();
+    // Fetch all items, order them by their position, and remove special ticket players and ssbu discount
+    const items = await database.item.findMany({
+      where: { NOT: { OR: [{ id: { startsWith: 'ticket-player-' } }, { id: 'discount-switch-ssbu' }] } },
+      orderBy: [{ position: 'asc' }],
+    });
     const response = await request(app).get('/items').expect(200);
 
-    for (const responseItem of response.body)
-      expect(responseItem.left ?? null).to.be.equal(items.find((item) => item.name === responseItem.name).stock);
+    for (let index = 0; index < response.body.length; index++) {
+      expect(response.body[index].id).to.be.equal(items[index].id);
+      expect(response.body[index].left ?? null).to.be.equal(items[index].stock);
+    }
   });
 });

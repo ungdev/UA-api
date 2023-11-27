@@ -63,12 +63,14 @@ Edit the file .env with your values
 ## Commands
 
 ```
-pnpm dev       # start development server
-pnpm build     # builds the typescript to javascript
-pnpm start     # start production server
-pnpm lint      # checks if the code is correct
-pnpm lint-fix  # try to fix lint errors and warnings
-pnpm fake      # populate the database with fake data
+pnpm dev              # start development server
+pnpm build            # builds the typescript to javascript
+pnpm start            # start production server
+pnpm lint             # checks if the code is correct
+pnpm lint-fix         # try to fix lint errors and warnings
+pnpm fake             # populate the database with fake data
+pnpm schema:push      # push the schema.prisma to the database
+pnpm test:schema:push # push the schema.prisma to the test database (done automatically in tests)
 ```
 
 ## Prisma config
@@ -78,6 +80,39 @@ Use `npx prisma generate` to generate your prisma client
 ## How to test
 
 The tests must be able to run without any environment variables except the database
+
+### Change the database for tests
+
+Create a new `.env.test` file that will override values from `.env` :
+
+```
+cp .env.test.example .env.test
+```
+
+Change the database name to `arena_test`. Change the credentials too, like in the `.env` file.
+
+Open MySQL/MariaDB, and run the following command to create the database :
+
+```
+CREATE DATABASE arena_test CHARACTER SET utf8;
+```
+
+What follows is mostly there for information purposes. It is done automatically during the tests. From what we know, there is no reason to use these commands.
+Come back to your terminal :
+
+```
+# Push the schema to the database :
+pnpm test:schema:push
+
+# Seed the database :
+mysql -u DATABASE_USER -p arena_test --protocol tcp < seed.sql
+```
+
+### Run the tests
+
+```
+pnpm test
+```
 
 # Documentation
 

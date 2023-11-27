@@ -12,6 +12,7 @@ export const fetchPartners = (): PrismaPromise<Partner[]> =>
 export const addPartner = (partner: {
   name: string;
   link: string;
+  description: string;
   display?: boolean;
   position: number;
 }): PrismaPromise<Partner> =>
@@ -20,6 +21,7 @@ export const addPartner = (partner: {
       id: nanoid(),
       name: partner.name,
       link: partner.link,
+      description: partner.description,
       display: partner.display,
       position: partner.position,
     },

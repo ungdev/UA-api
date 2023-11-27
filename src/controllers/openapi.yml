@@ -47,6 +47,8 @@ tags:
     description: Routes liées aux tournois
   - name: Users
     description: Routes liées aux utilisateurs
+  - name: Commissions
+    description: Routes liées aux commissions
 
 components:
   securitySchemes:
@@ -88,13 +90,14 @@ components:
         playersPerTeam:
           type: integer
           example: 5
+        coachesPerTeam:
+          type: integer
+          example: 2
         lockedTeamsCount:
           type: integer
         placesLeft:
           type: integer
           example: 5
-        position:
-          type: integer
 
     UserRestricted:
       type: object
@@ -110,6 +113,17 @@ components:
           nullable: true
         hasPaid:
           type: boolean
+
+    OrgaData:
+      type: object
+      description: Données spécifiques aux organisateurs
+      properties:
+        mainCommission:
+          type: string
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Commission'
 
     MailButton:
       type: object
@@ -610,6 +624,22 @@ components:
           type: integer
           description: Le stock total de l'item.
           nullable: true
+        availableFrom:
+          type: string
+          format: date-time
+          nullable: true
+        availableUntil:
+          type: string
+          format: date-time
+          nullable: true
+        position:
+          type: integer
+          description: La position de l'item dans la liste des items
+          nullable: true
+        display:
+          type: boolean
+          description: Si l'item est affiché ou non
+          nullable: true
 
     Log:
       type: object
@@ -722,6 +752,9 @@ components:
         playersPerTeam:
           type: integer
           example: 5
+        coachesPerTeam:
+          type: integer
+          example: 2
         cashprize:
           type: integer
           nullable: true
@@ -761,8 +794,6 @@ components:
         discordVocalCategoryId:
           type: string
           nullable: true
-        position:
-          type: integer
         teams:
           type: array
           items:
@@ -775,12 +806,26 @@ components:
           type: string
         name:
           type: string
+        description:
+          type: string
         link:
           type: string
         display:
           type: boolean
         position:
           type: integer
+
+    Commission:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+        masterCommission:
+          type: string
 
   responses:
     400Errored:
@@ -834,6 +879,15 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: Le panier est introuvable
+
+    404CommissionNotFound:
+      description: La commission est introuvable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: La commission n'existe pas
 
     409UsernameAlreadyExists:
       description: Le nom d'utilisateur existe déjà

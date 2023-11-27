@@ -13,13 +13,14 @@ describe('POST /users/current/spectate', () => {
   let token: string;
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
   });
 
   after(async () => {
     // Delete the user created
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -34,7 +35,7 @@ describe('POST /users/current/spectate', () => {
       .expect(403, { error: Error.CannotSpectate }));
 
   it('should fail with a server error', async () => {
-    user = await userOperations.updateAdminUser(user.id, { type: null });
+    user = await userOperations.updateAdminUser(user, { type: null });
     sandbox.stub(userOperations, 'updateAdminUser').throws('Unexpected error');
 
     return request(app)
@@ -51,7 +52,7 @@ describe('POST /users/current/spectate', () => {
     });
     const otherToken = generateToken(otherUser);
 
-    await userOperations.updateAdminUser(otherUser.id, {
+    await userOperations.updateAdminUser(otherUser, {
       type: null,
     });
 

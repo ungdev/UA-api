@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
@@ -11,11 +12,7 @@ import { createFakeTeam, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
-// eslint-disable-next-line func-names
-describe('DELETE /teams/currenta', function () {
-  // Setup is slow
-  this.timeout(30000);
-
+describe('DELETE /teams/current', () => {
   let captain: User;
   let team: Team;
   let lockedTeam: Team;
@@ -52,6 +49,7 @@ describe('DELETE /teams/currenta', function () {
   after(async () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -60,7 +58,7 @@ describe('DELETE /teams/currenta', function () {
   });
 
   it('should error as the request made by a random', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     const otherUserToken = generateToken(otherUser);
 
     await request(app)

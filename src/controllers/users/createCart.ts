@@ -12,6 +12,7 @@ import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
 import { isShopAllowed } from '../../middlewares/settings';
 import { isAuthenticated } from '../../middlewares/authentication';
+import { fetchTournament } from '../../operations/tournament';
 
 export interface PayBody {
   tickets: {
@@ -68,6 +69,8 @@ export default [
 
       const cartItems: PrimitiveCartItem[] = [];
 
+      const tournament = team && (await fetchTournament(team.tournamentId));
+
       // Manage the ticket part
       // We use sequential order to be able to send a response in case of bad userId
       for (const userId of body.tickets.userIds) {
@@ -76,24 +79,6 @@ export default [
         if (!ticketUser) {
           return notFound(response, ResponseError.UserNotFound);
         }
-
-        // Checks if the buyer and the user are in the same team
-        if (ticketUser.teamId !== user.teamId) {
-          return forbidden(response, ResponseError.NotInSameTeam);
-        }
-
-        // Checks if the user has already paid
-        if (ticketUser.hasPaid) {
-          return forbidden(response, ResponseError.AlreadyPaid);
-        }
-
-        // Checks whether the user can have an attendant because he is an adult
-        if (user.age !== UserAge.child && body.tickets.attendant)
-          return forbidden(response, ResponseError.AttendantNotAllowed);
-
-        // Checks whether a child has already registered an attendant
-        if (user.attendantId && body.tickets.attendant)
-          return forbidden(response, ResponseError.AttendantAlreadyRegistered);
 
         // Defines the ticket id to be either a player or a coach
         let itemId: string;
@@ -108,6 +93,35 @@ export default [
           default: {
             return forbidden(response, ResponseError.NotPlayerOrCoachOrSpectator);
           }
+        }
+
+        // Checks if the user has already paid
+        if (ticketUser.hasPaid) {
+          return forbidden(response, ResponseError.AlreadyPaid);
+        }
+
+        // Checks if the buyer and the user are in the same team
+        if (ticketUser.teamId !== user.teamId) {
+          return forbidden(response, ResponseError.NotInSameTeam);
+        }
+
+        // Checks if the tournament is full (if the user is a coach or an attendant, they can still have their place bought)
+        if (
+          (ticketUser.type === UserType.player || ticketUser.type === UserType.coach) &&
+          tournament.placesLeft <= 0 &&
+          !team.lockedAt
+        ) {
+          return forbidden(response, ResponseError.TournamentFull);
+        }
+
+        // Checks whether the user can have an attendant because he is an adult
+        if (user.age !== UserAge.child && body.tickets.attendant) {
+          return forbidden(response, ResponseError.AttendantNotAllowed);
+        }
+
+        // Checks whether a child has already registered an attendant
+        if (user.attendantId && body.tickets.attendant) {
+          return forbidden(response, ResponseError.AttendantAlreadyRegistered);
         }
 
         const item = (await fetchUserItems(team, ticketUser)).find((currentItem) => currentItem.id === itemId);
@@ -196,14 +210,18 @@ export default [
         }
       }
 
-      // Checks if the item is available
-      if (items.some((item) => item.availableFrom !== null && item.availableFrom > new Date())) {
-        return gone(response, ResponseError.ItemNotAvailableYet);
-      }
+      // Check availability of items
+      for (const cartItem of cartItems) {
+        const item = items.find((pItem) => pItem.id === cartItem.itemId);
+        // Checks if the item is available
+        if (item.availableFrom !== null && item.availableFrom > new Date()) {
+          return gone(response, ResponseError.ItemNotAvailableYet);
+        }
 
-      // Checks if the item is not available anymore
-      if (items.some((item) => item.availableUntil !== null && item.availableUntil < new Date())) {
-        return badRequest(response, ResponseError.ItemNotAvailableAnymore);
+        // Checks if the item is not available anymore
+        if (item.availableUntil !== null && item.availableUntil < new Date()) {
+          return badRequest(response, ResponseError.ItemNotAvailableAnymore);
+        }
       }
 
       // Defines the cart

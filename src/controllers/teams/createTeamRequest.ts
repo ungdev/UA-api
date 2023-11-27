@@ -27,14 +27,14 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const team = await fetchTeam(request.params.teamId);
+      const { user } = getRequestInfo(response);
 
       // Check if the team exists
       if (!team) return notFound(response, ResponseError.TeamNotFound);
 
       // Check if the team is not locked
-      if (team.lockedAt) return forbidden(response, ResponseError.TeamLocked);
-
-      const { user } = getRequestInfo(response);
+      if (team.lockedAt && request.body.userType !== UserType.coach)
+        return forbidden(response, ResponseError.TeamLocked);
 
       // Check if the user is already asking for a team
       if (user.askingTeamId) return forbidden(response, ResponseError.AlreadyAskedATeam);
@@ -47,9 +47,6 @@ export default [
 
       return success(response, filterUser(updatedUser));
     } catch (error) {
-      // This may happen when max coach amount is reached already
-      if (error.code === 'API_COACH_MAX_TEAM') return forbidden(response, ResponseError.TeamMaxCoachReached);
-
       return next(error);
     }
   },

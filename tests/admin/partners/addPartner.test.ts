@@ -15,26 +15,27 @@ describe('POST /admin/partners', () => {
 
   after(async () => {
     await database.partner.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
   before(async () => {
-    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser();
+    admin = await createFakeUser({ permissions: [Permission.admin] });
+    nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
   });
 
   it('should error as the user is not authenticated', () =>
     request(app)
       .post(`/admin/partners`)
-      .send({ name: 'test', link: 'test', display: true, position: 0 })
+      .send({ name: 'test', description: 'test', link: 'test', display: true, position: 0 })
       .expect(401, { error: Error.Unauthenticated }));
 
   it('should error as the user is not an administrator', () => {
     const userToken = generateToken(nonAdminUser);
     return request(app)
       .post(`/admin/partners`)
-      .send({ name: 'test', link: 'test', display: true, position: 0 })
+      .send({ name: 'test', description: 'test', link: 'test', display: true, position: 0 })
       .set('Authorization', `Bearer ${userToken}`)
       .expect(403, { error: Error.NoPermission });
   });
@@ -44,7 +45,7 @@ describe('POST /admin/partners', () => {
 
     await request(app)
       .post('/admin/partners')
-      .send({ name: 'test', link: 'test', display: true, position: 0 })
+      .send({ name: 'test', description: 'test', link: 'test', display: true, position: 0 })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
@@ -52,11 +53,11 @@ describe('POST /admin/partners', () => {
   it('should return 200 with an array of partners', async () => {
     const response = await request(app)
       .post('/admin/partners')
-      .send({ name: 'test', link: 'test', display: true, position: 0 })
+      .send({ name: 'test', description: 'test', link: 'test', display: true, position: 0 })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(201);
 
-    expect(response.body).to.have.all.keys(['id', 'name', 'link', 'display', 'position']);
+    expect(response.body).to.have.all.keys(['id', 'name', 'description', 'link', 'display', 'position']);
     expect(response.body.name).to.equal('test');
     expect(response.body.link).to.equal('test');
     expect(response.body.display).to.equal(true);

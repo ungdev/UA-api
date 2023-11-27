@@ -12,11 +12,7 @@ import * as teamOperations from '../../../src/operations/team';
 import * as userOperations from '../../../src/operations/user';
 import * as tournamentOperations from '../../../src/operations/tournament';
 
-// eslint-disable-next-line func-names
-describe('POST /admin/users/:userId/force-pay', function () {
-  // The setup is slow
-  this.timeout(30000);
-
+describe('POST /admin/users/:userId/force-pay', () => {
   let user: User;
   let admin: User;
   let adminToken: string;
@@ -27,11 +23,11 @@ describe('POST /admin/users/:userId/force-pay', function () {
   let player2: User;
 
   before(async () => {
-    user = await createFakeUser();
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    user = await createFakeUser({ type: UserType.player });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
     // Store the promises, to wait them all at the same time
-    const promises = [];
+    const promises = [] as Promise<Team>[];
 
     tournament = await tournamentOperations.fetchTournament('lol');
     team = await createFakeTeam({ members: tournament.playersPerTeam, tournament: 'lol' });
@@ -54,6 +50,7 @@ describe('POST /admin/users/:userId/force-pay', function () {
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -101,7 +98,7 @@ describe('POST /admin/users/:userId/force-pay', function () {
       .expect(403, { error: Error.AlreadyPaid }));
 
   it('should force pay the user and scan his ticket at the same time', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     const { body } = await request(app)
       .post(`/admin/users/${otherUser.id}/force-pay`)
       .send({

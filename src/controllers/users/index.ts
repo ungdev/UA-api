@@ -5,6 +5,7 @@ import updateUser from './updateUser';
 import getUser from './getUser';
 import { become, leave } from './spectate';
 import { fetchRemoteTicket } from './getRemoteTicket';
+import getOrgas from './getOrgas';
 
 const router = Router();
 
@@ -18,5 +19,7 @@ router.post('/current/spectate', become);
 router.delete('/current/spectate', leave);
 
 router.get('/:userId/ticket', fetchRemoteTicket);
+
+router.get('/orgas', getOrgas);
 
 export default router;

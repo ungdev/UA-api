@@ -15,13 +15,14 @@ describe('GET /admin/logs', () => {
   let user: User;
 
   before(async () => {
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = userUtils.generateToken(admin);
   });
 
   after(async () => {
     // Delete the user created
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -39,7 +40,7 @@ describe('GET /admin/logs', () => {
     request(app).get('/admin/logs').set('Authorization', `Bearer ${adminToken}`).expect(400));
 
   it('should return generated user logs', async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
     await request(app)
       .post('/auth/reset-password/ask')
       .send({

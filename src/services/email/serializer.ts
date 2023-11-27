@@ -64,7 +64,7 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
       },
       {
         title: 'Billet',
-        components: ["Tu reçevras ton *billet personnalisé* par mail quelques jours avant l'UTT Arena&nbsp;!"],
+        components: ["Tu recevras ton *billet personnalisé* par mail quelques jours avant l'UTT Arena&nbsp;!"],
       },
       {
         title: 'Confirmation de commande',
@@ -199,7 +199,6 @@ export const generatePasswordResetEmail = (user: Omit<RawUser, 'permissions'>) =
           {
             name: 'Réinitialise ton mot de passe',
             location: `${env.front.website}/${ActionFeedback.PASSWORD_RESET}/${user.resetToken}`,
-            color: '#8767AA',
           },
           `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_${env.front.website}/${ActionFeedback.PASSWORD_RESET}/${user.resetToken}_`,
         ],

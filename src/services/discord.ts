@@ -11,6 +11,7 @@ import type {
   DiscordRole,
   Snowflake,
   DiscordGuildMember,
+  DiscordEmbed,
 } from '../controllers/discord/discordApi';
 import { User } from '../types';
 import env from '../utils/env';
@@ -110,6 +111,14 @@ export const createDiscordChannel = async (requestBody: DiscordCreateChannelRequ
   return response.data;
 };
 
+export const deleteDiscordChannel = async (channelId: string) => {
+  const response = await bot.delete<DiscordChannel>(`channels/${channelId}`);
+
+  return response.data;
+};
+
+export const deleteDiscordRole = (roleId: string) => bot.delete(`guilds/${env.discord.server}/roles/${roleId}`);
+
 /**
  * Create a discord role
  */
@@ -191,4 +200,16 @@ export const fetchGuildMembers = async () => {
     chunkSize = playerListChunk.data.length;
   } while (chunkSize === 1000);
   return members;
+};
+
+export const callWebhook = async (webhook: string, embeds: DiscordEmbed[]) => {
+  const data = JSON.stringify({ embeds });
+  try {
+    // Send request
+    await axios.post(webhook, data, { headers: { 'Content-Type': 'application/json' } });
+  } catch {
+    logger.warn(
+      `An error occurred while sending a message on a webhook discord (${webhook}). What was tried to be sent : ${data}`,
+    );
+  }
 };

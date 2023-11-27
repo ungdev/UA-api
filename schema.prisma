@@ -48,18 +48,19 @@ model CartItem {
 }
 
 model Item {
-  id            String       @id
-  name          String
-  category      ItemCategory
-  attribute     String?
-  price         Int
-  reducedPrice  Int?
-  infos         String?      @db.VarChar(300)
-  image         String?
-  stock         Int?
-  availableFrom DateTime?
-  availableUntil   DateTime?
-  cartItems     CartItem[]
+  id             String       @id
+  name           String
+  category       ItemCategory
+  attribute      String?
+  price          Int
+  reducedPrice   Int?
+  infos          String?      @db.VarChar(300)
+  image          String?
+  stock          Int?
+  availableFrom  DateTime?
+  availableUntil DateTime?
+  position       Int          @default(0)
+  cartItems      CartItem[]
 
   @@map("items")
 }
@@ -72,20 +73,22 @@ model Setting {
 }
 
 model Team {
-  id              String     @id
-  name            String
-  tournamentId    String
-  captainId       String     @unique
-  lockedAt        DateTime?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @default(now()) @updatedAt
-  discordRoleId   String?
-  pokemonPlayerId String?
-  captain         User       @relation(fields: [captainId], references: [id])
-  tournament      Tournament @relation(fields: [tournamentId], references: [id])
-  askingUsers     User[]     @relation("teamAskingUsers")
-  users           User[]     @relation("teamUsers")
-  enteredQueueAt  DateTime?
+  id                    String     @id
+  name                  String
+  tournamentId          String
+  captainId             String     @unique
+  lockedAt              DateTime?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @default(now()) @updatedAt
+  discordRoleId         String?
+  discordTextChannelId  String?
+  discordVoiceChannelId String?
+  pokemonPlayerId       String?
+  captain               User       @relation(fields: [captainId], references: [id])
+  tournament            Tournament @relation(fields: [tournamentId], references: [id])
+  askingUsers           User[]     @relation("teamAskingUsers")
+  users                 User[]     @relation("teamUsers")
+  enteredQueueAt        DateTime?
 
   @@unique([name, tournamentId])
   @@index([id])
@@ -97,7 +100,8 @@ model Tournament {
   id                     String   @id
   name                   String   @unique
   maxPlayers             Int
-  playersPerTeam         Int
+  playersPerTeam         Int      @default(1)
+  coachesPerTeam         Int      @default(0)
   cashprize              Int?
   cashprizeDetails       String?
   displayCashprize       Boolean  @default(false)
@@ -127,11 +131,12 @@ model Caster {
 }
 
 model Partner {
-  id       String  @id
-  name     String
-  link     String
-  display  Boolean
-  position Int     @default(0)
+  id          String  @id
+  name        String  @unique
+  link        String
+  description String  @db.Text
+  display     Boolean
+  position    Int     @default(0)
 
   @@map("partners")
 }
@@ -180,11 +185,28 @@ model User {
   repoItems     RepoItem[] @relation("repoItemUser")
   repoLogs      RepoLog[]  @relation("repoLogUser")
   attended      User?      @relation("attendantUser")
+  orga          Orga?      @relation("userOrga")
 
   @@index([id])
   @@index([askingTeamId], map: "users_askingTeamId_fkey")
   @@index([teamId], map: "users_teamId_fkey")
   @@map("users")
+}
+
+model Orga {
+  userId String @id
+  photoFilename String?
+  displayName Boolean @default(false)
+  displayUsername Boolean @default(true)
+  displayPhoto Boolean @default(false)
+  mainCommissionId String?
+  roles     OrgaRole[] @relation("orgaRoleOrga")
+  user User @relation("userOrga", fields: [userId], references: [id])
+  mainCommission Commission? @relation("orgaCommission", fields: [mainCommissionId], references: [id])
+
+  @@index([mainCommissionId])
+  // TODO : uncomment that for next year, for 2023 it's too late
+  // @@map("orgas")
 }
 
 model RepoItem {
@@ -215,6 +237,35 @@ model RepoLog {
   @@map("repoLog")
 }
 
+model OrgaRole {
+  userId         String
+  commissionId   String
+  commissionRole RoleInCommission
+  user           Orga             @relation("orgaRoleOrga", fields: [userId], references: [userId])
+  commission     Commission       @relation("orgaRoleCommission", fields: [commissionId], references: [id])
+
+  @@id([userId, commissionId])
+  @@index([userId])
+  @@index([commissionId])
+  @@map("orgaRole")
+}
+
+model Commission {
+  id                 String       @id
+  name               String
+  nameOnBadge        String      @default("")
+  position           Int
+  color              String
+  masterCommissionId String?
+  masterCommission   Commission?  @relation("masterCommission", fields: [masterCommissionId], references: [id])
+  subCommissions     Commission[] @relation("masterCommission")
+  orgas              OrgaRole[]   @relation("orgaRoleCommission")
+  orgaWhereMain      Orga[]       @relation("orgaCommission")
+
+  @@index([masterCommissionId])
+  @@map("commission")
+}
+
 enum TransactionState {
   pending
   paid
@@ -222,6 +273,7 @@ enum TransactionState {
   refused
   refunded
   authorization
+  stale
 }
 
 enum ItemCategory {
@@ -232,7 +284,6 @@ enum ItemCategory {
 
 enum UserType {
   player
-  orga
   coach
   spectator
   attendant
@@ -241,6 +292,11 @@ enum UserType {
 enum UserAge {
   adult
   child
+}
+
+enum RoleInCommission {
+  respo
+  member
 }
 
 enum RepoItemType {

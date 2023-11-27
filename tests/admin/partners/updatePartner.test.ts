@@ -1,48 +1,32 @@
 import request from 'supertest';
-import { nanoid } from 'nanoid';
-import { faker } from '@faker-js/faker';
 import { Partner } from '@prisma/client';
 import app from '../../../src/app';
 import { sandbox } from '../../setup';
 import * as partnerOperations from '../../../src/operations/partner';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
-import { createFakeUser } from '../../utils';
+import { createFakePartner, createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
-import { fetchPartners } from '../../../src/operations/partner';
 
 describe('PATCH /admin/partners/{partnerId}', () => {
   let nonAdminUser: User;
   let admin: User;
   let adminToken: string;
-  let partners: Partner[];
+  const partners: Partner[] = [];
 
   after(async () => {
+    await database.orga.deleteMany();
     await database.user.deleteMany();
     await database.partner.deleteMany();
   });
 
   before(async () => {
-    const partnersList = [] as Partner[];
-
     for (let index = 0; index < 10; index++) {
-      partnersList.push({
-        id: nanoid(),
-        name: faker.company.name(),
-        link: faker.internet.url(),
-        display: true,
-        position: index,
-      });
+      partners.push(await createFakePartner({}));
     }
 
-    await database.partner.createMany({
-      data: partnersList,
-    });
-
-    partners = await fetchPartners();
-
-    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser();
+    admin = await createFakeUser({ permissions: [Permission.admin] });
+    nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
   });
 
@@ -84,6 +68,13 @@ describe('PATCH /admin/partners/{partnerId}', () => {
       .patch(`/admin/partners/${partners[0].id}`)
       .send({ name: 'test', link: 'test', display: false })
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200, { id: partners[0].id, name: 'test', link: 'test', display: false, position: 0 });
+      .expect(200, {
+        id: partners[0].id,
+        name: 'test',
+        description: partners[0].description,
+        link: 'test',
+        display: false,
+        position: 0,
+      });
   });
 });

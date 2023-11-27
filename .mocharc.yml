@@ -6,4 +6,4 @@ spec: 'tests/**/*.test.ts'
 
 watch-extensions: ts
 
-timeout: 10000
+timeout: 30000

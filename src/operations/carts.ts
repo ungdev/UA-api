@@ -33,12 +33,15 @@ export const dropStale = () =>
         },
       },
     }),
-    database.cart.deleteMany({
+    database.cart.updateMany({
+      data: {
+        transactionState: TransactionState.stale,
+      },
       where: {
         createdAt: {
           lt: new Date(Date.now() - env.api.cartLifespan),
         },
-        transactionState: 'pending',
+        transactionState: TransactionState.pending,
       },
     }),
   ]);
@@ -138,7 +141,7 @@ export const updateCart = async (
     return cart;
   }
   // Fetch player tickets from the cart
-  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.id === 'ticket-player');
+  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.id.startsWith('ticket-player'));
   for (const ticket of playerTickets) {
     // If the user is not in a team, skip
     if (!ticket.forUser.teamId) {
@@ -162,7 +165,7 @@ export const refundCart = async (cartId: string): Promise<Cart> => {
   });
 
   // Unlock the teams of the players whose tickets were refunded
-  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.id === 'ticket-player');
+  const playerTickets = cart.cartItems.filter((cartItem) => cartItem.item.id.startsWith('ticket-player'));
   for (const ticket of playerTickets) {
     if (ticket.forUser.team) {
       await unlockTeam(ticket.forUser.team.id);

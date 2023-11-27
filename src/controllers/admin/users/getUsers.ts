@@ -3,7 +3,7 @@ import Joi from 'joi';
 import { filterUserWithTeamAndTournamentInfo } from '../../../utils/filters';
 import { success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
-import { fetchUsers } from '../../../operations/user';
+import { fetchOrgaData, fetchUsers, filterOrgaData } from '../../../operations/user';
 import { Permission, UserSearchQuery } from '../../../types';
 import { validateQuery } from '../../../middlewares/validation';
 import * as validators from '../../../utils/validators';
@@ -22,7 +22,7 @@ export default [
       locked: validators.stringBoolean.optional(),
       payment: validators.stringBoolean.optional(),
       scan: validators.stringBoolean.optional(),
-      permission: validators.permission.optional(),
+      permissions: validators.permissions.optional(),
       page: Joi.number().integer().min(0).default('0'),
     }).required(),
   ),
@@ -47,7 +47,12 @@ export default [
         currentPage: page,
         totalItems: userCount,
         totalPages: nbPages,
-        users: users.map(filterUserWithTeamAndTournamentInfo),
+        users: await Promise.all(
+          users.map(async (user) => ({
+            ...filterUserWithTeamAndTournamentInfo(user),
+            orga: filterOrgaData(await fetchOrgaData(user.id)),
+          })),
+        ),
       });
     } catch (error) {
       return next(error);
