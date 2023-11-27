@@ -1,10 +1,11 @@
 // Prisma auto loads the .env file, but it has already been loaded by the env module.
 // So we save the variables, import and initialize prisma, and the set the variables back.
+import env from '../utils/env';
 /* eslint-disable import/first */
 const envBackup = { ...process.env };
-import { PrismaClient } from '@prisma/client';
 
-import env from '../utils/env';
+// eslint-disable-next-line import/order
+import { PrismaClient } from '@prisma/client';
 import logger from '../utils/logger';
 
 const database = new PrismaClient({

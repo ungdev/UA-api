@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
-import { ItemCategory } from '@prisma/client';
+import { ItemCategory, RoleInCommission } from '@prisma/client';
+import sharp from 'sharp';
 import { fetchUser } from '../src/operations/user';
 import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
@@ -34,11 +35,18 @@ type FakeUserData = {
   customMessage?: string;
   /** @default UserAge.adult */
   age?: UserAge;
+  orgaRoles?: Array<{ commission: string; role: RoleInCommission }>;
+  orgaDisplayPhoto?: boolean;
+  orgaDisplayName?: boolean;
+  orgaDisplayUsername?: boolean;
+  orgaPhotoFilename?: string;
+  orgaMainCommissionId?: string;
 };
 
 const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
   const userId = nanoid();
-  const userType = data.type || UserType.player;
+  const userType = data.type;
+  const permissions = serializePermissions(data.permissions);
   data.discordId = discord.registerMember(data.discordId);
   return salt.then(async (awaitedSalt) => ({
     id: userId,
@@ -49,7 +57,7 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
      * https://github.com/faker-js/faker/blob/main/src/modules/internet/index.ts#L129)
      * We update the result to match our username regular expression:
      * replace dots with dashes and remove trailing chars */
-    username: data.username || faker.internet.userName().replace('.', '-').slice(0, 16),
+    username: data.username || faker.internet.userName().replace('.', '-').slice(0, 12) + nanoid(4),
     firstname: data.firstname || faker.person.firstName(),
     lastname: data.lastname || faker.person.lastName(),
     email: data.email || faker.internet.email(),
@@ -57,7 +65,7 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
     registerToken: data.confirmed === false ? nanoid() : null,
     password: await hash(data.password || faker.internet.password(), awaitedSalt),
     discordId: data.discordId,
-    permissions: serializePermissions(data.permissions),
+    permissions,
     customMessage: data.customMessage,
     age: data.age || UserAge.adult,
     carts: data.paid
@@ -76,6 +84,23 @@ const generateFakeUserData = (data: FakeUserData, salt: Promise<string>) => {
                   forUserId: userId,
                 },
               ],
+            },
+          },
+        }
+      : undefined,
+    orga: permissions?.includes(Permission.orga)
+      ? {
+          create: {
+            displayPhoto: data.orgaDisplayPhoto,
+            displayName: data.orgaDisplayName,
+            photoFilename: data.orgaPhotoFilename,
+            displayUsername: data.orgaDisplayUsername,
+            mainCommissionId: data.orgaMainCommissionId,
+            roles: {
+              create: data.orgaRoles?.map((role) => ({
+                commission: { connect: { id: role.commission } },
+                commissionRole: role.role,
+              })),
             },
           },
         }
@@ -104,7 +129,7 @@ export const createFakeTeam = async ({
   tournament = 'lol',
   paid = false,
   locked = false,
-  name = faker.internet.userName(),
+  name = faker.internet.userName() + faker.number.int(),
   userPassword,
 }: {
   members?: number;
@@ -117,7 +142,9 @@ export const createFakeTeam = async ({
   const salt = genSalt(env.bcrypt.rounds);
   const [captainData, ...memberData] = await Promise.all(
     // eslint-disable-next-line unicorn/no-new-array
-    new Array(members).fill(0).map(() => generateFakeUserData({ password: userPassword, paid }, salt)),
+    new Array(members)
+      .fill(0)
+      .map(() => generateFakeUserData({ password: userPassword, paid, type: UserType.player }, salt)),
   );
 
   const team = await database.team.create({
@@ -239,3 +266,31 @@ export const createFakeCart = ({
       },
     },
   });
+
+export function generateDummyJpgBuffer(size: number) {
+  const sizeInPixels = Math.ceil(Math.sqrt(size / 3));
+  return sharp({
+    create: {
+      width: sizeInPixels,
+      height: sizeInPixels,
+      channels: 3,
+      background: { r: 255, g: 255, b: 255 },
+    },
+  })
+    .jpeg()
+    .toBuffer();
+}
+
+export function generateDummyPngBuffer(size: number) {
+  const sizeInPixels = Math.ceil(Math.sqrt(size / 4));
+  return sharp({
+    create: {
+      width: sizeInPixels,
+      height: sizeInPixels,
+      channels: 4,
+      background: { r: 255, g: 255, b: 255, alpha: 1 },
+    },
+  })
+    .png()
+    .toBuffer();
+}

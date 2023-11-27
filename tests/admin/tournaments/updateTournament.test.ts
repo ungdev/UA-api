@@ -33,13 +33,14 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     await database.cart.deleteMany();
     await database.cartItem.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
     await database.tournament.delete({ where: { id: tournament.id } });
   });
 
   before(async () => {
-    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser();
+    admin = await createFakeUser({ permissions: [Permission.admin] });
+    nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
 
     tournament = await createFakeTournament({

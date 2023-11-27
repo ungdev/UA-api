@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as cartItemOperations from '../../src/operations/cartItem';
@@ -17,7 +18,7 @@ describe('POST /users/:userId/carts', () => {
   let supplement: CartItem;
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
 
     // Create a ticket and a supplement
@@ -47,10 +48,11 @@ describe('POST /users/:userId/carts', () => {
   after(async () => {
     // Delete the user created
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
   it("should fail because cart item doesn't belong to the user", async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     const otherToken = generateToken(otherUser);
 
     await request(app)

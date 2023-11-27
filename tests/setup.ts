@@ -9,12 +9,13 @@ import chai, { expect } from 'chai';
 import chaiString from 'chai-string';
 import sinon from 'sinon';
 import database from '../src/services/database';
-import { setLoginAllowed, setShopAllowed } from '../src/operations/settings';
+import { setLoginAllowed, setShopAllowed, setTrombiAllowed } from '../src/operations/settings';
 import { transporter } from '../src/services/email';
 import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 import { disableFakeUploadApi, enableFakeUploadApi } from './upload';
 import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
+import * as uploads from './upload';
 
 export const sandbox = sinon.createSandbox();
 
@@ -30,6 +31,7 @@ before(async () => {
   chai.use(chaiString);
   await setLoginAllowed(true);
   await setShopAllowed(true);
+  await setTrombiAllowed(true);
 
   enableFakeDiscordApi();
   enableFakeUploadApi();
@@ -71,10 +73,17 @@ after(async () => {
   const repoLogCount = await database.repoLog.count();
   expect(repoLogCount).to.be.equal(0);
 
+  const orgaRoleCount = await database.orgaRole.count();
+  expect(orgaRoleCount).to.be.equal(0);
+
   await database.$disconnect();
   transporter.close();
 
   // Verify environment variables have not changed
   expect(process.env.API_PORT).to.be.undefined;
   expect(env.api.port).to.be.undefined;
+  expect(uploads.existingFiles).to.have.length(uploads.INITIAL_EXISTING_FILES.length);
+  for (const file of uploads.INITIAL_EXISTING_FILES) {
+    expect(uploads.existingFiles).to.include(file);
+  }
 });

@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { beforeEach } from 'mocha';
-import { User, Error, Permission, UserType } from '../../../src/types';
+import { User, Error, Permission } from '../../../src/types';
 import database from '../../../src/services/database';
 import * as mailOperations from '../../../src/services/email';
 import { createFakeTeam, createFakeUser } from '../../utils';
@@ -14,7 +14,7 @@ describe('POST /admin/emails', () => {
   let adminToken: string;
 
   before(async () => {
-    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
+    admin = await createFakeUser({ permissions: [Permission.admin] });
     await createFakeTeam({ members: 4, tournament: 'cs2' });
     await createFakeTeam({ members: 2, tournament: 'lol' });
     [nonAdminUser] = (await createFakeTeam({ members: 5, tournament: 'cs2', locked: true })).players;
@@ -27,6 +27,7 @@ describe('POST /admin/emails', () => {
 
   after(async () => {
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

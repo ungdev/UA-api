@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as userOperations from '../../src/operations/user';
@@ -27,6 +28,7 @@ describe('GET /users/:userId/ticket', () => {
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -35,7 +37,7 @@ describe('GET /users/:userId/ticket', () => {
   });
 
   it('should fail because the user is not in a team', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     const otherToken = generateToken(otherUser);
 
     await request(app)
@@ -45,28 +47,12 @@ describe('GET /users/:userId/ticket', () => {
   });
 
   it('should fail because the user is not in the same team', async () => {
-    const outerUser = await createFakeUser();
+    const outerUser = await createFakeUser({ type: UserType.player });
 
     await request(app)
       .get(`/users/${outerUser.id}/ticket`)
       .set('Authorization', `Bearer ${token}`)
       .expect(404, { error: Error.UserNotFound });
-  });
-
-  it('should fail as remote user is an orga', async () => {
-    await userOperations.updateAdminUser(remotePlayer.id, {
-      type: 'orga',
-    });
-    return request(app)
-      .get(`/users/${remotePlayer.id}/ticket`)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(403, { error: Error.IsOrga })
-      .then(async (result) => {
-        await userOperations.updateAdminUser(remotePlayer.id, {
-          type: 'player',
-        });
-        return result;
-      });
   });
 
   it('should throw an unexpected error', async () => {
@@ -88,7 +74,7 @@ describe('GET /users/:userId/ticket', () => {
   });
 
   it('should return the ticket of the remote coach', async () => {
-    await userOperations.updateAdminUser(remotePlayer.id, {
+    await userOperations.updateAdminUser(remotePlayer, {
       type: 'coach',
     });
     const item = filterItem((await fetchUserItems()).find((ticket) => ticket.id === 'ticket-coach') as Item);
@@ -98,7 +84,7 @@ describe('GET /users/:userId/ticket', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(200, item)
       .then(async (result) => {
-        await userOperations.updateAdminUser(remotePlayer.id, {
+        await userOperations.updateAdminUser(remotePlayer, {
           type: 'player',
         });
         return result;

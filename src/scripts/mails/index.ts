@@ -5,9 +5,11 @@ import { serialize } from '../../services/email/serializer';
 import { Mail } from '../../services/email/types';
 import { EmailAttachement } from '../../types';
 import logger from '../../utils/logger';
-import { ticketsGoal } from './tickets';
+// import { ticketsGoal } from './tickets';
+// import { notPaidGoal } from './notpaid';
+// import { notPaidSSBUGoal } from './notpaidssbu';
 // import { discordGoal } from './discord';
-// import { minorGoal } from './minor';
+import { minorGoal } from './minor';
 // import { unlockedPlayersGoal } from './unlocked';
 
 export type RecipientCollector = () => Promise<User[]>;
@@ -18,9 +20,12 @@ export type MailGoal = {
 };
 
 const goals: Array<MailGoal> = [
-  // discordGoal, minorGoal,
-  ticketsGoal,
+  // discordGoal,
+  minorGoal,
+  // ticketsGoal,
   // unlockedPlayersGoal
+  // notPaidGoal,
+  // notPaidSSBUGoal,
 ];
 
 (async () => {
@@ -50,10 +55,10 @@ const goals: Array<MailGoal> = [
           sections: mail.sections,
           reason: 'Tu as reçu ce mail car tu as créé un compte sur arena.utt.fr',
           title: {
-            banner: "J-3 avant l'UTT Arena",
+            banner: "Confirme ta participation à l'UTT Arena",
             highlight: `Cher ${mail.user.firstname}`,
             short: "L'UTT Arena arrive à grands pas 🔥",
-            topic: "Re: J-3 avant l'UTT Arena",
+            topic: "Confirme ta participation à l'UTT Arena",
           },
           receiver: mail.user.email,
         });

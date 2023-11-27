@@ -28,7 +28,7 @@ export const become = [
       return forbidden(response, Error.HasAlreadyPaidForAnotherTicket);
 
     try {
-      const updatedUser = await updateAdminUser(user.id, {
+      const updatedUser = await updateAdminUser(user, {
         type: UserType.spectator,
       });
       return success(response, updatedUser);
@@ -55,7 +55,7 @@ export const leave = [
     if (user.hasPaid) return forbidden(response, Error.AlreadyPaid);
 
     try {
-      const updatedUser = await updateAdminUser(user.id, {
+      const updatedUser = await updateAdminUser(user, {
         type: null,
       });
       return success(response, updatedUser);

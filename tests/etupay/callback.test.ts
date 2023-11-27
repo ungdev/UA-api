@@ -97,7 +97,7 @@ describe('POST /etupay/callback', () => {
   let lolTicket2Payload: string;
 
   before(async () => {
-    const user = await createFakeUser();
+    const user = await createFakeUser({ type: UserType.player });
 
     // Create a fake cart
     ({ cart, payload: paidPayload } = await createCartAndPayload(
@@ -204,6 +204,7 @@ describe('POST /etupay/callback', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -255,7 +256,7 @@ describe('POST /etupay/callback', () => {
   it('reject as the payment was not authorized', async () => {
     sandbox.stub(network, 'getIp').returns('10.0.0.0');
 
-    const user = await createFakeUser();
+    const user = await createFakeUser({ type: UserType.player });
 
     // Create a refused payload
     const failedCart = await cartOperations.createCart(user.id, [
@@ -421,7 +422,7 @@ describe('GET /etupay/callback', () => {
   let refusedPayload: string;
 
   before(async () => {
-    const user = await createFakeUser();
+    const user = await createFakeUser({ type: UserType.player });
 
     // Create a fake cart
     cart = await cartOperations.createCart(user.id, [
@@ -465,6 +466,7 @@ describe('GET /etupay/callback', () => {
   after(async () => {
     // Delete the user created
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

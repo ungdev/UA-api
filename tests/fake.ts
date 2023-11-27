@@ -19,6 +19,7 @@ import { createFakeTeam, createFakeUser } from './utils';
   await database.cart.deleteMany();
   await database.log.deleteMany();
   await database.team.deleteMany();
+  await database.orga.deleteMany();
   await database.user.deleteMany();
 
   // For each tournaments, create fake teams
@@ -65,21 +66,18 @@ import { createFakeTeam, createFakeUser } from './utils';
     username: 'ua_admin',
     password: defaultPassword,
     email: 'admin@ua.fr',
-    type: UserType.orga,
     permissions: [Permission.admin],
   });
   await createFakeUser({
     username: 'ua_entry',
     password: defaultPassword,
     email: 'entry@ua.fr',
-    type: UserType.orga,
     permissions: [Permission.entry],
   });
   await createFakeUser({
     username: 'ua_anim',
     password: defaultPassword,
     email: 'anim@ua.fr',
-    type: UserType.orga,
     permissions: [Permission.anim],
   });
 
