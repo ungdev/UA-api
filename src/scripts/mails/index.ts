@@ -5,12 +5,12 @@ import { serialize } from '../../services/email/serializer';
 import { Mail } from '../../services/email/types';
 import { EmailAttachement } from '../../types';
 import logger from '../../utils/logger';
-// import { ticketsGoal } from './tickets';
-// import { notPaidGoal } from './notpaid';
-// import { notPaidSSBUGoal } from './notpaidssbu';
-// import { discordGoal } from './discord';
+import { ticketsGoal } from './tickets';
+import { notPaidGoal } from './notpaid';
+import { notPaidSSBUGoal } from './notpaidssbu';
+import { discordGoal } from './discord';
 import { minorGoal } from './minor';
-// import { unlockedPlayersGoal } from './unlocked';
+import { unlockedPlayersGoal } from './unlocked';
 
 export type RecipientCollector = () => Promise<User[]>;
 export type MailGoal = {
@@ -19,17 +19,41 @@ export type MailGoal = {
   attachments: (user: User) => Promise<EmailAttachement[]>;
 };
 
-const goals: Array<MailGoal> = [
-  // discordGoal,
-  minorGoal,
-  // ticketsGoal,
-  // unlockedPlayersGoal
-  // notPaidGoal,
-  // notPaidSSBUGoal,
-];
+const availableGoals: {
+  [key: string]: MailGoal;
+} = {
+  discord: discordGoal,
+  mineurs: minorGoal,
+  tickets: ticketsGoal,
+  paslock: unlockedPlayersGoal,
+  paspayé: notPaidGoal,
+  paspayéssbu: notPaidSSBUGoal,
+};
 
 (async () => {
   const records: { [key: string]: { sections: Mail['sections']; user: User; attachments: EmailAttachement[] } } = {};
+
+  if (process.argv.length < 2) {
+    Promise.reject(
+      new Error(
+        `ERREUR : Tu dois donner au moins un type de mails à envoyer parmi les suivants : ${Object.keys(
+          availableGoals,
+        ).join(' ')}`,
+      ),
+    );
+  }
+  // Convert goal names to
+  const goals = process.argv
+    .splice(2)
+    .map((name: string) => {
+      if (name in availableGoals) {
+        logger.info(`[Scheduled] ${name}`);
+        return availableGoals[name];
+      }
+      logger.error(`[Skipping] ${name}: Not found`);
+      return null;
+    })
+    .filter((goal) => !!goal);
 
   for (const { collector, sections, attachments } of goals) {
     const targets = await collector();
@@ -55,10 +79,10 @@ const goals: Array<MailGoal> = [
           sections: mail.sections,
           reason: 'Tu as reçu ce mail car tu as créé un compte sur arena.utt.fr',
           title: {
-            banner: "Confirme ta participation à l'UTT Arena",
+            banner: 'On se retrouve ce weekend !',
             highlight: `Cher ${mail.user.firstname}`,
             short: "L'UTT Arena arrive à grands pas 🔥",
-            topic: "Confirme ta participation à l'UTT Arena",
+            topic: "Ton ticket pour l'UTT Arena",
           },
           receiver: mail.user.email,
         });
