@@ -87,18 +87,23 @@ export default [
               .then((users) => {
                 for (const user of users) {
                   if (!user.orga || user.orga.roles.length === 0) continue;
+                  let mainCommissionIndex = user.orga.roles.findIndex(
+                    (role) => role.commission.id === user.orga.mainCommissionId,
+                  );
+
+                  mainCommissionIndex = mainCommissionIndex === -1 ? 0 : mainCommissionIndex;
+
                   listBadgeToGenerate.push({
-                    type: getCommisionPermission(user.orga.roles[0].commissionRole, user.orga.roles[0].commission.id),
+                    type: getCommisionPermission(user.orga.roles[mainCommissionIndex].commissionRole, user.orga.roles[mainCommissionIndex].commission.id),
                     firstName: user.firstname,
                     lastName: user.lastname,
-                    // TODO: change URL
                     image: user.orga.photoFilename
                       ? `${env.front.website}/uploads/files/orga/${user.orga.photoFilename}.webp`
                       : '',
                     commissionName: getCommissionName(
-                      user.orga.roles[0].commissionRole,
-                      user.orga.roles[0].commission.id,
-                      user.orga.roles[0].commission.name,
+                      user.orga.roles[mainCommissionIndex].commissionRole,
+                      user.orga.roles[mainCommissionIndex].commission.id,
+                      user.orga.roles[mainCommissionIndex].commission.nameOnBadge,
                     ),
                   });
                 }
@@ -112,7 +117,6 @@ export default [
                 type: field.permission ?? 'restricted',
                 firstName: '',
                 lastName: '',
-                // TODO: change URL
                 image: '',
                 commissionName: field.name ?? '',
               });
@@ -142,19 +146,22 @@ export default [
                   return;
                 }
 
+                const mainCommissionIndex = user[0].orga.roles.findIndex(
+                  (role) => role.commission.id === user[0].orga.mainCommissionId,
+                );
+
                 listBadgeToGenerate.push({
                   type: getCommisionPermission(
-                    user[0].orga.roles[0].commissionRole,
-                    user[0].orga.roles[0].commission.id,
+                    user[0].orga.roles[mainCommissionIndex].commissionRole,
+                    user[0].orga.roles[mainCommissionIndex].commission.id,
                   ),
                   firstName: user[0].firstname,
                   lastName: user[0].lastname,
-                  // TODO: change URL
                   image: `${env.front.website}/uploads/files/orga/${user[0].orga.photoFilename}.webp` ?? '',
                   commissionName: getCommissionName(
-                    user[0].orga.roles[0].commissionRole,
-                    user[0].orga.roles[0].commission.id,
-                    user[0].orga.roles[0].commission.name,
+                    user[0].orga.roles[mainCommissionIndex].commissionRole,
+                    user[0].orga.roles[mainCommissionIndex].commission.id,
+                    user[0].orga.roles[mainCommissionIndex].commission.nameOnBadge,
                   ),
                 });
               });
@@ -166,7 +173,6 @@ export default [
               type: getCommisionPermission(field.commissionRole ?? 'member', field.commissionId ?? 'vieux'),
               firstName: field.firstname ?? '',
               lastName: field.lastname ?? '',
-              // TODO: change URL
               image: '',
               commissionName: await database.commission
                 .findUnique({

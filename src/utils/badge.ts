@@ -100,14 +100,12 @@ export const generateBadge = async (badges: Badge[]) => {
     // Constants for the columns and rows
     const columns = 4;
     const rows = 2;
+    const columnOffset = 190;
+    const rowOffset = 280;
 
     // For loop to do multiple pages
     // Page with 'RECTO' on it
     for (let page = 0; page < Math.ceil(badges.length / (columns * rows)); page++) {
-      // Constants for the images
-      const columnOffsetImage = 190;
-      const rowOffsetImage = 280;
-
       // 'for' because I dont like to repeat but I like chocolate and céréales après le lait
       for (let col = 0; col < columns; col++) {
         for (let row = 0; row < rows; row++) {
@@ -118,8 +116,8 @@ export const generateBadge = async (badges: Badge[]) => {
           // Informations about badge
           const image = await fetchImage(badges[index].image);
           // Coordonates
-          const x = pictureX + col * columnOffsetImage;
-          const y = pictureY + row * rowOffsetImage;
+          const x = pictureX + col * columnOffset;
+          const y = pictureY + row * rowOffset;
 
           // if image is webp convert it to png using sharp
           if (badges[index].image.includes('.webp')) {
@@ -138,10 +136,6 @@ export const generateBadge = async (badges: Badge[]) => {
       // Define a text format
       const textFormat = document.font(fontFamily).fill([239, 220, 235]).fontSize(fontSize);
 
-      // Constants for the columns and rows
-      const columnOffsetText = 190;
-      const rowOffsetText = 280;
-
       // 'for' because I dont like to repeat but I like potatoes and pain au chocolat
       for (let col = 0; col < columns; col++) {
         for (let row = 0; row < rows; row++) {
@@ -153,21 +147,21 @@ export const generateBadge = async (badges: Badge[]) => {
           const lastName = `${badges[index].lastName}`;
           const firstName = `${badges[index].firstName}`;
           // Offsets
-          const offsetX = textX + col * columnOffsetText;
-          const offsetY = textY + row * rowOffsetText;
+          const offsetX = textX + col * columnOffset;
+          const offsetY = textY + row * rowOffset;
           // Lastname
           const lastNameHeight = textFormat.heightOfString(lastName);
           textFormat.text(
             lastName.toUpperCase(),
             offsetX - textFormat.widthOfString(lastName.toUpperCase()) / 2,
-            offsetY - 260 - lastNameHeight / 2,
+            offsetY - 277 - lastNameHeight / 2,
           );
           // Firstname
           const firstNameHeight = textFormat.heightOfString(firstName);
           textFormat.text(
             firstName.toUpperCase(),
             offsetX - textFormat.widthOfString(firstName.toUpperCase()) / 2,
-            offsetY - 255 - lastNameHeight - firstNameHeight / 2,
+            offsetY - 273 - lastNameHeight - firstNameHeight / 2,
           );
           // Commission
           const commission = `${badges[index].commissionName.toUpperCase()}`;
@@ -175,16 +169,13 @@ export const generateBadge = async (badges: Badge[]) => {
           textFormat.text(
             commission,
             offsetX - textFormat.widthOfString(commission) / 2,
-            offsetY - 275 - lastNameHeight - firstNameHeight - commissionHeight / 2,
+            offsetY - 280 - lastNameHeight - firstNameHeight - commissionHeight / 2,
           );
         }
       }
 
       // Add a new page
       document.addPage();
-
-      const columnOffsetSecondImage = 190;
-      const rowOffsetSecondImage = 280;
 
       // 'for' because I dont like to repeat but I like chocolate and céréales après le lait
       for (let col = 0; col < columns; col++) {
@@ -194,8 +185,8 @@ export const generateBadge = async (badges: Badge[]) => {
           if (index >= badges.length) break;
 
           // Coordonates
-          const x = pictureX + col * columnOffsetSecondImage;
-          const y = pictureY + row * rowOffsetSecondImage;
+          const x = pictureX + col * columnOffset;
+          const y = pictureY + row * rowOffset;
 
           // Background
           document.image(getBack(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
