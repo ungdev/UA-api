@@ -5,7 +5,7 @@ import { fetchCart } from '../../operations/carts';
 import { fetchTeam } from '../../operations/team';
 import { fetchUser } from '../../operations/user';
 import { Error, ItemCategory, TransactionState } from '../../types';
-import { generateTicket } from '../../utils/pdf';
+import { generateTicket } from '../../utils/ticket';
 import { forbidden, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
 
