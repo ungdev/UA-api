@@ -98,7 +98,7 @@ describe('POST /users/:userId/carts', () => {
     const { body } = await request(app)
       .get(`/tickets`)
       .set('Authorization', `Bearer ${token}`)
-      .expect('Content-Type', 'application/pdf; charset=utf-8')
+      .expect('Content-Type', 'application/pdf')
       .expect(200);
 
     return expect(Buffer.isBuffer(body)).to.be.true;
@@ -108,7 +108,7 @@ describe('POST /users/:userId/carts', () => {
     const { body } = await request(app)
       .get(`/tickets/${ticket.id}`)
       .set('Authorization', `Bearer ${token}`)
-      .expect('Content-Type', 'application/pdf; charset=utf-8')
+      .expect('Content-Type', 'application/pdf')
       .expect(200);
 
     return expect(Buffer.isBuffer(body)).to.be.true;

@@ -47,7 +47,7 @@ export default [
       const pdf = await generateTicket(ticket);
 
       // Send the pdf
-      return response.set('Content-Type', 'application/pdf').send(pdf.content.toString('base64')).end();
+      return response.set('Content-Type', 'application/pdf').send(pdf.content).end();
     } catch (error) {
       return next(error);
     }

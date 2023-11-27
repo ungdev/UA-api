@@ -5,30 +5,33 @@ import { encrypt } from './helpers';
 import { fetchTeamWithTournament } from '../operations/team';
 import { DetailedCartItem, EmailAttachement, UserType } from '../types';
 
-const loadImage = () => `data:image/jpg;base64,${readFileSync(`assets/email/backgrounds/ticket.jpg`, 'base64')}`;
+const ticketsDesignAmount = 3;
 
-const tournamentBackground = loadImage();
+const loadImage = () => {
+  const random = Math.floor(Math.random() * ticketsDesignAmount) + 1;
+  return `data:image/jpg;base64,${readFileSync(`assets/email/backgrounds/ticket_${random}.jpg`, 'base64')}`;
+};
 
 export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailAttachement> => {
   // Define the parameters for the function
   const fontFamily = 'assets/email/font.ttf';
-  const fontSize = 50;
-  const qrCodeSize = 397;
-  const qrCodeX = 263;
-  const qrCodeY = 29;
-  const bottomLine = 800 - 220; // sponsors height substracted to ticket height
-  const lineSpaceCorrection = 20;
+  const fontSize = 24;
+  const qrCodeSize = 182;
+  const qrCodeX = 35;
+  const qrCodeY = 567;
+  const bottomLine = 842 - 150; // sponsors height substracted to ticket height
+  const lineSpaceCorrection = 22;
 
   const user = cartItem.forUser;
   const fullName = `${user.firstname} ${user.lastname}`;
 
-  const background = tournamentBackground;
+  const background = loadImage();
 
   // If the user is in a team, use an appropriate background
   let tournoiText: string;
   if (user.teamId) {
     const team = await fetchTeamWithTournament(user.teamId);
-    tournoiText = `Tournoi ${
+    tournoiText = `${
       team.tournament.name.length > 20
         ? team.tournament.name
             .split(/[ -]/)
@@ -53,26 +56,25 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
 
   const pdf = await new Promise<Buffer>((resolve, reject) => {
     // Create the document and the background
-    const document = new PDFkit({ size: [2560, 800], margin: 0 });
-    document.image(background, 0, 0);
+    const document = new PDFkit({ size: 'A4', margin: 0, layout: 'portrait' });
+    document.image(background, 0, 0, { width: 595, height: 842 });
 
     // Define a text format
-    const textFormat = document.font(fontFamily).fill([239, 220, 235]).fontSize(fontSize);
+    const textFormat = document.font(fontFamily).fill([255, 255, 255]).fontSize(fontSize);
 
     // Place the tournament name under the qrCode with the same margin as the qrcode
-    const textHeight = textFormat.heightOfString(tournoiText);
-    textFormat.text(tournoiText, qrCodeY + lineSpaceCorrection, bottomLine - lineSpaceCorrection);
+    textFormat.text(tournoiText, qrCodeX + qrCodeSize + lineSpaceCorrection, bottomLine);
 
     // Place the full name of the user
-    const nameHeight = textFormat.heightOfString(fullName);
-    textFormat.text(
-      fullName,
-      qrCodeY + lineSpaceCorrection,
-      bottomLine - textHeight - nameHeight + lineSpaceCorrection,
-    );
+    textFormat.text(fullName, qrCodeX + qrCodeSize + lineSpaceCorrection, bottomLine - lineSpaceCorrection * 4 - 15);
 
     // Place the text containing the seat
-    if (user.place) textFormat.text(`Place ${user.place}`, qrCodeY + lineSpaceCorrection, bottomLine - textHeight);
+    if (user.place)
+      textFormat.text(
+        `Place ${user.place}`,
+        qrCodeX + qrCodeSize + lineSpaceCorrection,
+        bottomLine - lineSpaceCorrection * 2 - 7,
+      );
 
     // Place the QR Code
     document.image(qrcode, qrCodeX, qrCodeY, { width: qrCodeSize });
