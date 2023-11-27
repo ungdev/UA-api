@@ -343,8 +343,9 @@ export const enum Error {
   AlreadyPickedUp = "L'objet a déjà été récupéré",
   TooMuchLockedTeams = "Il y a plus d'équipes inscrites que le nombre d'équipes maximal souhaité",
   TournamentFull = "Le tournoi est plein, attends qu'une place se libère pour payer un ticket",
-  UserDoesntHaveMainCommission = "L'utilisateur n'a pas la commission spécifiée comme commission principale",
-  TryingToRemoveMainCommission = "Vous ne pouvez pas supprimer la commission principale de l'organisateur sans le supprimer de cette commission",
+  IsNotOrga = "L'utilisateur n'est pas un organisateur. Impossible de lui assigner des commissions",
+  MainCommissionMustBeInList = "L'organisateur doit être dans sa propre commission principale",
+  MustHaveMainCommission = "L'une des commissions de l'utilisateur doit être sa commission principale",
 
   // 404
   // The server can't find the requested resource
