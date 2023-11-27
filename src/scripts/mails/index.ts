@@ -33,13 +33,11 @@ const availableGoals: {
 (async () => {
   const records: { [key: string]: { sections: Mail['sections']; user: User; attachments: EmailAttachement[] } } = {};
 
-  if (process.argv.length < 2) {
-    Promise.reject(
-      new Error(
-        `ERREUR : Tu dois donner au moins un type de mails à envoyer parmi les suivants : ${Object.keys(
-          availableGoals,
-        ).join(' ')}`,
-      ),
+  if (process.argv.length <= 2) {
+    throw new Error(
+      `ERREUR : Tu dois donner au moins un type de mails à envoyer parmi les suivants : ${Object.keys(
+        availableGoals,
+      ).join(' ')}`,
     );
   }
   // Convert goal names to
