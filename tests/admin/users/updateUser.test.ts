@@ -421,11 +421,13 @@ describe('PATCH /admin/users/:userId', () => {
           { commissionRole: 'member', commission: 'animation_ssbu' },
           { commissionRole: 'member', commission: 'animation_cs2' },
         ],
+        orgaMainCommission: 'animation_ssbu',
       })
       .expect(200);
     expect(body.data.orga).to.not.be.null;
     const orga = await fetchOrga(anim);
     expect(orga.roles).to.have.length(2);
+    expect(orga.mainCommissionId).to.be.equal('animation_ssbu');
   });
 
   it('should remove 1 commission to the anim orga, add 1 new commission and promote the orga in one commission', async () => {
@@ -452,7 +454,7 @@ describe('PATCH /admin/users/:userId', () => {
       .patch(`/admin/users/${anim.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ orgaMainCommission: 'coord' })
-      .expect(403, { error: Error.UserDoesntHaveMainCommission });
+      .expect(403, { error: Error.MainCommissionMustBeInList });
   });
 
   it('should fail as we are trying to set the main commission to a commission we are removing', async () => {
@@ -460,7 +462,7 @@ describe('PATCH /admin/users/:userId', () => {
       .patch(`/admin/users/${anim.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ orgaMainCommission: 'animation_ssbu', orgaRoles: [] })
-      .expect(403, { error: Error.UserDoesntHaveMainCommission });
+      .expect(403, { error: Error.MainCommissionMustBeInList });
   });
 
   it('should set the main commission to the orga', async () => {
@@ -473,12 +475,12 @@ describe('PATCH /admin/users/:userId', () => {
     expect(orga.mainCommission.id).to.be.equal('animation_ssbu');
   });
 
-  it('should fail as we are trying to remove a commission to the orga, and that commission is its main one', () =>
+  it('should fail as we are trying to remove a commission to the orga, and that commission is his main one', () =>
     request(app)
       .patch(`/admin/users/${anim.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ orgaRoles: [] })
-      .expect(403, { error: Error.TryingToRemoveMainCommission }));
+      .expect(403, { error: Error.MainCommissionMustBeInList }));
 
   it('should change the main commission of the orga and remove the old one from the list of commissions', () =>
     request(app)
@@ -489,4 +491,11 @@ describe('PATCH /admin/users/:userId', () => {
         orgaMainCommission: 'animation_lol',
       })
       .expect(200));
+
+  it('should fail to add a commission to the user as the user is not an organizer', () =>
+    request(app)
+      .patch(`/admin/users/${user.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ orgaRoles: [{ commissionRole: 'respo', commission: 'animation_lol' }] })
+      .expect(403, { error: Error.IsNotOrga }));
 });
