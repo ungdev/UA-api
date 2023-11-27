@@ -325,7 +325,7 @@ export const unlockTeam = async (teamId: string) => {
   // TODO : understand why we can't put awaits here
   deleteDiscordTeam(updatedTeam);
   sendDiscordTeamUnlock(updatedTeam, tournament);
-  return formatPrimitiveTeam(updatedTeam);
+  return updatedTeam;
 };
 
 const prismaRequestJoinTeam = (teamId: string, user: User, newUserType?: UserType): PrismaPromise<RawUser> =>
