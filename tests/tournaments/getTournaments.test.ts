@@ -5,8 +5,8 @@ import { sandbox } from '../setup';
 import * as tournamentOperations from '../../src/operations/tournament';
 import database from '../../src/services/database';
 import { Error } from '../../src/types';
-import {createFakeTeam, createFakeTournament} from '../utils';
-import {lockTeam} from "../../src/operations/team";
+import { createFakeTeam, createFakeTournament } from '../utils';
+import { lockTeam } from '../../src/operations/team';
 
 describe('GET /tournaments', () => {
   after(async () => {
@@ -14,7 +14,7 @@ describe('GET /tournaments', () => {
     await database.cart.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
-    await database.tournament.delete({where: {id: "1p"}});
+    await database.tournament.delete({ where: { id: '1p' } });
     await database.caster.deleteMany();
   });
 
@@ -128,7 +128,13 @@ describe('GET /tournaments', () => {
   });
 
   it('should return positionInQueue in the endpoint response', async () => {
-    const tournament = await createFakeTournament({id: "1p", name: "To1Player", playersPerTeam: 1, maxTeams: 1});
+    const tournament = await createFakeTournament({
+      id: '1p',
+      name: 'To1Player',
+      playersPerTeam: 1,
+      coachesPerTeam: 0,
+      maxTeams: 1,
+    });
     await database.tournament.update({
       where: {
         id: tournament.id,
@@ -149,16 +155,30 @@ describe('GET /tournaments', () => {
     const response = await request(app).get('/tournaments').expect(200);
     const teamList = response.body[0].teams;
     expect(teamList.length).to.be.equal(3);
-    for(let i=0; i < teamList.length; i++) {
-      if (teamList[i].id == team1.id) {
-        expect(teamList[i].lockedAt).to.be.not.null;
-        expect(teamList[i].positionInQueue).to.be.null;
-      } else if(teamList[i].id == team2.id) {
-        expect(teamList[i].lockedAt).to.be.null;
-        expect(teamList[i].positionInQueue).to.be.equal(1);
-      } else if(teamList[i].id == team3.id) {
-        expect(teamList[i].lockedAt).to.be.null;
-        expect(teamList[i].positionInQueue).to.be.equal(2);
+    for (const element of teamList) {
+      switch (element.id) {
+        case team1.id: {
+          expect(element.lockedAt).to.be.not.null;
+          expect(element.positionInQueue).to.be.null;
+
+          break;
+        }
+        case team2.id: {
+          expect(element.lockedAt).to.be.null;
+          expect(element.positionInQueue).to.be.equal(1);
+
+          break;
+        }
+        case team3.id: {
+          expect(element.lockedAt).to.be.null;
+          expect(element.positionInQueue).to.be.equal(2);
+
+          break;
+        }
+        default: {
+          // This should never happen
+          expect(false).to.be.true;
+        }
       }
     }
   });

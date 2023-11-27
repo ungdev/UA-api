@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { isCaptain } from '../../middlewares/team';
-import { formatPrimitiveTeam, formatTeam, promoteUser } from "../../operations/team";
+import { formatPrimitiveTeam, promoteUser } from '../../operations/team';
 import { fetchUser } from '../../operations/user';
 import { Error } from '../../types';
 import { filterTeam } from '../../utils/filters';
