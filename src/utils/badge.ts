@@ -143,8 +143,8 @@ export const generateBadge = async (badges: Badge[]) => {
           if (index >= badges.length) break;
 
           // Informations about badge
-          const lastName = `${badges[index].lastName}`;
-          const firstName = `${badges[index].firstName}`;
+          const lastName = `${badges[index].lastName || ' '}`;
+          const firstName = `${badges[index].firstName || ' '}`;
           // Offsets
           const offsetX = textX + col * columnOffset;
           const offsetY = textY + row * rowOffset;
@@ -164,11 +164,10 @@ export const generateBadge = async (badges: Badge[]) => {
           );
           // Commission
           const commission = `${badges[index].commissionName.toUpperCase()}`;
-          const commissionHeight = textFormat.heightOfString(commission);
           textFormat.text(
             commission,
             offsetX - textFormat.widthOfString(commission) / 2,
-            offsetY - 280 - lastNameHeight - firstNameHeight - commissionHeight / 2,
+            offsetY - 280 - lastNameHeight - firstNameHeight - firstNameHeight / 2,
           );
         }
       }
