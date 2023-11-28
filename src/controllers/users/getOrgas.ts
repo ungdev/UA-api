@@ -11,16 +11,21 @@ export default [
   validateQuery(
     Joi.object({
       onlyMainCommission: Joi.boolean().default(false),
-      includeVieux: Joi.boolean().default(false),
     }).optional(),
   ),
 
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { onlyMainCommission, includeVieux } = request.query as unknown as { onlyMainCommission: boolean; includeVieux: boolean };
+      const { onlyMainCommission } = request.query;
       if (!(await fetchSetting('trombi')).value) return forbidden(response, Error.TrombiNotAllowed);
       const orgas = await fetchOrgas();
       const commissions = await database.commission.findMany();
+
+      // remove commission 'vieux' from the list
+      const index = commissions.findIndex((commission) => commission.id === 'vieux');
+      if (index !== -1) {
+        commissions.splice(index, 1);
+      }
 
       const resultInObject = Object.fromEntries(
         commissions.map((commission) => [
@@ -41,9 +46,6 @@ export default [
             onlyMainCommission &&
             ((orga.mainCommission && orga.mainCommission.id !== role.commission.id) || !orga.mainCommission)
           ) {
-            continue;
-          }
-          if (!includeVieux && role.commission.id === 'vieux') {
             continue;
           }
           resultInObject[role.commission.id].roles[role.commissionRole].push({

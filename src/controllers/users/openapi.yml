@@ -256,14 +256,7 @@
         name: onlyMainCommission
         description: Si onlyMainCommission est mis à "true", chaque orga ne pourra être retourné qu'une seule fois, et apparaîtra dans la commission spécifiée comme étant sa principale. Si sa commission principale n'est pas l'une de ses commissions, ou qu'il n'a pas de commission principale, il ne sera pas retourné
         schema:
-          type: boolean
-        default: false
-        optional: true
-      - in: query
-        name: includeVieux
-        description: Si includeVieux est mis à "true", la commission vieux sera inclue dans la liste des commissions
-        schema:
-          type: boolean
+          type: string
         default: false
         optional: true
     responses:
