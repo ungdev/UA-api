@@ -16,8 +16,10 @@ import { generateFakeDiscordId } from './utils';
 
 let members: DiscordGuildMember[] = [];
 let roles: Snowflake[] = [];
+const channels: Snowflake[] = [];
 let userOauthCode: { [code in string]: { allow: boolean; userId?: Snowflake } } = {};
 let rateLimitRemainingRequests = 4;
+let firstRequestOfBatchTimestamp = 0;
 
 /**
  * Adds a {@link DiscordGuildMember} to the fake debug discord server.
@@ -122,6 +124,17 @@ export const registerRole = (id?: Snowflake): Snowflake => {
 export const deleteRole = (id: Snowflake) => roles.splice(roles.indexOf(id), 1).length > 0;
 
 /**
+ * Creates a {@link DiscordChannel} from the fake discord server.
+ */
+export const createChannel = (id?: Snowflake) => {
+  const channelId = id ?? generateFakeDiscordId();
+  channels.push(channelId);
+  return channelId;
+};
+
+export const deleteChannel = (id: Snowflake) => channels.splice(roles.indexOf(id), 1).length > 0;
+
+/**
  * Creates headers for the fake discord api. This function also updates the
  * {@link rateLimitRemainingRequests} property. When setting {@link enforceRateLimit} to
  * true, the request should check (before calling this function) whether the
@@ -131,6 +144,10 @@ export const deleteRole = (id: Snowflake) => roles.splice(roles.indexOf(id), 1).
  * @returns the header to use in the response
  */
 const computeRateLimitHeader = (enforceRateLimit = false): nock.ReplyHeaders => {
+  if (Date.now() - firstRequestOfBatchTimestamp > 1000) {
+    firstRequestOfBatchTimestamp = Date.now();
+    rateLimitRemainingRequests = 4;
+  }
   const remaining =
     rateLimitRemainingRequests < 0
       ? ((rateLimitRemainingRequests = 4) + 1) * <number>(<unknown>!enforceRateLimit)
@@ -139,7 +156,7 @@ const computeRateLimitHeader = (enforceRateLimit = false): nock.ReplyHeaders => 
   return <any>{
     'X-RateLimit-Limit': 5,
     'X-RateLimit-Remaining': remaining,
-    'X-Ratelimit-Reset-After': 0,
+    'X-Ratelimit-Reset-After': (1000 - Date.now() + firstRequestOfBatchTimestamp) / 1000,
   };
 };
 
@@ -296,6 +313,37 @@ const listen = () => {
               code: discordMember ? 10011 : 10007,
               message: discordMember ? 'Unknown role' : 'Unknown member',
             },
+        computeRateLimitHeader(),
+      ];
+    })
+
+    // Delete Guild Role https://discord.com/developers/docs/resources/guild#delete-guild-role
+    .delete(/\/guilds\/\d+\/roles\/\d+/)
+    .reply((uri) => {
+      if (rateLimitRemainingRequests < 0) return [429, null, computeRateLimitHeader(true)];
+      const [, discordRoleId] = /(\d+)$/.exec(uri)!;
+      const roleExists = deleteRole(discordRoleId);
+      return [
+        roleExists ? 204 : 404,
+        roleExists
+          ? null
+          : {
+              code: 10011,
+              message: 'Unknown role',
+            },
+        computeRateLimitHeader(),
+      ];
+    })
+
+    // Delete/Close Channel https://discord.com/developers/docs/resources/channel#deleteclose-channel
+    .delete(/\/channels\/\d+/)
+    .reply((uri) => {
+      if (rateLimitRemainingRequests < 0) return [429, null, computeRateLimitHeader(true)];
+      const [, channelId] = /(\d+)$/.exec(uri)!;
+      const channelExists = deleteChannel(channelId);
+      return [
+        channelExists ? 204 : 404,
+        channelExists ? null : { code: 10003, message: 'Unknwon channel' },
         computeRateLimitHeader(),
       ];
     });

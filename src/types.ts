@@ -217,6 +217,7 @@ export type Team = PrimitiveTeam & {
   players: User[];
   coaches: User[];
   askingUsers: User[];
+  positionInQueue: number | null;
 };
 
 export type Tournament = PrimitiveTournament & {

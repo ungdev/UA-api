@@ -180,10 +180,14 @@ export default [
               commissionName: await database.commission
                 .findUnique({
                   where: { id: field.commissionId ?? 'vieux' },
-                  select: { name: true },
+                  select: { nameOnBadge: true },
                 })
                 .then((commission) =>
-                  getCommissionName(field.commissionRole ?? 'member', field.commissionId ?? 'vieux', commission.name),
+                  getCommissionName(
+                    field.commissionRole ?? 'member',
+                    field.commissionId ?? 'vieux',
+                    commission.nameOnBadge,
+                  ),
                 ),
             });
             break;

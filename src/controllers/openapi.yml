@@ -374,6 +374,9 @@ components:
           type: string
           format: date-time
           nullable: true
+        positionInQueue:
+          type: integer
+          example: 1
 
     TeamWithUsersRestricted:
       allOf:

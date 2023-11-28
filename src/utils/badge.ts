@@ -100,6 +100,8 @@ export const generateBadge = async (badges: Badge[]) => {
     const columnOffset = 190;
     const rowOffset = 280;
 
+    const pictureX2 = 841.89 - pictureX;
+
     // For loop to do multiple pages
     // Page with 'RECTO' on it
     for (let page = 0; page < Math.ceil(badges.length / (columns * rows)); page++) {
@@ -141,8 +143,8 @@ export const generateBadge = async (badges: Badge[]) => {
           if (index >= badges.length) break;
 
           // Informations about badge
-          const lastName = `${badges[index].lastName}`;
-          const firstName = `${badges[index].firstName}`;
+          const lastName = `${badges[index].lastName || ' '}`;
+          const firstName = `${badges[index].firstName || ' '}`;
           // Offsets
           const offsetX = textX + col * columnOffset;
           const offsetY = textY + row * rowOffset;
@@ -162,11 +164,10 @@ export const generateBadge = async (badges: Badge[]) => {
           );
           // Commission
           const commission = `${badges[index].commissionName.toUpperCase()}`;
-          const commissionHeight = textFormat.heightOfString(commission);
           textFormat.text(
             commission,
             offsetX - textFormat.widthOfString(commission) / 2,
-            offsetY - 280 - lastNameHeight - firstNameHeight - commissionHeight / 2,
+            offsetY - 280 - lastNameHeight - firstNameHeight - firstNameHeight / 2,
           );
         }
       }
@@ -182,7 +183,7 @@ export const generateBadge = async (badges: Badge[]) => {
           if (index >= badges.length) break;
 
           // Coordonates
-          const x = pictureX + col * columnOffset;
+          const x = pictureX2 - pictureSize - col * columnOffset;
           const y = pictureY + row * rowOffset;
 
           // Background
