@@ -75,13 +75,13 @@ describe('PATCH /admin/users/trombi', () => {
 
   it('should successfully update the user and delete the old image', async () => {
     // First actually add the file at the specified location
-    uploads.existingFiles.push(`orgas/${orgaOrganizerInfo.photoFilename}.webp`);
+    uploads.existingFiles.push(`orga/${orgaOrganizerInfo.photoFilename}.webp`);
     const { body } = await request(app)
       .patch(`/admin/users/trombi`)
       .send({ displayName: true, displayPhoto: true, displayUsername: true })
       .set('Authorization', `Bearer ${orgaToken}`)
       .expect(200);
     expect(body.filename).to.be.not.equal(orgaOrganizerInfo.photoFilename);
-    expect(uploads.existingFiles).to.not.include(`orgas/${orgaOrganizerInfo.photoFilename}.webp`);
+    expect(uploads.existingFiles).to.not.include(`orga/${orgaOrganizerInfo.photoFilename}.webp`);
   });
 });

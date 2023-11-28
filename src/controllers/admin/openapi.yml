@@ -124,7 +124,7 @@
                     name:
                       type: string
                       description: Le nom associé au badge
-          
+
     responses:
       201:
         description: Les badges ont bien été créés.
@@ -146,8 +146,8 @@
               error: L'utilisateur n'est pas authentifié
       404:
         $ref: '#/components/responses/404UserNotFound'
-  
-      
+
+
 /admin/carts/{cartId}/refund:
   post:
     summary: Marque le panier comme étant remboursé
@@ -1386,7 +1386,7 @@
     description: |-
       L'organisateur peut opt-in pour afficher son nom et son prénom, ainsi que pour montrer sa photo de profil.
       Un nom de fichier est renvoyé, qui permet à l'organisateur de stocker son nom de fichier dans
-      "<uploads url>/orgas/<nom du fichier>.webp".
+      "<uploads url>/orga/<nom du fichier>.webp".
       Si un fichier existait déjà, ce fichier est supprimé. Le nom de fichier généré est aléatoire, et ne sera pas le même entre 2 appels de la route.
     tags:
       - Admin
