@@ -260,27 +260,29 @@ export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise
   });
 
 export const unlockTeam = async (teamId: string) => {
+  const team = await fetchTeam(teamId);
+  if (!team.lockedAt && !team.enteredQueueAt) return null;
   // We use the updateMany, because we may update no team
-  const updateCount = await database.team.updateMany({
+  await database.team.update({
     data: {
       lockedAt: null,
       enteredQueueAt: null,
     },
     where: {
       id: teamId,
-      // If the team is not locked nor in the queue, then we don't want to modify it, that allows us to have updatedTeam === undefined;
-      NOT: {
-        lockedAt: null,
-        enteredQueueAt: null,
-      },
     },
   });
-
-  if (updateCount.count === 0) return null;
 
   const updatedTeam = await fetchTeam(teamId);
 
   const tournament = await fetchTournament(updatedTeam.tournamentId);
+
+  // Only notify if team was locked (we don't want to notify if it was in the queue)
+  if (team.lockedAt) {
+    await deleteDiscordTeam(updatedTeam);
+    await sendDiscordTeamUnlock(updatedTeam, tournament);
+  }
+
   // We freed a place, so there is at least one place left
   // (except if the team was already in the queue, but then we want to skip the condition, so that's fine)
   if (tournament.placesLeft === 1) {
@@ -311,10 +313,6 @@ export const unlockTeam = async (teamId: string) => {
       await lockTeam(firstTeamInQueue.id);
     }
   }
-
-  // TODO : understand why we can't put awaits here
-  deleteDiscordTeam(updatedTeam);
-  sendDiscordTeamUnlock(updatedTeam, tournament);
 
   return updatedTeam;
 };

@@ -124,7 +124,7 @@ const env = {
       channel_open: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_OPEN') || '',
       channel_other: loadEnv('DISCORD_WEBHOOK_TOURNAMENT_OTHER') || '',
       contact: loadEnv('DISCORD_WEBHOOK_CONTACT') || '',
-    },
+    } as { [key: string]: string },
   },
   log: {
     level: loadEnv('LOG_LEVEL') || 'silly',
