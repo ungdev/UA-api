@@ -14,6 +14,7 @@ describe('GET /users/orgas', () => {
   let developmentRespo: User;
   let developmentMember: User;
   let networkRespo: User;
+  let vieux: User;
 
   before(async () => {
     // Do all transactions at one
@@ -46,6 +47,7 @@ describe('GET /users/orgas', () => {
         orgaRoles: [
           { commission: 'rozo', role: RoleInCommission.respo },
           { commission: 'dev', role: RoleInCommission.member },
+          { commission: 'vieux', role: RoleInCommission.member },
         ],
         orgaDisplayName: false,
         orgaDisplayUsername: true,
@@ -53,8 +55,13 @@ describe('GET /users/orgas', () => {
         orgaPhotoFilename: 'rozo-respo',
         orgaMainCommissionId: 'rozo',
       }),
+      // Create a vieux
+      createFakeUser({
+        permissions: [Permission.orga],
+        orgaRoles: [{ commission: 'vieux', role: RoleInCommission.member }],
+      }),
     ];
-    [, developmentRespo, developmentMember, networkRespo] = await Promise.all(transactions);
+    [, developmentRespo, developmentMember, networkRespo, vieux] = await Promise.all(transactions);
   });
 
   after(async () => {
@@ -131,5 +138,16 @@ describe('GET /users/orgas', () => {
     expect(body[developmentCommissionIndex].roles.member).to.have.length(1);
     expect(body[developmentCommissionIndex].roles.member[0].id).to.not.be.equal(networkRespo.id);
     expect(body[developmentCommissionIndex].roles.respo).to.have.length(0);
+  });
+
+  it('should also return the vieux commission', async () => {
+    const { body } = await request(app).get('/users/orgas?includeVieux=true').send().expect(200);
+    expect(body).to.be.an('array').with.length(3);
+    const vieuxResult = body.find((commission: { id: string }) => commission.id === 'vieux');
+    expect(vieuxResult).to.not.be.undefined;
+    expect(vieuxResult.roles.member).to.have.length(2);
+    expect([networkRespo.id, vieux.id]).to.include(vieuxResult.roles.member[0].id);
+    expect([networkRespo.id, vieux.id]).to.include(vieuxResult.roles.member[1].id);
+    expect(vieuxResult.roles.member[0].id).to.not.be.equal(vieuxResult.roles.member[1].id);
   });
 });
