@@ -613,10 +613,10 @@ export const updateTrombi = async (
   // First delete the old file, if any
   if (orga.photoFilename) {
     try {
-      await deleteFile(`orgas/${orga.photoFilename}.webp`);
+      await deleteFile(`orga/${orga.photoFilename}.webp`);
     } catch {
       logger.warn(
-        `Le fichier orgas/${orga.photoFilename}.webp n'existe pas. Cette erreur n'est pas forcément une erreur de l'API`,
+        `Le fichier orga/${orga.photoFilename}.webp n'existe pas. Cette erreur n'est pas forcément une erreur de l'API`,
       );
     }
   }
