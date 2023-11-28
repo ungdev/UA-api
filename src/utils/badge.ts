@@ -100,6 +100,8 @@ export const generateBadge = async (badges: Badge[]) => {
     const columnOffset = 190;
     const rowOffset = 280;
 
+    const pictureX2 = 841.89 - pictureX;
+
     // For loop to do multiple pages
     // Page with 'RECTO' on it
     for (let page = 0; page < Math.ceil(badges.length / (columns * rows)); page++) {
@@ -182,7 +184,7 @@ export const generateBadge = async (badges: Badge[]) => {
           if (index >= badges.length) break;
 
           // Coordonates
-          const x = pictureX + col * columnOffset;
+          const x = pictureX2 - pictureSize - col * columnOffset;
           const y = pictureY + row * rowOffset;
 
           // Background
