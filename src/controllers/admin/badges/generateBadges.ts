@@ -183,7 +183,11 @@ export default [
                   select: { nameOnBadge: true },
                 })
                 .then((commission) =>
-                  getCommissionName(field.commissionRole ?? 'member', field.commissionId ?? 'vieux', commission.nameOnBadge),
+                  getCommissionName(
+                    field.commissionRole ?? 'member',
+                    field.commissionId ?? 'vieux',
+                    commission.nameOnBadge,
+                  ),
                 ),
             });
             break;
