@@ -324,9 +324,6 @@ export const unlockTeam = async (teamId: string) => {
     }
   }
 
-  // TODO : understand why we can't put awaits here
-  deleteDiscordTeam(updatedTeam);
-  sendDiscordTeamUnlock(updatedTeam, tournament);
   return updatedTeam;
 };
 
