@@ -143,7 +143,7 @@ describe('GET /users/orgas', () => {
   it('should also return the vieux commission', async () => {
     const { body } = await request(app).get('/users/orgas?includeVieux=true').send().expect(200);
     expect(body).to.be.an('array').with.length(3);
-    const vieuxResult = body.find((commission: any) => commission.id === 'vieux');
+    const vieuxResult = body.find((commission: { id: string }) => commission.id === 'vieux');
     expect(vieuxResult).to.not.be.undefined;
     expect(vieuxResult.roles.member).to.have.length(2);
     expect([networkRespo.id, vieux.id]).to.include(vieuxResult.roles.member[0].id);

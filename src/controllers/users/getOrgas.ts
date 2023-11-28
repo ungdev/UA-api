@@ -17,7 +17,10 @@ export default [
 
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const { onlyMainCommission, includeVieux } = request.query as unknown as { onlyMainCommission: boolean; includeVieux: boolean };
+      const { onlyMainCommission, includeVieux } = request.query as unknown as {
+        onlyMainCommission: boolean;
+        includeVieux: boolean;
+      };
       if (!(await fetchSetting('trombi')).value) return forbidden(response, Error.TrombiNotAllowed);
       const orgas = await fetchOrgas();
       const commissions = await database.commission.findMany();
