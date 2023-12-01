@@ -34,4 +34,4 @@ export const removeRepoItem = async (itemId: string, userId: string) => {
 };
 
 export const fetchRepoLogs = (userId: string): Promise<RepoLog[]> =>
-  database.repoLog.findMany({ where: { forUserId: userId }, include: { item: true } });
+  database.repoLog.findMany({ where: { forUserId: userId }, include: { item: true }, orderBy: { timestamp: 'desc' } });
