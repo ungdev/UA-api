@@ -80,17 +80,22 @@ describe('GET /admin/repo/user/:userId/logs', () => {
   it('should successfully return a list of logs', async () => {
     await lockTeam(team.id);
     await database.$transaction(addRepoItem(captain.id, 'computer', 'Zone 1'));
+    await database.$transaction(addRepoItem(captain.id, 'computer', 'Zone 2'));
     const response = await request(app)
       .get(`/admin/repo/user/${captain.id}/logs`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
-    expect(response.body.logs).to.have.length(1);
-    expect(response.body.logs[0].itemType).to.be.equal('computer');
-    expect(response.body.logs[0].action).to.be.equal(RepoLogAction.added);
+    // Verify the first item added
+    expect(response.body.logs).to.have.length(2);
+    expect(response.body.logs[1].itemType).to.be.equal('computer');
+    expect(response.body.logs[1].action).to.be.equal(RepoLogAction.added);
     // We can't check the exact date, so we simply verify that the timestamp is the right one at +/- 3 seconds
     expect(Date.now() - Date.parse(response.body.logs[0].timestamp)).to.be.lessThanOrEqual(3000);
-    expect(response.body.logs[0].agent?.firstname).to.be.equal(captain.firstname);
-    expect(response.body.logs[0].agent?.lastname).to.be.equal(captain.lastname);
+    expect(response.body.logs[1].agent?.firstname).to.be.equal(captain.firstname);
+    expect(response.body.logs[1].agent?.lastname).to.be.equal(captain.lastname);
+    expect(response.body.logs[1].zone).to.be.equal('Zone 1');
+    // Verify the second item added
+    expect(response.body.logs[0].zone).to.be.equal('Zone 2');
   });
 
   it('should fail as user is a spectator', async () => {
