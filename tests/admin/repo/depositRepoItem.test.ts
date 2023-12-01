@@ -99,7 +99,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
           { type: 'computer', zone: 'Zone 2' },
         ],
       })
-      .expect(405, { error: Error.AlreadyHaveComputer });
+      .expect(405, { error: Error.CantDepositMulitpleComputers });
   });
 
   it('should successfully add a new item to the repo', async () => {
