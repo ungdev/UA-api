@@ -4,7 +4,7 @@ import { RepoItem, RepoLog } from '../types';
 import nanoid from '../utils/nanoid';
 
 export const fetchRepoItems = (userId: string): Promise<RepoItem[]> =>
-  database.repoItem.findMany({ where: { forUserId: userId, pickedUp: false } });
+  database.repoItem.findMany({ where: { forUserId: userId, pickedUp: false }, orderBy: { type: 'asc' } });
 
 export const fetchRepoItem = (itemId: string): Promise<RepoItem> =>
   database.repoItem.findUnique({ where: { id: itemId } });
