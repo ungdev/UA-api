@@ -368,6 +368,7 @@ export const enum Error {
   EtupayNoAccess = "Tu n'as pas accès à cette url",
   NotYourItem = "Cet item n'est pas le tiens",
   AlreadyHaveComputer = 'Tu as déjà un ordinateur stocké',
+  CantDepositMulitpleComputers = 'Tu ne peux pas déposer plusieurs ordinateurs',
   AlreadyPickedUp = "L'objet a déjà été récupéré",
   TooMuchLockedTeams = "Il y a plus d'équipes inscrites que le nombre d'équipes maximal souhaité",
   TournamentFull = "Le tournoi est plein, attends qu'une place se libère pour payer un ticket",
