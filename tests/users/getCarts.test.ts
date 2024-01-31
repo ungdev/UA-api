@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { UserType } from '@prisma/client';
+import { expect } from 'chai';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as cartOperations from '../../src/operations/carts';
@@ -8,7 +9,6 @@ import { Error, User } from '../../src/types';
 import { createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { fetchAllItems } from '../../src/operations/item';
-import { expect } from 'chai';
 
 describe('GET /users/current/carts', () => {
   let user: User;
@@ -53,11 +53,8 @@ describe('GET /users/current/carts', () => {
       },
     ]);
 
-    const result = await request(app)
-      .get(`/users/current/carts`)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(200);
-    
+    const result = await request(app).get(`/users/current/carts`).set('Authorization', `Bearer ${token}`).expect(200);
+
     expect(result.body).to.have.lengthOf(1);
     expect(result.body[0].cartItems[0].forUser.username).to.equal(`${user.firstname} ${user.lastname}`);
 

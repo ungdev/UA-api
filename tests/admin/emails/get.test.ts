@@ -31,14 +31,13 @@ describe('GET /admin/emails', () => {
       .expect(403, { error: Error.NoPermission });
   });
 
-  // This test is broken for no reason (after dependencies update) and breaks other tests
-  // it('should return a 500 error code', () => {
-  //   sandbox.stub(database.log, 'findMany');
-  //   return request(app)
-  //     .get(`/admin/emails`)
-  //     .set('Authorization', `Bearer ${adminToken}`)
-  //     .expect(500, { error: Error.InternalServerError });
-  // });
+  it('should return a 500 error code', () => {
+    sandbox.stub(mailOperations, 'getEmailsLogs').throws('Unexpected error');
+    return request(app)
+      .get(`/admin/emails`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
+  });
 
   it('should fetch one mail', async () => {
     const mailContent = {

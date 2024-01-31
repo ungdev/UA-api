@@ -65,8 +65,8 @@ describe('POST /auth/resendEmail', () => {
     await request(app)
       .post('/auth/resendEmail')
       .send({
-        username: "wrongusername",
-        email: "wrongemail@mail.com",
+        username: 'wrongusername',
+        email: 'wrongemail@mail.com',
         password,
       })
       .expect(401, { error: Error.InvalidCredentials });
