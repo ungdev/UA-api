@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { expect } from 'chai';
 import app from '../../../src/app';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from "../../utils";
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
@@ -16,10 +16,9 @@ describe('GET /admin/scan/', () => {
   let adminToken: string;
 
   before(async () => {
+    const tournament = await createFakeTournament({ maxTeams: 10 });
     for (let index = 0; index < 10; index++) {
-      const team = await createFakeTeam({
-        members: 1,
-      });
+      const team = await createFakeTeam({ members: 1, tournament: tournament.id });
       users.push(...team.players);
       await forcePay(users[index]);
       await lockTeam(team.id);
@@ -48,6 +47,7 @@ describe('GET /admin/scan/', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>

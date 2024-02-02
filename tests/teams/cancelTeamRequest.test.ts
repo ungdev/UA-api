@@ -5,7 +5,7 @@ import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeUser, createFakeTeam } from '../utils';
+import { createFakeUser, createFakeTeam, createFakeTournament } from "../utils";
 import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
 
@@ -15,7 +15,8 @@ describe('DELETE /teams/current/join-requests/current', () => {
   let team: Team;
 
   before(async () => {
-    team = await createFakeTeam({ members: 2 });
+    const tournament = await createFakeTournament({ playersPerTeam: 3 });
+    team = await createFakeTeam({ members: 2, tournament: tournament.id });
     user = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
     token = generateToken(user);
@@ -25,6 +26,7 @@ describe('DELETE /teams/current/join-requests/current', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail because the token is not provided', async () => {

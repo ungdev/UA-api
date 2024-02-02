@@ -82,7 +82,7 @@ export const bankCallback = [
       return forbidden(response, Error.EtupayNoAccess);
     }
     try {
-      // Retreive the base64 payload
+      // Retrieve the base64 payload
       const etupayResponse = response.locals.etupay as EtupayResponse;
 
       // Decode the base64 string to an object

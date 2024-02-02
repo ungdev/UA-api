@@ -9,16 +9,9 @@ import { createFakeTeam, createFakeTournament } from '../utils';
 import { lockTeam } from '../../src/operations/team';
 
 describe('GET /tournaments', () => {
-  after(async () => {
-    await database.team.deleteMany();
-    await database.cart.deleteMany();
-    await database.orga.deleteMany();
-    await database.user.deleteMany();
-    await database.tournament.delete({ where: { id: '1p' } });
-    await database.caster.deleteMany();
-  });
-
   before(async () => {
+    await createFakeTournament();
+    await createFakeTournament();
     await database.tournament.updateMany({
       data: {
         display: true,
@@ -26,6 +19,15 @@ describe('GET /tournaments', () => {
         displayCasters: true,
       },
     });
+  });
+
+  after(async () => {
+    await database.team.deleteMany();
+    await database.cart.deleteMany();
+    await database.orga.deleteMany();
+    await database.user.deleteMany();
+    await database.tournament.deleteMany();
+    await database.caster.deleteMany();
   });
 
   it('should fail with an internal server error', async () => {

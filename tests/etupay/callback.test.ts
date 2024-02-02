@@ -134,17 +134,15 @@ describe('POST /etupay/callback', () => {
     // Fetch the first 2 players, and force pay the others
     [lolPlayer1, lolPlayer2] = lolTeam.players;
     for (const player of lolTeam.players.slice(2)) await cartOperations.forcePay(player);
+    // Fill the tournament
+    const team = await createFakeTeam({ members: lolTournament.playersPerTeam, tournament: lolTournament.id, locked: true });
+    // Refresh the tournament
+    lolTournament = await tournamentOperations.fetchTournament(lolTournament.id);
 
     const cs2Tournament = await createFakeTournament({ name: 'Definitely CS2', playersPerTeam: 1, maxTeams: 1 });
     cs2Team = await createFakeTeam({ members: cs2Tournament.playersPerTeam, tournament: cs2Tournament.id });
     [cs2Player] = cs2Team.players;
     for (const player of cs2Team.players.slice(1)) await cartOperations.forcePay(player);
-
-    // Fill the tournament
-    await createFakeTeam({ members: lolTournament.playersPerTeam, tournament: lolTournament.id, locked: true });
-
-    // Refresh the tournament
-    lolTournament = await tournamentOperations.fetchTournament(lolTournament.id);
 
     ({ payload: lolTicket1Payload } = await createCartAndPayload(
       lolPlayer1.id,
@@ -303,7 +301,7 @@ describe('POST /etupay/callback', () => {
     expect(cs2TeamFromDatabase.enteredQueueAt).to.be.null;
   });
 
-  it('should respond api ok, lock the cs2 team but not and place the lol team in the queue', async () => {
+  it('should respond api ok, lock the cs2 team and place the lol team in the queue', async () => {
     sandbox.stub(network, 'getIp').returns('10.0.0.0');
     sandbox.stub(emailOperations, 'sendEmail').resolves();
 

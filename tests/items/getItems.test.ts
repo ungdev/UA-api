@@ -6,7 +6,7 @@ import * as itemOperations from '../../src/operations/item';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
 import { Error, User, Team, TransactionState, Cart, Item } from '../../src/types';
-import { createFakeTeam } from '../utils';
+import { createFakeTeam, createFakeTournament } from "../utils";
 import { getCaptain } from '../../src/utils/teams';
 import { generateToken } from '../../src/utils/users';
 
@@ -23,13 +23,15 @@ describe('GET /items', () => {
   let thirdCaptainCart: Cart;
 
   before(async () => {
+    const tournament = await createFakeTournament();
+    await createFakeTournament({ id: 'ssbu' });
     // This user should have the ssbu discount
     team = await createFakeTeam({ tournament: 'ssbu' });
     captain = getCaptain(team);
     captainToken = generateToken(captain);
 
     // This user shouldn't have the ssbu discount
-    otherTeam = await createFakeTeam({ tournament: 'lol' });
+    otherTeam = await createFakeTeam({ tournament: tournament.id });
     otherCaptain = getCaptain(otherTeam);
     otherCaptainToken = generateToken(otherCaptain);
 
@@ -47,6 +49,7 @@ describe('GET /items', () => {
     await database.cart.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail with an internal server error', async () => {

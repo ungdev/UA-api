@@ -122,9 +122,9 @@ describe('POST /admin/users/:userId/force-pay', () => {
       .post(`/admin/users/${player2.id}/force-pay`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
-    const lolTeamFromDatabase = (await database.team.findUnique({ where: { id: team.id } }))!;
-    expect(lolTeamFromDatabase.lockedAt).to.be.null;
-    expect(lolTeamFromDatabase.enteredQueueAt).to.not.be.null;
+    const teamFromDatabase = (await database.team.findUnique({ where: { id: team.id } }))!;
+    expect(teamFromDatabase.lockedAt).to.be.null;
+    expect(teamFromDatabase.enteredQueueAt).to.not.be.null;
     // Cancel the payment
     await database.cart.deleteMany({ where: { userId: player2.id } });
     await teamOperations.unlockTeam(team.id);

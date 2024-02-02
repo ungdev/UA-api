@@ -757,7 +757,6 @@ components:
           example: 2
         cashprize:
           type: integer
-          nullable: true
         cashprizeDetails:
           type: string
           nullable: true

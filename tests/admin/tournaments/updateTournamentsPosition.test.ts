@@ -5,15 +5,15 @@ import { sandbox } from '../../setup';
 import * as tournamentOperations from '../../../src/operations/tournament';
 import database from '../../../src/services/database';
 import { Error, Permission, Tournament, User, UserType } from '../../../src/types';
-import { createFakeUser } from '../../utils';
+import { createFakeTournament, createFakeUser } from "../../utils";
 import { generateToken } from '../../../src/utils/users';
-import { fetchTournaments } from '../../../src/operations/tournament';
 
 describe('PATCH /admin/tournaments', () => {
   let nonAdminUser: User;
   let admin: User;
   let adminToken: string;
-  let tournaments: Tournament[];
+  let tournament0: Tournament;
+  let tournament1: Tournament;
 
   let validBody: {
     tournaments: {
@@ -32,16 +32,17 @@ describe('PATCH /admin/tournaments', () => {
     nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
 
-    tournaments = await fetchTournaments();
+    tournament0 = await createFakeTournament();
+    tournament1 = await createFakeTournament();
 
     validBody = {
       tournaments: [
         {
-          id: tournaments[0].id,
+          id: tournament0.id,
           position: 1,
         },
         {
-          id: tournaments[1].id,
+          id: tournament1.id,
           position: 0,
         },
       ],
@@ -95,11 +96,11 @@ describe('PATCH /admin/tournaments', () => {
       .send({
         tournaments: [
           {
-            id: tournaments[0].id,
+            id: tournament0.id,
             position: 'aaaaaa',
           },
           {
-            id: tournaments[1].id,
+            id: tournament1.id,
             position: 0,
           },
         ],

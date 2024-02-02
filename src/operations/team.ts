@@ -136,7 +136,7 @@ export const lockTeam = async (teamId: string) => {
     // Setup team on Discord
     await setupDiscordTeam(team, tournament);
 
-    // Inform inform the Discord channel that the team has been locked out
+    // Inform the Discord channel that the team has been locked out
     await sendDiscordTeamLockout(team, await fetchTournament(tournament.id));
   } else {
     // Put the team in the waiting list
@@ -289,7 +289,7 @@ export const unlockTeam = async (teamId: string) => {
 
   // Only notify if team was locked (we don't want to notify if it was in the queue)
   if (team.lockedAt) {
-    await deleteDiscordTeam(updatedTeam);
+    await deleteDiscordTeam(updatedTeam, tournament);
     await sendDiscordTeamUnlock(updatedTeam, tournament);
   }
 

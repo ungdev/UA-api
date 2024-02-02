@@ -120,7 +120,9 @@ describe('POST /users/current/carts', () => {
   };
 
   before(async () => {
-    const team = await createFakeTeam({ members: 1, tournament: 'cs2', name: 'dontcare' });
+    const tournament = await createFakeTournament({playersPerTeam: 2, maxTeams: 2, coachesPerTeam: 1});
+    await createFakeTournament({ id: 'ssbu' });
+    const team = await createFakeTeam({ members: 1, tournament: tournament.id, name: 'dontcare' });
     user = getCaptain(team);
     token = generateToken(user);
 
@@ -137,7 +139,7 @@ describe('POST /users/current/carts', () => {
     tokenWithSwitchDiscount = generateToken(userWithSwitchDiscount);
     validCartWithSwitchDiscount.tickets.userIds.push(userWithSwitchDiscount.id);
 
-    notValidTeamWithSwitchDiscount = await createFakeTeam({ tournament: 'lol' });
+    notValidTeamWithSwitchDiscount = await createFakeTeam({ tournament: tournament.id });
     notValidUserWithSwitchDiscount = getCaptain(notValidTeamWithSwitchDiscount);
     notValidTokenWithSwitchDiscount = generateToken(notValidUserWithSwitchDiscount);
     notValidCartWithSwitchDiscount.tickets.userIds.push(notValidUserWithSwitchDiscount.id);
@@ -166,7 +168,7 @@ describe('POST /users/current/carts', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
-    await database.tournament.delete({ where: { id: fullTournament.id } });
+    await database.tournament.deleteMany();
   });
 
   it('should fail as the shop is deactivated', async () => {

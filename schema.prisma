@@ -102,7 +102,7 @@ model Tournament {
   maxPlayers             Int
   playersPerTeam         Int      @default(1)
   coachesPerTeam         Int      @default(0)
-  cashprize              Int?
+  cashprize              Int      @default(0)
   cashprizeDetails       String?
   displayCashprize       Boolean  @default(false)
   format                 String?

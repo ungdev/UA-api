@@ -4,20 +4,22 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeUser, createFakeTeam } from '../utils';
+import { Error, Team, Tournament, User, UserType } from "../../src/types";
+import { createFakeUser, createFakeTeam, createFakeTournament } from "../utils";
 import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
 
 describe('DELETE /teams/current/join-requests/:userId', () => {
+  let tournament: Tournament;
   let user: User;
   let captain: User;
   let captainToken: string;
   let team: Team;
 
   before(async () => {
-    team = await createFakeTeam({ members: 2 });
+    tournament = await createFakeTournament({playersPerTeam: 2});
+    team = await createFakeTeam({ members: 2, tournament:tournament.id });
     user = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
 
@@ -29,6 +31,7 @@ describe('DELETE /teams/current/join-requests/:userId', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail because the token is not provided', async () => {
@@ -63,7 +66,7 @@ describe('DELETE /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail as the user is the captain of another team', async () => {
-    const otherTeam = await createFakeTeam();
+    const otherTeam = await createFakeTeam({tournament: tournament.id});
     const otherCaptain = getCaptain(otherTeam);
     const otherCaptainToken = generateToken(otherCaptain);
 
@@ -81,7 +84,7 @@ describe('DELETE /teams/current/join-requests/:userId', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should succesfully cancel the team joining', async () => {
+  it('should successfully cancel the team joining', async () => {
     await request(app)
       .delete(`/teams/current/join-requests/${user.id}`)
       .set('Authorization', `Bearer ${captainToken}`)
