@@ -18,6 +18,7 @@ describe('PATCH /admin/items', () => {
   let validBody: { items: { id: string; position: number }[] };
 
   after(async () => {
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -37,8 +38,8 @@ describe('PATCH /admin/items', () => {
       ],
     };
 
-    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser();
+    admin = await createFakeUser({ permissions: [Permission.admin] });
+    nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
   });
 

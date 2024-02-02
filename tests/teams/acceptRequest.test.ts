@@ -33,7 +33,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
     user2 = await createFakeUser({ paid: true, type: UserType.player });
     await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
     await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
-    fullTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true });
+    fullTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true });
     fullCaptain = getCaptain(fullTeam);
     fullToken = generateToken(fullCaptain);
     // Fill the tournament
@@ -57,6 +57,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -65,7 +66,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail because the user is a random with no rights', async () => {
-    const randomUser = await createFakeUser();
+    const randomUser = await createFakeUser({ type: UserType.player });
     const randomUserToken = generateToken(randomUser);
 
     await request(app)
@@ -111,7 +112,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail as the team is full', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(fullTeam.id, otherUser.id, UserType.player);
 
     await request(app)
@@ -121,7 +122,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should succeed to join a full team as a coach', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
 
     await teamOperations.askJoinTeam(fullTeam.id, otherUser.id, UserType.coach);
 
@@ -136,9 +137,9 @@ describe('POST /teams/current/join-requests/:userId', () => {
 
   it('should fail to join the team as a coach because there are already 2 coaches', async () => {
     // There is only one coach for the moment
-    const coach = await createFakeUser();
+    const coach = await createFakeUser({ type: UserType.player });
     await teamOperations.joinTeam(fullTeam.id, coach, UserType.coach);
-    const willNotJoinCoach = await createFakeUser();
+    const willNotJoinCoach = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(fullTeam.id, willNotJoinCoach.id, UserType.coach);
     await request(app)
       .post(`/teams/current/join-requests/${willNotJoinCoach.id}`)
@@ -150,7 +151,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should successfully join the 1-player team as a coach', async () => {
-    const coach = await createFakeUser();
+    const coach = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(onePlayerTeam.id, coach.id, UserType.coach);
     await request(app)
       .post(`/teams/current/join-requests/${coach.id}`)
@@ -162,7 +163,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail to join the 1-player team as a coach because there is already a coach', async () => {
-    const coach = await createFakeUser();
+    const coach = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(onePlayerTeam.id, coach.id, UserType.coach);
     await request(app)
       .post(`/teams/current/join-requests/${coach.id}`)
@@ -292,8 +293,9 @@ describe('POST /teams/current/join-requests/:userId', () => {
 
     // Remove a team from the tournament
     const tournament = await tournamentOperations.fetchTournament('lol');
-    const teamToRemove = tournament.teams.find((pTeam) => pTeam.id !== team.id);
-    await teamOperations.unlockTeam(teamToRemove.id);
+    const teamToRemove = tournament.teams.find((pTeam) => pTeam.lockedAt)!;
+    await teamOperations.deleteTeam(teamToRemove);
+    await teamOperations.deleteTeam(tournament.teams.find((pTeam) => pTeam.lockedAt && pTeam.id !== teamToRemove.id)!);
 
     await request(app)
       .post(`/teams/current/join-requests/${user2.id}`)
@@ -308,9 +310,6 @@ describe('POST /teams/current/join-requests/:userId', () => {
     // Remove the user
     await teamOperations.kickUser(await userOperations.fetchUser(user2.id));
     await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
-
-    // Readd the removed team from the tournament
-    await teamOperations.lockTeam(teamToRemove.id);
   });
 
   it('should fail because the user is already in a team', async () => {

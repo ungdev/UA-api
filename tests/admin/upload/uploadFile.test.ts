@@ -1,31 +1,18 @@
 import request from 'supertest';
-import sharp from 'sharp';
 import app from '../../../src/app';
 import { sandbox } from '../../setup';
 import * as uploadOperation from '../../../src/operations/upload';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
-import { createFakeUser } from '../../utils';
+import { createFakeUser, generateDummyJpgBuffer, generateDummyPngBuffer } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
+import * as uploads from '../../upload';
 
 describe('POST /admin/upload', () => {
   let nonAdminUser: User;
+  let orga: User;
   let admin: User;
   let adminToken: string;
-
-  function generateDummyJpgBuffer(size: number) {
-    const sizeInPixels = Math.ceil(Math.sqrt(size / 3));
-    return sharp({
-      create: {
-        width: sizeInPixels,
-        height: sizeInPixels,
-        channels: 3,
-        background: { r: 255, g: 255, b: 255 },
-      },
-    })
-      .jpeg()
-      .toBuffer();
-  }
 
   const validObject = {
     name: 'test',
@@ -33,24 +20,52 @@ describe('POST /admin/upload', () => {
   };
 
   after(async () => {
+    await database.orga.deleteMany();
     await database.user.deleteMany();
+    uploads.existingFiles.splice(uploads.existingFiles.indexOf('orga/test.webp'), 1);
   });
 
   before(async () => {
-    admin = await createFakeUser({ type: UserType.orga, permissions: [Permission.admin] });
-    nonAdminUser = await createFakeUser();
+    admin = await createFakeUser({ permissions: [Permission.admin] });
+    orga = await createFakeUser({ permissions: [Permission.orga] });
+    nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
   });
 
   it('should error as the user is not authenticated', () =>
     request(app).post(`/admin/upload`).expect(401, { error: Error.Unauthenticated }));
 
-  it('should error as the user is not an administrator', () => {
+  it('should error as the user is a player', async () => {
     const userToken = generateToken(nonAdminUser);
     return request(app)
       .post(`/admin/upload`)
+      .field('name', validObject.name)
+      .field('path', validObject.path)
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${userToken}`)
       .expect(403, { error: Error.NoPermission });
+  });
+
+  it('should error as the user is not an administrator', async () => {
+    const orgaToken = generateToken(orga);
+    return request(app)
+      .post(`/admin/upload`)
+      .field('name', validObject.name)
+      .field('path', validObject.path)
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
+      .set('Authorization', `Bearer ${orgaToken}`)
+      .expect(403, { error: Error.NoPermission });
+  });
+
+  it('should succeed as the user is calling orga path', async () => {
+    const orgaToken = generateToken(orga);
+    return request(app)
+      .post(`/admin/upload`)
+      .field('name', validObject.name)
+      .field('path', 'orga')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
+      .set('Authorization', `Bearer ${orgaToken}`)
+      .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
   });
 
   it('should fail with an internal server error', async () => {
@@ -60,7 +75,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(500, { error: Error.InternalServerError });
   });
@@ -69,7 +84,7 @@ describe('POST /admin/upload', () => {
     await request(app)
       .post(`/admin/upload`)
       .field('name', validObject.name)
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(400);
   });
@@ -79,7 +94,7 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', await generateDummyJpgBuffer(100000000), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(100000000), 'test.webp')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: "La taille maximale d'un fichier est de 5MB" });
   });
@@ -99,18 +114,30 @@ describe('POST /admin/upload', () => {
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', 'test')
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), 'test.webp')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 1, message: "Le chemin n'est pas autorisé" });
   });
 
-  it('should successfully upload the file', async () => {
+  it('should successfully upload the file with a jpg', async () => {
     await request(app)
       .post(`/admin/upload`)
       .field('name', validObject.name)
       .field('path', validObject.path)
-      .attach('file', await generateDummyJpgBuffer(1), 'test.jpg')
+      .attach('file', await generateDummyJpgBuffer(1), { filename: 'test.jpg', contentType: 'image/jpeg' })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
+    uploads.existingFiles.splice(uploads.existingFiles.indexOf('tournaments/test.webp'), 1);
+  });
+
+  it('should successfully upload the file with a png', async () => {
+    await request(app)
+      .post(`/admin/upload`)
+      .field('name', validObject.name)
+      .field('path', validObject.path)
+      .attach('file', await generateDummyPngBuffer(1), { filename: 'test.png', contentType: 'image/png' })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { status: 0, message: 'Fichier téléversé avec succès' });
+    uploads.existingFiles.splice(uploads.existingFiles.indexOf('tournaments/test.webp'), 1);
   });
 });

@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeUser, createFakeTeam } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User, Team } from '../../../src/types';
+import { Error, Permission, User, Team, UserType } from '../../../src/types';
 import * as userUtils from '../../../src/utils/users';
 import * as teamUtils from '../../../src/utils/teams';
 import { encrypt } from '../../../src/utils/helpers';
@@ -19,9 +19,9 @@ describe('GET /admin/repo/user', () => {
   let captain: User;
 
   before(async () => {
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = userUtils.generateToken(admin);
-    nonAdmin = await createFakeUser();
+    nonAdmin = await createFakeUser({ type: UserType.player });
     nonAdminToken = userUtils.generateToken(nonAdmin);
     team = await createFakeTeam();
     captain = teamUtils.getCaptain(team);
@@ -31,6 +31,7 @@ describe('GET /admin/repo/user', () => {
     await database.repoLog.deleteMany();
     await database.repoItem.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -98,6 +99,7 @@ describe('GET /admin/repo/user', () => {
   });
 
   it('should successfully return a list of items', async () => {
+    await database.repoItem.create({ data: { id: 'FEDCBA', type: 'monitor', forUserId: captain.id, zone: 'Zone 2' } });
     await database.repoItem.create({ data: { id: 'ABCDEF', type: 'computer', forUserId: captain.id, zone: 'Zone 1' } });
     const response = await request(app)
       .get(`/admin/repo/user?id=${encodeURIComponent(encrypt(captain.id).toString('base64'))}`)
@@ -107,10 +109,11 @@ describe('GET /admin/repo/user', () => {
     expect(response.body.lastname).to.be.equal(captain.lastname);
     expect(response.body.place).to.be.equal(captain.place);
     expect(response.body.id).to.be.equal(captain.id);
-    expect(response.body.repoItems).to.have.length(1);
+    expect(response.body.repoItems).to.have.length(2);
     expect(response.body.repoItems[0].type).to.be.equal('computer');
     expect(response.body.repoItems[0].id).to.be.equal('ABCDEF');
     expect(response.body.repoItems[0].zone).to.be.equal('Zone 1');
+    expect(response.body.repoItems[1].type).to.be.equal('monitor');
   });
 
   it('should  fail as user is a spectator', async () => {

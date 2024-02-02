@@ -9,10 +9,12 @@ import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
 import { forcePay } from '../../../src/operations/carts';
 import { deleteRole, kickMember, registerMember, registerRole, resetFakeDiscord } from '../../discord';
+import { fetchOrga } from '../../../src/operations/user';
 
 describe('PATCH /admin/users/:userId', () => {
   let user: User;
   let adminToken: string;
+  let anim: User;
   let animToken: string;
   let tournamentDiscordId: string;
 
@@ -38,19 +40,21 @@ describe('PATCH /admin/users/:userId', () => {
   };
 
   before(async () => {
-    user = await createFakeUser();
+    user = await createFakeUser({ type: UserType.player });
     registerMember(user.discordId!);
-    const admin = await createFakeUser({ permissions: [Permission.admin] });
+    const admin = await createFakeUser({ permissions: [Permission.admin, Permission.orga], type: UserType.player });
     adminToken = generateToken(admin);
-    const anim = await createFakeUser({ permissions: [Permission.anim] });
+    anim = await createFakeUser({ permissions: [Permission.anim, Permission.orga], type: UserType.player });
     animToken = generateToken(anim);
   });
 
   after(async () => {
     // Delete the user created
     resetFakeDiscord();
+    await database.orgaRole.deleteMany();
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -104,29 +108,29 @@ describe('PATCH /admin/users/:userId', () => {
 
     const updatedUser = await userOperations.fetchUser(teamMember.id);
 
-    expect(body.type).to.be.equal(validBody.type);
-    expect(body.place).to.be.equal(validBody.place);
-    expect(body.permissions).to.have.same.members(validBody.permissions!);
-    expect(body.age).to.be.equal(validBody.age);
+    expect(body.data.type).to.be.equal(validBody.type);
+    expect(body.data.place).to.be.equal(validBody.place);
+    expect(body.data.permissions).to.have.same.members(validBody.permissions!);
+    expect(body.data.age).to.be.equal(validBody.age);
     expect(body.customMessage).to.be.equal(validBody.customMessage);
-    expect(body.email).to.be.equal(validBody.email);
-    expect(body.firstname).to.be.equal(validBody.firstname);
-    expect(body.lastname).to.be.equal(validBody.lastname);
-    expect(body.username).to.be.equal(validBody.username);
-    expect(body.discordId).to.be.equal(validBody.discordId);
-    expect(body.teamId).to.be.equal(team.id);
+    expect(body.data.email).to.be.equal(validBody.email);
+    expect(body.data.firstname).to.be.equal(validBody.firstname);
+    expect(body.data.lastname).to.be.equal(validBody.lastname);
+    expect(body.data.username).to.be.equal(validBody.username);
+    expect(body.data.discordId).to.be.equal(validBody.discordId);
+    expect(body.data.teamId).to.be.equal(team.id);
 
-    expect(body.type).to.be.equal(updatedUser.type);
-    expect(body.place).to.be.equal(updatedUser.place);
-    expect(body.teamId).to.be.equal(updatedUser.teamId);
-    expect(body.permissions).to.have.same.members(updatedUser.permissions);
-    expect(body.age).to.be.equal(updatedUser.age);
+    expect(body.data.type).to.be.equal(updatedUser.type);
+    expect(body.data.place).to.be.equal(updatedUser.place);
+    expect(body.data.teamId).to.be.equal(updatedUser.teamId);
+    expect(body.data.permissions).to.have.same.members(updatedUser.permissions);
+    expect(body.data.age).to.be.equal(updatedUser.age);
     expect(body.customMessage).to.be.equal(updatedUser.customMessage);
-    expect(body.email).to.be.equal(updatedUser.email);
-    expect(body.firstname).to.be.equal(updatedUser.firstname);
-    expect(body.lastname).to.be.equal(updatedUser.lastname);
-    expect(body.username).to.be.equal(updatedUser.username);
-    expect(body.discordId).to.be.equal(updatedUser.discordId);
+    expect(body.data.email).to.be.equal(updatedUser.email);
+    expect(body.data.firstname).to.be.equal(updatedUser.firstname);
+    expect(body.data.lastname).to.be.equal(updatedUser.lastname);
+    expect(body.data.username).to.be.equal(updatedUser.username);
+    expect(body.data.discordId).to.be.equal(updatedUser.discordId);
   });
 
   it('should update the user and remove him from his team', async () => {
@@ -156,9 +160,9 @@ describe('PATCH /admin/users/:userId', () => {
 
     const updatedUser = await userOperations.fetchUser(teamMember!.id);
 
-    expect(body.type).to.be.equal(UserType.spectator);
-    expect(body.type).to.be.equal(updatedUser.type);
-    expect(body.teamId).to.be.equal(updatedUser.teamId);
+    expect(body.data.type).to.be.equal(UserType.spectator);
+    expect(body.data.type).to.be.equal(updatedUser.type);
+    expect(body.data.teamId).to.be.equal(updatedUser.teamId);
   });
 
   it('should work if body is incomplete', async () => {
@@ -171,7 +175,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.type).to.be.equal(UserType.coach);
+    expect(body.data.type).to.be.equal(UserType.coach);
   });
 
   it('should be able to update discordId only (no team)', async () => {
@@ -184,7 +188,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal(fakeGuildMemberId);
+    expect(body.data.discordId).to.be.equal(fakeGuildMemberId);
     kickMember(fakeGuildMemberId);
   });
 
@@ -205,7 +209,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal(newAccount);
+    expect(body.data.discordId).to.be.equal(newAccount);
     deleteRole(team.discordRoleId!);
   });
 
@@ -226,7 +230,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal(newAccount);
+    expect(body.data.discordId).to.be.equal(newAccount);
 
     deleteRole(team.discordRoleId!);
   });
@@ -248,7 +252,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal(newDiscordId);
+    expect(body.data.discordId).to.be.equal(newDiscordId);
   });
 
   it('should be able to update discordId only (team not locked)', async () => {
@@ -266,7 +270,7 @@ describe('PATCH /admin/users/:userId', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
-    expect(body.discordId).to.be.equal(newDiscordId);
+    expect(body.data.discordId).to.be.equal(newDiscordId);
   });
 
   it('should be able to update customMessage only', async () => {
@@ -319,8 +323,17 @@ describe('PATCH /admin/users/:userId', () => {
       })
       .expect(403, { error: Error.NoPermission }));
 
+  it('should return an error as the commission does not exist', () =>
+    request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        orgaRoles: [{ commissionRole: 'member', commission: 'random' }],
+      })
+      .expect(404, { error: Error.CommissionNotFound }));
+
   it('should allow an anim to alter a user', async () => {
-    const randomUser = await createFakeUser();
+    const randomUser = await createFakeUser({ type: UserType.player });
     delete validAnimBody.permissions;
 
     const { body } = await request(app)
@@ -331,17 +344,17 @@ describe('PATCH /admin/users/:userId', () => {
 
     const updatedUser = await userOperations.fetchUser(randomUser.id);
 
-    expect(body.type).to.be.equal(validAnimBody.type);
-    expect(body.type).to.be.equal(updatedUser.type);
-    expect(body.teamId).to.be.equal(updatedUser.teamId);
-    expect(body.place).to.be.equal(validAnimBody.place);
-    expect(body.age).to.be.equal(validAnimBody.age);
+    expect(body.data.type).to.be.equal(validAnimBody.type);
+    expect(body.data.type).to.be.equal(updatedUser.type);
+    expect(body.data.teamId).to.be.equal(updatedUser.teamId);
+    expect(body.data.place).to.be.equal(validAnimBody.place);
+    expect(body.data.age).to.be.equal(validAnimBody.age);
     expect(body.customMessage).to.be.equal(validAnimBody.customMessage);
-    expect(body.email).to.be.equal(validAnimBody.email);
-    expect(body.firstname).to.be.equal(validAnimBody.firstname);
-    expect(body.lastname).to.be.equal(validAnimBody.lastname);
-    expect(body.username).to.be.equal(validAnimBody.username);
-    expect(body.discordId).to.be.equal(validAnimBody.discordId);
+    expect(body.data.email).to.be.equal(validAnimBody.email);
+    expect(body.data.firstname).to.be.equal(validAnimBody.firstname);
+    expect(body.data.lastname).to.be.equal(validAnimBody.lastname);
+    expect(body.data.username).to.be.equal(validAnimBody.username);
+    expect(body.data.discordId).to.be.equal(validAnimBody.discordId);
   });
 
   it('should fail as the user has already paid and wants to change its type', async () => {
@@ -355,7 +368,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should remove all permissions from the user', async () => {
-    const permissibleUser = await createFakeUser({ permissions: [Permission.stream] });
+    const permissibleUser = await createFakeUser({ permissions: [Permission.stream], type: UserType.player });
 
     const { body } = await request(app)
       .patch(`/admin/users/${permissibleUser.id}`)
@@ -367,17 +380,18 @@ describe('PATCH /admin/users/:userId', () => {
 
     const updatedUser = await userOperations.fetchUser(permissibleUser.id);
 
-    expect(body.permissions).to.have.lengthOf(0);
+    expect(body.data.permissions).to.have.lengthOf(0);
     expect(updatedUser.permissions).to.have.lengthOf(0);
-    expect(body.discordId).to.be.equal(permissibleUser.discordId);
-    expect(body.place).to.be.equal(permissibleUser.place);
-    expect(body.type).to.be.equal(permissibleUser.type);
-    expect(body.age).to.be.equal(permissibleUser.age);
+    expect(body.data.discordId).to.be.equal(permissibleUser.discordId);
+    expect(body.data.place).to.be.equal(permissibleUser.place);
+    expect(body.data.type).to.be.equal(permissibleUser.type);
+    expect(body.data.age).to.be.equal(permissibleUser.age);
     expect(body.customMessage).to.be.equal(permissibleUser.customMessage);
+    expect(body.data.orga).to.be.null;
   });
 
   it('should add permissions to the user', async () => {
-    const permissibleUser = await createFakeUser();
+    const permissibleUser = await createFakeUser({ type: UserType.player });
 
     const { body } = await request(app)
       .patch(`/admin/users/${permissibleUser.id}`)
@@ -389,12 +403,99 @@ describe('PATCH /admin/users/:userId', () => {
 
     const updatedUser = await userOperations.fetchUser(permissibleUser.id);
 
-    expect(body.permissions).to.include(Permission.stream);
+    expect(body.data.permissions).to.include(Permission.stream);
     expect(updatedUser.permissions).to.include(Permission.stream);
-    expect(body.discordId).to.be.equal(permissibleUser.discordId);
-    expect(body.place).to.be.equal(permissibleUser.place);
-    expect(body.type).to.be.equal(permissibleUser.type);
-    expect(body.age).to.be.equal(permissibleUser.age);
+    expect(body.data.discordId).to.be.equal(permissibleUser.discordId);
+    expect(body.data.place).to.be.equal(permissibleUser.place);
+    expect(body.data.type).to.be.equal(permissibleUser.type);
+    expect(body.data.age).to.be.equal(permissibleUser.age);
     expect(body.customMessage).to.be.equal(permissibleUser.customMessage);
   });
+
+  it('should add 2 commissions to the anim orga', async () => {
+    const { body } = await request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        orgaRoles: [
+          { commissionRole: 'member', commission: 'animation_ssbu' },
+          { commissionRole: 'member', commission: 'animation_cs2' },
+        ],
+        orgaMainCommission: 'animation_ssbu',
+      })
+      .expect(200);
+    expect(body.data.orga).to.not.be.null;
+    const orga = await fetchOrga(anim);
+    expect(orga.roles).to.have.length(2);
+    expect(orga.mainCommissionId).to.be.equal('animation_ssbu');
+  });
+
+  it('should remove 1 commission to the anim orga, add 1 new commission and promote the orga in one commission', async () => {
+    await request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        orgaRoles: [
+          { commissionRole: 'respo', commission: 'animation_ssbu' },
+          { commissionRole: 'member', commission: 'animation_lol' },
+        ],
+      })
+      .expect(200);
+    const orga = await fetchOrga(anim);
+    expect(orga.roles).to.have.length(2);
+    expect(orga.roles[0].commission.id).to.be.equal('animation_lol');
+    expect(orga.roles[0].commissionRole).to.be.equal('member');
+    expect(orga.roles[1].commission.id).to.be.equal('animation_ssbu');
+    expect(orga.roles[1].commissionRole).to.be.equal('respo');
+  });
+
+  it('should fail as the main commission we are trying to set is not a commission of the orga', async () => {
+    await request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ orgaMainCommission: 'coord' })
+      .expect(403, { error: Error.MainCommissionMustBeInList });
+  });
+
+  it('should fail as we are trying to set the main commission to a commission we are removing', async () => {
+    await request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ orgaMainCommission: 'animation_ssbu', orgaRoles: [] })
+      .expect(403, { error: Error.MainCommissionMustBeInList });
+  });
+
+  it('should set the main commission to the orga', async () => {
+    await request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ orgaMainCommission: 'animation_ssbu' })
+      .expect(200);
+    const orga = await fetchOrga(anim);
+    expect(orga.mainCommission.id).to.be.equal('animation_ssbu');
+  });
+
+  it('should fail as we are trying to remove a commission to the orga, and that commission is his main one', () =>
+    request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ orgaRoles: [] })
+      .expect(403, { error: Error.MainCommissionMustBeInList }));
+
+  it('should change the main commission of the orga and remove the old one from the list of commissions', () =>
+    request(app)
+      .patch(`/admin/users/${anim.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        orgaRoles: [{ commissionRole: 'respo', commission: 'animation_lol' }],
+        orgaMainCommission: 'animation_lol',
+      })
+      .expect(200));
+
+  it('should fail to add a commission to the user as the user is not an organizer', () =>
+    request(app)
+      .patch(`/admin/users/${user.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ orgaRoles: [{ commissionRole: 'respo', commission: 'animation_lol' }] })
+      .expect(403, { error: Error.IsNotOrga }));
 });

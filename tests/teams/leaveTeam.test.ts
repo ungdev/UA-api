@@ -55,6 +55,7 @@ describe('DELETE /teams/current/users/current', () => {
     await database.team.deleteMany();
     // User have paid, so they each have a cart
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

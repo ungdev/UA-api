@@ -6,7 +6,6 @@ import {
   UserType,
   PrimitiveTeam,
   RawUser,
-  RawUserWithCartItems,
   PrimitiveTeamWithPrimitiveUsers,
   PrimitiveTeamWithPartialTournament,
 } from '../types';
@@ -24,15 +23,20 @@ const teamInclusions = {
   },
 };
 
-export const getPositionInQueue = (team: Team): Promise<number | undefined> => {
+export const getPositionInQueue = (team: PrimitiveTeam): Promise<number | null> => {
   if (!team.enteredQueueAt) return null;
   return database.team.count({
-    where: { AND: [{ enteredQueueAt: { not: null } }, { enteredQueueAt: { lte: team.enteredQueueAt } }] },
+    where: {
+      tournamentId: team.tournamentId,
+      AND: [{ enteredQueueAt: { not: null } }, { enteredQueueAt: { lte: team.enteredQueueAt } }],
+    },
   });
 };
 
 export const formatTeam = (
-  team: PrimitiveTeam & { users: RawUserWithCartItems[]; askingUsers: RawUserWithCartItems[] },
+  team: PrimitiveTeamWithPrimitiveUsers & {
+    positionInQueue: number | null;
+  },
 ): Team => {
   if (!team) return null;
 
@@ -48,10 +52,16 @@ export const formatTeam = (
   };
 };
 
-export const fetchTeam = async (id: string): Promise<Team> => {
-  const team = await database.team.findUnique({ where: { id }, include: teamInclusions });
+export const formatPrimitiveTeam = async (team: PrimitiveTeamWithPrimitiveUsers): Promise<Team> =>
+  formatTeam({ ...team, positionInQueue: await getPositionInQueue(team) });
 
-  return formatTeam(team);
+export const fetchTeam = async (id: string): Promise<Team> | undefined => {
+  const team: PrimitiveTeamWithPrimitiveUsers = await database.team.findUnique({
+    where: { id },
+    include: teamInclusions,
+  });
+
+  return team ? formatPrimitiveTeam(team) : undefined;
 };
 
 export const fetchTeamWithTournament = (id: string): Promise<PrimitiveTeamWithPartialTournament> =>
@@ -75,7 +85,7 @@ export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
     include: teamInclusions,
   });
 
-  return teams.map(formatTeam);
+  return Promise.all(teams.map(formatPrimitiveTeam));
 };
 
 export const lockTeam = async (teamId: string) => {
@@ -141,7 +151,7 @@ export const lockTeam = async (teamId: string) => {
     });
   }
 
-  return formatTeam(updatedTeam);
+  return formatPrimitiveTeam(updatedTeam);
 };
 
 export const createTeam = async (
@@ -187,8 +197,8 @@ export const createTeam = async (
     include: teamInclusions,
   });
 
-  // Verify if team need to be locked
-  const newTeam = formatTeam(team);
+  // Verify if team needs to be locked
+  const newTeam = await formatPrimitiveTeam(team);
   const tournament = await fetchTournament(newTeam.tournamentId);
   if (newTeam.players.length === tournament.playersPerTeam && newTeam.players.every((player) => player.hasPaid)) {
     await lockTeam(newTeam.id);
@@ -208,7 +218,7 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
     include: teamInclusions,
   });
 
-  return formatTeam(team);
+  return formatPrimitiveTeam(team);
 };
 
 export const askJoinTeam = async (teamId: string, userId: string, userType: UserType) => {
@@ -260,27 +270,29 @@ export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise
   });
 
 export const unlockTeam = async (teamId: string) => {
+  const team = await fetchTeam(teamId);
+  if (!team.lockedAt && !team.enteredQueueAt) return null;
   // We use the updateMany, because we may update no team
-  const updateCount = await database.team.updateMany({
+  await database.team.update({
     data: {
       lockedAt: null,
       enteredQueueAt: null,
     },
     where: {
       id: teamId,
-      // If the team is not locked nor in the queue, then we don't want to modify it, that allows us to have updatedTeam === undefined;
-      NOT: {
-        lockedAt: null,
-        enteredQueueAt: null,
-      },
     },
   });
-
-  if (updateCount.count === 0) return null;
 
   const updatedTeam = await fetchTeam(teamId);
 
   const tournament = await fetchTournament(updatedTeam.tournamentId);
+
+  // Only notify if team was locked (we don't want to notify if it was in the queue)
+  if (team.lockedAt) {
+    await deleteDiscordTeam(updatedTeam);
+    await sendDiscordTeamUnlock(updatedTeam, tournament);
+  }
+
   // We freed a place, so there is at least one place left
   // (except if the team was already in the queue, but then we want to skip the condition, so that's fine)
   if (tournament.placesLeft === 1) {
@@ -311,10 +323,6 @@ export const unlockTeam = async (teamId: string) => {
       await lockTeam(firstTeamInQueue.id);
     }
   }
-
-  // TODO : understand why we can't put awaits here
-  deleteDiscordTeam(updatedTeam);
-  sendDiscordTeamUnlock(updatedTeam, tournament);
 
   return updatedTeam;
 };

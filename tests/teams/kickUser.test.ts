@@ -51,6 +51,7 @@ describe('DELETE /teams/current/users/:userId', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -59,7 +60,7 @@ describe('DELETE /teams/current/users/:userId', () => {
   });
 
   it('should fail because the user is a random with no rights', async () => {
-    const randomUser = await createFakeUser();
+    const randomUser = await createFakeUser({ type: UserType.player });
     const randomUserToken = generateToken(randomUser);
 
     await request(app)

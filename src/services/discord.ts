@@ -105,29 +105,6 @@ export const fetchDiscordUser = async (discordApiToken: DiscordToken) => {
   return userRequest.data.user;
 };
 
-export const createDiscordChannel = async (requestBody: DiscordCreateChannelRequest) => {
-  const response = await bot.post<DiscordChannel>(`guilds/${env.discord.server}/channels`, requestBody);
-
-  return response.data;
-};
-
-export const deleteDiscordChannel = async (channelId: string) => {
-  const response = await bot.delete<DiscordChannel>(`channels/${channelId}`);
-
-  return response.data;
-};
-
-export const deleteDiscordRole = (roleId: string) => bot.delete(`guilds/${env.discord.server}/roles/${roleId}`);
-
-/**
- * Create a discord role
- */
-export const createDiscordRole = async (requestBody: DiscordCreateRoleRequest) => {
-  const response = await bot.post<DiscordRole>(`guilds/${env.discord.server}/roles`, requestBody);
-
-  return response.data;
-};
-
 export const rateLimitedRequest = async <T>(handler: () => Promise<AxiosResponse<T>>): Promise<T> => {
   try {
     const response = await handler();
@@ -149,6 +126,21 @@ export const rateLimitedRequest = async <T>(handler: () => Promise<AxiosResponse
     throw error;
   }
 };
+
+export const createDiscordChannel = (requestBody: DiscordCreateChannelRequest) =>
+  rateLimitedRequest(() => bot.post<DiscordChannel>(`guilds/${env.discord.server}/channels`, requestBody));
+
+export const deleteDiscordChannel = (channelId: string) =>
+  rateLimitedRequest(() => bot.delete<DiscordChannel>(`channels/${channelId}`));
+
+export const deleteDiscordRole = (roleId: string) =>
+  rateLimitedRequest<{}>(() => bot.delete(`guilds/${env.discord.server}/roles/${roleId}`));
+
+/**
+ * Create a discord role
+ */
+export const createDiscordRole = (requestBody: DiscordCreateRoleRequest) =>
+  rateLimitedRequest<DiscordRole>(() => bot.post<DiscordRole>(`guilds/${env.discord.server}/roles`, requestBody));
 
 /**
  * Fetches a single {@link DiscordGuildMember}. Checks if the next request is about to be rate limited,

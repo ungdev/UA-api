@@ -5,12 +5,16 @@ import { sandbox } from '../setup';
 import * as tournamentOperations from '../../src/operations/tournament';
 import database from '../../src/services/database';
 import { Error } from '../../src/types';
-import { createFakeTeam } from '../utils';
+import { createFakeTeam, createFakeTournament } from '../utils';
+import { lockTeam } from '../../src/operations/team';
 
 describe('GET /tournaments', () => {
   after(async () => {
     await database.team.deleteMany();
+    await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.delete({ where: { id: '1p' } });
     await database.caster.deleteMany();
   });
 
@@ -121,5 +125,61 @@ describe('GET /tournaments', () => {
     expect(response.body[0].casters).to.be.null;
     expect(response.body[1].teams[0].players[0].id).to.be.a('string');
     expect(response.body[1].teams[0].players[0].firstname).to.be.undefined;
+  });
+
+  it('should return positionInQueue in the endpoint response', async () => {
+    const tournament = await createFakeTournament({
+      id: '1p',
+      name: 'To1Player',
+      playersPerTeam: 1,
+      coachesPerTeam: 0,
+      maxTeams: 1,
+    });
+    await database.tournament.update({
+      where: {
+        id: tournament.id,
+      },
+      data: {
+        display: true,
+        displayCashprize: false,
+        displayCasters: false,
+      },
+    });
+    const team1 = await createFakeTeam({ members: tournament.playersPerTeam, tournament: tournament.id, paid: true });
+    await lockTeam(team1.id);
+    const team2 = await createFakeTeam({ members: tournament.playersPerTeam, tournament: tournament.id, paid: true });
+    await lockTeam(team2.id);
+    const team3 = await createFakeTeam({ members: tournament.playersPerTeam, tournament: tournament.id, paid: true });
+    await lockTeam(team3.id);
+
+    const response = await request(app).get('/tournaments').expect(200);
+    const teamList = response.body[0].teams;
+    expect(teamList.length).to.be.equal(3);
+    for (const element of teamList) {
+      switch (element.id) {
+        case team1.id: {
+          expect(element.lockedAt).to.be.not.null;
+          expect(element.positionInQueue).to.be.null;
+
+          break;
+        }
+        case team2.id: {
+          expect(element.lockedAt).to.be.null;
+          expect(element.positionInQueue).to.be.equal(1);
+
+          break;
+        }
+        case team3.id: {
+          expect(element.lockedAt).to.be.null;
+          expect(element.positionInQueue).to.be.equal(2);
+
+          break;
+        }
+        default: {
+          // This should never happen
+          expect(false).to.be.true;
+        }
+      }
+    }
   });
 });

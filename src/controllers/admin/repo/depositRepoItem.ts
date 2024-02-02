@@ -51,8 +51,12 @@ export default [
       }
 
       const isStoringPC = !!(await findItemOfType(user.id, RepoItemType.computer));
-      if ((isStoringPC ? 1 : 0) + items.filter((item) => item.type === RepoItemType.computer).length > 1) {
+      const computersInBody = items.filter((item) => item.type === RepoItemType.computer).length;
+      if (isStoringPC && computersInBody > 0) {
         return methodNotSupported(response, ResponseError.AlreadyHaveComputer);
+      }
+      if (computersInBody > 1) {
+        return methodNotSupported(response, ResponseError.CantDepositMulitpleComputers);
       }
 
       await addRepoItems(

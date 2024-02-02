@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import app from '../../../src/app';
 import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Cart, Error, Permission, User, TransactionState, Team } from '../../../src/types';
+import { Cart, Error, Permission, User, TransactionState, Team, UserType } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import * as teamOperations from '../../../src/operations/team';
 import * as tournamentOperations from '../../../src/operations/tournament';
@@ -62,6 +62,7 @@ describe('POST /admin/carts/:cartId/refund', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
     await database.tournament.deleteMany();
   });

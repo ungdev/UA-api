@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import auth from './auth';
+import badges from './badges';
 import carts from './carts';
 import scan from './scan';
 import users from './users';
@@ -15,6 +16,7 @@ import upload from './upload';
 const router = Router();
 
 router.use('/auth', auth);
+router.use('/badges', badges);
 router.use('/carts', carts);
 router.use('/scan', scan);
 router.use('/users', users);

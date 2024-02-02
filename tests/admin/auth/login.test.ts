@@ -14,12 +14,13 @@ describe('POST /admin/auth/login', () => {
   let user: User;
 
   before(async () => {
-    user = await createFakeUser({ password });
+    user = await createFakeUser({ password, type: UserType.player });
     await setLoginAllowed(false);
   });
 
   after(async () => {
     // Delete the user created
+    await database.orga.deleteMany();
     await database.user.deleteMany();
     await setLoginAllowed(true);
   });

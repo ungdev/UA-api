@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
@@ -48,6 +49,7 @@ describe('DELETE /teams/current', () => {
   after(async () => {
     await database.team.deleteMany();
     await database.cart.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -56,7 +58,7 @@ describe('DELETE /teams/current', () => {
   });
 
   it('should error as the request made by a random', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     const otherUserToken = generateToken(otherUser);
 
     await request(app)
@@ -89,7 +91,7 @@ describe('DELETE /teams/current', () => {
     await request(app).delete(`/teams/current`).set('Authorization', `Bearer ${captainToken}`).expect(204);
 
     let deletedTeam = await teamOperations.fetchTeam(team.id);
-    expect(deletedTeam).to.be.null;
+    expect(deletedTeam).to.be.undefined;
 
     let updatedCaptain = await userOperations.fetchUser(captain.id);
     expect(updatedCaptain.teamId).to.be.null;
@@ -110,7 +112,7 @@ describe('DELETE /teams/current', () => {
     expect(updatedCaptain.type).to.be.null;
 
     deletedTeam = await teamOperations.fetchTeam(waitingTeamToDelete.id);
-    expect(deletedTeam).to.be.null;
+    expect(deletedTeam).to.be.undefined;
 
     waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
     expect(waitingTeam.lockedAt).to.be.null;
@@ -125,7 +127,7 @@ describe('DELETE /teams/current', () => {
     expect(updatedCaptain.type).to.be.null;
 
     const deletedTeam = await teamOperations.fetchTeam(lockedTeam.id);
-    expect(deletedTeam).to.be.null;
+    expect(deletedTeam).to.be.undefined;
 
     waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
     expect(waitingTeam.lockedAt).to.be.not.null;

@@ -64,6 +64,7 @@ export enum Permission {
   anim = 'anim',
   admin = 'admin',
   repo = 'repo',
+  orga = 'orga',
 }
 
 export { TransactionState, UserAge, UserType, ItemCategory, Log, RepoItemType } from '@prisma/client';
@@ -83,6 +84,7 @@ export type PrimitiveTeam = prisma.Team;
 export type PrimitiveTournament = prisma.Tournament;
 export type RepoItem = prisma.RepoItem;
 export type RepoLog = prisma.RepoLog & { item: RepoItem };
+export type RawOrga = prisma.Orga;
 
 export type Item = RawItem & {
   left?: number;
@@ -155,7 +157,7 @@ export type UserSearchQuery = {
   userId: string;
   search: string;
   type: UserType;
-  permission: Permission;
+  permissions: string;
   tournament: string;
   locked: string;
   payment: string;
@@ -176,8 +178,28 @@ export type UserPatchBody = Partial<
     | 'firstname'
     | 'lastname'
     | 'email'
-  >
+  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }>; orgaMainCommission?: string }
 >;
+
+export type RawOrgaWithDetailedRoles = RawOrga & {
+  roles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }>;
+  mainCommission: prisma.Commission;
+};
+
+export type RawOrgaWithUserData = Pick<User, 'id' | 'firstname' | 'lastname' | 'username'> &
+  Omit<RawOrgaWithDetailedRoles, 'userId'>;
+
+export type Orga = {
+  id: string;
+  name: string;
+  username: string;
+  photoFilename?: string;
+  roles: Array<{ commission: prisma.Commission; commissionRole: 'respo' | 'member' }>;
+  displayName: boolean;
+  displayPhoto: boolean;
+  displayUsername: boolean;
+  mainCommission?: prisma.Commission;
+};
 
 export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
   users: RawUserWithCartItems[];
@@ -195,6 +217,7 @@ export type Team = PrimitiveTeam & {
   players: User[];
   coaches: User[];
   askingUsers: User[];
+  positionInQueue: number | null;
 };
 
 export type Tournament = PrimitiveTournament & {
@@ -218,6 +241,33 @@ export interface EtupayResponse {
 export type EtupayError = ErrorRequestHandler & {
   message: string;
 };
+
+/************/
+/** Badges **/
+/************/
+
+export type BadgeType = 'orgas' | 'custom' | 'single' | 'singlecustom';
+export type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess';
+
+export interface Badge {
+  type: BadgePermission;
+  firstName: string;
+  lastName: string;
+  image: string;
+  commissionName: string;
+}
+
+export interface BadgeField {
+  type: BadgeType;
+  quantity?: number;
+  permission?: BadgePermission;
+  email?: string;
+  commissionRole?: prisma.RoleInCommission;
+  commissionId?: string;
+  firstname?: string;
+  lastname?: string;
+  name?: string;
+}
 
 /**********/
 /** Misc **/
@@ -243,6 +293,7 @@ export const enum Error {
   InvalidPlace = 'Numéro de place invalide',
   InvalidPermission = "Ces permissions n'existent pas",
   stringBooleanError = "Ce n'est pas du texte",
+  ShowNameOrPseudo = 'Vous devez au moins afficher le nom ou le pseudo',
 
   InvalidTeamName = "Nom d'équipe invalide !",
 
@@ -276,6 +327,7 @@ export const enum Error {
   LoginNotAllowed = 'Tu ne peux pas te connecter actuellement',
   NotAdmin = "Tu n'es pas administrateur",
   ShopNotAllowed = 'La billetterie est fermée',
+  TrombiNotAllowed = "Le trombinoscope n'est pas encore disponible",
   EmailNotConfirmed = "Le compte n'est pas confirmé",
   EmailAlreadyConfirmed = 'Le compte est déjà confirmé',
   NoPermission = "Tu n'as pas la permission d'accéder à cette ressource",
@@ -316,8 +368,13 @@ export const enum Error {
   EtupayNoAccess = "Tu n'as pas accès à cette url",
   NotYourItem = "Cet item n'est pas le tiens",
   AlreadyHaveComputer = 'Tu as déjà un ordinateur stocké',
+  CantDepositMulitpleComputers = 'Tu ne peux pas déposer plusieurs ordinateurs',
   AlreadyPickedUp = "L'objet a déjà été récupéré",
   TooMuchLockedTeams = "Il y a plus d'équipes inscrites que le nombre d'équipes maximal souhaité",
+  TournamentFull = "Le tournoi est plein, attends qu'une place se libère pour payer un ticket",
+  IsNotOrga = "L'utilisateur n'est pas un organisateur. Impossible de lui assigner des commissions",
+  MainCommissionMustBeInList = "L'organisateur doit être dans sa propre commission principale",
+  MustHaveMainCommission = "L'une des commissions de l'utilisateur doit être sa commission principale",
 
   // 404
   // The server can't find the requested resource
@@ -331,6 +388,7 @@ export const enum Error {
   TournamentNotFound = 'Le tournoi est introuvable',
   TicketNotFound = 'Le ticket est introuvable',
   WrongRegisterToken = "Token d'enregistrement invalide",
+  CommissionNotFound = "La commission n'existe pas",
 
   // 405
   // The request method is known by the server but is not supported by the target resource

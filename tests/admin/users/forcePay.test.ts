@@ -23,8 +23,8 @@ describe('POST /admin/users/:userId/force-pay', () => {
   let player2: User;
 
   before(async () => {
-    user = await createFakeUser();
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    user = await createFakeUser({ type: UserType.player });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
 
     tournament = await createFakeTournament({ maxTeams: 1, playersPerTeam: 3 });
@@ -44,6 +44,7 @@ describe('POST /admin/users/:userId/force-pay', () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
     await database.tournament.deleteMany();
   });
@@ -92,7 +93,7 @@ describe('POST /admin/users/:userId/force-pay', () => {
       .expect(403, { error: Error.AlreadyPaid }));
 
   it('should force pay the user and scan his ticket at the same time', async () => {
-    const otherUser = await createFakeUser();
+    const otherUser = await createFakeUser({ type: UserType.player });
     const { body } = await request(app)
       .post(`/admin/users/${otherUser.id}/force-pay`)
       .send({

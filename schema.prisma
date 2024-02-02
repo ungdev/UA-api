@@ -132,7 +132,7 @@ model Caster {
 
 model Partner {
   id          String  @id
-  name        String @unique
+  name        String  @unique
   link        String
   description String  @db.Text
   display     Boolean
@@ -155,41 +155,59 @@ model Log {
 }
 
 model User {
-  id            String     @id
-  username      String?    @unique
-  firstname     String
-  lastname      String
-  email         String?    @unique
-  password      String?
-  type          UserType?
-  age           UserAge
-  discordId     String?    @unique
-  permissions   String?
-  registerToken String?    @unique
-  resetToken    String?    @unique
-  place         String?    @unique
-  customMessage String?
-  scannedAt     DateTime?
-  attendantId   String?    @unique
-  teamId        String?
-  askingTeamId  String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now()) @updatedAt
-  askingTeam    Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
-  attendant     User?      @relation("attendantUser", fields: [attendantId], references: [id])
-  team          Team?      @relation("teamUsers", fields: [teamId], references: [id])
-  cartItems     CartItem[]
-  carts         Cart[]
-  logs          Log[]
-  captainTeam   Team?
-  repoItems     RepoItem[] @relation("repoItemUser")
-  repoLogs      RepoLog[]  @relation("repoLogUser")
-  attended      User?      @relation("attendantUser")
+  id             String     @id
+  username       String?    @unique
+  firstname      String
+  lastname       String
+  email          String?    @unique
+  password       String?
+  type           UserType?
+  age            UserAge
+  discordId      String?    @unique
+  permissions    String?
+  registerToken  String?    @unique
+  resetToken     String?    @unique
+  place          String?    @unique
+  customMessage  String?
+  scannedAt      DateTime?
+  attendantId    String?    @unique
+  teamId         String?
+  askingTeamId   String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @default(now()) @updatedAt
+  ticketMailSent Boolean    @default(false)
+  askingTeam     Team?      @relation("teamAskingUsers", fields: [askingTeamId], references: [id])
+  attendant      User?      @relation("attendantUser", fields: [attendantId], references: [id])
+  team           Team?      @relation("teamUsers", fields: [teamId], references: [id])
+  cartItems      CartItem[]
+  carts          Cart[]
+  logs           Log[]
+  captainTeam    Team?
+  repoItems      RepoItem[] @relation("repoItemUser")
+  repoLogs       RepoLog[]  @relation("repoLogUser")
+  attended       User?      @relation("attendantUser")
+  orga           Orga?      @relation("userOrga")
 
   @@index([id])
   @@index([askingTeamId], map: "users_askingTeamId_fkey")
   @@index([teamId], map: "users_teamId_fkey")
   @@map("users")
+}
+
+model Orga {
+  userId           String      @id
+  photoFilename    String?
+  displayName      Boolean     @default(false)
+  displayUsername  Boolean     @default(true)
+  displayPhoto     Boolean     @default(false)
+  mainCommissionId String?
+  roles            OrgaRole[]  @relation("orgaRoleOrga")
+  user             User        @relation("userOrga", fields: [userId], references: [id])
+  mainCommission   Commission? @relation("orgaCommission", fields: [mainCommissionId], references: [id])
+  // TODO : uncomment that for next year, for 2023 it's too late
+  // @@map("orgas")
+
+  @@index([mainCommissionId])
 }
 
 model RepoItem {
@@ -220,6 +238,35 @@ model RepoLog {
   @@map("repoLog")
 }
 
+model OrgaRole {
+  userId         String
+  commissionId   String
+  commissionRole RoleInCommission
+  user           Orga             @relation("orgaRoleOrga", fields: [userId], references: [userId])
+  commission     Commission       @relation("orgaRoleCommission", fields: [commissionId], references: [id])
+
+  @@id([userId, commissionId])
+  @@index([userId])
+  @@index([commissionId])
+  @@map("orgaRole")
+}
+
+model Commission {
+  id                 String       @id
+  name               String
+  nameOnBadge        String       @default("")
+  position           Int
+  color              String
+  masterCommissionId String?
+  masterCommission   Commission?  @relation("masterCommission", fields: [masterCommissionId], references: [id])
+  subCommissions     Commission[] @relation("masterCommission")
+  orgas              OrgaRole[]   @relation("orgaRoleCommission")
+  orgaWhereMain      Orga[]       @relation("orgaCommission")
+
+  @@index([masterCommissionId])
+  @@map("commission")
+}
+
 enum TransactionState {
   pending
   paid
@@ -238,7 +285,6 @@ enum ItemCategory {
 
 enum UserType {
   player
-  orga
   coach
   spectator
   attendant
@@ -247,6 +293,11 @@ enum UserType {
 enum UserAge {
   adult
   child
+}
+
+enum RoleInCommission {
+  respo
+  member
 }
 
 enum RepoItemType {

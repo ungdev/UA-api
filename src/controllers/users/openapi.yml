@@ -244,3 +244,74 @@
         $ref: '#/components/responses/403Unauthorized'
       404:
         $ref: '#/components/responses/404UserNotFound'
+
+/users/orgas:
+  get:
+    summary: Retourne la liste des organisateurs, avec leurs commissions et rôle dans chaque commission
+    description: Les données ne sont pas retournées si l'organisateur a demandé à ne pas rendre ces données publiques.
+    tags:
+      - Users
+    parameters:
+      - in: query
+        name: onlyMainCommission
+        description: Si onlyMainCommission est mis à "true", chaque orga ne pourra être retourné qu'une seule fois, et apparaîtra dans la commission spécifiée comme étant sa principale. Si sa commission principale n'est pas l'une de ses commissions, ou qu'il n'a pas de commission principale, il ne sera pas retourné
+        schema:
+          type: boolean
+        default: false
+        optional: true
+      - in: query
+        name: includeVieux
+        description: Si includeVieux est mis à "true", la commission vieux sera inclue dans la liste des commissions
+        schema:
+          type: boolean
+        default: false
+        optional: true
+    responses:
+      200:
+        description: La liste des organisateurs
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  color:
+                    type: string
+                  masterCommission:
+                    type: string
+                  roles:
+                    type: object
+                    properties:
+                      respo:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            username:
+                              type: string
+                            photoFilename:
+                              type: string
+                      member:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            username:
+                              type: string
+                            photoFilename:
+                              type: string
+      403:
+        $ref: '#/components/responses/403Unauthorized'

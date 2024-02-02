@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { nanoid } from 'nanoid';
 import { scanUser } from '../../../src/operations/user';
 import database from '../../../src/services/database';
-import { Error, Permission, Team, User } from '../../../src/types';
+import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
 import { createFakeTeam, createFakeUser } from '../../utils';
@@ -23,9 +23,9 @@ describe('POST /admin/repo/user/:userId/items', () => {
   };
 
   before(async () => {
-    admin = await createFakeUser({ permissions: [Permission.admin] });
+    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
-    nonAdmin = await createFakeUser();
+    nonAdmin = await createFakeUser({ type: UserType.player });
     nonAdminToken = generateToken(nonAdmin);
     team = await createFakeTeam();
     captain = getCaptain(team);
@@ -35,6 +35,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
     await database.repoLog.deleteMany();
     await database.repoItem.deleteMany();
     await database.team.deleteMany();
+    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
@@ -98,7 +99,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
           { type: 'computer', zone: 'Zone 2' },
         ],
       })
-      .expect(405, { error: Error.AlreadyHaveComputer });
+      .expect(405, { error: Error.CantDepositMulitpleComputers });
   });
 
   it('should successfully add a new item to the repo', async () => {

@@ -47,6 +47,8 @@ tags:
     description: Routes liées aux tournois
   - name: Users
     description: Routes liées aux utilisateurs
+  - name: Commissions
+    description: Routes liées aux commissions
 
 components:
   securitySchemes:
@@ -111,6 +113,17 @@ components:
           nullable: true
         hasPaid:
           type: boolean
+
+    OrgaData:
+      type: object
+      description: Données spécifiques aux organisateurs
+      properties:
+        mainCommission:
+          type: string
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Commission'
 
     MailButton:
       type: object
@@ -361,6 +374,9 @@ components:
           type: string
           format: date-time
           nullable: true
+        positionInQueue:
+          type: integer
+          example: 1
 
     TeamWithUsersRestricted:
       allOf:
@@ -799,6 +815,18 @@ components:
         position:
           type: integer
 
+    Commission:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+        masterCommission:
+          type: string
+
   responses:
     400Errored:
       description: Requête erronée
@@ -851,6 +879,15 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: Le panier est introuvable
+
+    404CommissionNotFound:
+      description: La commission est introuvable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: La commission n'existe pas
 
     409UsernameAlreadyExists:
       description: Le nom d'utilisateur existe déjà

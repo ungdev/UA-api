@@ -13,6 +13,7 @@ import tickets from './tickets';
 import etupay from './etupay';
 import discord from './discord';
 import admin from './admin';
+import commissions from './commissions';
 
 const options = {
   definition: {
@@ -64,5 +65,8 @@ router.use('/discord', discord);
 
 // Admin routes
 router.use('/admin', admin);
+
+// Commissions routes
+router.use('/commissions', commissions);
 
 export default router;
