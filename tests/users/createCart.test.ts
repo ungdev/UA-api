@@ -6,7 +6,7 @@ import * as userOperations from '../../src/operations/user';
 import * as itemOperations from '../../src/operations/item';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
-import { Error, User, Team, UserAge, UserType, TransactionState, Tournament } from '../../src/types';
+import { Error, User, Team, UserAge, UserType, TransactionState } from '../../src/types';
 import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { PayBody } from '../../src/controllers/users/createCart';
@@ -32,7 +32,6 @@ describe('POST /users/current/carts', () => {
   let annoyingUserWithSwitchDiscount: User;
   let annoyingTokenWithSwitchDiscount: string;
 
-  let fullTournament: Tournament;
   let teamInFullTournament: Team;
   let captainInFullTournament: User;
   let tokenInFullTournament: string;
@@ -120,7 +119,7 @@ describe('POST /users/current/carts', () => {
   };
 
   before(async () => {
-    const tournament = await createFakeTournament({playersPerTeam: 2, maxTeams: 2, coachesPerTeam: 1});
+    const tournament = await createFakeTournament({ playersPerTeam: 2, maxTeams: 2, coachesPerTeam: 1 });
     await createFakeTournament({ id: 'ssbu' });
     const team = await createFakeTeam({ members: 1, tournament: tournament.id, name: 'dontcare' });
     user = getCaptain(team);
@@ -148,14 +147,8 @@ describe('POST /users/current/carts', () => {
     annoyingUserWithSwitchDiscount = getCaptain(annoyingTeamWithSwitchDiscount);
     annoyingTokenWithSwitchDiscount = generateToken(annoyingUserWithSwitchDiscount);
 
-    fullTournament = await createFakeTournament({
-      id: 'test',
-      name: 'test',
-      playersPerTeam: 1,
-      coachesPerTeam: 1,
-      maxTeams: 0,
-    });
-    teamInFullTournament = await createFakeTeam({ members: 1, tournament: 'test' });
+    const fullTournament = await createFakeTournament({ coachesPerTeam: 1 });
+    teamInFullTournament = await createFakeTeam({ members: 1, tournament: fullTournament.id });
     captainInFullTournament = getCaptain(teamInFullTournament);
     tokenInFullTournament = generateToken(captainInFullTournament);
     coachInFullTournament = await createFakeUser({ type: UserType.coach });

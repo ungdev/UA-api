@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { expect } from 'chai';
 import app from '../../../src/app';
-import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
+import { createFakeTournament, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import * as userUtils from '../../../src/utils/users';

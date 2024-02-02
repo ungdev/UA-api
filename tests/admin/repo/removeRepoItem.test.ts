@@ -6,7 +6,7 @@ import database from '../../../src/services/database';
 import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
-import { createFakeTeam, createFakeTournament, createFakeUser } from "../../utils";
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import app from '../../../src/app';
 import { lockTeam } from '../../../src/operations/team';
 

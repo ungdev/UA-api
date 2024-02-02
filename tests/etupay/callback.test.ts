@@ -135,7 +135,11 @@ describe('POST /etupay/callback', () => {
     [lolPlayer1, lolPlayer2] = lolTeam.players;
     for (const player of lolTeam.players.slice(2)) await cartOperations.forcePay(player);
     // Fill the tournament
-    const team = await createFakeTeam({ members: lolTournament.playersPerTeam, tournament: lolTournament.id, locked: true });
+    await createFakeTeam({
+      members: lolTournament.playersPerTeam,
+      tournament: lolTournament.id,
+      locked: true,
+    });
     // Refresh the tournament
     lolTournament = await tournamentOperations.fetchTournament(lolTournament.id);
 

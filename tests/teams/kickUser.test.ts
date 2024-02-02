@@ -3,10 +3,9 @@ import request from 'supertest';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
-import * as tournamentOperations from '../../src/operations/tournament';
 import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeUser, createFakeTeam, createFakeTournament } from "../utils";
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import * as userOperations from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
@@ -20,8 +19,13 @@ describe('DELETE /teams/current/users/:userId', () => {
   let waitingTeam: Team;
 
   before(async () => {
-    const tournament = await createFakeTournament({maxTeams: 2, playersPerTeam: 3, coachesPerTeam: 1});
-    team = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true, tournament: tournament.id });
+    const tournament = await createFakeTournament({ maxTeams: 2, playersPerTeam: 3, coachesPerTeam: 1 });
+    team = await createFakeTeam({
+      members: tournament.playersPerTeam,
+      paid: true,
+      locked: true,
+      tournament: tournament.id,
+    });
 
     // Find a user that is not a captain
     userToKick = team.players.find((player) => player.id !== team.captainId);
@@ -34,7 +38,9 @@ describe('DELETE /teams/current/users/:userId', () => {
     // Fill the tournament
     const promises = [];
     for (let index = 0; index < tournament.placesLeft - 1; index++) {
-      promises.push(createFakeTeam({ members: tournament.playersPerTeam, locked: true, paid: true, tournament: tournament.id }));
+      promises.push(
+        createFakeTeam({ members: tournament.playersPerTeam, locked: true, paid: true, tournament: tournament.id }),
+      );
     }
     await Promise.all(promises);
 
@@ -82,7 +88,7 @@ describe('DELETE /teams/current/users/:userId', () => {
 
   it('should fail as the user is the captain of another team', async () => {
     const otherTournament = await createFakeTournament();
-    const otherTeam = await createFakeTeam({tournament: otherTournament.id});
+    const otherTeam = await createFakeTeam({ tournament: otherTournament.id });
     const otherCaptain = getCaptain(otherTeam);
     const otherCaptainToken = generateToken(otherCaptain);
 

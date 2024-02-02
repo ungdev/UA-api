@@ -7,7 +7,7 @@ import * as discordFunctions from '../../src/utils/discord';
 import { Error } from '../../src/types';
 import env from '../../src/utils/env';
 import database from '../../src/services/database';
-import { createFakeTeam, createFakeTournament } from "../utils";
+import { createFakeTeam, createFakeTournament } from '../utils';
 import { registerMember, registerRole, resetFakeDiscord } from '../discord';
 
 describe('POST /discord/sync-roles', () => {

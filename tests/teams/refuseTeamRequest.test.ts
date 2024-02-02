@@ -4,8 +4,8 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, Tournament, User, UserType } from "../../src/types";
-import { createFakeUser, createFakeTeam, createFakeTournament } from "../utils";
+import { Error, Team, Tournament, User, UserType } from '../../src/types';
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
@@ -18,8 +18,8 @@ describe('DELETE /teams/current/join-requests/:userId', () => {
   let team: Team;
 
   before(async () => {
-    tournament = await createFakeTournament({playersPerTeam: 2});
-    team = await createFakeTeam({ members: 2, tournament:tournament.id });
+    tournament = await createFakeTournament({ playersPerTeam: 2 });
+    team = await createFakeTeam({ members: 2, tournament: tournament.id });
     user = await createFakeUser({ type: UserType.player });
     await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
 
@@ -66,7 +66,7 @@ describe('DELETE /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail as the user is the captain of another team', async () => {
-    const otherTeam = await createFakeTeam({tournament: tournament.id});
+    const otherTeam = await createFakeTeam({ tournament: tournament.id });
     const otherCaptain = getCaptain(otherTeam);
     const otherCaptainToken = generateToken(otherCaptain);
 

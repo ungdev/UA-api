@@ -5,7 +5,7 @@ import { sandbox } from '../setup';
 import * as responses from '../../src/utils/responses';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
-import { createFakeTeam, createFakeTournament } from "../utils";
+import { createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
@@ -15,7 +15,7 @@ describe('GET /teams/:teamId', () => {
   let captainToken: string;
 
   before(async () => {
-    const tournament = await createFakeTournament({playersPerTeam: 2})
+    const tournament = await createFakeTournament({ playersPerTeam: 2 });
     team = await createFakeTeam({ members: 2, tournament: tournament.id });
 
     captain = getCaptain(team);

@@ -6,7 +6,7 @@ import * as itemOperations from '../../src/operations/item';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
 import { Error, User, Team, TransactionState, Cart, Item } from '../../src/types';
-import { createFakeTeam, createFakeTournament } from "../utils";
+import { createFakeTeam, createFakeTournament } from '../utils';
 import { getCaptain } from '../../src/utils/teams';
 import { generateToken } from '../../src/utils/users';
 

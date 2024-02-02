@@ -5,7 +5,7 @@ import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeTeam, createFakeTournament, createFakeUser } from "../utils";
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import * as userOperations from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
@@ -22,7 +22,12 @@ describe('DELETE /teams/current/users/current', () => {
 
   before(async () => {
     const tournament = await createFakeTournament({ playersPerTeam: 2, maxTeams: 2 });
-    team = await createFakeTeam({ members: tournament.playersPerTeam, locked: true, paid: true, tournament: tournament.id });
+    team = await createFakeTeam({
+      members: tournament.playersPerTeam,
+      locked: true,
+      paid: true,
+      tournament: tournament.id,
+    });
 
     // Find a user that is not a captain
     user = team.players.find((player) => player.id !== team.captainId);
@@ -36,7 +41,9 @@ describe('DELETE /teams/current/users/current', () => {
     // Fill the tournament
     const promises = [];
     for (let index = 0; index < tournament.placesLeft - 1; index++) {
-      promises.push(createFakeTeam({ members: tournament.playersPerTeam, locked: true, paid: true, tournament: tournament.id }));
+      promises.push(
+        createFakeTeam({ members: tournament.playersPerTeam, locked: true, paid: true, tournament: tournament.id }),
+      );
     }
     await Promise.all(promises);
 

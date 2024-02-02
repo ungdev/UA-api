@@ -7,7 +7,7 @@ import * as teamOperations from '../../src/operations/team';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
-import { createFakeTeam, createFakeTournament, createFakeUser } from "../utils";
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
@@ -36,7 +36,11 @@ describe('DELETE /teams/current', () => {
     waitingTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: tournament.id });
     await teamOperations.lockTeam(waitingTeam.id);
     waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
-    waitingTeamToDelete = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: tournament.id });
+    waitingTeamToDelete = await createFakeTeam({
+      members: tournament.playersPerTeam,
+      paid: true,
+      tournament: tournament.id,
+    });
     await teamOperations.lockTeam(waitingTeamToDelete.id);
 
     captain = getCaptain(team);

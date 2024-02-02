@@ -5,7 +5,7 @@ import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeUser, createFakeTeam, createFakeTournament } from "../utils";
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { fetchUser } from '../../src/operations/user';
 

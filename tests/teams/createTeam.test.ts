@@ -6,8 +6,8 @@ import * as teamOperations from '../../src/operations/team';
 import * as tournamentOperations from '../../src/operations/tournament';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
-import { Error, Tournament, User, UserType } from "../../src/types";
-import { createFakeUser, createFakeTeam, createFakeTournament } from "../utils";
+import { Error, Tournament, User, UserType } from '../../src/types';
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 
 describe('POST /teams', () => {
@@ -29,9 +29,9 @@ describe('POST /teams', () => {
   };
 
   before(async () => {
-    tournament = await createFakeTournament({id: 'theIdOfTheTournament', playersPerTeam: 2});
+    tournament = await createFakeTournament({ id: 'theIdOfTheTournament', playersPerTeam: 2 });
     soloTournament = await createFakeTournament();
-    await createFakeTournament({id: 'pokemon'});
+    await createFakeTournament({ id: 'pokemon' });
     user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
   });
@@ -49,7 +49,7 @@ describe('POST /teams', () => {
     request(app).post('/teams').expect(401, { error: Error.Unauthenticated }));
 
   it('should fail because the user is already in a team', async () => {
-    const team = await createFakeTeam({tournament: tournament.id});
+    const team = await createFakeTeam({ tournament: tournament.id });
     const [localUser] = team.players;
 
     const localToken = generateToken(localUser);

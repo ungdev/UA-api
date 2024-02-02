@@ -4,8 +4,8 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, Tournament, User, UserType } from "../../src/types";
-import { createFakeUser, createFakeTeam, createFakeTournament } from "../utils";
+import { Error, Team, Tournament, User, UserType } from '../../src/types';
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { updateAdminUser } from '../../src/operations/user';
 
@@ -17,7 +17,7 @@ describe('POST /teams/:teamId/join-requests', () => {
 
   before(async () => {
     tournament = await createFakeTournament();
-    team = await createFakeTeam({tournament: tournament.id});
+    team = await createFakeTeam({ tournament: tournament.id });
     user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
   });
@@ -47,7 +47,7 @@ describe('POST /teams/:teamId/join-requests', () => {
   });
 
   it('should fail because the user is already in a team', async () => {
-    const otherTeam = await createFakeTeam({tournament: tournament.id});
+    const otherTeam = await createFakeTeam({ tournament: tournament.id });
     const [localUser] = otherTeam.players;
     const localToken = generateToken(localUser);
 
@@ -139,7 +139,7 @@ describe('POST /teams/:teamId/join-requests', () => {
   });
 
   it('should fail as we already asked another team', async () => {
-    const otherTeam = await createFakeTeam({tournament: tournament.id});
+    const otherTeam = await createFakeTeam({ tournament: tournament.id });
 
     await request(app)
       .post(`/teams/${otherTeam.id}/join-requests`)

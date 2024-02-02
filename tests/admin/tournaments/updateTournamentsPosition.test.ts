@@ -5,7 +5,7 @@ import { sandbox } from '../../setup';
 import * as tournamentOperations from '../../../src/operations/tournament';
 import database from '../../../src/services/database';
 import { Error, Permission, Tournament, User, UserType } from '../../../src/types';
-import { createFakeTournament, createFakeUser } from "../../utils";
+import { createFakeTournament, createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
 
 describe('PATCH /admin/tournaments', () => {

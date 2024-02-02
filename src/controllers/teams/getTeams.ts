@@ -5,8 +5,8 @@ import { fetchTeams } from '../../operations/team';
 import { filterTeamRestricted } from '../../utils/filters';
 import { success } from '../../utils/responses';
 import * as validators from '../../utils/validators';
-import { fetchTournament } from "../../operations/tournament";
-import { Error } from "../../types";
+import { fetchTournament } from '../../operations/tournament';
+import { Error } from '../../types';
 
 export default [
   // Middlewares

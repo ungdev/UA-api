@@ -7,8 +7,8 @@ import * as cartOperations from '../../src/operations/carts';
 import * as tournamentOperations from '../../src/operations/tournament';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
-import { Error, Team, Tournament, User, UserType } from "../../src/types";
-import { createFakeUser, createFakeTeam, createFakeTournament } from "../utils";
+import { Error, Team, Tournament, User, UserType } from '../../src/types';
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchUser } from '../../src/operations/user';
@@ -34,14 +34,21 @@ describe('POST /teams/current/join-requests/:userId', () => {
     user2 = await createFakeUser({ paid: true, type: UserType.player });
     await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
     await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
-    fullTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true, tournament: tournament.id });
+    fullTeam = await createFakeTeam({
+      members: tournament.playersPerTeam,
+      paid: true,
+      locked: true,
+      tournament: tournament.id,
+    });
     fullCaptain = getCaptain(fullTeam);
     fullToken = generateToken(fullCaptain);
     // Fill the tournament
     // Store the promises
     const promises = [];
     for (let index = 0; index < tournament.placesLeft; index++) {
-      promises.push(createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true, tournament: tournament.id }));
+      promises.push(
+        createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true, tournament: tournament.id }),
+      );
     }
     await Promise.all(promises);
     // Update the team
@@ -89,7 +96,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail as the user is the captain of another team', async () => {
-    const otherTeam = await createFakeTeam({tournament: tournament.id});
+    const otherTeam = await createFakeTeam({ tournament: tournament.id });
     const otherCaptain = getCaptain(otherTeam);
     const otherCaptainToken = generateToken(otherCaptain);
 

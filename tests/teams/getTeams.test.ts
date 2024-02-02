@@ -4,7 +4,7 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamsOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Tournament } from "../../src/types";
+import { Error, Tournament } from '../../src/types';
 import { createFakeTeam, createFakeTournament } from '../utils';
 
 describe('GET /teams', () => {
@@ -33,7 +33,9 @@ describe('GET /teams', () => {
   });
 
   it('should not accept bad query parameters', async () => {
-    await request(app).get(`/teams?tournamentId=${tournament.id}&locked=mdr`).expect(400, { error: Error.InvalidQueryParameters });
+    await request(app)
+      .get(`/teams?tournamentId=${tournament.id}&locked=mdr`)
+      .expect(400, { error: Error.InvalidQueryParameters });
   });
 
   it('should return a 404 because the tournament does not exist', async () => {

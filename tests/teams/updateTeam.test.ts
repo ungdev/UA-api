@@ -4,8 +4,8 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, Tournament, User } from "../../src/types";
-import { createFakeTeam, createFakeTournament } from "../utils";
+import { Error, Team, Tournament, User } from '../../src/types';
+import { createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
