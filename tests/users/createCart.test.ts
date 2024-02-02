@@ -380,11 +380,19 @@ describe('POST /users/current/carts', () => {
     const coach = users.find((findUser) => findUser.type === UserType.coach && findUser.teamId === user.teamId);
     const attendant = users.find((findUser) => findUser.type === UserType.attendant);
 
+    const items = await itemOperations.fetchAllItems();
+    const price = (id: string, reduced: boolean = false) =>
+      items.find((item) => item.id === id)![reduced ? 'reducedPrice' : 'price'];
+
     expect(body.url).to.startWith(env.etupay.url);
 
-    // player place + player reduced price + coach place + attendant place + 4 * ethernet-7
-    // TODO : do it better (use directly values in the database)
-    expect(body.price).to.be.equal(2500 + 2000 + 1500 + 1500 + 4 * 1000);
+    expect(body.price).to.be.equal(
+      price('ticket-player') +
+        price('ticket-player', true) +
+        price('ticket-coach') +
+        price('ticket-attendant') +
+        4 * price('ethernet-7'),
+    );
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(5);
