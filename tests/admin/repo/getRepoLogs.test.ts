@@ -9,7 +9,7 @@ import database from '../../../src/services/database';
 import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from "../../utils";
 
 describe('GET /admin/repo/user/:userId/logs', () => {
   let admin: User;
@@ -20,11 +20,12 @@ describe('GET /admin/repo/user/:userId/logs', () => {
   let captain: User;
 
   before(async () => {
+    const tournament = await createFakeTournament();
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
     nonAdmin = await createFakeUser({ type: UserType.player });
     nonAdminToken = generateToken(nonAdmin);
-    team = await createFakeTeam();
+    team = await createFakeTeam({ tournament: tournament.id });
     captain = getCaptain(team);
   });
 
@@ -34,6 +35,7 @@ describe('GET /admin/repo/user/:userId/logs', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail as user is not authenticated', async () => {

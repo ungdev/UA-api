@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
 import { ItemCategory, RoleInCommission } from '@prisma/client';
 import sharp from 'sharp';
+import { assert } from 'chai';
 import { fetchUser } from '../src/operations/user';
 import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
@@ -11,7 +12,6 @@ import nanoid from '../src/utils/nanoid';
 import env from '../src/utils/env';
 import { serializePermissions } from '../src/utils/helpers';
 import { fetchTournament } from '../src/operations/tournament';
-import { assert } from 'chai';
 import * as discord from './discord';
 
 export const generateFakeDiscordId = () => `${Math.floor(Date.now() * (1 + Math.random()))}`;
@@ -127,19 +127,19 @@ export const createFakeUser = async (userData: FakeUserData = {}): Promise<User>
  */
 export const createFakeTeam = async ({
   members = 1,
-  tournament = 'lol',
+  tournament,
   paid = false,
   locked = false,
   name = faker.internet.userName() + faker.number.int(),
   userPassword,
 }: {
   members?: number;
-  tournament?: string;
+  tournament: string;
   paid?: boolean;
   locked?: boolean;
   name?: string;
   userPassword?: string;
-} = {}) => {
+}) => {
   assert(members >= 1, 'Cannot create a team with less than 1 member');
   const salt = genSalt(env.bcrypt.rounds);
   const [captainData, ...memberData] = await Promise.all(
@@ -207,18 +207,25 @@ export const createFakePartner = async ({
 export const createFakeTournament = async ({
   id = nanoid(),
   name = faker.word.noun(),
-  playersPerTeam,
-  coachesPerTeam = 1,
-  maxTeams,
+  playersPerTeam = 1,
+  coachesPerTeam = 0,
+  maxTeams = 1,
 }: {
   id?: string;
   name?: string;
-  playersPerTeam: number;
+  playersPerTeam?: number;
   coachesPerTeam?: number;
-  maxTeams: number;
-}) => {
+  maxTeams?: number;
+} = {}) => {
   await database.tournament.create({
-    data: { id, name, maxPlayers: playersPerTeam * maxTeams, playersPerTeam, coachesPerTeam },
+    data: {
+      id,
+      name,
+      maxPlayers: playersPerTeam * maxTeams,
+      playersPerTeam,
+      coachesPerTeam,
+      discordRoleId: discord.registerRole(),
+    },
   });
   logger.verbose(`Created tournament ${name}`);
   return fetchTournament(id);

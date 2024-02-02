@@ -4,11 +4,10 @@ import { UserType } from '@prisma/client';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
-import * as tournamentOperations from '../../src/operations/tournament';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
 import { Error, Team, User } from '../../src/types';
-import { createFakeTeam, createFakeUser } from '../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from "../utils";
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
@@ -23,21 +22,21 @@ describe('DELETE /teams/current', () => {
   let waitingTeamToDeleteCaptainToken: string;
 
   before(async () => {
-    const tournament = await tournamentOperations.fetchTournament('rl');
-    team = await createFakeTeam({ members: tournament.playersPerTeam, locked: false, tournament: 'rl' });
+    const tournament = await createFakeTournament({ maxTeams: 2, playersPerTeam: 2 });
+    team = await createFakeTeam({ members: tournament.playersPerTeam, locked: false, tournament: tournament.id });
     for (let index = 0; index < tournament.placesLeft; index++) {
       // We want to get only one, so we can erase the previous value
       lockedTeam = await createFakeTeam({
         members: tournament.playersPerTeam,
         paid: true,
         locked: true,
-        tournament: 'rl',
+        tournament: tournament.id,
       });
     }
-    waitingTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: 'rl' });
+    waitingTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: tournament.id });
     await teamOperations.lockTeam(waitingTeam.id);
     waitingTeam = await teamOperations.fetchTeam(waitingTeam.id);
-    waitingTeamToDelete = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: 'rl' });
+    waitingTeamToDelete = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: tournament.id });
     await teamOperations.lockTeam(waitingTeamToDelete.id);
 
     captain = getCaptain(team);
@@ -51,6 +50,7 @@ describe('DELETE /teams/current', () => {
     await database.cart.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should error as the token is missing', async () => {

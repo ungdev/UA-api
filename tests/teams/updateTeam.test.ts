@@ -4,18 +4,20 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, User } from '../../src/types';
-import { createFakeTeam } from '../utils';
+import { Error, Team, Tournament, User } from "../../src/types";
+import { createFakeTeam, createFakeTournament } from "../utils";
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
 describe('PUT /teams/current', () => {
+  let tournament: Tournament;
   let captain: User;
   let team: Team;
   let captainToken: string;
 
   before(async () => {
-    team = await createFakeTeam({ members: 2 });
+    tournament = await createFakeTournament({ playersPerTeam: 2 });
+    team = await createFakeTeam({ members: 2, tournament: tournament.id });
 
     captain = getCaptain(team);
     captainToken = generateToken(captain);
@@ -25,6 +27,7 @@ describe('PUT /teams/current', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should error as the body is incorrect', async () => {
@@ -77,7 +80,7 @@ describe('PUT /teams/current', () => {
   });
 
   it('should error the team name already exists', async () => {
-    const otherTeam = await createFakeTeam();
+    const otherTeam = await createFakeTeam({ tournament: tournament.id });
     const otherCaptain = getCaptain(otherTeam);
     const otherCaptainToken = generateToken(otherCaptain);
 

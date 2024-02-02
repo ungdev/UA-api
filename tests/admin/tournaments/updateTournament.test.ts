@@ -14,6 +14,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
   let admin: User;
   let adminToken: string;
   let tournament: Tournament;
+  let otherTournament: Tournament;
   const teams: Team[] = [];
 
   const validBody = {
@@ -50,6 +51,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
       coachesPerTeam: 1,
       maxTeams: 1,
     });
+    otherTournament = await createFakeTournament();
 
     // Create 4 teams : 1 will be locked, 3 in the queue, of which 2 will be locked after tournament modifications
     for (let index = 0; index < 4; index++) {
@@ -101,7 +103,7 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
   it('should fail as a tournament already has this name', async () => {
     await request(app)
       .patch(`/admin/tournaments/${tournament.id}`)
-      .send({ name: 'Pokémon' })
+      .send({ name: otherTournament.name })
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(409, { error: Error.TournamentNameAlreadyExists });
   });

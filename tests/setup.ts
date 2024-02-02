@@ -23,10 +23,9 @@ before(async () => {
   // Reset and seed the database
   execSync('pnpm test:schema:push --force-reset');
   await Promise.all(
-    readFileSync(`seed.sql`, 'utf-8')
+    readFileSync(`seed.test.sql`, 'utf-8')
       .split(';')
-      // TODO : put that back to -1 and remove tournaments from seeding (or add a seed-test.sql without the tournaments)
-      .slice(0, -2) //-1)
+      .slice(0, -1) // Remove the last empty string after the last ;
       .map((command) => database.$executeRawUnsafe(command)),
   );
   chai.use(chaiString);
