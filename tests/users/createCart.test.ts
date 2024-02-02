@@ -147,7 +147,7 @@ describe('POST /users/current/carts', () => {
     annoyingUserWithSwitchDiscount = getCaptain(annoyingTeamWithSwitchDiscount);
     annoyingTokenWithSwitchDiscount = generateToken(annoyingUserWithSwitchDiscount);
 
-    const fullTournament = await createFakeTournament({ coachesPerTeam: 1 });
+    const fullTournament = await createFakeTournament({ coachesPerTeam: 1, maxTeams: 0 });
     teamInFullTournament = await createFakeTeam({ members: 1, tournament: fullTournament.id });
     captainInFullTournament = getCaptain(teamInFullTournament);
     tokenInFullTournament = generateToken(captainInFullTournament);
