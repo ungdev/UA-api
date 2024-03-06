@@ -1,44 +1,49 @@
 import database from '../services/database';
-import { Item, ItemCategory, Team, TransactionState, User, UserType } from '../types';
+import { Item, ItemCategory, RawItem, Team, TransactionState, User, UserType } from '../types';
 import { isPartnerSchool } from '../utils/helpers';
+
+export const formatItem = async (item: RawItem): Promise<Item> => {
+  // Defines the left variable to undefined
+  let left;
+
+  // If the item contains stocks, computes the left variables
+  if (typeof item.stock === 'number') {
+    // Fetches all the cart items related to the item
+    const cartItems = await database.cartItem.findMany({
+      where: {
+        itemId: item.id,
+        cart: {
+          transactionState: {
+            in: [TransactionState.paid, TransactionState.pending],
+          },
+        },
+      },
+    });
+
+    // Calculates how many items were ordered by adding all the quantity ordered
+    const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
+
+    // Returns the stock minus the count. The max 0 is used in case of negative number, which should never happen
+    left = Math.max(item.stock - count, 0);
+  }
+
+  return {
+    ...item,
+    left,
+  };
+};
 
 export const fetchAllItems = async (): Promise<Item[]> => {
   // fetches the items
   const items = await database.item.findMany({ orderBy: [{ position: 'asc' }] });
 
   // Add a left property which tells how many items are there left
-  return Promise.all(
-    items.map(async (item): Promise<Item> => {
-      // Defines the left variable to undefined
-      let left;
+  return Promise.all(items.map(formatItem));
+};
 
-      // If the item contains stocks, computes the left variables
-      if (typeof item.stock === 'number') {
-        // Fetches all the cart items related to the item
-        const cartItems = await database.cartItem.findMany({
-          where: {
-            itemId: item.id,
-            cart: {
-              transactionState: {
-                in: [TransactionState.paid, TransactionState.pending],
-              },
-            },
-          },
-        });
-
-        // Calculates how many items were ordered by adding all the quantity ordered
-        const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
-
-        // Returns the stock minus the count. The max 0 is used in case of negative number, which should never happen
-        left = Math.max(item.stock - count, 0);
-      }
-
-      return {
-        ...item,
-        left,
-      };
-    }),
-  );
+export const fetchItem = async (id: string) => {
+  const item = await database.item.findUnique({ where: { id } });
+  return formatItem(item);
 };
 
 export const fetchUserItems = async (team?: Team, user?: User) => {

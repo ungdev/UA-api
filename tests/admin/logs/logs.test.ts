@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { expect } from 'chai';
 import app from '../../../src/app';
-import { createFakeUser } from '../../utils';
+import { createFakeTournament, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import * as userUtils from '../../../src/utils/users';
@@ -20,10 +20,10 @@ describe('GET /admin/logs', () => {
   });
 
   after(async () => {
-    // Delete the user created
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should throw an internal server error', async () => {
@@ -72,11 +72,12 @@ describe('GET /admin/logs', () => {
   });
 
   it('should return generated team logs', async () => {
+    const tournament = await createFakeTournament({ maxTeams: 1, playersPerTeam: 1 });
     const { body: team } = await request(app)
       .post('/teams')
       .send({
         name: 'fake-team',
-        tournamentId: 'lol',
+        tournamentId: tournament.id,
         userType: UserType.player,
       })
       .set('Authorization', `Bearer ${userUtils.generateToken(user)}`)

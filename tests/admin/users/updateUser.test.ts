@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../../src/app';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, User, UserAge, UserPatchBody, UserType } from '../../../src/types';
+import { Error, Permission, Tournament, User, UserAge, UserPatchBody, UserType } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
@@ -12,6 +12,7 @@ import { deleteRole, kickMember, registerMember, registerRole, resetFakeDiscord 
 import { fetchOrga } from '../../../src/operations/user';
 
 describe('PATCH /admin/users/:userId', () => {
+  let tournament: Tournament;
   let user: User;
   let adminToken: string;
   let anim: User;
@@ -40,6 +41,7 @@ describe('PATCH /admin/users/:userId', () => {
   };
 
   before(async () => {
+    tournament = await createFakeTournament();
     user = await createFakeUser({ type: UserType.player });
     registerMember(user.discordId!);
     const admin = await createFakeUser({ permissions: [Permission.admin, Permission.orga], type: UserType.player });
@@ -56,6 +58,7 @@ describe('PATCH /admin/users/:userId', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>
@@ -97,7 +100,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should update the user', async () => {
-    const team = await createFakeTeam();
+    const team = await createFakeTeam({ tournament: tournament.id });
     const teamMember = team.players[0];
 
     const { body } = await request(app)
@@ -134,7 +137,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should update the user and remove him from his team', async () => {
-    const team = await createFakeTeam({ members: 2, locked: true });
+    const team = await createFakeTeam({ members: 2, locked: true, tournament: tournament.id });
     registerRole(team.discordRoleId!);
 
     tournamentDiscordId = registerRole();
@@ -193,7 +196,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should be able to update discordId only (team locked)', async () => {
-    const team = await createFakeTeam({ members: 1, locked: true });
+    const team = await createFakeTeam({ members: 1, locked: true, tournament: tournament.id });
     // tournament id has already been given
     const [teamMember] = team.players;
     registerRole(team.discordRoleId!);
@@ -214,7 +217,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should be able to update discordId only (team locked, was not synced)', async () => {
-    const team = await createFakeTeam({ members: 1, locked: true });
+    const team = await createFakeTeam({ members: 1, locked: true, tournament: tournament.id });
     // tournament id has already been given
     const [teamMember] = team.players;
     registerRole(team.discordRoleId!);
@@ -236,7 +239,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should be able to update discordId only (team locked, left discord server)', async () => {
-    const team = await createFakeTeam({ members: 1, locked: true });
+    const team = await createFakeTeam({ members: 1, locked: true, tournament: tournament.id });
     // tournament id has already been given
     const [teamMember] = team.players;
     kickMember(teamMember!.discordId!);
@@ -256,7 +259,7 @@ describe('PATCH /admin/users/:userId', () => {
   });
 
   it('should be able to update discordId only (team not locked)', async () => {
-    const team = await createFakeTeam({ members: 1 });
+    const team = await createFakeTeam({ members: 1, tournament: tournament.id });
     // tournament id has already been given
     const [teamMember] = team.players;
     registerMember(teamMember.id);

@@ -5,7 +5,7 @@ import { sandbox } from '../../setup';
 import * as tournamentOperations from '../../../src/operations/tournament';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
 
 describe('GET /admin/tournaments', () => {
@@ -13,13 +13,9 @@ describe('GET /admin/tournaments', () => {
   let admin: User;
   let adminToken: string;
 
-  after(async () => {
-    await database.team.deleteMany();
-    await database.orga.deleteMany();
-    await database.user.deleteMany();
-  });
-
   before(async () => {
+    await createFakeTournament();
+    await createFakeTournament();
     await database.tournament.updateMany({
       data: {
         display: true,
@@ -30,6 +26,13 @@ describe('GET /admin/tournaments', () => {
     admin = await createFakeUser({ permissions: [Permission.admin] });
     nonAdminUser = await createFakeUser({ type: UserType.player });
     adminToken = generateToken(admin);
+  });
+
+  after(async () => {
+    await database.team.deleteMany();
+    await database.orga.deleteMany();
+    await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>

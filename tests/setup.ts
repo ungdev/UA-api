@@ -23,9 +23,9 @@ before(async () => {
   // Reset and seed the database
   execSync('pnpm test:schema:push --force-reset');
   await Promise.all(
-    readFileSync(`seed.sql`, 'utf-8')
+    readFileSync(`seed.test.sql`, 'utf-8')
       .split(';')
-      .slice(0, -1)
+      .slice(0, -1) // Remove the last empty string after the last ;
       .map((command) => database.$executeRawUnsafe(command)),
   );
   chai.use(chaiString);
@@ -72,6 +72,9 @@ after(async () => {
 
   const repoLogCount = await database.repoLog.count();
   expect(repoLogCount).to.be.equal(0);
+
+  const tournamentCount = await database.tournament.count();
+  expect(tournamentCount).to.be.equal(0);
 
   const orgaRoleCount = await database.orgaRole.count();
   expect(orgaRoleCount).to.be.equal(0);

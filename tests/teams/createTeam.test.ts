@@ -6,19 +6,19 @@ import * as teamOperations from '../../src/operations/team';
 import * as tournamentOperations from '../../src/operations/tournament';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
-import { Error, User, UserType } from '../../src/types';
-import { createFakeUser, createFakeTeam } from '../utils';
+import { Error, Tournament, User, UserType } from '../../src/types';
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 
 describe('POST /teams', () => {
+  let tournament: Tournament;
+  let soloTournament: Tournament;
   let user: User;
   let token: string;
 
-  let lolMaxPlayers: number;
-
   const teamBody = {
     name: 'ZeBest',
-    tournamentId: 'lol',
+    tournamentId: 'theIdOfTheTournament',
     userType: UserType.player,
   };
 
@@ -29,11 +29,11 @@ describe('POST /teams', () => {
   };
 
   before(async () => {
+    tournament = await createFakeTournament({ id: 'theIdOfTheTournament', playersPerTeam: 2 });
+    soloTournament = await createFakeTournament();
+    await createFakeTournament({ id: 'pokemon' });
     user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
-
-    const lol = await tournamentOperations.fetchTournament('lol');
-    lolMaxPlayers = lol.maxPlayers;
   });
 
   after(async () => {
@@ -42,15 +42,14 @@ describe('POST /teams', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
-
-    await database.tournament.update({ data: { maxPlayers: lolMaxPlayers }, where: { id: 'lol' } });
+    await database.tournament.deleteMany();
   });
 
   it('should fail because the token is not provided', () =>
     request(app).post('/teams').expect(401, { error: Error.Unauthenticated }));
 
   it('should fail because the user is already in a team', async () => {
-    const team = await createFakeTeam();
+    const team = await createFakeTeam({ tournament: tournament.id });
     const [localUser] = team.players;
 
     const localToken = generateToken(localUser);
@@ -188,15 +187,16 @@ describe('POST /teams', () => {
   it('should success to create a team with the same name but in a different tournament', async () => {
     const newUser = await createFakeUser({ type: UserType.player });
     const newToken = generateToken(newUser);
+    const otherTournament = await createFakeTournament();
 
     const { body } = await request(app)
       .post('/teams')
-      .send({ ...teamBody, tournamentId: 'cs2' })
+      .send({ ...teamBody, tournamentId: otherTournament.id })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(201);
 
     expect(body.name).to.be.equal(teamBody.name);
-    expect(body.tournamentId).to.be.equal('cs2');
+    expect(body.tournamentId).to.be.equal(otherTournament.id);
     expect(body.captainId).to.be.equal(newUser.id);
     const remoteUser = await userOperations.fetchUser(body.captainId);
     expect(remoteUser.type).to.be.equal(teamBody.userType);
@@ -206,6 +206,7 @@ describe('POST /teams', () => {
   });
 
   it('should fail to create a team because user as already paid another ticket', async () => {
+    await createFakeTournament({ id: 'ssbu' });
     const ssbuUser = await createFakeUser({ paid: true, type: UserType.player });
     const ssbuUserToken = generateToken(ssbuUser);
 
@@ -227,8 +228,8 @@ describe('POST /teams', () => {
     return request(app)
       .post('/teams')
       .send({
-        name: 'lol-team',
-        tournamentId: 'lol',
+        name: `${tournament.id}-team`, // this was lol-team before removing references to tournaments, I don't have much inspiration today :)
+        tournamentId: tournament.id,
         userType: UserType.player,
       })
       .set('Authorization', `Bearer ${coachToken}`)
@@ -259,13 +260,14 @@ describe('POST /teams', () => {
       .send({
         ...teamBody,
         name: 'NoDiscordAccount',
-        tournamentId: 'rl',
+        tournamentId: tournament.id,
       })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(403, { error: Error.NoDiscordAccountLinked });
   });
 
   it('should fail as the user is not whitelisted for osu!', async () => {
+    await createFakeTournament({ id: 'osu' });
     const osuPlayer = await createFakeUser({ type: UserType.player });
     const newToken = generateToken(osuPlayer);
     return request(app)
@@ -288,10 +290,9 @@ describe('POST /teams', () => {
     const localUser = await createFakeUser({ paid: true, type: UserType.player, pricePaid: 2500 });
     const localUserToken = generateToken(localUser);
 
-    // TFT : team of 1 person
     const localTeamBody = {
       name: 'Alone_1',
-      tournamentId: 'tft',
+      tournamentId: soloTournament.id,
       userType: UserType.player,
     };
 
@@ -314,10 +315,9 @@ describe('POST /teams', () => {
     const localUser = await createFakeUser({ paid: false });
     const localUserToken = generateToken(localUser);
 
-    // TFT : team of 1 person
     const localTeamBody = {
       name: 'AloneButNotPaid_1',
-      tournamentId: 'tft',
+      tournamentId: soloTournament.id,
       userType: UserType.player,
     };
 

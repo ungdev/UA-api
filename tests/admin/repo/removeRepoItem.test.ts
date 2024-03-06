@@ -6,7 +6,7 @@ import database from '../../../src/services/database';
 import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import app from '../../../src/app';
 import { lockTeam } from '../../../src/operations/team';
 
@@ -19,11 +19,12 @@ describe('DELETE /admin/repo/user/:userId/items/:itemId', () => {
   let captain: User;
 
   before(async () => {
+    const tournament = await createFakeTournament();
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
     nonAdmin = await createFakeUser({ type: UserType.player });
     nonAdminToken = generateToken(nonAdmin);
-    team = await createFakeTeam();
+    team = await createFakeTeam({ tournament: tournament.id });
     captain = getCaptain(team);
   });
   after(async () => {
@@ -32,6 +33,7 @@ describe('DELETE /admin/repo/user/:userId/items/:itemId', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail as user is not authenticated', async () => {

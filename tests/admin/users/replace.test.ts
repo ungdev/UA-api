@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../../src/app';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, Team, User, UserType } from '../../../src/types';
+import { Error, Permission, Team, Tournament, User, UserType } from '../../../src/types';
 import * as teamOperations from '../../../src/operations/team';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
@@ -11,6 +11,7 @@ import { getCaptain } from '../../../src/utils/teams';
 import { registerMember, registerRole, resetFakeDiscord } from '../../discord';
 
 describe('POST /admin/users/:userId/replace', () => {
+  let tournament: Tournament;
   let team: Team;
   let user: User;
   let tournamentDiscordId: string;
@@ -21,7 +22,8 @@ describe('POST /admin/users/:userId/replace', () => {
   let validBody: { replacingUserId: string };
 
   before(async () => {
-    team = await createFakeTeam({ locked: true });
+    tournament = await createFakeTournament({ playersPerTeam: 2, maxTeams: 1 });
+    team = await createFakeTeam({ locked: true, tournament: tournament.id });
     registerRole(team.discordRoleId!);
     user = getCaptain(team);
     targetUser = await createFakeUser({ paid: true, type: UserType.player });
@@ -51,6 +53,7 @@ describe('POST /admin/users/:userId/replace', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>
@@ -101,7 +104,7 @@ describe('POST /admin/users/:userId/replace', () => {
       .expect(403, { error: Error.AlreadyInTeam }));
 
   it('should error as the team is not locked (and is not in the waiting list)', async () => {
-    const notLockedTeam = await createFakeTeam();
+    const notLockedTeam = await createFakeTeam({ tournament: tournament.id });
     const notLockedUser = getCaptain(notLockedTeam);
 
     return request(app)

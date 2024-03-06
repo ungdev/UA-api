@@ -7,13 +7,14 @@ import * as cartOperations from '../../src/operations/carts';
 import * as tournamentOperations from '../../src/operations/tournament';
 import * as userOperations from '../../src/operations/user';
 import database from '../../src/services/database';
-import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeUser, createFakeTeam } from '../utils';
+import { Error, Team, Tournament, User, UserType } from '../../src/types';
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 import { fetchUser } from '../../src/operations/user';
 
 describe('POST /teams/current/join-requests/:userId', () => {
+  let tournament: Tournament;
   let user: User;
   let user2: User;
   let team: Team;
@@ -27,20 +28,27 @@ describe('POST /teams/current/join-requests/:userId', () => {
   let onePlayerTeamToken: string;
 
   before(async () => {
-    const tournament = await tournamentOperations.fetchTournament('lol');
-    team = await createFakeTeam({ members: tournament.playersPerTeam - 2, paid: true });
+    tournament = await createFakeTournament({ playersPerTeam: 4, maxTeams: 3, coachesPerTeam: 1 });
+    team = await createFakeTeam({ members: tournament.playersPerTeam - 2, paid: true, tournament: tournament.id });
     user = await createFakeUser({ paid: true, type: UserType.player });
     user2 = await createFakeUser({ paid: true, type: UserType.player });
     await teamOperations.askJoinTeam(team.id, user.id, UserType.player);
     await teamOperations.askJoinTeam(team.id, user2.id, UserType.player);
-    fullTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true });
+    fullTeam = await createFakeTeam({
+      members: tournament.playersPerTeam,
+      paid: true,
+      locked: true,
+      tournament: tournament.id,
+    });
     fullCaptain = getCaptain(fullTeam);
     fullToken = generateToken(fullCaptain);
     // Fill the tournament
     // Store the promises
     const promises = [];
     for (let index = 0; index < tournament.placesLeft; index++) {
-      promises.push(createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true }));
+      promises.push(
+        createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true, tournament: tournament.id }),
+      );
     }
     await Promise.all(promises);
     // Update the team
@@ -49,7 +57,8 @@ describe('POST /teams/current/join-requests/:userId', () => {
     captain = getCaptain(team);
     token = generateToken(captain);
 
-    onePlayerTeam = await createFakeTeam({ tournament: 'pokemon' });
+    const onePlayerTournament = await createFakeTournament({ coachesPerTeam: 1 });
+    onePlayerTeam = await createFakeTeam({ tournament: onePlayerTournament.id });
     onePlayerTeamCaptain = getCaptain(onePlayerTeam);
     onePlayerTeamToken = generateToken(onePlayerTeamCaptain);
   });
@@ -59,6 +68,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
     await database.cart.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail because the token is not provided', async () => {
@@ -86,7 +96,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
   });
 
   it('should fail as the user is the captain of another team', async () => {
-    const otherTeam = await createFakeTeam();
+    const otherTeam = await createFakeTeam({ tournament: tournament.id });
     const otherCaptain = getCaptain(otherTeam);
     const otherCaptainToken = generateToken(otherCaptain);
 
@@ -137,9 +147,9 @@ describe('POST /teams/current/join-requests/:userId', () => {
 
   it('should fail to join the team as a coach because there are already 2 coaches', async () => {
     // There is only one coach for the moment
-    const coach = await createFakeUser({ type: UserType.player });
+    const coach = await createFakeUser();
     await teamOperations.joinTeam(fullTeam.id, coach, UserType.coach);
-    const willNotJoinCoach = await createFakeUser({ type: UserType.player });
+    const willNotJoinCoach = await createFakeUser();
     await teamOperations.askJoinTeam(fullTeam.id, willNotJoinCoach.id, UserType.coach);
     await request(app)
       .post(`/teams/current/join-requests/${willNotJoinCoach.id}`)
@@ -290,9 +300,9 @@ describe('POST /teams/current/join-requests/:userId', () => {
     team = await teamOperations.fetchTeam(team.id);
     expect(team.lockedAt).to.be.null;
     expect(team.enteredQueueAt).to.be.null;
+    tournament = await tournamentOperations.fetchTournament(tournament.id);
 
     // Remove a team from the tournament
-    const tournament = await tournamentOperations.fetchTournament('lol');
     const teamToRemove = tournament.teams.find((pTeam) => pTeam.lockedAt)!;
     await teamOperations.deleteTeam(teamToRemove);
     await teamOperations.deleteTeam(tournament.teams.find((pTeam) => pTeam.lockedAt && pTeam.id !== teamToRemove.id)!);
