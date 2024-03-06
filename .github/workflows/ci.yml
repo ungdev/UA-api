@@ -84,7 +84,6 @@ jobs:
         with:
           fail_ci_if_error: true
           verbose: true
-          gcov: true
 
   deploy-dbdocs:
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev'
