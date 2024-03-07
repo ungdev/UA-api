@@ -27,11 +27,6 @@ export default [
     try {
       const { username, password } = request.body;
 
-      // Fetch the user depending on the email or the username
-      if (validators.username.validate(username).error) {
-        return unauthenticated(response, ResponseError.InvalidCredentials);
-      }
-
       const field = 'username';
 
       const user = await fetchUser(username, field);

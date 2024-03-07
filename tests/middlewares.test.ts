@@ -11,6 +11,8 @@ import env from '../src/utils/env';
 describe('Test middlewares', () => {
   after(async () => {
     await database.orga.deleteMany();
+    await database.team.deleteMany();
+    await database.tournament.deleteMany();
     await database.user.deleteMany();
   });
 

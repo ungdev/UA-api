@@ -5,20 +5,24 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as cartItemOperations from '../../src/operations/cartItem';
 import database from '../../src/services/database';
-import { CartItem, Error, User, TransactionState } from '../../src/types';
-import { createFakeUser } from '../utils';
+import { CartItem, Error, User, TransactionState, Team } from '../../src/types';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { createCart, fetchCarts, updateCart } from '../../src/operations/carts';
 import { fetchAllItems } from '../../src/operations/item';
+import { fetchUser } from '../../src/operations/user';
 
 describe('POST /users/:userId/carts', () => {
   let user: User;
   let token: string;
+  let team: Team;
   let ticket: CartItem;
   let supplement: CartItem;
 
   before(async () => {
-    user = await createFakeUser({ type: UserType.player });
+    const tournament = await createFakeTournament();
+    team = await createFakeTeam({ members: 1, tournament: tournament.id, locked: true });
+    user = await fetchUser(team.captainId);
     token = generateToken(user);
 
     // Create a ticket and a supplement
@@ -26,12 +30,12 @@ describe('POST /users/:userId/carts', () => {
       {
         itemId: 'ticket-player',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player').price,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player')!.price,
         forUserId: user.id,
       },
       {
         itemId: 'ethernet-7',
-        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-7').price,
+        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-7')!.price,
         quantity: 1,
         forUserId: user.id,
       },
@@ -41,14 +45,16 @@ describe('POST /users/:userId/carts', () => {
     const carts = await fetchCarts(user.id);
     const [cart] = carts;
 
-    ticket = cart.cartItems.find((cartItem) => cartItem.itemId === 'ticket-player');
-    supplement = cart.cartItems.find((cartItem) => cartItem.itemId === 'ethernet-7');
+    ticket = cart.cartItems.find((cartItem) => cartItem.itemId === 'ticket-player')!;
+    supplement = cart.cartItems.find((cartItem) => cartItem.itemId === 'ethernet-7')!;
   });
 
   after(async () => {
     // Delete the user created
     await database.cart.deleteMany();
     await database.orga.deleteMany();
+    await database.team.deleteMany();
+    await database.tournament.deleteMany();
     await database.user.deleteMany();
   });
   it("should fail because cart item doesn't belong to the user", async () => {
@@ -112,5 +118,20 @@ describe('POST /users/:userId/carts', () => {
       .expect(200);
 
     return expect(Buffer.isBuffer(body)).to.be.true;
+  });
+
+  it('should fail as the player team is not locked', async () => {
+    await database.team.update({ where: { id: user.teamId! }, data: { lockedAt: null } });
+
+    await request(app)
+      .get(`/tickets/${ticket.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403, { error: Error.TeamNotLocked });
+  });
+
+  it('should successfully get the pdf as the player team no longer exists', async () => {
+    await database.team.deleteMany();
+
+    await request(app).get(`/tickets/${ticket.id}`).set('Authorization', `Bearer ${token}`).expect(200);
   });
 });

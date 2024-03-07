@@ -6,6 +6,8 @@ import { createFakeCart, createFakeItem, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import { generateToken } from '../../../src/utils/users';
+import { sandbox } from '../../setup';
+import * as itemOperations from '../../../src/operations/item';
 
 describe('PATCH /admin/items/:itemId', () => {
   let user: User;
@@ -119,6 +121,16 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(itemDatabase.stock).to.be.equal(item.stock);
     expect(itemDatabase.availableFrom.getTime()).to.be.equal(item.availableFrom.getTime());
     expect(itemDatabase.availableUntil.getTime()).to.be.equal(item.availableUntil.getTime());
+  });
+
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(itemOperations, 'updateAdminItem').throws('Unexpected error');
+
+    await request(app)
+      .patch(`/admin/items/${item.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(validBody)
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should modify the item entirely', async () => {

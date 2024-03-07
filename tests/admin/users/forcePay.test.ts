@@ -106,6 +106,16 @@ describe('POST /admin/users/:userId/force-pay', () => {
     expect(body.scannedAt).not.to.be.null;
   });
 
+  it('should force pay the user as a spectator', async () => {
+    const otherUser = await createFakeUser({ type: UserType.attendant });
+    const { body } = await request(app)
+      .post(`/admin/users/${otherUser.id}/force-pay`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(body.hasPaid).to.be.true;
+  });
+
   it("should add a ticket to player and not lock the team because everyone hasn't payed", async () => {
     const { body } = await request(app)
       .post(`/admin/users/${player1.id}/force-pay`)

@@ -87,9 +87,31 @@ describe('PATCH /admin/settings', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { id: 'login', value: false });
 
+    await request(app)
+      .patch('/admin/settings/shop')
+      .send({ value: false })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { id: 'shop', value: false });
+
+    await request(app)
+      .patch('/admin/settings/trombi')
+      .send({ value: false })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { id: 'trombi', value: false });
+
     const login = await settingsOperations.fetchSetting('login');
 
     expect(login.id).to.be.equal('login');
     expect(login.value).to.be.equal(false);
+
+    const shop = await settingsOperations.fetchSetting('shop');
+
+    expect(shop.id).to.be.equal('shop');
+    expect(shop.value).to.be.equal(false);
+
+    const trombi = await settingsOperations.fetchSetting('trombi');
+
+    expect(trombi.id).to.be.equal('trombi');
+    expect(trombi.value).to.be.equal(false);
   });
 });

@@ -1,9 +1,9 @@
 coverage:
   precision: 2
   round: down
-  range: '90...95'
+  range: '95...100'
   status:
     patch: off # Disable codecov patches because only the global project coverage matters
     project:
       default:
-        target: 85%
+        target: 95%

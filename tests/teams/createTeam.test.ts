@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import request from 'supertest';
+import fs from 'fs';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
@@ -266,21 +267,6 @@ describe('POST /teams', () => {
       .expect(403, { error: Error.NoDiscordAccountLinked });
   });
 
-  it('should fail as the user is not whitelisted for osu!', async () => {
-    await createFakeTournament({ id: 'osu' });
-    const osuPlayer = await createFakeUser({ type: UserType.player });
-    const newToken = generateToken(osuPlayer);
-    return request(app)
-      .post('/teams')
-      .send({
-        ...teamBody,
-        name: 'osuPlayer',
-        tournamentId: 'osu',
-      })
-      .set('Authorization', `Bearer ${newToken}`)
-      .expect(403, { error: Error.NotWhitelisted });
-  });
-
   it('should successfully lock the team (create solo team)', async () => {
     // Here, a user creates a team in a solo tournament (his team is therefore complete),
     // he has paid his ticket, so his team should be locked.
@@ -328,5 +314,42 @@ describe('POST /teams', () => {
 
     // Check if the team is not lock
     expect(databasedTeam?.lockedAt).to.be.null;
+  });
+
+  // TODO: make it work
+
+  // it('should successfully create the whitelisted osu! team', async () => {
+  //   await createFakeTournament({ id: 'osu' });
+  //   const osuPlayer = await createFakeUser({ type: UserType.player });
+  //   const newToken = generateToken(osuPlayer);
+
+  //   fs.writeFileSync('whitelist.json', JSON.stringify({ osu: [osuPlayer.email] }, null, 2));
+
+  //   return request(app)
+  //     .post('/teams')
+  //     .send({
+  //       ...teamBody,
+  //       name: 'osuPlayer',
+  //       tournamentId: 'osu',
+  //     })
+  //     .set('Authorization', `Bearer ${newToken}`)
+  //     .expect(201);
+  // });
+
+  it('should fail as the user is not whitelisted for osu!', async () => {
+    const osuPlayer = await createFakeUser({ type: UserType.player });
+    const newToken = generateToken(osuPlayer);
+
+    fs.writeFileSync('whitelist.json', JSON.stringify({ osu: [] }, null, 2));
+
+    return request(app)
+      .post('/teams')
+      .send({
+        ...teamBody,
+        name: 'osuPlayer',
+        tournamentId: 'osu',
+      })
+      .set('Authorization', `Bearer ${newToken}`)
+      .expect(403, { error: Error.NotWhitelisted });
   });
 });

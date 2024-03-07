@@ -61,6 +61,17 @@ describe('POST /auth/resendEmail', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
+  it('should return an invalid credentials error as the username or the email is wrong', async () => {
+    await request(app)
+      .post('/auth/resendEmail')
+      .send({
+        username: 'wrongusername',
+        email: 'wrongemail@mail.com',
+        password,
+      })
+      .expect(401, { error: Error.InvalidCredentials });
+  });
+
   it('should return an email already confirmed error', async () => {
     await request(app)
       .post('/auth/resendEmail')
@@ -70,6 +81,18 @@ describe('POST /auth/resendEmail', () => {
         password,
       })
       .expect(403, { error: Error.EmailAlreadyConfirmed });
+  });
+
+  it('should return an error as the code has not been sent successfully', async () => {
+    sandbox.stub(mailOperations, 'sendValidationCode').throws('Unexpected error');
+    await request(app)
+      .post('/auth/resendEmail')
+      .send({
+        username: user.username,
+        email: user.email,
+        password,
+      })
+      .expect(500);
   });
 
   it('should return a valid response', async () => {

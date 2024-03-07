@@ -2,12 +2,11 @@ import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { success } from '../../../utils/responses';
 import { hasPermission } from '../../../middlewares/authentication';
-import { MailQuery, Permission, Log, RawUser } from '../../../types';
+import { Permission } from '../../../types';
 import { validateQuery } from '../../../middlewares/validation';
-import database from '../../../services/database';
-import env from '../../../utils/env';
 import { filterAdminAccount } from '../../../utils/filters';
 import { deserializePermissions } from '../../../utils/helpers';
+import { getEmailsLogs } from '../../../services/email';
 
 export default [
   // Middlewares
@@ -17,23 +16,7 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const logs = (await database.log.findMany({
-        where: {
-          AND: {
-            method: 'POST',
-            path: `${env.api.prefix}${env.api.prefix === '/' ? '' : '/'}admin/emails`,
-          },
-        },
-        include: {
-          user: true,
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      })) as (Log & {
-        body: MailQuery;
-        user: RawUser;
-      })[];
+      const logs = await getEmailsLogs();
       return success(
         response,
         logs.map((log) => ({
