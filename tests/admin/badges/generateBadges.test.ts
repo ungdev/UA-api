@@ -18,9 +18,13 @@ describe('POST /badges/generate', () => {
     adminToken = userUtils.generateToken(adminUser);
 
     user = await createFakeUser({ permissions: [Permission.orga] });
+    userToken = userUtils.generateToken(user);
 
     // Add a mainCommission to the user
-    updateAdminUser(user, { orgaMainCommission: 'vieux', orgaRoles: [{ commission: 'vieux', commissionRole: 'member' }] });
+    updateAdminUser(user, {
+      orgaMainCommission: 'vieux',
+      orgaRoles: [{ commission: 'vieux', commissionRole: 'member' }],
+    });
   });
 
   after(async () => {
@@ -31,6 +35,14 @@ describe('POST /badges/generate', () => {
 
   it('should return an error for unauthenticated user', async () => {
     await request(app).post('/admin/badges').send({}).expect(401, { error: Error.Unauthenticated });
+  });
+
+  it('should return an error for non-admin user', async () => {
+    await request(app)
+      .post('/admin/badges')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({})
+      .expect(403, { error: Error.NoPermission });
   });
 
   it('should return an error for invalid body', async () => {
@@ -68,14 +80,17 @@ describe('POST /badges/generate', () => {
   });
 
   it('should generate a single badge for a specific user', async () => {
-    const orgaUser = await createFakeUser({ permissions: [Permission.orga]});
+    const orgaUser = await createFakeUser({ permissions: [Permission.orga] });
 
     // Add a mainCommission to the user
-    updateAdminUser(orgaUser, { orgaMainCommission: 'vieux', orgaRoles: [{ commission: 'vieux', commissionRole: 'member' }] })
+    updateAdminUser(orgaUser, {
+      orgaMainCommission: 'vieux',
+      orgaRoles: [{ commission: 'vieux', commissionRole: 'member' }],
+    });
 
     await request(app)
       .post('/admin/badges')
-      .set('Authorization', `Bearer ${adminToken}`) 
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({
         fields: [{ type: 'single', email: orgaUser.email }],
       })
