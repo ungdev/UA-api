@@ -7,7 +7,7 @@ import { createFakeUser } from '../../utils';
 import * as userUtils from '../../../src/utils/users';
 import { updateAdminUser } from '../../../src/operations/user';
 
-describe('POST /badges/generate', () => {
+describe('POST /admin/badges', () => {
   let adminUser: User;
   let adminToken: string;
   let user: User;
@@ -80,19 +80,11 @@ describe('POST /badges/generate', () => {
   });
 
   it('should generate a single badge for a specific user', async () => {
-    const orgaUser = await createFakeUser({ permissions: [Permission.orga] });
-
-    // Add a mainCommission to the user
-    updateAdminUser(orgaUser, {
-      orgaMainCommission: 'vieux',
-      orgaRoles: [{ commission: 'vieux', commissionRole: 'member' }],
-    });
-
     await request(app)
       .post('/admin/badges')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
-        fields: [{ type: 'single', email: orgaUser.email }],
+        fields: [{ type: 'single', email: user.email }],
       })
       .expect(200)
       .then((response) => {
