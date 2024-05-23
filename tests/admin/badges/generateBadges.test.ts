@@ -137,20 +137,6 @@ describe('POST /admin/badges', () => {
       });
   });
 
-  it('should generate badges even without roles', async () => {
-    await database.orgaRole.deleteMany();
-    await request(app)
-      .post('/admin/badges')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send({
-        fields: [{ type: 'orgas' }],
-      })
-      .expect(200)
-      .then((response) => {
-        expect(response.headers['content-type']).to.equal('application/pdf');
-      });
-  });
-
   it('should generate custom badges', async () => {
     await request(app)
       .post('/admin/badges')
@@ -185,6 +171,20 @@ describe('POST /admin/badges', () => {
         fields: [{ type: 'single', email: 'nonexistinguser@example.com' }],
       })
       .expect(404, { error: `User (nonexistinguser@example.com) not found` });
+  });
+
+  it('should generate badges even without roles', async () => {
+    await database.orgaRole.deleteMany();
+    await request(app)
+      .post('/admin/badges')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        fields: [{ type: 'orgas' }],
+      })
+      .expect(200)
+      .then((response) => {
+        expect(response.headers['content-type']).to.equal('application/pdf');
+      });
   });
 
   it('should trigger the hasError flag', async () => {
