@@ -339,7 +339,8 @@ export const enum Error {
   AlreadyAuthenticated = 'Tu es déjà identifié',
   NotplayerOrCoach = "L'utilisateur doit être un joueur ou un coach",
   NotPlayerOrCoachOrSpectator = "L'utilisateur n'est ni un joueur, ni un coach, ni un spectateur",
-  AlreadyPaid = 'Le joueur possède déjà une place',
+  PlayerAlreadyPaid = 'Le joueur possède déjà une place',
+  CartAlreadyPaid = 'Le paiement a déjà été effectué',
   AlreadyErrored = 'Tu ne peux pas valider une transaction échouée',
   TeamLocked = "L'équipe est verrouillée",
   TeamNotLocked = "L'équipe n'est pas verrouillée",
@@ -411,6 +412,10 @@ export const enum Error {
 
   // 415
   UnsupportedMediaType = "Le format de la requête n'est pas supporté",
+
+  // 418
+  // Routes we don't want to issue
+  ObsoleteRoute = 'Route obsolète',
 
   // 500
   // The server encountered an unexpected condition that prevented it from fulfilling the request

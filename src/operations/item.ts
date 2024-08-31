@@ -144,7 +144,7 @@ export const updateAdminItem = async (
       itemId: item.id,
       cart: {
         transactionState: {
-          in: [TransactionState.paid, TransactionState.pending, TransactionState.authorization],
+          in: [TransactionState.paid, TransactionState.pending],
         },
       },
     },

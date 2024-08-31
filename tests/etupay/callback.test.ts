@@ -1,26 +1,26 @@
 /* eslint-disable mocha/max-top-level-suites */
 // Disable eslint mocha/max-top-level-suites because the etupay.ts contains two controllers
 
-import crypto from 'crypto';
+// import crypto from 'crypto';
 import request from 'supertest';
-import { expect } from 'chai';
-import { UserType } from '@prisma/client';
+// import { expect } from 'chai';
+// import { UserType } from '@prisma/client';
 import app from '../../src/app';
-import { sandbox } from '../setup';
-import database from '../../src/services/database';
-import { Cart, Error, PrimitiveCartItem, Team, Tournament, TransactionState, User } from '../../src/types';
-import { createFakeTeam, createFakeTournament, createFakeUser } from '../utils';
-import env from '../../src/utils/env';
-import { encodeToBase64, randomInt } from '../../src/utils/helpers';
-import * as cartOperations from '../../src/operations/carts';
-import * as network from '../../src/utils/network';
-import * as emailOperations from '../../src/services/email';
-import * as itemOperations from '../../src/operations/item';
-import * as tournamentOperations from '../../src/operations/tournament';
-import * as teamOperations from '../../src/operations/team';
-import * as userOperations from '../../src/operations/user';
+// import { sandbox } from '../setup';
+// import database from '../../src/services/database';
+import { Error } from '../../src/types';
+// import { createFakeTeam, createFakeTournament, createFakeUser } from '../utils';
+// import env from '../../src/utils/env';
+// import { encodeToBase64, randomInt } from '../../src/utils/helpers';
+// import * as cartOperations from '../../src/operations/carts';
+// import * as network from '../../src/utils/network';
+// import * as emailOperations from '../../src/services/email';
+// import * as itemOperations from '../../src/operations/item';
+// import * as tournamentOperations from '../../src/operations/tournament';
+// import * as teamOperations from '../../src/operations/team';
+// import * as userOperations from '../../src/operations/user';
 
-const createEtupayPayload = (etupayBody: object) => {
+/* const createEtupayPayload = (etupayBody: object) => {
   // Strinigifies the etupay body
   const stringifiedEtupayBody = JSON.stringify(etupayBody);
 
@@ -75,10 +75,12 @@ const createCartAndPayload = async (
       service_data: encodeToBase64({ cartId: cart.id }),
     }),
   };
-};
+};*/
 
 describe('POST /etupay/callback', () => {
-  let cart: Cart;
+  it('should be an old route', () =>
+    request(app).get('/etupay/callback').expect(410, { error: Error.ObsoleteRoute }));
+  /* let cart: Cart;
   let paidPayload: string;
   let refusedPayload: string;
 
@@ -409,11 +411,13 @@ describe('POST /etupay/callback', () => {
     expect(lolTeamFromDatabase.enteredQueueAt).to.be.null;
     // Lock back the team
     await teamOperations.lockTeam(unlockedTeam.id);
-  });
+  });*/
 });
 
 describe('GET /etupay/callback', () => {
-  let cart: Cart;
+  it('should be an old route', () =>
+    request(app).get('/etupay/callback').expect(410, { error: Error.ObsoleteRoute }));
+  /* let cart: Cart;
   let paidPayload: string;
   let refusedPayload: string;
 
@@ -505,5 +509,5 @@ describe('GET /etupay/callback', () => {
     request(app).get(`/etupay/callback?payload=${paidPayload}`).expect(302).expect('Location', env.etupay.successUrl));
 
   it('should fail as the cart is already paid', () =>
-    request(app).get(`/etupay/callback?payload=${paidPayload}`).expect(403, { error: Error.AlreadyPaid }));
+    request(app).get(`/etupay/callback?payload=${paidPayload}`).expect(403, { error: Error.AlreadyPaid }));*/
 });

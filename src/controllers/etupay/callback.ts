@@ -1,15 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
-import { fetchCart, updateCart } from '../../operations/carts';
+import stripe from 'stripe';
+import { fetchCartFromTransactionId, updateCart } from '../../operations/carts';
 import { sendPaymentConfirmation } from '../../services/email';
 import * as etupay from '../../services/etupay';
-import { Error, EtupayError, EtupayResponse, TransactionState } from '../../types';
-import env from '../../utils/env';
-import { decodeFromBase64 } from '../../utils/helpers';
-import { getIp } from '../../utils/network';
+import { Error, EtupayError, TransactionState } from '../../types';
 import { badRequest, forbidden, notFound, success } from '../../utils/responses';
 
 // Called by the client
-export const clientCallback = [
+export const etupayClientCallback = [
+  (request: Request, response: Response) => badRequest(response, Error.ObsoleteRoute),
+
   // Use the middleware to decrypt the data
   etupay.middleware,
 
@@ -18,7 +18,7 @@ export const clientCallback = [
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (error: EtupayError, request: Request, response: Response, next: NextFunction) =>
     badRequest(response, Error.InvalidQueryParameters),
-
+  /*
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       // Retreive the base64 payload
@@ -62,11 +62,13 @@ export const clientCallback = [
     } catch (error) {
       return next(error);
     }
-  },
+  },*/
 ];
 
 // Called by the bank few minutes after
 export const bankCallback = [
+  (request: Request, response: Response) => badRequest(response, Error.ObsoleteRoute),
+
   // Use the middleware to decrypt the data
   etupay.middleware,
 
@@ -76,7 +78,7 @@ export const bankCallback = [
   (error: EtupayError, request: Request, response: Response, next: NextFunction) =>
     badRequest(response, Error.InvalidQueryParameters),
 
-  async (request: Request, response: Response, next: NextFunction) => {
+  /* async (request: Request, response: Response, next: NextFunction) => {
     if (!/^10\./.test(getIp(request))) {
       // Not sent by a local ip (eg. etupay)
       return forbidden(response, Error.EtupayNoAccess);
@@ -117,6 +119,53 @@ export const bankCallback = [
       if (updatedCart.transactionState === TransactionState.paid)
         // Send the tickets to the user
         await sendPaymentConfirmation(updatedCart);
+
+      return success(response, { api: 'ok' });
+    } catch (error) {
+      return next(error);
+    }
+  },*/
+];
+
+// Called by the client
+export const stripeWebhook = [
+  // TODO : add middleware to check the body (maybe see etupay's middleware, see above)
+
+  // Create a small middleware to be able to handle payload errors.
+  // The eslint disabling is important because the error argument can only be gotten in the 4 arguments function
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (error: EtupayError, request: Request, response: Response, next: NextFunction) =>
+    badRequest(response, Error.InvalidQueryParameters),
+
+  async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      const body = request.body as stripe.Event;
+      if (body.type !== 'checkout.session.completed') {
+        return badRequest(response, Error.InvalidBody);
+      }
+      const session = body.data.object;
+
+      // Fetch the cart from the cartId
+      const cart = await fetchCartFromTransactionId(session.id);
+
+      // If the cart wasn't found, return a 404
+      if (!cart) {
+        return notFound(response, Error.CartNotFound);
+      }
+
+      // If the transaction is already paid
+      if (cart.transactionState === TransactionState.paid) {
+        return forbidden(response, Error.CartAlreadyPaid);
+      }
+
+      // If the transaction is already errored
+      if (cart.transactionState !== TransactionState.pending) {
+        return forbidden(response, Error.AlreadyErrored);
+      }
+
+      // Update the cart with the callback data
+      const updatedCart = await updateCart(cart.id, session.id, TransactionState.paid);
+      await sendPaymentConfirmation(updatedCart);
 
       return success(response, { api: 'ok' });
     } catch (error) {

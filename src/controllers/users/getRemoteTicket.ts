@@ -20,7 +20,7 @@ export const fetchRemoteTicket = [
       if (!remoteUser || remoteUser.teamId !== user.teamId) return notFound(response, ResponseError.UserNotFound);
 
       // Check if the user has already paid
-      if (remoteUser.hasPaid) return forbidden(response, ResponseError.AlreadyPaid);
+      if (remoteUser.hasPaid) return forbidden(response, ResponseError.PlayerAlreadyPaid);
 
       const items = await fetchUserItems(team, remoteUser);
       return success(response, filterItem(items.find((item) => item.id === `ticket-${remoteUser.type}`)));

@@ -35,6 +35,7 @@
     "rate-limiter-flexible": "^3.0.4",
     "sharp": "^0.32.6",
     "split": "^1.0.1",
+    "stripe": "^16.9.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "ts-node": "^10.9.1",

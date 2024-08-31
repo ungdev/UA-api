@@ -53,6 +53,13 @@ export const fetchCart = (cartId: string): Promise<Cart> =>
     },
   });
 
+export const fetchCartFromTransactionId = (transactionId: string): Promise<Cart> =>
+  database.cart.findUnique({
+    where: {
+      transactionId,
+    },
+  });
+
 /**
  * Retrieves all carts created by a {@link prisma.User}
  * @param userId the id of the user to fetch the carts of
@@ -112,7 +119,7 @@ export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
 
 export const updateCart = async (
   cartId: string,
-  transactionId: number,
+  transactionId: string,
   transactionState: TransactionState,
 ): Promise<DetailedCart> => {
   const cart = await database.cart.update({

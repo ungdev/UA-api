@@ -90,6 +90,17 @@ const env = {
     successUrl: loadEnv('ETUPAY_SUCCESS_URL') || `${frontEndpoint}/dashboard/payment?type=success`,
     errorUrl: loadEnv('ETUPAY_ERROR_URL') || `${frontEndpoint}/dashboard/payment?type=error`,
   },
+  stripe: {
+    callback: `${frontEndpoint}/stripe`,
+    token: loadEnv('STRIPE_PRIVATE_KEY'),
+    items: {
+      // TODO : continue adding items
+      'tshirt-s': loadEnv('STRIPE_ITEM_TSHIRT-S') || '',
+      'tshirt-m': loadEnv('STRIPE_ITEM_TSHIRT-M') || '',
+      'tshirt-l': loadEnv('STRIPE_ITEM_TSHIRT-L') || '',
+      'tshirt-xl': loadEnv('STRIPE_ITEM_TSHIRT-XL') || '',
+    },
+  },
   crypto: {
     // random 128 bits key generated if not in production
     key: loadEnv('CRYPTO_KEY') || notInProduction(crypto.randomBytes(16).toString('base64')),

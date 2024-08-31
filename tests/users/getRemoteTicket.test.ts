@@ -98,6 +98,6 @@ describe('GET /users/:userId/ticket', () => {
     await request(app)
       .get(`/users/${remotePlayer.id}/ticket`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(403, { error: Error.AlreadyPaid });
+      .expect(403, { error: Error.PlayerAlreadyPaid });
   });
 });

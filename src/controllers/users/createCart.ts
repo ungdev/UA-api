@@ -1,18 +1,21 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-import { Basket } from '../../services/etupay';
+import Stripe from 'stripe';
 import { validateBody } from '../../middlewares/validation';
-import { createCart, dropStale } from '../../operations/carts';
+import { createCart, dropStale, updateCart } from "../../operations/carts";
 import { fetchUserItems } from '../../operations/item';
 import { createAttendant, deleteUser, fetchUser, formatUser } from '../../operations/user';
 import { Cart, Error as ResponseError, PrimitiveCartItem, ItemCategory, UserType, UserAge } from '../../types';
-import { encodeToBase64, removeAccents } from '../../utils/helpers';
 import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
 import { isShopAllowed } from '../../middlewares/settings';
 import { isAuthenticated } from '../../middlewares/authentication';
 import { fetchTournament } from '../../operations/tournament';
+import env from '../../utils/env';
+import { TransactionState } from "@prisma/client";
+
+const stripe = new Stripe(env.stripe.token);
 
 export interface PayBody {
   tickets: {
@@ -97,7 +100,7 @@ export default [
 
         // Checks if the user has already paid
         if (ticketUser.hasPaid) {
-          return forbidden(response, ResponseError.AlreadyPaid);
+          return forbidden(response, ResponseError.PlayerAlreadyPaid);
         }
 
         // Checks if the buyer and the user are in the same team
@@ -160,6 +163,7 @@ export default [
         }
 
         // In case user asked for multiple discounts
+        // TODO : We should send back an error instead, it also makes more sense for the user, now he can truly know what he will pay.
         if (supplement.itemId === 'discount-switch-ssbu') {
           supplement.quantity = 1;
         }
@@ -254,32 +258,17 @@ export default [
         return next(error);
       }
 
-      // Creates a etupay basket. The accents need to be removed as on the website they don't appear otherwise
-      // We also send as encoded data the cartId to be able to retreive it in the callback
-      const basket = new Basket(
-        'UTT Arena',
-        removeAccents(user.firstname),
-        removeAccents(user.lastname),
-        user.email,
-        'checkout',
-        encodeToBase64({ cartId: cart.id }),
-      );
-
-      // Foreach cartitem
-      for (const cartItem of cartItems) {
-        // Finds the item associated with the cartitem
-        const item = items.find((findItem) => findItem.id === cartItem.itemId);
-
-        // Add the item to the etupay basket
-        basket.addItem(removeAccents(item.name), cartItem.reducedPrice ?? cartItem.price, cartItem.quantity);
-      }
-
-      if (basket.getPrice() < 0) {
-        return forbidden(response, ResponseError.BasketCannotBeNegative);
-      }
-
-      // Returns a answer with the etupay url
-      return created(response, { url: basket.compute(), price: basket.getPrice() });
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        ui_mode: 'embedded',
+        return_url: `${env.stripe.callback}`,
+        line_items: cartItems.map((cartItem) => ({
+          price: env.stripe.items[cartItem.itemId as keyof typeof env.stripe.items],
+          quantity: cartItem.quantity,
+        })),
+      });
+      await updateCart(cart.id, session.id, TransactionState.pending);
+      return created(response, { checkoutSecret: session.client_secret });
     } catch (error) {
       return next(error);
     }

@@ -15,7 +15,7 @@ model Cart {
   id               String           @id
   userId           String
   transactionState TransactionState @default(pending)
-  transactionId    Int?
+  transactionId    String? @unique
   paidAt           DateTime?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now()) @updatedAt
@@ -270,10 +270,8 @@ model Commission {
 enum TransactionState {
   pending
   paid
-  canceled
-  refused
+  expired
   refunded
-  authorization
   stale
 }
 

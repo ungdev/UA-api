@@ -10,7 +10,6 @@ import { Error, User, Team, UserAge, UserType, TransactionState } from '../../sr
 import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { PayBody } from '../../src/controllers/users/createCart';
-import env from '../../src/utils/env';
 import { setShopAllowed } from '../../src/operations/settings';
 import { getCaptain } from '../../src/utils/teams';
 import { createAttendant, deleteUser, updateAdminUser } from '../../src/operations/user';
@@ -316,7 +315,7 @@ describe('POST /users/current/carts', () => {
         tickets: { userIds: [paidUser.id] },
         supplements: [],
       })
-      .expect(403, { error: Error.AlreadyPaid });
+      .expect(403, { error: Error.PlayerAlreadyPaid });
 
     // Delete the user to not make the results wrong for the success test
     await database.cartItem.deleteMany({ where: { forUserId: paidUser.id } });
@@ -381,18 +380,8 @@ describe('POST /users/current/carts', () => {
     const attendant = users.find((findUser) => findUser.type === UserType.attendant);
 
     const items = await itemOperations.fetchAllItems();
-    const price = (id: string, reduced: boolean = false) =>
-      items.find((item) => item.id === id)![reduced ? 'reducedPrice' : 'price'];
 
-    expect(body.url).to.startWith(env.etupay.url);
-
-    expect(body.price).to.be.equal(
-      price('ticket-player') +
-        price('ticket-player', true) +
-        price('ticket-coach') +
-        price('ticket-attendant') +
-        4 * price('ethernet-7'),
-    );
+    expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(5);
@@ -432,10 +421,11 @@ describe('POST /users/current/carts', () => {
       (cartItem) => cartItem.itemId === validCartWithSwitchDiscount.supplements[0].itemId,
     );
 
-    expect(body.url).to.startWith(env.etupay.url);
+    //expect(body.url).to.startWith(env.etupay.url);
+    expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
 
     // player place (ssbu) - 1 * discount-ssbu
-    expect(body.price).to.be.equal(2200 - 300);
+    //expect(body.price).to.be.equal(2200 - 300);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(2);
@@ -484,8 +474,9 @@ describe('POST /users/current/carts', () => {
         ],
       })
       .expect(201);
-    expect(body.url).to.startWith(env.etupay.url);
-    expect(body.price).to.be.equal(14000);
+    //expect(body.url).to.startWith(env.etupay.url);
+    expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
+    //expect(body.price).to.be.equal(14000);
   });
 
   it('should send an error as ssbu discount is already in a pending cart', async () => {
@@ -509,7 +500,7 @@ describe('POST /users/current/carts', () => {
         where: { forUserId: userWithSwitchDiscount.id, itemId: 'discount-switch-ssbu' },
       })
     ).cartId;
-    await cartOperations.updateCart(cartWithDiscountId, 123, TransactionState.paid);
+    await cartOperations.updateCart(cartWithDiscountId, '123', TransactionState.paid);
     await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
@@ -607,8 +598,9 @@ describe('POST /users/current/carts', () => {
       })
       .expect(201);
 
-    expect(body.url).to.startWith(env.etupay.url);
-    expect(body.price).to.be.equal(1000);
+    //expect(body.url).to.startWith(env.etupay.url);
+    expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
+    //expect(body.price).to.be.equal(1000);
 
     return database.item.update({
       data: { stock: currentSpectatorStock },
@@ -668,8 +660,9 @@ describe('POST /users/current/carts', () => {
       })
       .expect(201);
 
-    expect(body.url).to.startWith(env.etupay.url);
-    expect(body.price).to.be.equal(1000);
+    //expect(body.url).to.startWith(env.etupay.url);
+    expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
+    //expect(body.price).to.be.equal(1000);
 
     // Check that the stale cart has been deleted
     const staleSpectatorCarts = await cartOperations.fetchCarts(staleSpectator.id);

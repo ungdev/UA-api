@@ -90,7 +90,7 @@ describe('POST /admin/users/:userId/force-pay', () => {
     request(app)
       .post(`/admin/users/${user.id}/force-pay`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(403, { error: Error.AlreadyPaid }));
+      .expect(403, { error: Error.PlayerAlreadyPaid }));
 
   it('should force pay the user and scan his ticket at the same time', async () => {
     const otherUser = await createFakeUser({ type: UserType.player });
