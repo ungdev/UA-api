@@ -10,7 +10,7 @@ import items from './items';
 import teams from './teams';
 import auth from './auth';
 import tickets from './tickets';
-import etupay from './etupay';
+import etupay from './stripe';
 import discord from './discord';
 import admin from './admin';
 import commissions from './commissions';

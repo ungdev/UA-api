@@ -16,32 +16,29 @@ import { fetchUserItems } from './item';
 import { fetchTeam, lockTeam, unlockTeam } from './team';
 import { fetchTournament } from './tournament';
 
-export const dropStale = () =>
+export const checkForExpiredCarts = () =>
   database.$transaction([
+    database.cart.updateMany({
+      data: {
+        transactionState: TransactionState.expired,
+      },
+      where: {
+        createdAt: {
+          lt: new Date(Date.now() - env.api.cartLifespan * 1000),
+        },
+        transactionState: TransactionState.pending,
+      },
+    }),
     database.user.deleteMany({
       where: {
         type: UserType.attendant,
         cartItems: {
           some: {
             cart: {
-              transactionState: TransactionState.pending,
-              createdAt: {
-                lt: new Date(Date.now() - env.api.cartLifespan),
-              },
+              transactionState: TransactionState.expired,
             },
           },
         },
-      },
-    }),
-    database.cart.updateMany({
-      data: {
-        transactionState: TransactionState.stale,
-      },
-      where: {
-        createdAt: {
-          lt: new Date(Date.now() - env.api.cartLifespan),
-        },
-        transactionState: TransactionState.pending,
       },
     }),
   ]);

@@ -93,7 +93,7 @@ describe('POST /users/:userId/carts', () => {
 
   it('shoud successfully get the pdf of current user', async () => {
     // Pay the cart
-    await updateCart(ticket.cartId, 123, TransactionState.paid);
+    await updateCart(ticket.cartId, '123', TransactionState.paid);
 
     const { body } = await request(app)
       .get(`/tickets`)

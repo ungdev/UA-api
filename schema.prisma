@@ -60,6 +60,7 @@ model Item {
   availableFrom  DateTime?
   availableUntil DateTime?
   position       Int          @default(0)
+  stripeId       String?
   cartItems      CartItem[]
 
   @@map("items")
@@ -272,7 +273,6 @@ enum TransactionState {
   paid
   expired
   refunded
-  stale
 }
 
 enum ItemCategory {

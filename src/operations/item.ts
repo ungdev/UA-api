@@ -1,6 +1,7 @@
 import database from '../services/database';
 import { Item, ItemCategory, RawItem, Team, TransactionState, User, UserType } from '../types';
 import { isPartnerSchool } from '../utils/helpers';
+import { checkForExpiredCarts } from "./carts";
 
 export const formatItem = async (item: RawItem): Promise<Item> => {
   // Defines the left variable to undefined
@@ -34,6 +35,7 @@ export const formatItem = async (item: RawItem): Promise<Item> => {
 };
 
 export const fetchAllItems = async (): Promise<Item[]> => {
+  await checkForExpiredCarts();
   // fetches the items
   const items = await database.item.findMany({ orderBy: [{ position: 'asc' }] });
 
@@ -42,6 +44,7 @@ export const fetchAllItems = async (): Promise<Item[]> => {
 };
 
 export const fetchItem = async (id: string) => {
+  await checkForExpiredCarts();
   const item = await database.item.findUnique({ where: { id } });
   return formatItem(item);
 };

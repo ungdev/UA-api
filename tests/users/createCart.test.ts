@@ -379,8 +379,6 @@ describe('POST /users/current/carts', () => {
     const coach = users.find((findUser) => findUser.type === UserType.coach && findUser.teamId === user.teamId);
     const attendant = users.find((findUser) => findUser.type === UserType.attendant);
 
-    const items = await itemOperations.fetchAllItems();
-
     expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
 
     expect(carts).to.have.lengthOf(1);
@@ -474,9 +472,7 @@ describe('POST /users/current/carts', () => {
         ],
       })
       .expect(201);
-    //expect(body.url).to.startWith(env.etupay.url);
     expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
-    //expect(body.price).to.be.equal(14000);
   });
 
   it('should send an error as ssbu discount is already in a pending cart', async () => {
@@ -539,11 +535,7 @@ describe('POST /users/current/carts', () => {
       .post('/users/current/carts')
       .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
       .send(cartWithMultipleSwitchDiscounts)
-      .expect(201);
-    const discountCartItem = await database.cartItem.findFirst({
-      where: { itemId: 'discount-switch-ssbu', forUserId: userWithSwitchDiscount.id },
-    });
-    expect(discountCartItem?.quantity).to.be.equal(1);
+      .expect(403, { error: Error.OnlyOneDiscountSSBU });
   });
 
   it('should fail as the item is no longer available', async () => {
@@ -667,7 +659,7 @@ describe('POST /users/current/carts', () => {
     // Check that the stale cart has been deleted
     const staleSpectatorCarts = await cartOperations.fetchCarts(staleSpectator.id);
     expect(staleSpectatorCarts).to.have.lengthOf(1);
-    expect(staleSpectatorCarts[0].transactionState).to.be.equal(TransactionState.stale);
+    expect(staleSpectatorCarts[0].transactionState).to.be.equal(TransactionState.expired);
 
     const spectatorTickets = await database.cartItem.findMany({
       where: {

@@ -1,0 +1,27 @@
+/stripe/accepted:
+  post:
+    summary: Webhook appelé par Stripe permettant de confirmer un paiement
+    description: Webhook appelé par Stripe une fois qu'un paiement est confirmé. L'événement attendu est 'checkout.session.completed', regardez la documentation Stripe pour plus d'informations.
+    tags:
+      - Stripe
+    responses:
+      200:
+        description: Le panier a été marqué comme payé.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                api:
+                  type: string
+                  example: 'ok'
+      403:
+        description: Une action interdite est survenue
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              error: Le joueur possède déjà une place
+      404:
+        $ref: '#/components/responses/404CartNotFound'

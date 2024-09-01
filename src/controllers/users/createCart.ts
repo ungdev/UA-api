@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import Stripe from 'stripe';
+import { TransactionState } from '@prisma/client';
 import { validateBody } from '../../middlewares/validation';
-import { createCart, dropStale, updateCart } from "../../operations/carts";
+import { createCart, updateCart } from '../../operations/carts';
 import { fetchUserItems } from '../../operations/item';
 import { createAttendant, deleteUser, fetchUser, formatUser } from '../../operations/user';
 import { Cart, Error as ResponseError, PrimitiveCartItem, ItemCategory, UserType, UserAge } from '../../types';
@@ -13,7 +14,6 @@ import { isShopAllowed } from '../../middlewares/settings';
 import { isAuthenticated } from '../../middlewares/authentication';
 import { fetchTournament } from '../../operations/tournament';
 import env from '../../utils/env';
-import { TransactionState } from "@prisma/client";
 
 const stripe = new Stripe(env.stripe.token);
 
@@ -61,7 +61,6 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const dropOperation = dropStale();
       const { body } = request as { body: PayBody };
 
       const requestInfo = getRequestInfo(response);
@@ -163,9 +162,8 @@ export default [
         }
 
         // In case user asked for multiple discounts
-        // TODO : We should send back an error instead, it also makes more sense for the user, now he can truly know what he will pay.
-        if (supplement.itemId === 'discount-switch-ssbu') {
-          supplement.quantity = 1;
+        if (supplement.itemId === 'discount-switch-ssbu' && supplement.quantity !== 1) {
+          return forbidden(response, ResponseError.OnlyOneDiscountSSBU);
         }
 
         // Push the supplement to the basket
@@ -184,18 +182,17 @@ export default [
         return badRequest(response, ResponseError.EmptyBasket);
       }
 
+      if (
+        cartItems.reduce(
+          (previous, current) => previous + (current.reducedPrice ?? current.price) * current.quantity,
+          0,
+        ) < 0
+      ) {
+        return forbidden(response, ResponseError.BasketCannotBeNegative);
+      }
+
       // Calculate if each cart item is available
       const itemsWithStock = items.filter((item) => item.left !== undefined);
-
-      // Wait for sql delete query to end (if not already ended)
-      const [, { count: droppedCartsCount }] = await dropOperation;
-      // Check if rows (ie. carts) were updated
-      if (droppedCartsCount > 0) {
-        // Update fetched items
-        const refetchedItems = await fetchUserItems(team, user);
-        for (const item of itemsWithStock)
-          item.left = refetchedItems.find((fetchedItem) => fetchedItem.id === item.id).left;
-      }
 
       // Foreach item where there is a stock
       for (const item of itemsWithStock) {
@@ -266,6 +263,7 @@ export default [
           price: env.stripe.items[cartItem.itemId as keyof typeof env.stripe.items],
           quantity: cartItem.quantity,
         })),
+        expires_at: Math.ceil(Date.now() / 1000) + env.api.cartLifespan,
       });
       await updateCart(cart.id, session.id, TransactionState.pending);
       return created(response, { checkoutSecret: session.client_secret });

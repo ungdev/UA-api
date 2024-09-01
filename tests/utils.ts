@@ -261,7 +261,7 @@ export const createFakeCart = ({
       id: nanoid(),
       userId,
       transactionState,
-      transactionId: 123,
+      transactionId: faker.string.alpha({ length: 12 }),
       cartItems: {
         createMany: {
           data: items.map(({ itemId, quantity, price }) => ({

@@ -123,7 +123,7 @@ describe('Tests the email utils', () => {
       ...supplementsCartItems,
     ]);
 
-    const detailedCart = await updateCart(createdCart.id, 123, TransactionState.paid);
+    const detailedCart = await updateCart(createdCart.id, '123', TransactionState.paid);
 
     const ticketsEmail = await generateTicketsEmail(detailedCart);
 

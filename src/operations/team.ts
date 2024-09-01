@@ -14,14 +14,15 @@ import { formatUser, userInclusions } from './user';
 import { deleteDiscordTeam, sendDiscordTeamLockout, sendDiscordTeamUnlock, setupDiscordTeam } from '../utils/discord';
 import { fetchTournament } from './tournament';
 
-const teamInclusions = {
+// Okayyyy, for some reason if this is not a function, userInclusions is undefined.
+const teamInclusions = () => ({
   users: {
     include: userInclusions,
   },
   askingUsers: {
     include: userInclusions,
   },
-};
+});
 
 export const getPositionInQueue = (team: PrimitiveTeam): Promise<number | null> => {
   if (!team.enteredQueueAt) return null;
@@ -58,7 +59,7 @@ export const formatPrimitiveTeam = async (team: PrimitiveTeamWithPrimitiveUsers)
 export const fetchTeam = async (id: string): Promise<Team> | undefined => {
   const team: PrimitiveTeamWithPrimitiveUsers = await database.team.findUnique({
     where: { id },
-    include: teamInclusions,
+    include: teamInclusions(),
   });
 
   return team ? formatPrimitiveTeam(team) : undefined;
@@ -82,7 +83,7 @@ export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
     where: {
       tournamentId,
     },
-    include: teamInclusions,
+    include: teamInclusions(),
   });
 
   return Promise.all(teams.map(formatPrimitiveTeam));
@@ -131,7 +132,7 @@ export const lockTeam = async (teamId: string) => {
       where: {
         id: teamId,
       },
-      include: teamInclusions,
+      include: teamInclusions(),
     });
     // Setup team on Discord
     await setupDiscordTeam(team, tournament);
@@ -147,7 +148,7 @@ export const lockTeam = async (teamId: string) => {
       where: {
         id: teamId,
       },
-      include: teamInclusions,
+      include: teamInclusions(),
     });
   }
 
@@ -194,7 +195,7 @@ export const createTeam = async (
     where: {
       captainId,
     },
-    include: teamInclusions,
+    include: teamInclusions(),
   });
 
   // Verify if team needs to be locked
@@ -215,7 +216,7 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
     where: {
       id: teamId,
     },
-    include: teamInclusions,
+    include: teamInclusions(),
   });
 
   return formatPrimitiveTeam(team);
@@ -266,7 +267,7 @@ export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise
     where: {
       id: teamId,
     },
-    include: teamInclusions,
+    include: teamInclusions(),
   });
 
 export const unlockTeam = async (teamId: string) => {
