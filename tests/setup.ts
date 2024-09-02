@@ -1,5 +1,7 @@
 // Setup all environment variables
 /* eslint-disable import/first*/
+import { disableFakeStripeApi, enableFakeStripeApi } from "./stripe";
+
 process.env.NODE_ENV = 'test';
 
 // Load the environment variables before loading prisma
@@ -35,6 +37,7 @@ before(async () => {
 
   enableFakeDiscordApi();
   enableFakeUploadApi();
+  enableFakeStripeApi();
 
   // Verify environment variables have been loaded correctly
   expect(process.env.API_PORT).to.be.undefined;
@@ -48,6 +51,7 @@ afterEach('Restore the sandbox after every tests', () => {
 after(async () => {
   disableFakeDiscordApi();
   disableFakeUploadApi();
+  disableFakeStripeApi();
 
   // Reset the database at it was
   await setLoginAllowed(false);
