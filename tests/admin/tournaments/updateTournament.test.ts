@@ -192,4 +192,12 @@ describe('PATCH /admin/tournaments/{tournamentId}', () => {
     const tournamentDatabase = await tournamentOperations.fetchTournament(tournament.id);
     expect(tournamentDatabase.maxPlayers).to.equal(validBody.maxPlayers);
   });
+
+  it('should allow for empty strings in fields `format` and `infos`', async () => {
+    await request(app)
+      .patch(`/admin/tournaments/${tournament.id}`)
+      .send({ format: '', infos: '' })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+  });
 });
