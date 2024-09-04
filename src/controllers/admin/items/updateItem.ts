@@ -56,8 +56,7 @@ export default [
         return notFound(response, Error.ItemNotFound);
       }
 
-      const item = await updateAdminItem(
-        request.params.itemId,
+      const item = await updateAdminItem(request.params.itemId, {
         name,
         category,
         attribute,
@@ -68,7 +67,7 @@ export default [
         stockDifference,
         availableFrom,
         availableUntil,
-      );
+      });
 
       return success(response, filterAdminItem(item));
     } catch (error) {

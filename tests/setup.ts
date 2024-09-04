@@ -1,7 +1,5 @@
 // Setup all environment variables
 /* eslint-disable import/first*/
-import { disableFakeStripeApi, enableFakeStripeApi } from "./stripe";
-
 process.env.NODE_ENV = 'test';
 
 // Load the environment variables before loading prisma
@@ -15,6 +13,7 @@ import { setLoginAllowed, setShopAllowed, setTrombiAllowed } from '../src/operat
 import { transporter } from '../src/services/email';
 import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 import { disableFakeUploadApi, enableFakeUploadApi } from './upload';
+import { disableFakeStripeApi, enableFakeStripeApi } from './stripe';
 import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
 import * as uploads from './upload';

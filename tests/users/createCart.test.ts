@@ -14,6 +14,7 @@ import { setShopAllowed } from '../../src/operations/settings';
 import { getCaptain } from '../../src/utils/teams';
 import { createAttendant, deleteUser, updateAdminUser } from '../../src/operations/user';
 import { joinTeam } from '../../src/operations/team';
+import { resetFakeStripeApi, stripeSessions } from "../stripe";
 
 describe('POST /users/current/carts', () => {
   let user: User;
@@ -352,6 +353,7 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should successfuly create a cart', async () => {
+    resetFakeStripeApi();
     const oldUserCount = await database.user.count();
     const { body } = await request(app)
       .post(`/users/current/carts`)
@@ -379,7 +381,7 @@ describe('POST /users/current/carts', () => {
     const coach = users.find((findUser) => findUser.type === UserType.coach && findUser.teamId === user.teamId);
     const attendant = users.find((findUser) => findUser.type === UserType.attendant);
 
-    expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
+    expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(5);
@@ -396,6 +398,7 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should successfuly create a cart even with the ssbu discount', async () => {
+    resetFakeStripeApi();
     const { body } = await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
@@ -420,7 +423,7 @@ describe('POST /users/current/carts', () => {
     );
 
     //expect(body.url).to.startWith(env.etupay.url);
-    expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
+    expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
 
     // player place (ssbu) - 1 * discount-ssbu
     //expect(body.price).to.be.equal(2200 - 300);
@@ -455,6 +458,7 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should sucessfully create a cart with a rental pc', async () => {
+    resetFakeStripeApi();
     const userToken = generateToken(notValidUserWithSwitchDiscount);
 
     const { body } = await request(app)
@@ -472,7 +476,7 @@ describe('POST /users/current/carts', () => {
         ],
       })
       .expect(201);
-    expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
+    expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
   });
 
   it('should send an error as ssbu discount is already in a pending cart', async () => {
@@ -527,7 +531,7 @@ describe('POST /users/current/carts', () => {
       .expect(403, { error: Error.BasketCannotBeNegative });
   });
 
-  it('should only apply 1 ssbu discount as user cannot order more than 1 ssbu reduction', async () => {
+  it('should fail as user cannot order more than 1 ssbu reduction', async () => {
     await database.cartItem.deleteMany({
       where: { itemId: 'discount-switch-ssbu', forUserId: userWithSwitchDiscount.id },
     });
@@ -566,6 +570,7 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should succeed to buy last item', async () => {
+    resetFakeStripeApi();
     // We clear previous tickets first
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
@@ -591,7 +596,7 @@ describe('POST /users/current/carts', () => {
       .expect(201);
 
     //expect(body.url).to.startWith(env.etupay.url);
-    expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
+    expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
     //expect(body.price).to.be.equal(1000);
 
     return database.item.update({
@@ -601,6 +606,7 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should pass as a stale stock-blocking cart was deleted', async () => {
+    resetFakeStripeApi();
     // We clear previous tickets first
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
@@ -653,7 +659,7 @@ describe('POST /users/current/carts', () => {
       .expect(201);
 
     //expect(body.url).to.startWith(env.etupay.url);
-    expect(body.checkoutSecret).to.be.not.null.and.not.undefined;
+    expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
     //expect(body.price).to.be.equal(1000);
 
     // Check that the stale cart has been deleted

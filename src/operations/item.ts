@@ -1,7 +1,7 @@
 import database from '../services/database';
 import { Item, ItemCategory, RawItem, Team, TransactionState, User, UserType } from '../types';
 import { isPartnerSchool } from '../utils/helpers';
-import { checkForExpiredCarts } from "./carts";
+import { checkForExpiredCarts } from './carts';
 
 export const formatItem = async (item: RawItem): Promise<Item> => {
   // Defines the left variable to undefined
@@ -105,17 +105,36 @@ export const findAdminItem = async (itemId: string) => {
 };
 
 export const updateAdminItem = async (
-  itemId?: string,
-  name?: string,
-  category?: ItemCategory,
-  attribute?: string,
-  price?: number,
-  reducedPrice?: number,
-  infos?: string,
-  image?: string,
-  stockDifference?: number,
-  availableFrom?: Date,
-  availableUntil?: Date,
+  itemId: string,
+  {
+    name,
+    category,
+    attribute,
+    price,
+    reducedPrice,
+    infos,
+    image,
+    stockDifference,
+    availableFrom,
+    availableUntil,
+    stripeProductId,
+    stripePriceId,
+    stripeReducedPriceId,
+  }: {
+    name?: string;
+    category?: ItemCategory;
+    attribute?: string;
+    price?: number;
+    reducedPrice?: number;
+    infos?: string;
+    image?: string;
+    stockDifference?: number;
+    availableFrom?: Date;
+    availableUntil?: Date;
+    stripeProductId?: string | null;
+    stripePriceId?: string | null;
+    stripeReducedPriceId?: string | null;
+  } = {},
 ): Promise<Item> => {
   const newStock = stockDifference
     ? (
@@ -139,6 +158,9 @@ export const updateAdminItem = async (
       stock: newStock,
       availableFrom,
       availableUntil,
+      stripeProductId,
+      stripePriceId,
+      stripeReducedPriceId,
     },
     where: { id: itemId },
   });

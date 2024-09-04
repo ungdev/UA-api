@@ -251,7 +251,9 @@ export default [
         cart = await createCart(user.id, cartItems);
       } catch (error) {
         const attendantTicket = cartItems.find((cartItem) => cartItem.itemId === 'ticket-attendant');
-        await deleteUser(attendantTicket.forUserId);
+        if (attendantTicket) {
+          await deleteUser(attendantTicket.forUserId);
+        }
         return next(error);
       }
 
