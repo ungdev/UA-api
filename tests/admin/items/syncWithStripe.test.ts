@@ -29,7 +29,6 @@ describe('PATCH /admin/items/stripe-sync', () => {
 
   after(async () => {
     // Delete the user created
-    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 

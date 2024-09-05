@@ -3,8 +3,8 @@ import stripe from 'stripe';
 import Joi from 'joi';
 import { fetchCartFromTransactionId, updateCart } from '../../operations/carts';
 import { sendPaymentConfirmation } from '../../services/email';
-import { Error, EtupayError, TransactionState } from '../../types';
-import { badRequest, forbidden, notFound, success } from '../../utils/responses';
+import { Error, TransactionState } from '../../types';
+import { notFound, success } from '../../utils/responses';
 import { validateBody } from '../../middlewares/validation';
 
 // This route is a webhook called by stripe
@@ -27,12 +27,6 @@ export default [
     }).unknown(true),
   ),
 
-  // Create a small middleware to be able to handle payload errors.
-  // The eslint disabling is important because the error argument can only be gotten in the 4 arguments function
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  (error: EtupayError, request: Request, response: Response, next: NextFunction) =>
-    badRequest(response, Error.InvalidQueryParameters),
-
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const session = request.body.data.object as stripe.Checkout.Session;
@@ -45,14 +39,9 @@ export default [
         return notFound(response, Error.CartNotFound);
       }
 
-      // If the transaction is already paid
-      if (cart.transactionState === TransactionState.paid) {
-        return forbidden(response, Error.CartAlreadyPaid);
-      }
-
-      // If the transaction is already errored
+      // If the transaction is already errored (force-payed, directly changed in database, ...)
       if (cart.transactionState !== TransactionState.pending) {
-        return forbidden(response, Error.AlreadyErrored);
+        return success(response, { api: 'ok' });
       }
 
       // Update the cart with the callback data
