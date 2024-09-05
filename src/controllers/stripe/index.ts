@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import paymentAcceptedWebhook from "./paymentAcceptedWebhook";
-import paymentExpiredWebhook from "./paymentExpiredWebhook";
+import paymentAcceptedWebhook from './paymentAcceptedWebhook';
+import paymentExpiredWebhook from './paymentExpiredWebhook';
 
 const router = Router();
 

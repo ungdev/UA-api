@@ -36,11 +36,17 @@ describe('POST /stripe/accepted', () => {
 
   it('should fail with an internal server error', async () => {
     sandbox.stub(cartOperations, 'fetchCartFromTransactionId').throws('Unexpected error');
-    await request(app).post('/stripe/accepted').send(generateCart('plz throw')).expect(500, { error: Error.InternalServerError });
+    await request(app)
+      .post('/stripe/accepted')
+      .send(generateCart('plz throw'))
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should fail as the transaction id does not exist', () =>
-    request(app).post('/stripe/accepted').send(generateCart('I AM A H4X0R')).expect(404, { error: Error.CartNotFound }));
+    request(app)
+      .post('/stripe/accepted')
+      .send(generateCart('I AM A H4X0R'))
+      .expect(404, { error: Error.CartNotFound }));
 
   it('should change the transactionState of the cart from pending to paid', async () => {
     await updateCart(cart.id, 'supersecret', TransactionState.pending);

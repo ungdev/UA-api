@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import stripe from 'stripe';
 import Joi from 'joi';
 import { fetchCartFromTransactionId, updateCart } from '../../operations/carts';
-import { Error, EtupayError, TransactionState } from '../../types';
-import { badRequest, forbidden, notFound, success } from '../../utils/responses';
+import { Error, TransactionState } from '../../types';
+import { notFound, success } from '../../utils/responses';
 import { validateBody } from '../../middlewares/validation';
 
 // This route is a webhook called by stripe

@@ -1,6 +1,6 @@
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 import type { Request, Response, NextFunction } from 'express';
-import env from "../utils/env";
+import env from '../utils/env';
 
 const options = {
   points: env.api.rateLimit,

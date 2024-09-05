@@ -14,7 +14,7 @@ import { setShopAllowed } from '../../src/operations/settings';
 import { getCaptain } from '../../src/utils/teams';
 import { createAttendant, deleteUser, updateAdminUser } from '../../src/operations/user';
 import { joinTeam } from '../../src/operations/team';
-import { resetFakeStripeApi, stripeSessions } from "../stripe";
+import { resetFakeStripeApi, stripeSessions } from '../stripe';
 
 describe('POST /users/current/carts', () => {
   let user: User;
@@ -422,11 +422,11 @@ describe('POST /users/current/carts', () => {
       (cartItem) => cartItem.itemId === validCartWithSwitchDiscount.supplements[0].itemId,
     );
 
-    //expect(body.url).to.startWith(env.etupay.url);
+    // expect(body.url).to.startWith(env.etupay.url);
     expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
 
     // player place (ssbu) - 1 * discount-ssbu
-    //expect(body.price).to.be.equal(2200 - 300);
+    // expect(body.price).to.be.equal(2200 - 300);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(2);
@@ -595,9 +595,9 @@ describe('POST /users/current/carts', () => {
       })
       .expect(201);
 
-    //expect(body.url).to.startWith(env.etupay.url);
+    // expect(body.url).to.startWith(env.etupay.url);
     expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
-    //expect(body.price).to.be.equal(1000);
+    // expect(body.price).to.be.equal(1000);
 
     return database.item.update({
       data: { stock: currentSpectatorStock },
@@ -658,9 +658,9 @@ describe('POST /users/current/carts', () => {
       })
       .expect(201);
 
-    //expect(body.url).to.startWith(env.etupay.url);
+    // expect(body.url).to.startWith(env.etupay.url);
     expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
-    //expect(body.price).to.be.equal(1000);
+    // expect(body.price).to.be.equal(1000);
 
     // Check that the stale cart has been deleted
     const staleSpectatorCarts = await cartOperations.fetchCarts(staleSpectator.id);

@@ -36,7 +36,10 @@ describe('POST /stripe/expired', () => {
 
   it('should fail with an internal server error', async () => {
     sandbox.stub(cartOperations, 'fetchCartFromTransactionId').throws('Unexpected error');
-    await request(app).post('/stripe/expired').send(generateCart('plz throw')).expect(500, { error: Error.InternalServerError });
+    await request(app)
+      .post('/stripe/expired')
+      .send(generateCart('plz throw'))
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should fail as the transaction id does not exist', () =>

@@ -4,9 +4,7 @@ import { hasPermission } from '../../../middlewares/authentication';
 import { Item, Permission } from '../../../types';
 import { noContent } from '../../../utils/responses';
 import { fetchAllItems, updateAdminItem } from '../../../operations/item';
-import env from '../../../utils/env';
-
-const stripe = new Stripe(env.stripe.token);
+import { stripe } from '../../../utils/stripe';
 
 export default [
   // Middlewares

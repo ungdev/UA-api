@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-import Stripe from 'stripe';
 import { TransactionState } from '@prisma/client';
 import { validateBody } from '../../middlewares/validation';
 import { createCart, updateCart } from '../../operations/carts';
@@ -14,8 +13,7 @@ import { isShopAllowed } from '../../middlewares/settings';
 import { isAuthenticated } from '../../middlewares/authentication';
 import { fetchTournament } from '../../operations/tournament';
 import env from '../../utils/env';
-
-const stripe = new Stripe(env.stripe.token);
+import { stripe } from '../../utils/stripe';
 
 export interface PayBody {
   tickets: {
