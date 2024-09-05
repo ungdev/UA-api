@@ -15,7 +15,7 @@ describe('POST /admin/badges', () => {
   let user: User;
   let userToken: string;
   let presUser: User;
-  let respoElec: User;
+  let respoCom: User;
   let respoSSL: User;
   let respoSecu: User;
   let respoLog: User;
@@ -42,10 +42,10 @@ describe('POST /admin/badges', () => {
       orgaRoles: [{ commission: 'coord', commissionRole: 'respo' }],
     });
 
-    respoElec = await createFakeUser({ permissions: [Permission.orga] });
-    updateAdminUser(respoElec, {
-      orgaMainCommission: 'elec',
-      orgaRoles: [{ commission: 'elec', commissionRole: 'respo' }],
+    respoCom = await createFakeUser({ permissions: [Permission.orga] });
+    updateAdminUser(respoCom, {
+      orgaMainCommission: 'com',
+      orgaRoles: [{ commission: 'com', commissionRole: 'respo' }],
     });
 
     respoSSL = await createFakeUser({ permissions: [Permission.orga] });
