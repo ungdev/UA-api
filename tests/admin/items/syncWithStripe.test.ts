@@ -5,7 +5,7 @@ import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Item, Permission, User, UserType } from '../../../src/types';
 import { generateToken } from '../../../src/utils/users';
-import { fetchAllItems, updateAdminItem } from '../../../src/operations/item';
+import * as itemOperations from '../../../src/operations/item';
 import {
   generateStripePrice,
   generateStripeProduct,
@@ -13,6 +13,7 @@ import {
   stripePrices,
   stripeProducts,
 } from '../../stripe';
+import { sandbox } from '../../setup';
 
 describe('PATCH /admin/items/stripe-sync', () => {
   let user: User;
@@ -21,7 +22,7 @@ describe('PATCH /admin/items/stripe-sync', () => {
   let adminToken: string;
 
   before(async () => {
-    items = await fetchAllItems();
+    items = await itemOperations.fetchAllItems();
     user = await createFakeUser({ type: UserType.player });
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
@@ -30,6 +31,14 @@ describe('PATCH /admin/items/stripe-sync', () => {
   after(async () => {
     // Delete the user created
     await database.user.deleteMany();
+  });
+
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(itemOperations, 'fetchAllItems').throws('Unexpected error');
+    await request(app)
+      .patch('/admin/items/stripe-sync')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should error as the user is not authenticated', () =>
@@ -51,7 +60,7 @@ describe('PATCH /admin/items/stripe-sync', () => {
     let price = generateStripePrice('eur', item.price, product.id);
     product.default_price = price.id;
     let reducedPrice = generateStripePrice('eur', item.reducedPrice - 1, product.id);
-    await updateAdminItem('ticket-player', {
+    await itemOperations.updateAdminItem('ticket-player', {
       stripeProductId: product.id,
       stripePriceId: price.id,
       stripeReducedPriceId: reducedPrice.id,
@@ -63,14 +72,17 @@ describe('PATCH /admin/items/stripe-sync', () => {
     product.default_price = price.id;
     reducedPrice = generateStripePrice('eur', item.reducedPrice, product.id);
     generateStripePrice('eur', item.price + 1, product.id);
-    await updateAdminItem('ticket-player-ssbu', { stripeProductId: product.id, stripeReducedPriceId: reducedPrice.id });
+    await itemOperations.updateAdminItem('ticket-player-ssbu', {
+      stripeProductId: product.id,
+      stripeReducedPriceId: reducedPrice.id,
+    });
     // Unexisting item
     product = generateStripeProduct('canard caché');
     price = generateStripePrice('eur', 666, product.id);
     product.default_price = price.id;
     await request(app).patch('/admin/items/stripe-sync').set('Authorization', `Bearer ${adminToken}`).expect(204);
 
-    items = await fetchAllItems();
+    items = await itemOperations.fetchAllItems();
     let priceCount = 0;
     for (item of items) {
       priceCount++;
@@ -94,7 +106,7 @@ describe('PATCH /admin/items/stripe-sync', () => {
 
     // Roll-back changes
     for (item of items) {
-      await updateAdminItem(item.id, {
+      await itemOperations.updateAdminItem(item.id, {
         stripeProductId: null,
         stripePriceId: null,
         stripeReducedPriceId: null,
