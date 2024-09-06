@@ -186,6 +186,7 @@ describe('POST /users/current/carts', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(400, { error: Error.InvalidCart });
   });
+
   describe('dynamic tests failures on body', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const badBodies: any[] = [

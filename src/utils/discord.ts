@@ -1,4 +1,3 @@
-/* eslint-disable default-case */
 /* eslint-disable import/no-unresolved */
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
 import { fetchTeam, fetchTeams } from '../operations/team';

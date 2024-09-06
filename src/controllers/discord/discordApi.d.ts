@@ -1,5 +1,3 @@
-/* eslint-disable camelcase */
-
 /**
  * Make an alias of snowflake to string to be more precise on the expected type
  */
