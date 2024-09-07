@@ -94,22 +94,6 @@ const env = {
   stripe: {
     callback: `${frontEndpoint}/stripe`,
     token: loadEnv('STRIPE_PRIVATE_KEY'),
-    items: {
-      'ticket-player': loadEnv('STRIPE_ITEM_TICKET-PLAYER') || '',
-      'ticket-player-ssbu': loadEnv('STRIPE_ITEM_TICKET-PLAYER-SSBU') || '',
-      'ticket-coach': loadEnv('STRIPE_ITEM_TICKET-COACH') || '',
-      'ticket-attendant': loadEnv('STRIPE_ITEM_TICKET-ATTENDANT') || '',
-      'ticket-spectator': loadEnv('STRIPE_ITEM_TICKET-SPECTATOR') || '',
-      'discount-switch-ssbu': loadEnv('STRIPE_ITEM_DISCOUNT-SWITCH-SSBU') || '',
-      'ethernet-7': loadEnv('STRIPE_ITEM_ETHERNET-7') || '',
-      'multi-socket': loadEnv('STRIPE_ITEM_MULTI-SOCKET') || '',
-      pin: loadEnv('STRIPE_ITEM_PIN') || '',
-      pc: loadEnv('STRIPE_ITEM_PC') || '',
-      'tshirt-s': loadEnv('STRIPE_ITEM_TSHIRT-S') || '',
-      'tshirt-m': loadEnv('STRIPE_ITEM_TSHIRT-M') || '',
-      'tshirt-l': loadEnv('STRIPE_ITEM_TSHIRT-L') || '',
-      'tshirt-xl': loadEnv('STRIPE_ITEM_TSHIRT-XL') || '',
-    },
   },
   crypto: {
     // random 128 bits key generated if not in production
