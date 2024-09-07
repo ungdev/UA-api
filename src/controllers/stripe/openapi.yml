@@ -15,13 +15,25 @@
                 api:
                   type: string
                   example: 'ok'
-      403:
-        description: Une action interdite est survenue
+      404:
+        $ref: '#/components/responses/404CartNotFound'
+
+/stripe/expired:
+  post:
+    summary: Webhook appelé par Stripe permettant de signaler qu'un paiement a expiré
+    description: Webhook appelé par Stripe une fois qu'un paiement a expiré (sa création a eu lieu il y a plus d'une heure et n'a pas été payé).
+    tags:
+      - Stripe
+    responses:
+      200:
+        description: L'information a bien été prise en compte.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Error'
-            example:
-              error: Le joueur possède déjà une place
-      404:
+              type: object
+              properties:
+                api:
+                  type: string
+                  example: 'ok'
+      403:
         $ref: '#/components/responses/404CartNotFound'

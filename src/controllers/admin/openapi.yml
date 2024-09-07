@@ -403,6 +403,18 @@
       403:
         $ref: '#/components/responses/403Unauthorized'
 
+/admin/items/stripe-sync:
+  patch:
+    summary: Synchronizes Stripe items with the items in the shop.
+    description: Verifies all items are present in Stripe, verify their prices (and reduced prices). Do not run this command if not needed, it does quite a lot of calls to the Stripe API, that would be sad to be rate limited by it.
+    tags:
+      - Admin
+    security:
+      - BearerAuth: []
+    responses:
+      204:
+        description: Synchronization has been completed successfully
+
 /admin/logs:
   get:
     summary: Récupère les actions effectués par les utilisateurs
@@ -1112,7 +1124,6 @@
               display:
                 type: boolean
                 description: Si le tournoi doit être affiché ou non
-
     responses:
       200:
         description: Le tournoi a bien été modifié. Ses informations sont renvoyées.
@@ -1137,6 +1148,8 @@
   post:
     summary: Upload un fichier
     description: Upload un fichier
+    tags:
+      - Admin
     security:
       - BearerAuth: []
     requestBody:

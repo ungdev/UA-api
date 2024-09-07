@@ -24,7 +24,7 @@ export default [
         prices.push(...stripeResponse.data);
         hasMore = stripeResponse.has_more;
       }
-      // Fetch all products
+      // Fetch all products, and bind them with their prices
       const remainingStripeProducts: Array<{ product: Stripe.Product; prices: Stripe.Price[] }> = [];
       hasMore = true;
       while (hasMore) {
@@ -49,8 +49,10 @@ export default [
           ({ product }) => product.id === item.stripeProductId,
         );
         if (stripeProductIndex === -1) {
+          // There is no stripe product associated with this item
           remainingItems.push(item);
         } else {
+          // We found a Stripe product to map with this item
           const stripeProduct = remainingStripeProducts.splice(stripeProductIndex, 1)[0];
           mapping.push([item, stripeProduct]);
         }
@@ -63,6 +65,7 @@ export default [
         );
         let stripeDefaultPrice: Stripe.Price;
         if (defaultPriceIndex === -1) {
+          // There is no price to map with the default price of the shop, we create a new one (it's impossible to modify the value of a price)
           stripeDefaultPrice = await stripe.prices.create({
             currency: 'eur',
             product: stripeProduct.product.id,
@@ -78,6 +81,8 @@ export default [
         }
         let stripeReducedPrice: Stripe.Price;
         if (item.reducedPrice !== null) {
+          // If item has a reduced price, we try to find one that could match.
+          // The default price was either not present in the list or has been removed by the splice called earlier.
           const reducedPriceIndex = stripeProduct.prices.findIndex(
             (price) => price.id === item.stripeReducedPriceId && price.unit_amount === item.price,
           );
@@ -92,6 +97,7 @@ export default [
         }
         const stripeReducedPriceId = stripeReducedPrice?.id ?? null;
         if (item.stripePriceId !== stripeDefaultPrice.id || item.stripeReducedPriceId !== stripeReducedPriceId) {
+          // If one of the the stripe price or the stripe reduced price has been modified, modify their IDs in the database.
           await updateAdminItem(item.id, {
             stripePriceId: stripeDefaultPrice.id,
             stripeReducedPriceId,
@@ -104,7 +110,7 @@ export default [
         }
       }
 
-      // Create stripe products for unmatched items
+      // Create stripe products for unmatched items, quite straightforward
       for (const item of remainingItems) {
         const stripeProduct = await stripe.products.create({
           name: item.name,
@@ -124,13 +130,13 @@ export default [
         await updateAdminItem(item.id, {
           stripeProductId: stripeProduct.id,
           stripePriceId: stripeProduct.default_price as string,
-          stripeReducedPriceId: reducedStripePrice?.id,
+          stripeReducedPriceId: reducedStripePrice?.id ?? null,
         });
       }
 
-      // Remove unmatched stripe products
+      // Remove unmatched stripe products.
+      // For each product we remove the prices, and then delete the product.
       for (const product of remainingStripeProducts) {
-        // First, remove prices
         for (const price of product.prices) {
           await stripe.prices.update(price.id, {
             active: false,
