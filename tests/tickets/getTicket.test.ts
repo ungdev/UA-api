@@ -57,6 +57,7 @@ describe('POST /users/:userId/carts', () => {
     await database.tournament.deleteMany();
     await database.user.deleteMany();
   });
+
   it("should fail because cart item doesn't belong to the user", async () => {
     const otherUser = await createFakeUser({ type: UserType.player });
     const otherToken = generateToken(otherUser);
@@ -129,9 +130,12 @@ describe('POST /users/:userId/carts', () => {
       .expect(403, { error: Error.TeamNotLocked });
   });
 
-  it('should successfully get the pdf as the player team no longer exists', async () => {
+  it('should fail to get the pdf as the player team no longer exists', async () => {
     await database.team.deleteMany();
 
-    await request(app).get(`/tickets/${ticket.id}`).set('Authorization', `Bearer ${token}`).expect(200);
+    await request(app)
+      .get(`/tickets/${ticket.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403, { error: Error.NotInTeam });
   });
 });

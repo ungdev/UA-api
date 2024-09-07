@@ -316,31 +316,9 @@ describe('POST /teams', () => {
     expect(databasedTeam?.lockedAt).to.be.null;
   });
 
-  // TODO: make it work
-
-  // it('should successfully create the whitelisted osu! team', async () => {
-  //   await createFakeTournament({ id: 'osu' });
-  //   const osuPlayer = await createFakeUser({ type: UserType.player });
-  //   const newToken = generateToken(osuPlayer);
-
-  //   fs.writeFileSync('whitelist.json', JSON.stringify({ osu: [osuPlayer.email] }, null, 2));
-
-  //   return request(app)
-  //     .post('/teams')
-  //     .send({
-  //       ...teamBody,
-  //       name: 'osuPlayer',
-  //       tournamentId: 'osu',
-  //     })
-  //     .set('Authorization', `Bearer ${newToken}`)
-  //     .expect(201);
-  // });
-
   it('should fail as the user is not whitelisted for osu!', async () => {
     const osuPlayer = await createFakeUser({ type: UserType.player });
     const newToken = generateToken(osuPlayer);
-
-    fs.writeFileSync('whitelist.json', JSON.stringify({ osu: [] }, null, 2));
 
     return request(app)
       .post('/teams')
@@ -351,5 +329,34 @@ describe('POST /teams', () => {
       })
       .set('Authorization', `Bearer ${newToken}`)
       .expect(403, { error: Error.NotWhitelisted });
+  });
+
+  it('should successfully create the whitelisted osu! team', async () => {
+    await createFakeTournament({ id: 'osu' });
+    const osuPlayer = await createFakeUser({ type: UserType.player });
+    const newToken = generateToken(osuPlayer);
+
+    fs.writeFileSync('whitelist.json', JSON.stringify({ osu: [osuPlayer.email.toLowerCase()] }, null, 2));
+    // Huuuu, weellll, whitelist.json has to be reloaded, so we need to remove its cache, and also the cache of where it is imported, whitelist.ts
+    // To reload properly whitelist.ts, we need to delete the cache of the file in which it is imported, createTeam.ts, etc... until we go back to the app.ts file
+    delete require.cache[require.resolve('../../src/app.ts')];
+    delete require.cache[require.resolve('../../src/controllers/index.ts')];
+    delete require.cache[require.resolve('../../src/controllers/teams/index.ts')];
+    delete require.cache[require.resolve('../../src/controllers/teams/createTeam.ts')];
+    delete require.cache[require.resolve('../../src/middlewares/whitelist.ts')];
+    delete require.cache[require.resolve('../../whitelist.json')];
+    const { default: nonTestApp } = await import('../../src/app');
+
+    await request(nonTestApp)
+      .post('/teams')
+      .send({
+        ...teamBody,
+        name: 'osuPlayer',
+        tournamentId: 'osu',
+      })
+      .set('Authorization', `Bearer ${newToken}`)
+      .expect(201);
+    // Roll back
+    fs.writeFileSync('whitelist.json', JSON.stringify({ osu: [] }, null, 2));
   });
 });
