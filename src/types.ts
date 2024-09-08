@@ -118,7 +118,7 @@ export interface PrimitiveCartItem {
 
 export type PrimitiveCartItemWithItem = Omit<PrimitiveCartItem, 'itemId'> & {
   item: Item;
-}
+};
 
 export type ParsedPermissionsHolder<T extends RawUser> = Omit<T, 'permissions'> & {
   permissions: Permission[];

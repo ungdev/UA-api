@@ -234,7 +234,7 @@ export default [
             await createAttendant(user.id, body.tickets.attendant.firstname, body.tickets.attendant.lastname),
           );
 
-          const item = items.find((item) => item.id === 'ticket-attendant');
+          const item = items.find((pItem) => pItem.id === 'ticket-attendant');
 
           // Add the item to the basket
           cartItems.push({
