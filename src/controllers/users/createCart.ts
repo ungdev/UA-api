@@ -180,6 +180,7 @@ export default [
         return badRequest(response, ResponseError.EmptyBasket);
       }
 
+      // Verify cart price is not negative
       if (
         cartItems.reduce(
           (previous, current) => previous + (current.reducedPrice ?? current.price) * current.quantity,
