@@ -26,11 +26,13 @@ describe('POST /stripe/accepted', () => {
   const generateCart = (transactionId: string) => ({
     object: 'event',
     type: 'checkout.session.completed',
+    // There are more fields that are sent by Stripe, we just put one more there to verify that other fields would be accepted, and not considered as a bad request.
     another_field_that_should_be_accepted: 'hello there :)',
     data: {
       object: {
         object: 'checkout.session',
         id: transactionId,
+        // Same explanation as above here.
         and_put_one_more_here: 3,
       },
     },
