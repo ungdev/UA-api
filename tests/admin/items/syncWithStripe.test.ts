@@ -57,9 +57,9 @@ describe('PATCH /admin/items/stripe-sync', () => {
     // Existing item, price sync-ed and wrong reduced price
     let item = items.find((pItem) => pItem.id === 'ticket-player');
     let product = generateStripeProduct(item.name);
-    let price = generateStripePrice('eur', item.price, product.id);
+    let price = generateStripePrice(item.price, product.id);
     product.default_price = price.id;
-    let reducedPrice = generateStripePrice('eur', item.reducedPrice - 1, product.id);
+    let reducedPrice = generateStripePrice(item.reducedPrice - 1, product.id);
     await itemOperations.updateAdminItem('ticket-player', {
       stripeProductId: product.id,
       stripePriceId: price.id,
@@ -68,17 +68,17 @@ describe('PATCH /admin/items/stripe-sync', () => {
     // Existing item, unbound price but sync-ed reduced price, and a random other price cause why not
     item = items.find((pItem) => pItem.id === 'ticket-player-ssbu');
     product = generateStripeProduct(item.name);
-    price = generateStripePrice('eur', item.price, product.id);
+    price = generateStripePrice(item.price, product.id);
     product.default_price = price.id;
-    reducedPrice = generateStripePrice('eur', item.reducedPrice, product.id);
-    generateStripePrice('eur', item.price + 1, product.id);
+    reducedPrice = generateStripePrice(item.reducedPrice, product.id);
+    generateStripePrice(item.price + 1, product.id);
     await itemOperations.updateAdminItem('ticket-player-ssbu', {
       stripeProductId: product.id,
       stripeReducedPriceId: reducedPrice.id,
     });
     // Unexisting item
     product = generateStripeProduct('canard caché');
-    price = generateStripePrice('eur', 666, product.id);
+    price = generateStripePrice(666, product.id);
     product.default_price = price.id;
     await request(app).patch('/admin/items/stripe-sync').set('Authorization', `Bearer ${adminToken}`).expect(204);
 
@@ -91,7 +91,6 @@ describe('PATCH /admin/items/stripe-sync', () => {
       expect(product).to.not.be.undefined;
       expect(price).to.not.be.undefined;
       expect(price.product).to.be.equal(product.id);
-      expect(price.currency).to.be.equal('eur');
       expect(price.unit_amount).to.be.equal(item.price);
       expect(product.default_price).to.be.equal(price.id);
       if (item.reducedPrice !== null) {

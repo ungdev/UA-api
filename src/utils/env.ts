@@ -83,14 +83,6 @@ const env = {
     partners: ['utt.fr', 'utc.fr', 'utbm.fr'],
     maxMailsPerBatch: loadIntEnv('MAX_MAIL_PER_BATCH') || 100,
   },
-  etupay: {
-    id: loadIntEnv('ETUPAY_ID') || notInProduction(1),
-    // random 256 bits key genereated if not in production
-    key: loadEnv('ETUPAY_KEY') || notInProduction(crypto.randomBytes(32).toString('base64')),
-    url: loadEnv('ETUPAY_URL') || 'https://etupay.utt.fr/initiate',
-    successUrl: loadEnv('ETUPAY_SUCCESS_URL') || `${frontEndpoint}/dashboard/payment?type=success`,
-    errorUrl: loadEnv('ETUPAY_ERROR_URL') || `${frontEndpoint}/dashboard/payment?type=error`,
-  },
   stripe: {
     callback: `${frontEndpoint}/stripe`,
     token: loadEnv('STRIPE_PRIVATE_KEY'),

@@ -12,6 +12,7 @@ interface StripeObject {
 interface StripeSession extends StripeObject {
   object: 'checkout.session';
   client_secret: string;
+  amount_total: number;
 }
 interface StripeProduct extends StripeObject {
   object: 'product';
@@ -20,7 +21,6 @@ interface StripeProduct extends StripeObject {
 }
 interface StripePrice extends StripeObject {
   object: 'price';
-  currency: string;
   unit_amount: number;
   product: string;
 }
@@ -34,17 +34,16 @@ export const stripePrices: StripePrice[] = [];
 function decodeBody(body: string) {
   return [...new URLSearchParams(body)].reduce(
     (object, [key, value]) => {
-      const [name, sub] = key.match(/[^[\]]+/g);
-      if (!sub) {
-        // eslint-disable-next-line no-param-reassign
-        object[name] = value;
-      } else if (object[name]) {
-        // eslint-disable-next-line no-param-reassign
-        (object[name] as Record<string, unknown>)[sub] = value;
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        object[name] = { [sub]: value };
+      // The idea is the same as the algorithm given in the stackoverflow link above, but generalized.
+      const keys = key.match(/[^[\]]+/g) as [string | number];
+      let currentObject = object;
+      for (let index = 0; index < keys.length - 1; index++) {
+        if (currentObject[keys[index]] === undefined) {
+          currentObject[keys[index]] = {};
+        }
+        currentObject = currentObject[keys[index]] as Record<string, unknown>;
       }
+      currentObject[keys.at(-1)] = value;
       return object;
     },
     {} as Record<string, unknown>,
@@ -55,11 +54,12 @@ function id(prefix: string) {
   return `${prefix}_${faker.string.alpha({ length: 16 })}`;
 }
 
-export function generateStripeSession() {
+export function generateStripeSession(amount: number) {
   const session: StripeSession = {
     id: id('cs'),
     object: 'checkout.session',
     client_secret: id(''),
+    amount_total: amount,
   };
   stripeSessions.push(session);
   return session;
@@ -76,11 +76,10 @@ export function generateStripeProduct(name: string) {
   return product;
 }
 
-export function generateStripePrice(currency: string, unit_amount: number, product: string) {
+export function generateStripePrice(unit_amount: number, product: string) {
   const price: StripePrice = {
     id: id('price'),
     object: 'price',
-    currency,
     unit_amount,
     product,
   };
@@ -115,12 +114,11 @@ function listen() {
           unit_amount: string;
         };
       };
+      if (body.default_price_data.currency !== 'eur') {
+        return [500, '`default_price_data.currency` should be `eur`'];
+      }
       const product = generateStripeProduct(body.name);
-      const price = generateStripePrice(
-        body.default_price_data.currency,
-        Number.parseInt(body.default_price_data.unit_amount),
-        product.id,
-      );
+      const price = generateStripePrice(Number.parseInt(body.default_price_data.unit_amount), product.id);
       product.default_price = price.id;
       return [200, product];
     })
@@ -176,7 +174,10 @@ function listen() {
       if (!stripeProducts.some((product) => product.id === body.product)) {
         return [500, { error: 'Product not found' }];
       }
-      return [200, generateStripePrice(body.currency, Number.parseInt(body.unit_amount), body.product)];
+      if (body.currency !== 'eur') {
+        return [500, '`currency` should be `eur`'];
+      }
+      return [200, generateStripePrice(Number.parseInt(body.unit_amount), body.product)];
     })
 
     // Modify a price (only used for deletion)
@@ -196,7 +197,30 @@ function listen() {
 
     // Create a checkout session
     .post(/\/checkout\/sessions$/)
-    .reply(() => [200, generateStripeSession()]);
+    .reply((uri, pBody) => {
+      const body = decodeBody(pBody as string) as {
+        mode: string;
+        ui_mode: string;
+        return_url: string;
+        line_items: { [key: number]: { price: string; quantity: number } }; // Basically an array
+        expires_at: string;
+      };
+      if (body.mode !== 'payment') return [500, { error: 'Mode is not `payment`' }];
+      if (body.ui_mode !== 'embedded') return [500, { error: 'ui_mode is not `embedded`' }];
+      if (body.return_url !== env.stripe.callback)
+        return [500, { error: `return_url is not \`${env.stripe.callback}\`` }];
+      if (Date.parse(body.expires_at) < Date.now()) return [500, { error: '`expires_at` has already expired' }];
+      return [
+        200,
+        generateStripeSession(
+          Object.values(body.line_items).reduce(
+            (previous, current) =>
+              stripePrices.find((price) => price.id === current.price).unit_amount * current.quantity + previous,
+            0,
+          ),
+        ),
+      ];
+    });
 }
 
 /**
@@ -207,6 +231,7 @@ function listen() {
 export const resetFakeStripeApi = () => {
   stripeProducts.splice(0);
   stripeSessions.splice(0);
+  stripePrices.splice(0);
 };
 
 /**

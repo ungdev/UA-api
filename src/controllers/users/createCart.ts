@@ -5,7 +5,7 @@ import { validateBody } from '../../middlewares/validation';
 import { createCart, updateCart } from '../../operations/carts';
 import { fetchUserItems } from '../../operations/item';
 import { createAttendant, deleteUser, fetchUser, formatUser } from '../../operations/user';
-import { Cart, Error as ResponseError, PrimitiveCartItem, ItemCategory, UserType, UserAge } from '../../types';
+import { Cart, Error as ResponseError, ItemCategory, UserType, UserAge, PrimitiveCartItemWithItem } from '../../types';
 import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
@@ -67,7 +67,7 @@ export default [
 
       const items = await fetchUserItems(team, user);
 
-      const cartItems: PrimitiveCartItem[] = [];
+      const cartItems: PrimitiveCartItemWithItem[] = [];
 
       const tournament = team && (await fetchTournament(team.tournamentId));
 
@@ -128,7 +128,7 @@ export default [
 
         // Adds the item to the basket
         cartItems.push({
-          itemId,
+          item,
           quantity: 1,
           price: item.price,
           reducedPrice: item.reducedPrice,
@@ -166,7 +166,7 @@ export default [
 
         // Push the supplement to the basket
         cartItems.push({
-          itemId: supplement.itemId,
+          item: currentItem,
           quantity: supplement.quantity,
           price: items.find((item) => item.id === supplement.itemId).price,
           reducedPrice: items.find((item) => item.id === supplement.itemId).reducedPrice,
@@ -196,7 +196,7 @@ export default [
       for (const item of itemsWithStock) {
         // Checks how many items the user has orders and takes account the quantity
         const cartItemsCount = cartItems.reduce((previous, cartItem) => {
-          if (cartItem.itemId === item.id) {
+          if (cartItem.item.id === item.id) {
             return previous + cartItem.quantity;
           }
 
@@ -211,14 +211,13 @@ export default [
 
       // Check availability of items
       for (const cartItem of cartItems) {
-        const item = items.find((pItem) => pItem.id === cartItem.itemId);
         // Checks if the item is available
-        if (item.availableFrom !== null && item.availableFrom > new Date()) {
+        if (cartItem.item.availableFrom !== null && cartItem.item.availableFrom > new Date()) {
           return gone(response, ResponseError.ItemNotAvailableYet);
         }
 
         // Checks if the item is not available anymore
-        if (item.availableUntil !== null && item.availableUntil < new Date()) {
+        if (cartItem.item.availableUntil !== null && cartItem.item.availableUntil < new Date()) {
           return badRequest(response, ResponseError.ItemNotAvailableAnymore);
         }
       }
@@ -235,20 +234,28 @@ export default [
             await createAttendant(user.id, body.tickets.attendant.firstname, body.tickets.attendant.lastname),
           );
 
+          const item = items.find((item) => item.id === 'ticket-attendant');
+
           // Add the item to the basket
           cartItems.push({
-            itemId: 'ticket-attendant',
+            item,
             quantity: 1,
-            price: items.find((item) => item.id === 'ticket-attendant').price,
-            reducedPrice: items.find((item) => item.id === 'ticket-attendant').reducedPrice,
+            price: item.price,
+            reducedPrice: item.reducedPrice,
             forUserId: user.attendantId,
           });
         }
 
         // Set the cart variable defined outside the try/catch block
-        cart = await createCart(user.id, cartItems);
+        cart = await createCart(
+          user.id,
+          cartItems.map((cartItem) => ({
+            ...cartItem,
+            itemId: cartItem.item.id,
+          })),
+        );
       } catch (error) {
-        const attendantTicket = cartItems.find((cartItem) => cartItem.itemId === 'ticket-attendant');
+        const attendantTicket = cartItems.find((cartItem) => cartItem.item.id === 'ticket-attendant');
         if (attendantTicket) {
           await deleteUser(attendantTicket.forUserId);
         }
@@ -258,9 +265,9 @@ export default [
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
         ui_mode: 'embedded',
-        return_url: `${env.stripe.callback}`,
+        return_url: env.stripe.callback,
         line_items: cartItems.map((cartItem) => ({
-          price: env.stripe.items[cartItem.itemId as keyof typeof env.stripe.items],
+          price: cartItem.reducedPrice === null ? cartItem.item.stripePriceId : cartItem.item.stripeReducedPriceId,
           quantity: cartItem.quantity,
         })),
         expires_at: Math.ceil(Date.now() / 1000) + env.api.cartLifespan,

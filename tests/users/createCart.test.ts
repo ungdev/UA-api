@@ -14,11 +14,14 @@ import { setShopAllowed } from '../../src/operations/settings';
 import { getCaptain } from '../../src/utils/teams';
 import { createAttendant, deleteUser, updateAdminUser } from '../../src/operations/user';
 import { joinTeam } from '../../src/operations/team';
-import { resetFakeStripeApi, stripeSessions } from '../stripe';
+import { generateStripePrice, generateStripeProduct, resetFakeStripeApi, stripeSessions } from '../stripe';
+import { fetchAllItems, fetchItem, updateAdminItem } from '../../src/operations/item';
 
 describe('POST /users/current/carts', () => {
   let user: User;
   let token: string;
+
+  let partnerUser: User;
 
   let teamWithSwitchDiscount: Team;
   let userWithSwitchDiscount: User;
@@ -39,7 +42,7 @@ describe('POST /users/current/carts', () => {
 
   const validCart: PayBody = {
     tickets: {
-      userIds: [],
+      userIds: [], // 2 players and a coach will be added
       attendant: { firstname: 'toto', lastname: 'de lachô' },
     },
     supplements: [
@@ -126,7 +129,7 @@ describe('POST /users/current/carts', () => {
     token = generateToken(user);
 
     const coach = await createFakeUser({ type: UserType.coach });
-    const partnerUser = await createFakeUser({ type: UserType.player, email: 'toto@utt.fr' });
+    partnerUser = await createFakeUser({ type: UserType.player, email: 'toto@utt.fr' });
     await joinTeam(team.id, coach, UserType.coach);
     await joinTeam(team.id, partnerUser, UserType.player);
 
@@ -153,6 +156,21 @@ describe('POST /users/current/carts', () => {
     tokenInFullTournament = generateToken(captainInFullTournament);
     coachInFullTournament = await createFakeUser({ type: UserType.coach });
     await joinTeam(teamInFullTournament.id, coachInFullTournament, UserType.coach);
+
+    // Seed Stripe properly
+    for (const item of await fetchAllItems()) {
+      const product = generateStripeProduct(item.name);
+      const price = generateStripePrice(item.price, product.id);
+      let reducedPrice;
+      if (item.reducedPrice !== null) {
+        reducedPrice = generateStripePrice(item.reducedPrice, product.id);
+      }
+      await updateAdminItem(item.id, {
+        stripeProductId: product.id,
+        stripePriceId: price.id,
+        stripeReducedPriceId: reducedPrice?.id ?? null,
+      });
+    }
   });
 
   after(async () => {
@@ -162,6 +180,14 @@ describe('POST /users/current/carts', () => {
     await database.orga.deleteMany();
     await database.user.deleteMany();
     await database.tournament.deleteMany();
+    resetFakeStripeApi();
+    for (const item of await fetchAllItems()) {
+      await updateAdminItem(item.id, {
+        stripeProductId: null,
+        stripePriceId: null,
+        stripeReducedPriceId: null,
+      });
+    }
   });
 
   it('should fail as the shop is deactivated', async () => {
@@ -352,8 +378,7 @@ describe('POST /users/current/carts', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should successfuly create a cart', async () => {
-    resetFakeStripeApi();
+  it('should successfully create a cart', async () => {
     const oldUserCount = await database.user.count();
     const { body } = await request(app)
       .post(`/users/current/carts`)
@@ -381,7 +406,7 @@ describe('POST /users/current/carts', () => {
     const coach = users.find((findUser) => findUser.type === UserType.coach && findUser.teamId === user.teamId);
     const attendant = users.find((findUser) => findUser.type === UserType.attendant);
 
-    expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
+    expect(body.checkoutSecret).to.be.equal(stripeSessions.at(-1).client_secret);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(5);
@@ -395,10 +420,13 @@ describe('POST /users/current/carts', () => {
 
     expect(attendant?.firstname).to.be.equal(validCart.tickets.attendant?.firstname);
     expect(attendant?.lastname).to.be.equal(validCart.tickets.attendant?.lastname);
+
+    expect(stripeSessions.at(-1).amount_total).to.be.equal(
+      cartItems.reduce((previous, current) => (current.reducedPrice ?? current.price) * current.quantity + previous, 0),
+    );
   });
 
   it('should successfuly create a cart even with the ssbu discount', async () => {
-    resetFakeStripeApi();
     const { body } = await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
@@ -422,11 +450,7 @@ describe('POST /users/current/carts', () => {
       (cartItem) => cartItem.itemId === validCartWithSwitchDiscount.supplements[0].itemId,
     );
 
-    // expect(body.url).to.startWith(env.etupay.url);
-    expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
-
-    // player place (ssbu) - 1 * discount-ssbu
-    // expect(body.price).to.be.equal(2200 - 300);
+    expect(body.checkoutSecret).to.be.equal(stripeSessions.at(-1).client_secret);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(2);
@@ -434,6 +458,10 @@ describe('POST /users/current/carts', () => {
     expect(cartItems.filter((cartItem) => cartItem.forUserId === userWithSwitchDiscount.id)).to.have.lengthOf(2);
 
     expect(supplement?.quantity).to.be.equal(validCartWithSwitchDiscount.supplements[0].quantity);
+
+    expect(stripeSessions.at(-1).amount_total).to.be.equal(
+      cartItems.reduce((previous, current) => current.price * current.quantity + previous, 0),
+    );
   });
 
   it('should error as spectator cannot rent a pc', async () => {
@@ -458,7 +486,6 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should sucessfully create a cart with a rental pc', async () => {
-    resetFakeStripeApi();
     const userToken = generateToken(notValidUserWithSwitchDiscount);
 
     const { body } = await request(app)
@@ -476,7 +503,8 @@ describe('POST /users/current/carts', () => {
         ],
       })
       .expect(201);
-    expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
+    expect(body.checkoutSecret).to.be.equal(stripeSessions.at(-1).client_secret);
+    expect(stripeSessions.at(-1).amount_total).to.be.equal((await fetchItem('pc')).price);
   });
 
   it('should send an error as ssbu discount is already in a pending cart', async () => {
@@ -570,7 +598,6 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should succeed to buy last item', async () => {
-    resetFakeStripeApi();
     // We clear previous tickets first
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
@@ -595,9 +622,8 @@ describe('POST /users/current/carts', () => {
       })
       .expect(201);
 
-    // expect(body.url).to.startWith(env.etupay.url);
-    expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
-    // expect(body.price).to.be.equal(1000);
+    expect(body.checkoutSecret).to.be.equal(stripeSessions.at(-1).client_secret);
+    expect(stripeSessions.at(-1).amount_total).to.be.equal((await fetchItem('ticket-spectator')).price);
 
     return database.item.update({
       data: { stock: currentSpectatorStock },
@@ -606,14 +632,13 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should pass as a stale stock-blocking cart was deleted', async () => {
-    resetFakeStripeApi();
     // We clear previous tickets first
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
 
     // We retrieve ticket-spectator stock to reset it at the end of the test
     const items = await itemOperations.fetchAllItems();
-    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator')?.stock;
+    const spectatorTicket = items.find((item) => item.id === 'ticket-spectator')!;
 
     // We set stock for the ticket to 1 unit
     await database.item.update({
@@ -658,9 +683,7 @@ describe('POST /users/current/carts', () => {
       })
       .expect(201);
 
-    // expect(body.url).to.startWith(env.etupay.url);
-    expect(body.checkoutSecret).to.be.equal(stripeSessions[0].client_secret);
-    // expect(body.price).to.be.equal(1000);
+    expect(body.checkoutSecret).to.be.equal(stripeSessions.at(-1).client_secret);
 
     // Check that the stale cart has been deleted
     const staleSpectatorCarts = await cartOperations.fetchCarts(staleSpectator.id);
@@ -674,9 +697,11 @@ describe('POST /users/current/carts', () => {
     });
     expect(spectatorTickets).to.have.lengthOf(2);
 
+    expect(stripeSessions.at(-1).amount_total).to.be.equal(spectatorTicket.price);
+
     // Restore actual stock
     return database.item.update({
-      data: { stock: currentSpectatorStock },
+      data: { stock: spectatorTicket.stock },
       where: { id: 'ticket-spectator' },
     });
   });

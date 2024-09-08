@@ -19,17 +19,19 @@ describe('POST /stripe/accepted', () => {
   });
 
   after(async () => {
-    await database.user.deleteMany();
     await database.cart.deleteMany();
+    await database.user.deleteMany();
   });
 
   const generateCart = (transactionId: string) => ({
     object: 'event',
-    type: 'checkout.session.accepted',
+    type: 'checkout.session.completed',
+    another_field_that_should_be_accepted: 'hello there :)',
     data: {
       object: {
         object: 'checkout.session',
         id: transactionId,
+        and_put_one_more_here: 3,
       },
     },
   });
@@ -59,7 +61,7 @@ describe('POST /stripe/accepted', () => {
     for (const transactionState of [TransactionState.paid, TransactionState.expired, TransactionState.refunded]) {
       it(`should not change the transactionState of the cart as it already equals ${transactionState}`, async () => {
         await updateCart(cart.id, 'supersecret', transactionState);
-        await request(app).post('/stripe/expired').send(generateCart('supersecret')).expect(200, { api: 'ok' });
+        await request(app).post('/stripe/accepted').send(generateCart('supersecret')).expect(200, { api: 'ok' });
         const databaseCart = await database.cart.findUnique({ where: { id: cart.id } });
         expect(databaseCart.transactionState).to.equal(transactionState);
       });
