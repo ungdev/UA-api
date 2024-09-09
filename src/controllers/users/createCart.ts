@@ -267,11 +267,19 @@ export default [
         mode: 'payment',
         ui_mode: 'embedded',
         return_url: env.stripe.callback,
-        line_items: cartItems.map((cartItem) => ({
-          price: cartItem.reducedPrice === null ? cartItem.item.stripePriceId : cartItem.item.stripeReducedPriceId,
-          quantity: cartItem.quantity,
-        })),
+        line_items: cartItems
+          .filter((cartItem) => cartItem.price > 0)
+          .map((cartItem) => ({
+            price: cartItem.reducedPrice === null ? cartItem.item.stripePriceId : cartItem.item.stripeReducedPriceId,
+            quantity: cartItem.quantity,
+          })),
         expires_at: Math.ceil(Date.now() / 1000) + env.api.cartLifespan,
+        customer_email: user.email,
+        discounts: cartItems
+          .filter((cartItem) => cartItem.price < 0)
+          .map((cartItem) => ({
+            coupon: cartItem.item.stripePriceId,
+          })),
       });
       await updateCart(cart.id, session.id, TransactionState.pending);
       return created(response, { checkoutSecret: session.client_secret });

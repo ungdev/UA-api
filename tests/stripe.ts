@@ -12,6 +12,7 @@ interface StripeObject {
 interface StripeSession extends StripeObject {
   object: 'checkout.session';
   client_secret: string;
+  email: string;
   amount_total: number;
 }
 interface StripeProduct extends StripeObject {
@@ -24,10 +25,16 @@ interface StripePrice extends StripeObject {
   unit_amount: number;
   product: string;
 }
+interface StripeCoupon extends StripeObject {
+  object: 'coupon';
+  name: string;
+  amount_off: number;
+}
 
 export const stripeSessions: StripeSession[] = [];
 export const stripeProducts: StripeProduct[] = [];
 export const stripePrices: StripePrice[] = [];
+export const stripeCoupons: StripeCoupon[] = [];
 
 // Bro whaattt ?? Stripe uses `application/x-www-form-urlencoded` to send data
 // https://stackoverflow.com/questions/73534171/convert-an-x-www-form-urlencoded-string-to-json#answer-73534319
@@ -54,11 +61,12 @@ function id(prefix: string) {
   return `${prefix}_${faker.string.alpha({ length: 16 })}`;
 }
 
-export function generateStripeSession(amount: number) {
+export function generateStripeSession(email: string, amount: number) {
   const session: StripeSession = {
     id: id('cs'),
     object: 'checkout.session',
     client_secret: id(''),
+    email,
     amount_total: amount,
   };
   stripeSessions.push(session);
@@ -87,6 +95,17 @@ export function generateStripePrice(unit_amount: number, product: string) {
   return price;
 }
 
+export function generateStripeCoupon(name: string, amount_off: number) {
+  const coupon: StripeCoupon = {
+    id: id(''),
+    object: 'coupon',
+    name,
+    amount_off,
+  };
+  stripeCoupons.push(coupon);
+  return coupon;
+}
+
 function listen() {
   axios.defaults.adapter = 'http';
   nock('https://api.stripe.com/v1')
@@ -95,7 +114,7 @@ function listen() {
     // Get all products (paginated)
     // This can only happen in tests, it cannot be used to make ReDoS attacks
     // eslint-disable-next-line security/detect-unsafe-regex
-    .get(/\/products(\?((starting_after=[^&]*)|(limit=\d+))+&?)?$/)
+    .get(/\/products(\?((((starting_after=[^&]*)|(limit=\d+)|(active=true))&?)+))?$/)
     .reply((uri) => {
       const limit = Number.parseInt(uri.match(/limit=(\d+)/)?.[1]);
       const starting_after = uri.match(/starting_after=([^&]+)/)?.[1];
@@ -115,7 +134,13 @@ function listen() {
         };
       };
       if (body.default_price_data.currency !== 'eur') {
-        return [500, '`default_price_data.currency` should be `eur`'];
+        return [500, {error: '`default_price_data.currency` should be `eur`'}];
+      }
+      if (Number.parseInt(body.default_price_data.unit_amount) < 0) {
+        return [500, {error:'price is negative'}];
+      }
+      if (body.name.length > 40) {
+        return [500, {error:'`name` is greater than 40 characters'}];
       }
       const product = generateStripeProduct(body.name);
       const price = generateStripePrice(Number.parseInt(body.default_price_data.unit_amount), product.id);
@@ -126,33 +151,22 @@ function listen() {
     // Modify a product
     .post(/\/products\/.+$/)
     .reply((uri, pBody) => {
-      const body = decodeBody(pBody as string) as { default_price?: string };
+      const body = decodeBody(pBody as string) as { default_price?: string; active?: boolean };
       const productId = uri.slice(uri.indexOf('/', 4) + 1);
-      const product = stripeProducts.find((pProduct) => pProduct.id === productId);
-      if (!product) {
+      const productIndex = stripeProducts.findIndex((pProduct) => pProduct.id === productId);
+      if (productIndex === -1) {
         return [500, { error: 'Product not found' }];
+      }
+      if (body.active === false) {
+        return [200, stripePrices.slice(productIndex, 1)[0]];
       }
       if (body.default_price) {
         if (!stripePrices.some((price) => price.id === body.default_price && price.product === productId)) {
           return [500, { error: 'Price default_price not found or not bound to product' }];
         }
-        product.default_price = body.default_price;
+        stripeProducts[productIndex].default_price = body.default_price;
       }
-      return [200, product];
-    })
-
-    // Delete a product
-    .delete(/\/products\/.+$/)
-    .reply((uri) => {
-      const productId = uri.slice(uri.indexOf('/', 4) + 1);
-      const productIndex = stripeProducts.findIndex((product) => product.id === productId);
-      if (productIndex === -1) {
-        return [500, { error: 'Product not found' }];
-      }
-      if (stripePrices.some((price) => price.product === productId)) {
-        return [500, { error: 'Prices still bound' }];
-      }
-      return [200, stripeProducts.splice(productIndex, 1)[0]];
+      return [200, stripeProducts[productIndex]];
     })
 
     // Get all prices (paginated)
@@ -175,7 +189,10 @@ function listen() {
         return [500, { error: 'Product not found' }];
       }
       if (body.currency !== 'eur') {
-        return [500, '`currency` should be `eur`'];
+        return [500, {error: '`currency` should be `eur`'}];
+      }
+      if (Number.parseInt(body.unit_amount) < 0) {
+        return [500, {error: 'price is negative'}];
       }
       return [200, generateStripePrice(Number.parseInt(body.unit_amount), body.product)];
     })
@@ -195,6 +212,58 @@ function listen() {
       return [500, { error: 'Not understood' }];
     })
 
+    // Get all coupons (paginated)
+    // This can only happen in tests, it cannot be used to make ReDoS attacks
+    // eslint-disable-next-line security/detect-unsafe-regex
+    .get(/\/coupons(\?((starting_after=[^&]*)|(limit=\d+))+&?)?$/)
+    .reply((uri) => {
+      const limit = Number.parseInt(uri.match(/limit=(\d+)/)?.[1]);
+      const starting_after = uri.match(/starting_after=([^&]+)/)?.[1];
+      const fromIndex = starting_after ? stripeCoupons.findIndex((coupon) => coupon.id === starting_after) : 0;
+      const toIndex = fromIndex + (limit ?? 10);
+      return [200, { has_more: toIndex < stripeCoupons.length, data: stripeCoupons.slice(fromIndex, toIndex) }];
+    })
+
+    // Create a price
+    .post(/\/coupons$/)
+    .reply((uri, pBody) => {
+      const body = decodeBody(pBody as string) as { name: string; currency: string; amount_off: string };
+      if (body.currency !== 'eur') {
+        return [500, { error:"`currency` should be `eur`" }];
+      }
+      if (Number.parseInt(body.amount_off) < 0) {
+        return [500, { error: '`amount_off` is negative' }];
+      }
+      return [200, generateStripeCoupon(body.name, Number.parseInt(body.amount_off))];
+    })
+
+    // Modify a price (only used for deletion)
+    .post(/\/coupons\/.+$/)
+    .reply((uri, pBody) => {
+      const body = decodeBody(pBody as string) as { name: string };
+      const couponId = uri.slice(uri.indexOf('/', 4) + 1);
+      const couponIndex = stripeCoupons.findIndex((coupon) => coupon.id === couponId);
+      if (couponIndex === -1) {
+        return [500, { error: 'Price not found' }];
+      }
+      stripeCoupons[couponIndex].name = body.name;
+      return [200, stripeCoupons[couponIndex]];
+    })
+
+    // Delete a product
+    .delete(/\/coupons\/.+$/)
+    .reply((uri) => {
+      const couponId = uri.slice(uri.indexOf('/', 4) + 1);
+      const couponIndex = stripeCoupons.findIndex((coupon) => coupon.id === couponId);
+      if (couponIndex === -1) {
+        return [500, { error: 'Product not found' }];
+      }
+      if (stripePrices.some((price) => price.product === couponId)) {
+        return [500, { error: 'Prices still bound' }];
+      }
+      return [200, stripeProducts.splice(couponIndex, 1)[0]];
+    })
+
     // Create a checkout session
     .post(/\/checkout\/sessions$/)
     .reply((uri, pBody) => {
@@ -204,20 +273,27 @@ function listen() {
         return_url: string;
         line_items: { [key: number]: { price: string; quantity: number } }; // Basically an array
         expires_at: string;
+        customer_email: string;
+        discounts: { [key: number]: { coupon: string } }; // Another array
       };
       if (body.mode !== 'payment') return [500, { error: 'Mode is not `payment`' }];
       if (body.ui_mode !== 'embedded') return [500, { error: 'ui_mode is not `embedded`' }];
       if (body.return_url !== env.stripe.callback)
         return [500, { error: `return_url is not \`${env.stripe.callback}\`` }];
       if (Date.parse(body.expires_at) < Date.now()) return [500, { error: '`expires_at` has already expired' }];
+      const discounts = Object.values(body.discounts ?? {});
+      if (discounts.length > 1) return [500, { error: "Can't apply more than 1 discount" }];
+      const totalDiscount =
+        discounts.length === 1 ? stripeCoupons.find((coupons) => coupons.id === discounts[0].coupon)!.amount_off : 0;
       return [
         200,
         generateStripeSession(
+          body.customer_email ?? '',
           Object.values(body.line_items).reduce(
             (previous, current) =>
               stripePrices.find((price) => price.id === current.price).unit_amount * current.quantity + previous,
             0,
-          ),
+          ) - totalDiscount,
         ),
       ];
     });

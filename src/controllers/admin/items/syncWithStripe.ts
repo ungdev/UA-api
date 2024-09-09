@@ -6,6 +6,10 @@ import { noContent } from '../../../utils/responses';
 import { fetchAllItems, updateAdminItem } from '../../../operations/item';
 import { stripe } from '../../../utils/stripe';
 
+function clampString(string_: string, maxLength: number) {
+  return string_.length > maxLength ? `${string_.slice(0, maxLength - 3)}...` : string_;
+}
+
 export default [
   // Middlewares
   ...hasPermission(Permission.admin),
@@ -31,6 +35,7 @@ export default [
         const stripeResponse = await stripe.products.list({
           limit: 100,
           starting_after: remainingStripeProducts.at(-1)?.product.id,
+          active: true,
         });
         remainingStripeProducts.push(
           ...stripeResponse.data.map((product) => ({
@@ -41,25 +46,54 @@ export default [
         hasMore = stripeResponse.has_more;
       }
 
+      // Fetch all coupons
+      const remainingStripeCoupons: Stripe.Coupon[] = [];
+      hasMore = true;
+      while (hasMore) {
+        const stripeResponse = await stripe.coupons.list({
+          limit: 100,
+          starting_after: remainingStripeCoupons.at(-1)?.id,
+        });
+        remainingStripeCoupons.push(...stripeResponse.data);
+        hasMore = stripeResponse.has_more;
+      }
+
       // Try to map items to products & prices
-      const mapping: Array<[Item, { product: Stripe.Product; prices: Stripe.Price[] }]> = [];
+      const productsMapping: Array<[Item, { product: Stripe.Product; prices: Stripe.Price[] }]> = [];
       const remainingItems: Item[] = [];
+      const remainingDiscountItems: Item[] = []; // Items with a negative price are coupons, not products
+      const discountsMapping: Array<[Item, Stripe.Coupon]> = [];
       for (const item of items) {
-        const stripeProductIndex = remainingStripeProducts.findIndex(
-          ({ product }) => product.id === item.stripeProductId,
-        );
-        if (stripeProductIndex === -1) {
-          // There is no stripe product associated with this item
-          remainingItems.push(item);
+        // Check if item should be interpreted as a coupon or a reduction
+        if (item.price > 0) {
+          const stripeProductIndex = remainingStripeProducts.findIndex(
+            ({ product }) => product.id === item.stripeProductId,
+          );
+          if (stripeProductIndex === -1) {
+            // There is no stripe product associated with this item.
+            remainingItems.push(item);
+          } else {
+            // We found a Stripe product to map with this item.
+            const stripeProduct = remainingStripeProducts.splice(stripeProductIndex, 1)[0];
+            productsMapping.push([item, stripeProduct]);
+          }
         } else {
-          // We found a Stripe product to map with this item
-          const stripeProduct = remainingStripeProducts.splice(stripeProductIndex, 1)[0];
-          mapping.push([item, stripeProduct]);
+          const stripeCouponIndex = remainingStripeCoupons.findIndex(
+            (coupon) => coupon.id === item.stripePriceId && coupon.amount_off === item.price, // We can't change the price of a coupon, so if it doesn't have the right price, consider it as not mapped
+          );
+          if (stripeCouponIndex === -1) {
+            // There is no Stripe coupon associated with this item.
+            remainingDiscountItems.push(item);
+          } else {
+            // We found a Stripe coupon to map with this item.
+            const stripeCoupon = remainingStripeCoupons.splice(stripeCouponIndex, 1)[0];
+            discountsMapping.push([item, stripeCoupon]);
+          }
         }
       }
 
-      // Verify prices are correct for mapped items
-      for (const [item, stripeProduct] of mapping) {
+      // Verify prices are correct for mapped products
+      for (const [item, stripeProduct] of productsMapping) {
         const defaultPriceIndex = stripeProduct.prices.findIndex(
           (price) => price.id === item.stripePriceId && price.unit_amount === item.price,
         );
@@ -97,7 +131,7 @@ export default [
         }
         const stripeReducedPriceId = stripeReducedPrice?.id ?? null;
         if (item.stripePriceId !== stripeDefaultPrice.id || item.stripeReducedPriceId !== stripeReducedPriceId) {
-          // If one of the the stripe price or the stripe reduced price has been modified, modify their IDs in the database.
+          // If one of the Stripe price or the stripe reduced price has been modified, modify their IDs in the database.
           await updateAdminItem(item.id, {
             stripePriceId: stripeDefaultPrice.id,
             stripeReducedPriceId,
@@ -110,10 +144,19 @@ export default [
         }
       }
 
-      // Create stripe products for unmatched items, quite straightforward
+      // Verify names are correct for mapped discounts (prices have already been verified during mapping)
+      for (const [item, stripeCoupon] of discountsMapping) {
+        if (item.name !== stripeCoupon.name) {
+          await stripe.coupons.update(stripeCoupon.id, {
+            name: clampString(item.name, 40),
+          });
+        }
+      }
+
+      // Create Stripe products for unmatched items, quite straightforward
       for (const item of remainingItems) {
         const stripeProduct = await stripe.products.create({
-          name: item.name,
+          name: clampString(item.name, 40),
           default_price_data: {
             currency: 'eur',
             unit_amount: item.price,
@@ -134,15 +177,32 @@ export default [
         });
       }
 
+      // Create Stripe coupons for unmatched discount items, even more straightforward
+      for (const item of remainingDiscountItems) {
+        const stripeCoupon = await stripe.coupons.create({
+          name: clampString(item.name, 40),
+          currency: 'eur',
+          amount_off: -item.price,
+        });
+        await updateAdminItem(item.id, { stripePriceId: stripeCoupon.id ?? null });
+      }
+
       // Remove unmatched stripe products.
-      // For each product we remove the prices, and then delete the product.
+      // For each product we deactivate it and its prices.
       for (const product of remainingStripeProducts) {
+        await stripe.products.update(product.product.id, {
+          active: false,
+        });
         for (const price of product.prices) {
           await stripe.prices.update(price.id, {
             active: false,
           });
         }
-        await stripe.products.del(product.product.id);
+      }
+
+      // Remove unmatched Stripe coupons.
+      for (const coupon of remainingStripeCoupons) {
+        await stripe.coupons.del(coupon.id);
       }
       return noContent(response);
     } catch (error) {
