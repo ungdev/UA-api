@@ -9,6 +9,8 @@ import * as teamUtils from '../../../src/utils/teams';
 import { encrypt } from '../../../src/utils/helpers';
 import { scanUser } from '../../../src/operations/user';
 import { lockTeam } from '../../../src/operations/team';
+import * as repoOperations from '../../../src/operations/repo';
+import { sandbox } from '../../setup';
 
 describe('GET /admin/repo/user', () => {
   let admin: User;
@@ -98,6 +100,14 @@ describe('GET /admin/repo/user', () => {
     expect(response.body.place).to.be.equal(captain.place);
     expect(response.body.id).to.be.equal(captain.id);
     expect(response.body.repoItems).to.have.length(0);
+  });
+
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(repoOperations, 'fetchRepoItems').throws('Unexpected error');
+    await request(app)
+      .get(`/admin/repo/user?id=${encodeURIComponent(encrypt(captain.id).toString('base64'))}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should successfully return a list of items', async () => {

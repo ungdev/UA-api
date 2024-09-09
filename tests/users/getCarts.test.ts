@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { UserType } from '@prisma/client';
+import { expect } from 'chai';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as cartOperations from '../../src/operations/carts';
@@ -42,12 +43,30 @@ describe('GET /users/current/carts', () => {
     await request(app).get(`/users/current/carts`).set('Authorization', `Bearer ${token}`).expect(200, []);
   });
 
+  it('should return a cart with an attendant', async () => {
+    await cartOperations.createCart(user.id, [
+      {
+        itemId: 'ticket-attendant',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-attendant')!.price,
+        forUserId: user.id,
+      },
+    ]);
+
+    const result = await request(app).get(`/users/current/carts`).set('Authorization', `Bearer ${token}`).expect(200);
+
+    expect(result.body).to.have.lengthOf(1);
+    expect(result.body[0].cartItems[0].forUser.username).to.equal(`${user.firstname} ${user.lastname}`);
+
+    await database.cart.deleteMany();
+  });
+
   it('should return a pending cart', async () => {
     await cartOperations.createCart(user.id, [
       {
         itemId: 'ethernet-7',
         quantity: 1,
-        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-7').price,
+        price: (await fetchAllItems()).find((item) => item.id === 'ethernet-7')!.price,
         forUserId: user.id,
       },
     ]);

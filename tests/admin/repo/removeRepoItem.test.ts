@@ -2,6 +2,7 @@ import request from 'supertest';
 import { expect } from 'chai';
 import { RepoLogAction } from '@prisma/client';
 import { scanUser } from '../../../src/operations/user';
+import * as repoOperations from '../../../src/operations/repo';
 import database from '../../../src/services/database';
 import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
@@ -9,6 +10,7 @@ import { generateToken } from '../../../src/utils/users';
 import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import app from '../../../src/app';
 import { lockTeam } from '../../../src/operations/team';
+import { sandbox } from '../../setup';
 
 describe('DELETE /admin/repo/user/:userId/items/:itemId', () => {
   let admin: User;
@@ -98,10 +100,19 @@ describe('DELETE /admin/repo/user/:userId/items/:itemId', () => {
       .expect(403, { error: Error.NotYourItem });
   });
 
-  it('should successfully remove an item from the repo', async () => {
+  it('should fail with an internal server error', async () => {
     await database.repoItem.create({
       data: { id: 'GHIJKL', type: 'computer', forUserId: captain.id, zone: 'Zone 1' },
     });
+
+    sandbox.stub(repoOperations, 'removeRepoItem').throws('Unexpected error');
+    await request(app)
+      .delete(`/admin/repo/user/${captain.id}/items/GHIJKL`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
+  });
+
+  it('should successfully remove an item from the repo', async () => {
     await request(app)
       .delete(`/admin/repo/user/${captain.id}/items/GHIJKL`)
       .set('Authorization', `Bearer ${adminToken}`)
