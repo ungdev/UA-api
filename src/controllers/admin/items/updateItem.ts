@@ -52,8 +52,15 @@ export default [
         availableUntil: Date;
       };
 
-      if (!(await fetchAllItems()).some((item) => item.id === request.params.itemId)) {
+      const oldItem = (await fetchAllItems()).find((item) => item.id === request.params.itemId);
+
+      if (!oldItem) {
         return notFound(response, Error.ItemNotFound);
+      }
+
+      if (namapozndoianzodbaozjbdaozbdouazbduabzdubazoudbazjdbazbd)
+      if (name !== oldItem.name) {
+        stripe
       }
 
       const item = await updateAdminItem(request.params.itemId, {
