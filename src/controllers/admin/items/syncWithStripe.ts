@@ -4,11 +4,7 @@ import { hasPermission } from '../../../middlewares/authentication';
 import { Item, Permission } from '../../../types';
 import { noContent } from '../../../utils/responses';
 import { fetchAllItems, updateAdminItem } from '../../../operations/item';
-import { stripe } from '../../../utils/stripe';
-
-function clampString(string_: string, maxLength: number) {
-  return string_.length > maxLength ? `${string_.slice(0, maxLength - 3)}...` : string_;
-}
+import { stripe, clampString } from '../../../utils/stripe';
 
 export default [
   // Middlewares
@@ -148,7 +144,7 @@ export default [
       for (const [item, stripeCoupon] of discountsMapping) {
         if (item.name !== stripeCoupon.name) {
           await stripe.coupons.update(stripeCoupon.id, {
-            name: clampString(item.name, 40),
+            name: clampString(item.name),
           });
         }
       }
@@ -156,7 +152,7 @@ export default [
       // Create Stripe products for unmatched items, quite straightforward
       for (const item of remainingItems) {
         const stripeProduct = await stripe.products.create({
-          name: clampString(item.name, 40),
+          name: clampString(item.name),
           default_price_data: {
             currency: 'eur',
             unit_amount: item.price,
@@ -180,7 +176,7 @@ export default [
       // Create Stripe coupons for unmatched discount items, even more straightforward
       for (const item of remainingDiscountItems) {
         const stripeCoupon = await stripe.coupons.create({
-          name: clampString(item.name, 40),
+          name: clampString(item.name),
           currency: 'eur',
           amount_off: -item.price,
         });

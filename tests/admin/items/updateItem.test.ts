@@ -6,6 +6,7 @@ import { createFakeCart, createFakeItem, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import { generateToken } from '../../../src/utils/users';
+import { resetFakeStripeApi, stripeCoupons, stripePrices, stripeProducts } from '../../stripe';
 
 describe('PATCH /admin/items/:itemId', () => {
   let user: User;
@@ -57,6 +58,7 @@ describe('PATCH /admin/items/:itemId', () => {
       availableFrom: new Date(Date.now()),
       availableUntil: new Date(Date.now() + 1000),
     };
+    resetFakeStripeApi();
   });
 
   after(async () => {
@@ -118,6 +120,13 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(itemDatabase.stock).to.be.equal(item.stock);
     expect(itemDatabase.availableFrom.getTime()).to.be.equal(item.availableFrom.getTime());
     expect(itemDatabase.availableUntil.getTime()).to.be.equal(item.availableUntil.getTime());
+
+    // Check the Stripe product has been created.
+    expect(itemDatabase.stripeProductId).to.be.equal(stripeProducts[0].id);
+    expect(itemDatabase.stripePriceId).to.be.equal(stripePrices[0].id);
+    expect(stripeProducts[0].name).to.be.equal(item.name);
+    expect(stripeProducts[0].default_price).to.be.equal(stripePrices[0].id);
+    expect(stripePrices[0].unit_amount).to.be.equal(item.price);
   });
 
   it('should modify the item entirely', async () => {
@@ -153,5 +162,44 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(itemDatabase.stock).to.be.equal(validBody.stockDifference + item.stock);
     expect(itemDatabase.availableFrom.getTime()).to.be.equal(validBody.availableFrom.getTime());
     expect(itemDatabase.availableUntil.getTime()).to.be.equal(validBody.availableUntil.getTime());
+
+    // Verify changes have been made to Stripe
+    expect(itemDatabase.stripeProductId).to.be.equal(stripeProducts[0].id);
+    expect(itemDatabase.stripePriceId).to.be.equal(stripePrices[0].id);
+    expect(itemDatabase.stripeReducedPriceId).to.be.equal(stripePrices[1].id);
+    expect(stripeProducts[0].name).to.be.equal(validBody.name);
+    expect(stripeProducts[0].default_price).to.be.equal(stripePrices[0].id);
+    expect(stripePrices[0].unit_amount).to.be.equal(validBody.price);
+    expect(stripePrices[1].unit_amount).to.be.equal(validBody.reducedPrice);
+  });
+
+  it('should create the Stripe coupon associated to the item', async () => {
+    resetFakeStripeApi();
+    await database.item.update({
+      where: { id: item.id },
+      data: { price: -3, stripeProductId: null, stripePriceId: null, stripeReducedPriceId: null },
+    });
+    await request(app)
+      .patch(`/admin/items/${item.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ price: -4 })
+      .expect(200);
+
+    const itemDatabase = await database.item.findUnique({ where: { id: item.id } });
+    expect(stripeCoupons[0].id).to.equal(itemDatabase.stripePriceId);
+    expect(stripeCoupons[0].amount_off).to.equal(4);
+  });
+
+  it('should update the Stripe coupon name', async () => {
+    await request(app)
+      .patch(`/admin/items/${item.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ name: 'Chocapic SAV' })
+      .expect(200);
+
+    const itemDatabase = await database.item.findUnique({ where: { id: item.id } });
+    expect(stripeCoupons[0].id).to.equal(itemDatabase.stripePriceId);
+    expect(stripeCoupons[0].amount_off).to.equal(4);
+    expect(stripeCoupons[0].name).to.be.equal('Chocapic SAV');
   });
 });

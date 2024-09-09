@@ -61,18 +61,6 @@ function id(prefix: string) {
   return `${prefix}_${faker.string.alpha({ length: 16 })}`;
 }
 
-export function generateStripeSession(email: string, amount: number) {
-  const session: StripeSession = {
-    id: id('cs'),
-    object: 'checkout.session',
-    client_secret: id(''),
-    email,
-    amount_total: amount,
-  };
-  stripeSessions.push(session);
-  return session;
-}
-
 export function generateStripeProduct(name: string) {
   const product: StripeProduct = {
     id: id('prod'),
@@ -104,6 +92,18 @@ export function generateStripeCoupon(name: string, amount_off: number) {
   };
   stripeCoupons.push(coupon);
   return coupon;
+}
+
+export function generateStripeSession(email: string, amount: number) {
+  const session: StripeSession = {
+    id: id('cs'),
+    object: 'checkout.session',
+    client_secret: id(''),
+    email,
+    amount_total: amount,
+  };
+  stripeSessions.push(session);
+  return session;
 }
 
 function listen() {
@@ -151,7 +151,7 @@ function listen() {
     // Modify a product
     .post(/\/products\/.+$/)
     .reply((uri, pBody) => {
-      const body = decodeBody(pBody as string) as { default_price?: string; active?: boolean };
+      const body = decodeBody(pBody as string) as { default_price?: string; active?: boolean; name?: string };
       const productId = uri.slice(uri.indexOf('/', 4) + 1);
       const productIndex = stripeProducts.findIndex((pProduct) => pProduct.id === productId);
       if (productIndex === -1) {
@@ -165,6 +165,10 @@ function listen() {
           return [500, { error: 'Price default_price not found or not bound to product' }];
         }
         stripeProducts[productIndex].default_price = body.default_price;
+      }
+      if (body.name) {
+        if (body.name.length > 40) return [500, { error: '`name` is greater than 40 characters' }];
+        stripeProducts[productIndex].name = body.name;
       }
       return [200, stripeProducts[productIndex]];
     })
@@ -306,8 +310,9 @@ function listen() {
  */
 export const resetFakeStripeApi = () => {
   stripeProducts.splice(0);
-  stripeSessions.splice(0);
   stripePrices.splice(0);
+  stripeCoupons.splice(0);
+  stripeSessions.splice(0);
 };
 
 /**
