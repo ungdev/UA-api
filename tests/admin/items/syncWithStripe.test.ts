@@ -9,10 +9,11 @@ import * as itemOperations from '../../../src/operations/item';
 import {
   generateStripePrice,
   generateStripeProduct,
-  resetFakeStripeApi, stripeCoupons,
+  resetFakeStripeApi,
+  stripeCoupons,
   stripePrices,
-  stripeProducts
-} from "../../stripe";
+  stripeProducts,
+} from '../../stripe';
 import { sandbox } from '../../setup';
 
 describe('PATCH /admin/items/stripe-sync', () => {
@@ -104,7 +105,7 @@ describe('PATCH /admin/items/stripe-sync', () => {
     }
     expect(stripePrices).to.have.length(priceCount);
     expect(stripeProducts).to.have.length(items.length);
-    const discountItems = items.filter((pItem) => pItem.price < 0)
+    const discountItems = items.filter((pItem) => pItem.price < 0);
     for (item of discountItems) {
       const coupon = stripeCoupons.find((pCoupon) => pCoupon.id === item.stripePriceId);
       expect(coupon).to.not.be.undefined;

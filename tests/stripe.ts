@@ -134,13 +134,13 @@ function listen() {
         };
       };
       if (body.default_price_data.currency !== 'eur') {
-        return [500, {error: '`default_price_data.currency` should be `eur`'}];
+        return [500, { error: '`default_price_data.currency` should be `eur`' }];
       }
       if (Number.parseInt(body.default_price_data.unit_amount) < 0) {
-        return [500, {error:'price is negative'}];
+        return [500, { error: 'price is negative' }];
       }
       if (body.name.length > 40) {
-        return [500, {error:'`name` is greater than 40 characters'}];
+        return [500, { error: '`name` is greater than 40 characters' }];
       }
       const product = generateStripeProduct(body.name);
       const price = generateStripePrice(Number.parseInt(body.default_price_data.unit_amount), product.id);
@@ -189,10 +189,10 @@ function listen() {
         return [500, { error: 'Product not found' }];
       }
       if (body.currency !== 'eur') {
-        return [500, {error: '`currency` should be `eur`'}];
+        return [500, { error: '`currency` should be `eur`' }];
       }
       if (Number.parseInt(body.unit_amount) < 0) {
-        return [500, {error: 'price is negative'}];
+        return [500, { error: 'price is negative' }];
       }
       return [200, generateStripePrice(Number.parseInt(body.unit_amount), body.product)];
     })
@@ -229,7 +229,7 @@ function listen() {
     .reply((uri, pBody) => {
       const body = decodeBody(pBody as string) as { name: string; currency: string; amount_off: string };
       if (body.currency !== 'eur') {
-        return [500, { error:"`currency` should be `eur`" }];
+        return [500, { error: '`currency` should be `eur`' }];
       }
       if (Number.parseInt(body.amount_off) < 0) {
         return [500, { error: '`amount_off` is negative' }];
