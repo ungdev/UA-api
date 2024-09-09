@@ -4,7 +4,7 @@ import { fetchCartItem } from '../../operations/cartItem';
 import { fetchCart } from '../../operations/carts';
 import { fetchTeam } from '../../operations/team';
 import { fetchUser } from '../../operations/user';
-import { Error, ItemCategory, TransactionState } from '../../types';
+import { Error, ItemCategory, TransactionState, UserType } from '../../types';
 import { generateTicket } from '../../utils/ticket';
 import { forbidden, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
@@ -39,6 +39,10 @@ export default [
 
       // Check that the cart is paid
       if (cart.transactionState !== TransactionState.paid) return forbidden(response, Error.NotPaid);
+
+      // Check that the player is in a team
+      if ((user.type === UserType.player || user.type === UserType.coach) && !team)
+        return forbidden(response, Error.NotInTeam);
 
       // Check that the team is locked
       if (team && !team.lockedAt) return forbidden(response, Error.TeamNotLocked);

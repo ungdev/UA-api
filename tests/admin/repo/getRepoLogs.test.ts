@@ -2,7 +2,7 @@ import { RepoLogAction } from '@prisma/client';
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../../src/app';
-import { addRepoItem } from '../../../src/operations/repo';
+import * as repoOperations from '../../../src/operations/repo';
 import { lockTeam } from '../../../src/operations/team';
 import { scanUser } from '../../../src/operations/user';
 import database from '../../../src/services/database';
@@ -10,6 +10,7 @@ import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
 import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
+import { sandbox } from '../../setup';
 
 describe('GET /admin/repo/user/:userId/logs', () => {
   let admin: User;
@@ -81,8 +82,8 @@ describe('GET /admin/repo/user/:userId/logs', () => {
 
   it('should successfully return a list of logs', async () => {
     await lockTeam(team.id);
-    await database.$transaction(addRepoItem(captain.id, 'computer', 'Zone 1'));
-    await database.$transaction(addRepoItem(captain.id, 'computer', 'Zone 2'));
+    await database.$transaction(repoOperations.addRepoItem(captain.id, 'computer', 'Zone 1'));
+    await database.$transaction(repoOperations.addRepoItem(captain.id, 'computer', 'Zone 2'));
     const response = await request(app)
       .get(`/admin/repo/user/${captain.id}/logs`)
       .set('Authorization', `Bearer ${adminToken}`)
@@ -98,6 +99,14 @@ describe('GET /admin/repo/user/:userId/logs', () => {
     expect(response.body.logs[1].zone).to.be.equal('Zone 1');
     // Verify the second item added
     expect(response.body.logs[0].zone).to.be.equal('Zone 2');
+  });
+
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(repoOperations, 'fetchRepoLogs').throws('Unexpected error');
+    await request(app)
+      .get(`/admin/repo/user/${captain.id}/logs`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should fail as user is a spectator', async () => {

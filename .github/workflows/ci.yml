@@ -81,6 +81,9 @@ jobs:
       - run: docker exec -i mariadb mysql -utest -ptest arena < seed.sql
       - run: pnpm test:coverage
       - uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: true
+          verbose: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 

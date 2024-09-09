@@ -1,12 +1,33 @@
 import nodemailer from 'nodemailer';
-import { DetailedCart, EmailAttachement, RawUser, User } from '../../types';
+import { Log } from '@prisma/client';
+import { DetailedCart, EmailAttachement, RawUser, User, MailQuery } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
 import { generateTicketsEmail, generateValidationEmail, generatePasswordResetEmail } from './serializer';
 import type { SerializedMail } from './types';
+import database from '../database';
 
 // eslint-disable-next-line import/no-unresolved
 export type { Component, Mail, SerializedMail } from './types';
+
+export const getEmailsLogs = async () =>
+  (await database.log.findMany({
+    where: {
+      AND: {
+        method: 'POST',
+        path: `${env.api.prefix}${env.api.prefix === '/' ? '' : '/'}admin/emails`,
+      },
+    },
+    include: {
+      user: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })) as (Log & {
+    body: MailQuery;
+    user: RawUser;
+  })[];
 
 const emailOptions = env.email.gmail
   ? {

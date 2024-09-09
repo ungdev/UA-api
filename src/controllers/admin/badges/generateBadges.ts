@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { generateBadge } from '../../../utils/badge';
 import { Badge, BadgeField, Error, Permission } from '../../../types';
 import database from '../../../services/database';
-import { notFound } from '../../../utils/responses';
+import { badRequest, notFound } from '../../../utils/responses';
 import env from '../../../utils/env';
 import { hasPermission } from '../../../middlewares/authentication';
 
@@ -59,7 +59,7 @@ export default [
     try {
       // Check if the body is correct
       if (!request.body.fields || !Array.isArray(request.body.fields)) {
-        return notFound(response, Error.InvalidBody);
+        return badRequest(response, Error.InvalidBody);
       }
 
       let hasError = false;
@@ -194,7 +194,7 @@ export default [
           }
 
           default: {
-            break;
+            return badRequest(response, Error.InvalidBody);
           }
         }
       }

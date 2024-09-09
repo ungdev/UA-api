@@ -6,7 +6,8 @@ import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import { generateToken } from '../../../src/utils/users';
-import { fetchAllItems } from '../../../src/operations/item';
+import * as itemOperations from '../../../src/operations/item';
+import { sandbox } from '../../setup';
 
 describe('GET /admin/items/:itemId', () => {
   let user: User;
@@ -15,7 +16,7 @@ describe('GET /admin/items/:itemId', () => {
   let adminToken: string;
 
   before(async () => {
-    [item] = await fetchAllItems();
+    [item] = await itemOperations.fetchAllItems();
     user = await createFakeUser({ type: UserType.player });
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
@@ -43,6 +44,15 @@ describe('GET /admin/items/:itemId', () => {
       .get(`/admin/items/POTATO`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(404, { error: Error.ItemNotFound }));
+
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(itemOperations, 'findAdminItem').throws('Unexpected error');
+
+    await request(app)
+      .get(`/admin/items/${item.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
+  });
 
   it('should return the item with proper stock and left value', async () => {
     const { body } = await request(app)
