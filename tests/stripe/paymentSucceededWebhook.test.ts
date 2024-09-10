@@ -8,7 +8,7 @@ import database from '../../src/services/database';
 import { Error, User, Cart } from '../../src/types';
 import { createFakeUser, createFakeCart } from '../utils';
 import { updateCart } from '../../src/operations/carts';
-import { generatePaymentIntent, resetFakeStripeApi, StripePaymentIntent } from "../stripe";
+import { generatePaymentIntent, resetFakeStripeApi, StripePaymentIntent } from '../stripe';
 
 describe('POST /stripe/succeeded', () => {
   let user: User;
@@ -19,7 +19,7 @@ describe('POST /stripe/succeeded', () => {
     user = await createFakeUser();
     cart = await createFakeCart({ userId: user.id, items: [] });
     paymentIntent = generatePaymentIntent(120);
-    await updateCart(cart.id, paymentIntent.id, TransactionState.processing);
+    await updateCart(cart.id, { transactionId: paymentIntent.id, transactionState: TransactionState.processing });
   });
 
   after(async () => {
@@ -57,16 +57,15 @@ describe('POST /stripe/succeeded', () => {
       .send(generateCart('I AM A H4X0R'))
       .expect(404, { error: Error.CartNotFound }));
 
-  it('should fail as the request does not come from Stripe', async () => {
-    return request(app)
+  it('should fail as the request does not come from Stripe', async () =>
+    request(app)
       .post('/stripe/succeeded')
       .send(generateCart(paymentIntent.id))
-      .expect(401, { error: Error.PleaseDontPlayWithStripeWebhooks }); // Given status is succeeded, real status is requires_action.
-  });
+      .expect(401, { error: Error.PleaseDontPlayWithStripeWebhooks })); // Given status is succeeded, real status is requires_action.
 
   it('should change the transactionState of the cart from processing to paid', async () => {
     paymentIntent.status = 'succeeded';
-    await updateCart(cart.id, paymentIntent.id, TransactionState.processing);
+    await updateCart(cart.id, { transactionState: TransactionState.processing });
     await request(app).post('/stripe/succeeded').send(generateCart(paymentIntent.id)).expect(200, { api: 'ok' });
     const databaseCart = await database.cart.findUnique({ where: { id: cart.id } });
     expect(databaseCart.transactionState).to.equal(TransactionState.paid);
@@ -81,7 +80,7 @@ describe('POST /stripe/succeeded', () => {
       TransactionState.canceled,
     ]) {
       it(`should not change the transactionState of the cart as it already equals ${transactionState}`, async () => {
-        await updateCart(cart.id, paymentIntent.id, transactionState);
+        await updateCart(cart.id, { transactionState });
         await request(app).post('/stripe/succeeded').send(generateCart(paymentIntent.id)).expect(200, { api: 'ok' });
         const databaseCart = await database.cart.findUnique({ where: { id: cart.id } });
         expect(databaseCart.transactionState).to.equal(transactionState);

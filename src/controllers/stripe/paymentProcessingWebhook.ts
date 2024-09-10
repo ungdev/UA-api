@@ -3,7 +3,7 @@ import { updateCart } from '../../operations/carts';
 import { TransactionState } from '../../types';
 import { success } from '../../utils/responses';
 import { paymentIntentWebhookMiddleware } from '../../utils/stripe';
-import logger from "../../utils/logger";
+import logger from '../../utils/logger';
 
 // See src/controllers/stripe/index.ts
 export default [
@@ -22,7 +22,7 @@ export default [
       }
 
       // Update the cart with the callback data
-      await updateCart(cart.id, cart.transactionId, TransactionState.processing);
+      await updateCart(cart.id, { transactionState: TransactionState.processing, succeededAt: new Date(Date.now()) });
 
       return success(response, { api: 'ok' });
     } catch (error) {

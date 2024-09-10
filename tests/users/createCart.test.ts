@@ -506,7 +506,10 @@ describe('POST /users/current/carts', () => {
         where: { forUserId: userWithSwitchDiscount.id, itemId: 'discount-switch-ssbu' },
       })
     ).cartId;
-    await cartOperations.updateCart(cartWithDiscountId, '123', TransactionState.paid);
+    await cartOperations.updateCart(cartWithDiscountId, {
+      transactionId: '123',
+      transactionState: TransactionState.paid,
+    });
     await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)

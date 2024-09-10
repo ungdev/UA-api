@@ -75,7 +75,7 @@ describe('GET /items', () => {
   });
 
   it(`should return 200 with an array of items with the "discount-switch-ssbu" and a quantity of -1 item because user has a pending cart containing it`, async () => {
-    await cartOperations.updateCart(thirdCaptainCart.id, '123', TransactionState.pending);
+    await cartOperations.updateCart(thirdCaptainCart.id, {transactionId: '123', transactionState: TransactionState.pending});
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${thirdCaptainToken}`).expect(200);
 
@@ -85,7 +85,7 @@ describe('GET /items', () => {
   });
 
   it(`should return 200 with an array of items without the "discount-switch-ssbu" item because user has a paid cart containing it`, async () => {
-    await cartOperations.updateCart(thirdCaptainCart.id, '123', TransactionState.paid);
+    await cartOperations.updateCart(thirdCaptainCart.id, {transactionId: '123', transactionState: TransactionState.paid});
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${thirdCaptainToken}`).expect(200);
 
@@ -97,7 +97,7 @@ describe('GET /items', () => {
     for (const transactionState of [TransactionState.refunded, TransactionState.expired]) {
       it(`should return 200 with array of items with the "discount-switch-ssbu" item because user has a cart containing it, but it was ${transactionState}`, async () => {
         // update cart's transactionState
-        await cartOperations.updateCart(thirdCaptainCart.id, '123', transactionState);
+        await cartOperations.updateCart(thirdCaptainCart.id, {transactionId: '123', transactionState});
         const items = await database.item.findMany();
         const response = await request(app)
           .get('/items')

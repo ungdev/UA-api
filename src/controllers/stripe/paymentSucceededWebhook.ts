@@ -22,7 +22,10 @@ export default [
       }
 
       // Update the cart with the callback data
-      const updatedCart = await updateCart(cart.id, cart.transactionId, TransactionState.paid);
+      const updatedCart = await updateCart(cart.id, {
+        transactionState: TransactionState.paid,
+        succeededAt: new Date(Date.now()),
+      });
       await sendPaymentConfirmation(updatedCart);
 
       return success(response, { api: 'ok' });

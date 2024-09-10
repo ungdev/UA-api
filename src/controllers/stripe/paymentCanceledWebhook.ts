@@ -4,7 +4,7 @@ import { sendPaymentConfirmation } from '../../services/email';
 import { TransactionState } from '../../types';
 import { success } from '../../utils/responses';
 import { paymentIntentWebhookMiddleware } from '../../utils/stripe';
-import logger from "../../utils/logger";
+import logger from '../../utils/logger';
 
 // See src/controllers/stripe/index.ts
 export default [
@@ -23,7 +23,7 @@ export default [
       }
 
       // Update the cart with the callback data
-      const updatedCart = await updateCart(cart.id, cart.transactionId, TransactionState.canceled);
+      const updatedCart = await updateCart(cart.id, { transactionState: TransactionState.canceled });
       await sendPaymentConfirmation(updatedCart);
 
       return success(response, { api: 'ok' });
