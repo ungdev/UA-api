@@ -31,7 +31,7 @@ export default [
 
       // Check if the user is not paid
       if (user.hasPaid) {
-        return forbidden(response, Error.AlreadyPaid);
+        return forbidden(response, Error.PlayerAlreadyPaid);
       }
 
       await forcePay(user);

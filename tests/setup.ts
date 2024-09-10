@@ -13,6 +13,7 @@ import { setLoginAllowed, setShopAllowed, setTrombiAllowed } from '../src/operat
 import { transporter } from '../src/services/email';
 import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 import { disableFakeUploadApi, enableFakeUploadApi } from './upload';
+import { disableFakeStripeApi, enableFakeStripeApi } from './stripe';
 import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
 import * as uploads from './upload';
@@ -35,6 +36,7 @@ before(async () => {
 
   enableFakeDiscordApi();
   enableFakeUploadApi();
+  enableFakeStripeApi();
 
   // Verify environment variables have been loaded correctly
   expect(process.env.API_PORT).to.be.undefined;
@@ -48,6 +50,7 @@ afterEach('Restore the sandbox after every tests', () => {
 after(async () => {
   disableFakeDiscordApi();
   disableFakeUploadApi();
+  disableFakeStripeApi();
 
   // Reset the database at it was
   await setLoginAllowed(false);

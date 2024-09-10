@@ -28,6 +28,8 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
+      const oldItem = (await fetchAllItems()).find((item) => item.id === request.params.itemId);
+
       const {
         name,
         category,
@@ -52,12 +54,11 @@ export default [
         availableUntil: Date;
       };
 
-      if (!(await fetchAllItems()).some((item) => item.id === request.params.itemId)) {
+      if (!oldItem) {
         return notFound(response, Error.ItemNotFound);
       }
 
-      const item = await updateAdminItem(
-        request.params.itemId,
+      const item = await updateAdminItem(request.params.itemId, {
         name,
         category,
         attribute,
@@ -68,7 +69,7 @@ export default [
         stockDifference,
         availableFrom,
         availableUntil,
-      );
+      });
 
       return success(response, filterAdminItem(item));
     } catch (error) {

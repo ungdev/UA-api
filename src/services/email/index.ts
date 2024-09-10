@@ -70,15 +70,19 @@ export const transporter = nodemailer.createTransport(emailOptions);
 export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttachement[]) => {
   const from = `${env.email.sender.name} <${env.email.sender.address}>`;
 
-  await transporter.sendMail({
-    from,
-    to: mail.to,
-    subject: mail.subject,
-    html: mail.html,
-    attachments,
-  });
+  try {
+    await transporter.sendMail({
+      from,
+      to: mail.to,
+      subject: mail.subject,
+      html: mail.html,
+      attachments,
+    });
 
-  logger.info(`Email sent to ${mail.to}`);
+    logger.info(`Email sent to ${mail.to}`);
+  } catch {
+    logger.warn(`Could not send email to ${mail.to}`);
+  }
 };
 
 /**
