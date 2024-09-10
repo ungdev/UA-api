@@ -44,7 +44,5 @@ export const gone = (response: Response, error: Error): void => respondError(res
 
 export const unsupportedMediaType = (response: Response, error: Error): void => respondError(response, error, 415);
 
-export const imATeapot = (response: Response, error: Error): void => respondError(response, error, 418);
-
 export const internalServerError = (response: Response, error?: Error): void =>
   respondError(response, error || Error.InternalServerError, 500);
