@@ -274,7 +274,7 @@ export default [
             quantity: cartItem.quantity,
           })),
         expires_at: Math.ceil(Date.now() / 1000) + env.api.cartLifespan,
-        customer_email: user.email,
+
         discounts: cartItems
           .filter((cartItem) => cartItem.price < 0)
           .map((cartItem) => ({
