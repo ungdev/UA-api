@@ -113,6 +113,7 @@ export const updateAdminItem = async (
   stockDifference?: number,
   availableFrom?: Date,
   availableUntil?: Date,
+  display?: Boolean,
 ): Promise<Item> => {
   const newStock = stockDifference
     ? (
@@ -136,6 +137,7 @@ export const updateAdminItem = async (
       stock: newStock,
       availableFrom,
       availableUntil,
+      display,
     },
     where: { id: itemId },
   });

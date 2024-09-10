@@ -59,6 +59,7 @@ model Item {
   stock          Int?
   availableFrom  DateTime?
   availableUntil DateTime?
+  display        Boolean      @default(false)
   position       Int          @default(0)
   cartItems      CartItem[]
 
