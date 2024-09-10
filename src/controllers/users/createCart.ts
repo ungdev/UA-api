@@ -265,7 +265,7 @@ export default [
         currency: 'eur',
         amount: cartPrice,
       });
-      await updateCart(cart.id, {transactionId: paymentIntent.id, transactionState: TransactionState.pending});
+      await updateCart(cart.id, { transactionId: paymentIntent.id, transactionState: TransactionState.pending });
       return created(response, { checkoutSecret: paymentIntent.client_secret });
     } catch (error) {
       return next(error);

@@ -221,7 +221,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
       where: { cartItems: { some: { itemId: 'ticket-player', forUserId: user2.id } } },
       include: { cartItems: true },
     });
-    await cartOperations.updateCart(cart.id, {transactionState: 'pending'});
+    await cartOperations.updateCart(cart.id, { transactionState: 'pending' });
 
     await request(app)
       .post(`/teams/current/join-requests/${user2.id}`)
@@ -252,7 +252,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
       where: { cartItems: { some: { itemId: 'ticket-player', forUserId: user.id } } },
       include: { cartItems: true },
     });
-    await cartOperations.updateCart(cart.id, { transactionState: "pending" });
+    await cartOperations.updateCart(cart.id, { transactionState: 'pending' });
 
     await request(app)
       .post(`/teams/current/join-requests/${user2.id}`)
@@ -264,7 +264,7 @@ describe('POST /teams/current/join-requests/:userId', () => {
     expect(team.enteredQueueAt).to.be.null;
 
     // Make the user pay again
-    await cartOperations.updateCart(cart.id, { transactionState: "paid" });
+    await cartOperations.updateCart(cart.id, { transactionState: 'paid' });
 
     // Remove the user for the next test
     await teamOperations.kickUser(await userOperations.fetchUser(user2.id));

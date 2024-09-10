@@ -1,11 +1,11 @@
 import Stripe from 'stripe';
+import { NextFunction, Request, Response } from 'express';
+import Joi from 'joi';
 import env from './env';
-import { NextFunction, Request, Response } from "express";
-import { validateBody } from "../middlewares/validation";
-import Joi from "joi";
-import { notFound, unauthenticated } from "./responses";
-import { Error } from "../types";
-import { fetchCartFromTransactionId } from "../operations/carts";
+import { validateBody } from '../middlewares/validation';
+import { notFound, unauthenticated } from './responses';
+import { Error } from '../types';
+import { fetchCartFromTransactionId } from '../operations/carts';
 
 export const stripe = new Stripe(env.stripe.token);
 

@@ -57,7 +57,7 @@ describe('POST /stripe/succeeded', () => {
       .send(generateCart('I AM A H4X0R'))
       .expect(404, { error: Error.CartNotFound }));
 
-  it('should fail as the request does not come from Stripe', async () =>
+  it('should fail as the request does not come from Stripe', () =>
     request(app)
       .post('/stripe/succeeded')
       .send(generateCart(paymentIntent.id))

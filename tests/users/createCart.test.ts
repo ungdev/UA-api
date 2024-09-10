@@ -21,8 +21,6 @@ describe('POST /users/current/carts', () => {
   let user: User;
   let token: string;
 
-  let partnerUser: User;
-
   let teamWithSwitchDiscount: Team;
   let userWithSwitchDiscount: User;
   let tokenWithSwitchDiscount: string;
@@ -129,7 +127,7 @@ describe('POST /users/current/carts', () => {
     token = generateToken(user);
 
     const coach = await createFakeUser({ type: UserType.coach });
-    partnerUser = await createFakeUser({ type: UserType.player, email: 'toto@utt.fr' });
+    const partnerUser = await createFakeUser({ type: UserType.player, email: 'toto@utt.fr' });
     await joinTeam(team.id, coach, UserType.coach);
     await joinTeam(team.id, partnerUser, UserType.player);
 
@@ -612,7 +610,7 @@ describe('POST /users/current/carts', () => {
     });
   });
 
-  it('should pass as a stale stock-blocking cart was deleted', async () => {
+  it('should pass as an expired stock-blocking cart was deleted', async () => {
     // We clear previous tickets first
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
@@ -627,12 +625,12 @@ describe('POST /users/current/carts', () => {
       where: { id: 'ticket-spectator' },
     });
 
-    // We use that unit for a spectator and force-stale his cart
-    const staleSpectator = await createFakeUser({ type: UserType.spectator });
-    const staleSpectatorCart = await cartOperations.forcePay(staleSpectator);
+    // We use that unit for a spectator and force-expire his cart
+    const expiredSpectator = await createFakeUser({ type: UserType.spectator });
+    const expiredSpectatorCart = await cartOperations.forcePay(expiredSpectator);
     await database.cart.update({
       where: {
-        id: staleSpectatorCart.id,
+        id: expiredSpectatorCart.id,
       },
       data: {
         createdAt: new Date(Date.now() - 6e6),
@@ -666,10 +664,10 @@ describe('POST /users/current/carts', () => {
 
     expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
 
-    // Check that the stale cart has been deleted
-    const staleSpectatorCarts = await cartOperations.fetchCarts(staleSpectator.id);
-    expect(staleSpectatorCarts).to.have.lengthOf(1);
-    expect(staleSpectatorCarts[0].transactionState).to.be.equal(TransactionState.expired);
+    // Check that the expired cart has been deleted
+    const expiredSpectatorCarts = await cartOperations.fetchCarts(expiredSpectator.id);
+    expect(expiredSpectatorCarts).to.have.lengthOf(1);
+    expect(expiredSpectatorCarts[0].transactionState).to.be.equal(TransactionState.expired);
 
     const spectatorTickets = await database.cartItem.findMany({
       where: {
