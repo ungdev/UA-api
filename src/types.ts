@@ -305,6 +305,7 @@ export const enum Error {
   InvalidCredentials = 'Identifiants invalides',
   NoDiscordAccountLinked = 'Tu dois lier ton compte discord pour créer ou rejoindre une équipe',
   NoToken = "Aucun token n'a été donné",
+  PleaseDontPlayWithStripeWebhooks = 'Merci de ne pas jouer avec les webhooks Stripe',
 
   // 403
   // The server understood the request but refuses to authorize it

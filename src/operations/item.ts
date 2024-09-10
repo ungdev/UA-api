@@ -117,9 +117,6 @@ export const updateAdminItem = async (
     stockDifference,
     availableFrom,
     availableUntil,
-    stripeProductId,
-    stripePriceId,
-    stripeReducedPriceId,
   }: {
     name?: string;
     category?: ItemCategory;
@@ -131,9 +128,6 @@ export const updateAdminItem = async (
     stockDifference?: number;
     availableFrom?: Date;
     availableUntil?: Date;
-    stripeProductId?: string | null;
-    stripePriceId?: string | null;
-    stripeReducedPriceId?: string | null;
   } = {},
 ): Promise<Item> => {
   const newStock = stockDifference
@@ -158,9 +152,6 @@ export const updateAdminItem = async (
       stock: newStock,
       availableFrom,
       availableUntil,
-      stripeProductId,
-      stripePriceId,
-      stripeReducedPriceId,
     },
     where: { id: itemId },
   });

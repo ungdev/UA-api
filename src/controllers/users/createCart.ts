@@ -12,7 +12,6 @@ import * as validators from '../../utils/validators';
 import { isShopAllowed } from '../../middlewares/settings';
 import { isAuthenticated } from '../../middlewares/authentication';
 import { fetchTournament } from '../../operations/tournament';
-import env from '../../utils/env';
 import { stripe } from '../../utils/stripe';
 
 export interface PayBody {
@@ -180,16 +179,6 @@ export default [
         return badRequest(response, ResponseError.EmptyBasket);
       }
 
-      // Verify cart price is not negative
-      if (
-        cartItems.reduce(
-          (previous, current) => previous + (current.reducedPrice ?? current.price) * current.quantity,
-          0,
-        ) < 0
-      ) {
-        return forbidden(response, ResponseError.BasketCannotBeNegative);
-      }
-
       // Calculate if each cart item is available
       const itemsWithStock = items.filter((item) => item.left !== undefined);
 
@@ -263,26 +252,21 @@ export default [
         return next(error);
       }
 
-      const session = await stripe.checkout.sessions.create({
-        mode: 'payment',
-        ui_mode: 'embedded',
-        return_url: env.stripe.callback,
-        line_items: cartItems
-          .filter((cartItem) => cartItem.price > 0)
-          .map((cartItem) => ({
-            price: cartItem.reducedPrice === null ? cartItem.item.stripePriceId : cartItem.item.stripeReducedPriceId,
-            quantity: cartItem.quantity,
-          })),
-        expires_at: Math.ceil(Date.now() / 1000) + env.api.cartLifespan,
+      // Verify cart price is not negative
+      const cartPrice = cartItems.reduce(
+        (previous, current) => previous + (current.reducedPrice ?? current.price) * current.quantity,
+        0,
+      );
+      if (cartPrice < 0) {
+        return forbidden(response, ResponseError.BasketCannotBeNegative);
+      }
 
-        discounts: cartItems
-          .filter((cartItem) => cartItem.price < 0)
-          .map((cartItem) => ({
-            coupon: cartItem.item.stripePriceId,
-          })),
+      const paymentIntent = await stripe.paymentIntents.create({
+        currency: 'eur',
+        amount: cartPrice,
       });
-      await updateCart(cart.id, session.id, TransactionState.pending);
-      return created(response, { checkoutSecret: session.client_secret });
+      await updateCart(cart.id, paymentIntent.id, TransactionState.pending);
+      return created(response, { checkoutSecret: paymentIntent.client_secret });
     } catch (error) {
       return next(error);
     }

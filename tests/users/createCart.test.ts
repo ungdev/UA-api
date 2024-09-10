@@ -14,14 +14,8 @@ import { setShopAllowed } from '../../src/operations/settings';
 import { getCaptain } from '../../src/utils/teams';
 import { createAttendant, deleteUser, updateAdminUser } from '../../src/operations/user';
 import { joinTeam } from '../../src/operations/team';
-import {
-  generateStripeCoupon,
-  generateStripePrice,
-  generateStripeProduct,
-  resetFakeStripeApi,
-  stripeSessions,
-} from '../stripe';
-import { fetchAllItems, fetchItem, updateAdminItem } from '../../src/operations/item';
+import { resetFakeStripeApi, stripePaymentIntents } from '../stripe';
+import { fetchItem } from '../../src/operations/item';
 
 describe('POST /users/current/carts', () => {
   let user: User;
@@ -162,28 +156,6 @@ describe('POST /users/current/carts', () => {
     tokenInFullTournament = generateToken(captainInFullTournament);
     coachInFullTournament = await createFakeUser({ type: UserType.coach });
     await joinTeam(teamInFullTournament.id, coachInFullTournament, UserType.coach);
-
-    // Seed Stripe properly
-    for (const item of await fetchAllItems()) {
-      if (item.price > 0) {
-        const product = generateStripeProduct(item.name);
-        const price = generateStripePrice(item.price, product.id);
-        let reducedPrice;
-        if (item.reducedPrice !== null) {
-          reducedPrice = generateStripePrice(item.reducedPrice, product.id);
-        }
-        await updateAdminItem(item.id, {
-          stripeProductId: product.id,
-          stripePriceId: price.id,
-          stripeReducedPriceId: reducedPrice?.id ?? null,
-        });
-      } else {
-        const coupon = generateStripeCoupon(item.name, -item.price);
-        await updateAdminItem(item.id, {
-          stripePriceId: coupon.id,
-        });
-      }
-    }
   });
 
   after(async () => {
@@ -194,13 +166,6 @@ describe('POST /users/current/carts', () => {
     await database.user.deleteMany();
     await database.tournament.deleteMany();
     resetFakeStripeApi();
-    for (const item of await fetchAllItems()) {
-      await updateAdminItem(item.id, {
-        stripeProductId: null,
-        stripePriceId: null,
-        stripeReducedPriceId: null,
-      });
-    }
   });
 
   it('should fail as the shop is deactivated', async () => {
@@ -419,7 +384,7 @@ describe('POST /users/current/carts', () => {
     const coach = users.find((findUser) => findUser.type === UserType.coach && findUser.teamId === user.teamId);
     const attendant = users.find((findUser) => findUser.type === UserType.attendant);
 
-    expect(body.checkoutSecret).to.be.equal(stripeSessions.at(-1).client_secret);
+    expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(5);
@@ -434,8 +399,7 @@ describe('POST /users/current/carts', () => {
     expect(attendant?.firstname).to.be.equal(validCart.tickets.attendant?.firstname);
     expect(attendant?.lastname).to.be.equal(validCart.tickets.attendant?.lastname);
 
-    expect(stripeSessions.at(-1).email).to.be.equal(user.email);
-    expect(stripeSessions.at(-1).amount_total).to.be.equal(
+    expect(stripePaymentIntents.at(-1).amount).to.be.equal(
       cartItems.reduce((previous, current) => (current.reducedPrice ?? current.price) * current.quantity + previous, 0),
     );
   });
@@ -464,7 +428,7 @@ describe('POST /users/current/carts', () => {
       (cartItem) => cartItem.itemId === validCartWithSwitchDiscount.supplements[0].itemId,
     );
 
-    expect(body.checkoutSecret).to.be.equal(stripeSessions.at(-1).client_secret);
+    expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(2);
@@ -473,8 +437,7 @@ describe('POST /users/current/carts', () => {
 
     expect(supplement?.quantity).to.be.equal(validCartWithSwitchDiscount.supplements[0].quantity);
 
-    expect(stripeSessions.at(-1).email).to.be.equal(userWithSwitchDiscount.email);
-    expect(stripeSessions.at(-1).amount_total).to.be.equal(
+    expect(stripePaymentIntents.at(-1).amount).to.be.equal(
       cartItems.reduce((previous, current) => current.price * current.quantity + previous, 0),
     );
   });
@@ -518,9 +481,8 @@ describe('POST /users/current/carts', () => {
         ],
       })
       .expect(201);
-    expect(body.checkoutSecret).to.be.equal(stripeSessions.at(-1).client_secret);
-    expect(stripeSessions.at(-1).email).to.be.equal(notValidUserWithSwitchDiscount.email);
-    expect(stripeSessions.at(-1).amount_total).to.be.equal((await fetchItem('pc')).price);
+    expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
+    expect(stripePaymentIntents.at(-1).amount).to.be.equal((await fetchItem('pc')).price);
   });
 
   it('should send an error as ssbu discount is already in a pending cart', async () => {
@@ -638,9 +600,8 @@ describe('POST /users/current/carts', () => {
       })
       .expect(201);
 
-    expect(body.checkoutSecret).to.be.equal(stripeSessions.at(-1).client_secret);
-    expect(stripeSessions.at(-1).email).to.be.equal(spectator.email);
-    expect(stripeSessions.at(-1).amount_total).to.be.equal((await fetchItem('ticket-spectator')).price);
+    expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
+    expect(stripePaymentIntents.at(-1).amount).to.be.equal((await fetchItem('ticket-spectator')).price);
 
     return database.item.update({
       data: { stock: currentSpectatorStock },
@@ -700,7 +661,7 @@ describe('POST /users/current/carts', () => {
       })
       .expect(201);
 
-    expect(body.checkoutSecret).to.be.equal(stripeSessions.at(-1).client_secret);
+    expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
 
     // Check that the stale cart has been deleted
     const staleSpectatorCarts = await cartOperations.fetchCarts(staleSpectator.id);
@@ -714,8 +675,7 @@ describe('POST /users/current/carts', () => {
     });
     expect(spectatorTickets).to.have.lengthOf(2);
 
-    expect(stripeSessions.at(-1).email).to.be.equal(spectator.email);
-    expect(stripeSessions.at(-1).amount_total).to.be.equal(spectatorTicket.price);
+    expect(stripePaymentIntents.at(-1).amount).to.be.equal(spectatorTicket.price);
 
     // Restore actual stock
     return database.item.update({

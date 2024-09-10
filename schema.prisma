@@ -20,6 +20,8 @@ model Cart {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now()) @updatedAt
   user             User             @relation(fields: [userId], references: [id])
+  processingAt     DateTime?
+  succeededAt      DateTime?
   cartItems        CartItem[]
 
   @@index([userId], map: "carts_userId_fkey")
@@ -60,9 +62,6 @@ model Item {
   availableFrom        DateTime?
   availableUntil       DateTime?
   position             Int          @default(0)
-  stripeProductId      String?
-  stripePriceId        String?
-  stripeReducedPriceId String?
   cartItems            CartItem[]
 
   @@map("items")
@@ -272,7 +271,9 @@ model Commission {
 
 enum TransactionState {
   pending
+  processing
   paid
+  canceled
   expired
   refunded
 }

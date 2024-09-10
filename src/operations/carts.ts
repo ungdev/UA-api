@@ -116,14 +116,25 @@ export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
 
 export const updateCart = async (
   cartId: string,
-  transactionId: string,
-  transactionState: TransactionState,
+  {
+    transactionId,
+    transactionState,
+    processingAt,
+    succeededAt,
+  }: {
+    transactionId?: string | null;
+    transactionState?: TransactionState | null;
+    processingAt?: Date | null;
+    succeededAt?: Date | null;
+  } = {},
 ): Promise<DetailedCart> => {
   const cart = await database.cart.update({
     data: {
       transactionState,
       paidAt: new Date(),
       transactionId,
+      processingAt,
+      succeededAt,
     },
     where: {
       id: cartId,

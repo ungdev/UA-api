@@ -9,12 +9,6 @@ interface StripeObject {
   id: string;
   object: string;
 }
-interface StripeSession extends StripeObject {
-  object: 'checkout.session';
-  client_secret: string;
-  email: string;
-  amount_total: number;
-}
 interface StripeProduct extends StripeObject {
   object: 'product';
   name: string;
@@ -30,11 +24,24 @@ interface StripeCoupon extends StripeObject {
   name: string;
   amount_off: number;
 }
+interface StripeSession extends StripeObject {
+  object: 'checkout.session';
+  client_secret: string;
+  email: string;
+  amount_total: number;
+}
+export interface StripePaymentIntent extends StripeObject {
+  object: 'payment_intent';
+  client_secret: string;
+  amount: number;
+  status: 'canceled' | 'processing' | 'succeeded' | 'requires_action';
+}
 
-export const stripeSessions: StripeSession[] = [];
 export const stripeProducts: StripeProduct[] = [];
 export const stripePrices: StripePrice[] = [];
 export const stripeCoupons: StripeCoupon[] = [];
+export const stripeSessions: StripeSession[] = [];
+export const stripePaymentIntents: StripePaymentIntent[] = [];
 
 // Bro whaattt ?? Stripe uses `application/x-www-form-urlencoded` to send data
 // https://stackoverflow.com/questions/73534171/convert-an-x-www-form-urlencoded-string-to-json#answer-73534319
@@ -104,6 +111,19 @@ export function generateStripeSession(email: string, amount: number) {
   };
   stripeSessions.push(session);
   return session;
+}
+
+export function generatePaymentIntent(amount: number) {
+  const paymentIntentId = id('pi');
+  const paymentIntent: StripePaymentIntent = {
+    id: paymentIntentId,
+    object: 'payment_intent',
+    client_secret: `${paymentIntentId}_${id('secret')}`,
+    amount,
+    status: 'requires_action',
+  };
+  stripePaymentIntents.push(paymentIntent);
+  return paymentIntent;
 }
 
 function listen() {
@@ -300,6 +320,30 @@ function listen() {
           ) - totalDiscount,
         ),
       ];
+    })
+
+    .get(/payment_intents\/.*$/)
+    .reply((uri) => {
+      const paymentIntentId = uri.slice(uri.indexOf('/', 4) + 1);
+      const paymentIntent = stripePaymentIntents.find((pi) => pi.id === paymentIntentId);
+      if (!paymentIntent) {
+        return [500, 'Payment intent was not found'];
+      }
+      return [200, paymentIntent];
+    })
+
+    .post(/\/payment_intents$/)
+    .reply((uri, pBody) => {
+      const body = decodeBody(pBody as string) as {
+        currency: string;
+        amount: string;
+      };
+      if (body.currency !== 'eur') return [500, '`currency` must be `eur`'];
+      const amount = Number(body.amount);
+      if (amount <= 0) {
+        return [500, 'Price is negative'];
+      }
+      return [200, generatePaymentIntent(amount)];
     });
 }
 
