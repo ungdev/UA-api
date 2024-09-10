@@ -8,7 +8,6 @@ import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import { createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
-import { fetchAllItems } from '../../../src/operations/item';
 
 describe('PATCH /admin/items', () => {
   let nonAdminUser: User;
@@ -23,7 +22,7 @@ describe('PATCH /admin/items', () => {
   });
 
   before(async () => {
-    items = await fetchAllItems();
+    items = await itemOperations.fetchAllItems();
 
     validBody = {
       items: [

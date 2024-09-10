@@ -10,7 +10,6 @@ import env from '../src/utils/env';
 // Test cases that are not tested in common routes
 describe('Test middlewares', () => {
   after(async () => {
-    await database.orga.deleteMany();
     await database.user.deleteMany();
   });
 
