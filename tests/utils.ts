@@ -173,7 +173,7 @@ export const createFakeTeam = async ({
   });
 
   logger.verbose(`Created team ${team.name}`);
-  return fetchTeam(team.id);
+  return fetchTeam(team.id)!;
 };
 
 export const createFakePartner = async ({
