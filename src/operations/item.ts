@@ -105,7 +105,6 @@ export const findAdminItem = async (itemId: string) => {
 };
 
 export const updateAdminItem = async (
-
   itemId: string,
   {
     name,
