@@ -113,7 +113,7 @@ export function generateStripeSession(email: string, amount: number) {
   return session;
 }
 
-export function generatePaymentIntent(amount: number) {
+export function generateStripePaymentIntent(amount: number) {
   const paymentIntentId = id('pi');
   const paymentIntent: StripePaymentIntent = {
     id: paymentIntentId,
@@ -343,7 +343,17 @@ function listen() {
       if (amount <= 0) {
         return [500, 'Price is negative'];
       }
-      return [200, generatePaymentIntent(amount)];
+      return [200, generateStripePaymentIntent(amount)];
+    })
+
+    .post(/\/payment_intents\/.*\/cancel$/)
+    .reply((uri) => {
+      const paymentIntentId = uri.match(/payment_intents\/(.*)\/cancel$/)[1];
+      const paymentIntentIndex = stripePaymentIntents.findIndex((pi) => pi.id === paymentIntentId);
+      if (!paymentIntentIndex) {
+        return [500, 'Payment intent was not found'];
+      }
+      return [200, stripePaymentIntents.splice(paymentIntentIndex, 1)[0]];
     });
 }
 

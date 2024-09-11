@@ -8,7 +8,7 @@ import database from '../../src/services/database';
 import { Error, User, Cart } from '../../src/types';
 import { createFakeUser, createFakeCart } from '../utils';
 import { updateCart } from '../../src/operations/carts';
-import { generatePaymentIntent, resetFakeStripeApi, StripePaymentIntent } from '../stripe';
+import { generateStripePaymentIntent, resetFakeStripeApi, StripePaymentIntent } from '../stripe';
 
 describe('POST /stripe/canceled', () => {
   let user: User;
@@ -18,7 +18,7 @@ describe('POST /stripe/canceled', () => {
   before(async () => {
     user = await createFakeUser();
     cart = await createFakeCart({ userId: user.id, items: [] });
-    paymentIntent = generatePaymentIntent(120);
+    paymentIntent = generateStripePaymentIntent(120);
     await updateCart(cart.id, { transactionId: paymentIntent.id, transactionState: TransactionState.processing });
   });
 

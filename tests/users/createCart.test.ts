@@ -14,7 +14,7 @@ import { setShopAllowed } from '../../src/operations/settings';
 import { getCaptain } from '../../src/utils/teams';
 import { createAttendant, deleteUser, updateAdminUser } from '../../src/operations/user';
 import { joinTeam } from '../../src/operations/team';
-import { resetFakeStripeApi, stripePaymentIntents } from '../stripe';
+import { generateStripePaymentIntent, resetFakeStripeApi, stripePaymentIntents } from '../stripe';
 import { fetchItem } from '../../src/operations/item';
 
 describe('POST /users/current/carts', () => {
@@ -628,6 +628,7 @@ describe('POST /users/current/carts', () => {
     // We use that unit for a spectator and force-expire his cart
     const expiredSpectator = await createFakeUser({ type: UserType.spectator });
     const expiredSpectatorCart = await cartOperations.forcePay(expiredSpectator);
+    const paymentIntent = generateStripePaymentIntent(spectatorTicket.price);
     await database.cart.update({
       where: {
         id: expiredSpectatorCart.id,
@@ -636,6 +637,7 @@ describe('POST /users/current/carts', () => {
         createdAt: new Date(Date.now() - 6e6),
         updatedAt: new Date(Date.now() - 6e6),
         transactionState: 'pending',
+        transactionId: paymentIntent.id,
         cartItems: {
           updateMany: {
             data: {
@@ -677,6 +679,7 @@ describe('POST /users/current/carts', () => {
     expect(spectatorTickets).to.have.lengthOf(2);
 
     expect(stripePaymentIntents.at(-1).amount).to.be.equal(spectatorTicket.price);
+    expect(stripePaymentIntents.some((pi) => pi.id === paymentIntent.id)).to.be.false;
 
     // Restore actual stock
     return database.item.update({

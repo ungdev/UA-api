@@ -15,18 +15,29 @@ import nanoid from '../utils/nanoid';
 import { fetchUserItems } from './item';
 import { fetchTeam, lockTeam, unlockTeam } from './team';
 import { fetchTournament } from './tournament';
+import { stripe } from '../utils/stripe';
 
-export const checkForExpiredCarts = () =>
-  database.$transaction([
+export const checkForExpiredCarts = async () => {
+  const carts = await database.cart.findMany({
+    where: {
+      createdAt: {
+        lt: new Date(Date.now() - env.api.cartLifespan * 1000),
+      },
+      transactionState: TransactionState.pending,
+    },
+  });
+  for (const cart of carts) {
+    if (cart.transactionId) {
+      await stripe.paymentIntents.cancel(cart.transactionId);
+    }
+  }
+  await database.$transaction([
     database.cart.updateMany({
       data: {
         transactionState: TransactionState.expired,
       },
       where: {
-        createdAt: {
-          lt: new Date(Date.now() - env.api.cartLifespan * 1000),
-        },
-        transactionState: TransactionState.pending,
+        id: { in: carts.map((item) => item.id) },
       },
     }),
     database.user.deleteMany({
@@ -42,6 +53,7 @@ export const checkForExpiredCarts = () =>
       },
     }),
   ]);
+};
 
 export const fetchCart = (cartId: string): Promise<Cart> =>
   database.cart.findUnique({
