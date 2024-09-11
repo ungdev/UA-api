@@ -66,6 +66,7 @@ export const filterAdminItem = (item: Item) =>
     'stock',
     'availableFrom',
     'availableUntil',
+    'display',
   ]);
 
 export const filterItem = (item: Item) =>

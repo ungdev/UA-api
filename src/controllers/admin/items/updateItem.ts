@@ -14,7 +14,7 @@ export default [
     Joi.object({
       name: Joi.string(),
       category: Joi.string().valid(ItemCategory.rent, ItemCategory.supplement, ItemCategory.ticket),
-      attribute: Joi.string(),
+      attribute: Joi.string().allow(null),
       price: Joi.number().integer(),
       reducedPrice: Joi.number().integer(),
       infos: Joi.string(),
