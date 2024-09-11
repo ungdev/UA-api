@@ -15,11 +15,13 @@ model Cart {
   id               String           @id
   userId           String
   transactionState TransactionState @default(pending)
-  transactionId    Int?
+  transactionId    String? @unique
   paidAt           DateTime?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @default(now()) @updatedAt
   user             User             @relation(fields: [userId], references: [id])
+  processingAt     DateTime?
+  succeededAt      DateTime?
   cartItems        CartItem[]
 
   @@index([userId], map: "carts_userId_fkey")
@@ -48,19 +50,19 @@ model CartItem {
 }
 
 model Item {
-  id             String       @id
-  name           String
-  category       ItemCategory
-  attribute      String?
-  price          Int
-  reducedPrice   Int?
-  infos          String?      @db.VarChar(300)
-  image          String?
-  stock          Int?
-  availableFrom  DateTime?
-  availableUntil DateTime?
-  position       Int          @default(0)
-  cartItems      CartItem[]
+  id                   String       @id
+  name                 String
+  category             ItemCategory
+  attribute            String?
+  price                Int
+  reducedPrice         Int?
+  infos                String?      @db.VarChar(300)
+  image                String?
+  stock                Int?
+  availableFrom        DateTime?
+  availableUntil       DateTime?
+  position             Int          @default(0)
+  cartItems            CartItem[]
 
   @@map("items")
 }
@@ -269,12 +271,11 @@ model Commission {
 
 enum TransactionState {
   pending
+  processing
   paid
   canceled
-  refused
+  expired
   refunded
-  authorization
-  stale
 }
 
 enum ItemCategory {

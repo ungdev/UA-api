@@ -39,7 +39,10 @@ describe('Tests the PDF utils', () => {
       },
     ]);
 
-    const detailedCart = await updateCart(createdCart.id, 123, TransactionState.paid);
+    const detailedCart = await updateCart(createdCart.id, {
+      transactionId: '123',
+      transactionState: TransactionState.paid,
+    });
 
     const cartItem = detailedCart.cartItems[0];
 
@@ -61,7 +64,10 @@ describe('Tests the PDF utils', () => {
       },
     ]);
 
-    const detailedCart = await updateCart(createdCart.id, 123, TransactionState.paid);
+    const detailedCart = await updateCart(createdCart.id, {
+      transactionId: '124',
+      transactionState: TransactionState.paid,
+    });
 
     const cartItem = detailedCart.cartItems[0];
 

@@ -52,7 +52,7 @@ export const leave = [
 
     // If the user has already paid, he can't discard his spectator ticket
     user = await fetchUser(user.id);
-    if (user.hasPaid) return forbidden(response, Error.AlreadyPaid);
+    if (user.hasPaid) return forbidden(response, Error.PlayerAlreadyPaid);
 
     try {
       const updatedUser = await updateAdminUser(user, {
