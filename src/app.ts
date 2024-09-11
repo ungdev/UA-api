@@ -22,7 +22,6 @@ if (!env.test) app.use(rateLimiter);
 
 // Initiate Sentry
 Sentry.init({ dsn: env.log.sentryDsn, environment: env.environment });
-app.use(Sentry.Handlers.requestHandler({}));
 
 // Enable morgan logger
 app.use(morgan());

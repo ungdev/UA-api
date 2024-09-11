@@ -400,7 +400,7 @@ export const enum Error {
 }
 
 // Toornament
-/* eslint-disable camelcase */
+
 export interface ToornamentPlayerCustomFields {
   discord?: string;
   nom_complet: {
@@ -424,7 +424,6 @@ export interface ToornamentParticipant {
   lineup: Array<ToornamentPlayer>;
   created_at: string;
 }
-/* eslint-enable camelcase */
 
 export interface DiscordParticipants {
   name: string;

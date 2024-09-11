@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-spread */
 // https://github.com/sindresorhus/eslint-plugin-unicorn/issues/1068
 // known as a bug that will be fixed soon
 

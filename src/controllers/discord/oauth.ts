@@ -23,7 +23,10 @@ const redirect = (response: Response, statusCode: DiscordFeedbackCode) => {
 
 export default [
   isLoginAllowed,
-  async (request: Request<{}, {}, {}, DiscordAuthorization>, response: Response) => {
+  async (
+    request: Request<Record<string, never>, Record<string, never>, Record<string, never>, DiscordAuthorization>,
+    response: Response,
+  ) => {
     try {
       const { error, code, state } = request.query;
 

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import multer = require('multer');
+import multer from 'multer';
 import uploadFile from './uploadFile';
 import deleteFile from './deleteFile';
 

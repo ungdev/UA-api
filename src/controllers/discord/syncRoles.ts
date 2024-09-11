@@ -17,7 +17,7 @@ export default [
       }
 
       // Checks if the token is valid
-      // eslint-disable-next-line security/detect-possible-timing-attacks
+
       if (token !== env.discord.syncKey) {
         return unauthenticated(response, Error.InvalidToken);
       }

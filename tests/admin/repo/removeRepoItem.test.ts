@@ -29,6 +29,7 @@ describe('DELETE /admin/repo/user/:userId/items/:itemId', () => {
     team = await createFakeTeam({ tournament: tournament.id });
     captain = getCaptain(team);
   });
+
   after(async () => {
     await database.repoLog.deleteMany();
     await database.repoItem.deleteMany();

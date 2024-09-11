@@ -7,7 +7,6 @@ import { generateTicketsEmail, generateValidationEmail, generatePasswordResetEma
 import type { SerializedMail } from './types';
 import database from '../database';
 
-// eslint-disable-next-line import/no-unresolved
 export type { Component, Mail, SerializedMail } from './types';
 
 export const getEmailsLogs = async () =>

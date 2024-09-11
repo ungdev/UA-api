@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-non-literal-fs-filename */
 import fs from 'fs/promises';
 import { UserType } from '@prisma/client';
 import { createFakeTeam, createFakeTournament, createFakeUser } from '../utils';
@@ -20,6 +19,7 @@ describe('Tests the PDF utils', () => {
   });
 
   let placeId = 0;
+
   it(`should generate a PDF ticket for a player`, async () => {
     // Create a fake user and add it in a random team
     const tournament = await createFakeTournament();
