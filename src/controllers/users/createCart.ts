@@ -264,6 +264,7 @@ export default [
       const paymentIntent = await stripe.paymentIntents.create({
         currency: 'eur',
         amount: cartPrice,
+        receipt_email: user.email,
       });
       await updateCart(cart.id, { transactionId: paymentIntent.id, transactionState: TransactionState.pending });
       return created(response, { checkoutSecret: paymentIntent.client_secret });
