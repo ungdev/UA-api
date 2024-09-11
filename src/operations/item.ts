@@ -137,7 +137,7 @@ export const updateAdminItem = async (
       stock: newStock,
       availableFrom,
       availableUntil,
-      display,
+      /*display,*/
     },
     where: { id: itemId },
   });

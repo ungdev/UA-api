@@ -22,6 +22,7 @@ export default [
       stockDifference: Joi.number().integer(),
       availableFrom: Joi.date(),
       availableUntil: Joi.date(),
+      display: Joi.boolean(),
     }),
   ),
 
@@ -39,6 +40,7 @@ export default [
         stockDifference,
         availableFrom,
         availableUntil,
+        display,
       } = request.body as {
         name: string;
         category: ItemCategory;
@@ -50,6 +52,7 @@ export default [
         stockDifference: number;
         availableFrom: Date;
         availableUntil: Date;
+        display: Boolean;
       };
 
       if (!(await fetchAllItems()).some((item) => item.id === request.params.itemId)) {
@@ -68,6 +71,7 @@ export default [
         stockDifference,
         availableFrom,
         availableUntil,
+        display,
       );
 
       return success(response, filterAdminItem(item));
