@@ -52,7 +52,7 @@ export default [
         stockDifference: number;
         availableFrom: Date;
         availableUntil: Date;
-        display: Boolean;
+        display: boolean;
       };
 
       if (!(await fetchAllItems()).some((item) => item.id === request.params.itemId)) {
