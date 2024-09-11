@@ -13,10 +13,12 @@ export default [
   async (request: Request, response: Response, next: NextFunction) => {
     try {
       const { user, team } = getRequestInfo(response);
-      const items = await fetchUserItems(team, user || undefined);
+      let result = await fetchUserItems(team, user || undefined);
 
-      const result = items.map(filterItem);
-      return success(response, result);
+      result = result.filter((item) => item.display);
+
+      const items = result.map(filterItem);
+      return success(response, items);
     } catch (error) {
       return next(error);
     }
