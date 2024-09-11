@@ -48,11 +48,31 @@ describe('GET /admin/items', () => {
   });
 
   it('should return items list with proper stock and left value', async () => {
+    await database.item.update({
+      where: {
+        id: items[0].id,
+      },
+      data: {
+        display: false,
+      },
+    });
+
     const { body } = await request(app).get(`/admin/items`).set('Authorization', `Bearer ${adminToken}`).expect(200);
+
+    expect(body).to.have.lengthOf(items.length);
 
     for (const responseItem of body) {
       expect(responseItem.left).to.be.equal(items.find((item) => item.name === responseItem.name)!.left);
       expect(responseItem.stock).to.be.equal(items.find((item) => item.name === responseItem.name)!.stock);
     }
+
+    await database.item.update({
+      where: {
+        id: items[0].id,
+      },
+      data: {
+        display: true,
+      },
+    });
   });
 });
