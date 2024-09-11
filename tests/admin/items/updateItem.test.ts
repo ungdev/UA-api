@@ -37,13 +37,12 @@ describe('PATCH /admin/items/:itemId', () => {
     user = await createFakeUser({ type: UserType.player });
     // Buy this item. Buy it once per transaction state, to test them all
     await Promise.all(
-      (['paid', 'pending', 'authorization', 'refused', 'canceled', 'refunded', 'stale'] as TransactionState[]).map(
-        (transactionState) =>
-          createFakeCart({
-            userId: user.id,
-            transactionState,
-            items: [{ itemId: item.id, price: item.price, quantity: 1 }],
-          }),
+      (['paid', 'pending', 'refunded', 'expired'] as TransactionState[]).map((transactionState) =>
+        createFakeCart({
+          userId: user.id,
+          transactionState,
+          items: [{ itemId: item.id, price: item.price, quantity: 1 }],
+        }),
       ),
     );
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
@@ -105,7 +104,7 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(body.infos).to.be.equal(item.infos);
     expect(body.image).to.be.equal(item.image);
     expect(body.stock).to.be.equal(item.stock);
-    expect(body.left).to.be.equal(item.stock - 3); // Only three carts should count as bought
+    expect(body.left).to.be.equal(item.stock - 2); // Only 2 carts should count as bought
     expect(body.availableFrom).to.be.equal(item.availableFrom.toISOString());
     expect(body.availableUntil).to.be.equal(item.availableUntil.toISOString());
 
@@ -150,7 +149,7 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(body.infos).to.be.equal(validBody.infos);
     expect(body.image).to.be.equal(validBody.image);
     expect(body.stock).to.be.equal(validBody.stockDifference + item.stock);
-    expect(body.left).to.be.equal(validBody.stockDifference + item.stock - 3); // Only three carts should count as bought
+    expect(body.left).to.be.equal(validBody.stockDifference + item.stock - 2); // Only 2 carts should count as bought
     expect(body.availableFrom).to.be.equal(validBody.availableFrom.toISOString());
     expect(body.availableUntil).to.be.equal(validBody.availableUntil.toISOString());
 

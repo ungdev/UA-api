@@ -15,41 +15,57 @@ import nanoid from '../utils/nanoid';
 import { fetchUserItems } from './item';
 import { fetchTeam, lockTeam, unlockTeam } from './team';
 import { fetchTournament } from './tournament';
+import { stripe } from '../utils/stripe';
 
-export const dropStale = () =>
-  database.$transaction([
+export const checkForExpiredCarts = async () => {
+  const carts = await database.cart.findMany({
+    where: {
+      createdAt: {
+        lt: new Date(Date.now() - env.api.cartLifespan * 1000),
+      },
+      transactionState: TransactionState.pending,
+    },
+  });
+  for (const cart of carts) {
+    if (cart.transactionId) {
+      await stripe.paymentIntents.cancel(cart.transactionId);
+    }
+  }
+  await database.$transaction([
+    database.cart.updateMany({
+      data: {
+        transactionState: TransactionState.expired,
+      },
+      where: {
+        id: { in: carts.map((item) => item.id) },
+      },
+    }),
     database.user.deleteMany({
       where: {
         type: UserType.attendant,
         cartItems: {
           some: {
             cart: {
-              transactionState: TransactionState.pending,
-              createdAt: {
-                lt: new Date(Date.now() - env.api.cartLifespan),
-              },
+              transactionState: TransactionState.expired,
             },
           },
         },
       },
     }),
-    database.cart.updateMany({
-      data: {
-        transactionState: TransactionState.stale,
-      },
-      where: {
-        createdAt: {
-          lt: new Date(Date.now() - env.api.cartLifespan),
-        },
-        transactionState: TransactionState.pending,
-      },
-    }),
   ]);
+};
 
 export const fetchCart = (cartId: string): Promise<Cart> =>
   database.cart.findUnique({
     where: {
       id: cartId,
+    },
+  });
+
+export const fetchCartFromTransactionId = (transactionId: string): Promise<Cart> =>
+  database.cart.findUnique({
+    where: {
+      transactionId,
     },
   });
 
@@ -112,14 +128,25 @@ export const createCart = (userId: string, cartItems: PrimitiveCartItem[]) =>
 
 export const updateCart = async (
   cartId: string,
-  transactionId: number,
-  transactionState: TransactionState,
+  {
+    transactionId,
+    transactionState,
+    processingAt,
+    succeededAt,
+  }: {
+    transactionId?: string | null;
+    transactionState?: TransactionState | null;
+    processingAt?: Date | null;
+    succeededAt?: Date | null;
+  } = {},
 ): Promise<DetailedCart> => {
   const cart = await database.cart.update({
     data: {
       transactionState,
       paidAt: new Date(),
       transactionId,
+      processingAt,
+      succeededAt,
     },
     where: {
       id: cartId,

@@ -17,7 +17,7 @@ export default [
     if (
       !bodyMethods.includes(request.method) ||
       !contentType ||
-      contentType === 'application/json' ||
+      contentType.includes('application/json') ||
       contentType.includes('multipart/form-data') ||
       contentType.toLowerCase() === 'application/json;charset=utf-8'
     ) {

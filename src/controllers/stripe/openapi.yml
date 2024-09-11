@@ -1,0 +1,65 @@
+/stripe/succeeded:
+  post:
+    summary: Webhook appelé par Stripe permettant de confirmer un paiement
+    description: Webhook appelé par Stripe une fois qu'un paiement est confirmé. L'événement attendu est 'payment_intent.succeeded', regardez la documentation Stripe pour plus d'informations.
+    tags:
+      - Stripe
+    responses:
+      200:
+        description: Le panier a été marqué comme payé.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                api:
+                  type: string
+                  example: 'ok'
+      401:
+        $ref: '#components/responses/401PleaseDontPlayWithStripeWebhooks'
+      404:
+        $ref: '#/components/responses/404CartNotFound'
+
+/stripe/canceled:
+  post:
+    summary: Webhook appelé par Stripe permettant de signaler qu'un paiement a été annulé
+    description: Webhook appelé par Stripe une fois qu'un paiement a été annulé.
+    tags:
+      - Stripe
+    responses:
+      200:
+        description: L'information a bien été prise en compte.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                api:
+                  type: string
+                  example: 'ok'
+      401:
+        $ref: '#components/responses/401PleaseDontPlayWithStripeWebhooks'
+      404:
+        $ref: '#/components/responses/404CartNotFound'
+
+/stripe/processing:
+  post:
+    summary: Webhook appelé par Stripe permettant de signaler qu'un paiement est en attente de la confirmation de la banque.
+    description: Webhook appelé par Stripe une fois qu'un paiement a été payé et est en attente de la confirmation de la banque.
+    tags:
+      - Stripe
+    responses:
+      200:
+        description: L'information a bien été prise en compte.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                api:
+                  type: string
+                  example: 'ok'
+      401:
+        $ref: '#components/responses/401PleaseDontPlayWithStripeWebhooks'
+      404:
+        $ref: '#/components/responses/404CartNotFound'

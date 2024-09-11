@@ -1,18 +1,18 @@
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
-import { Basket } from '../../services/etupay';
+import { TransactionState } from '@prisma/client';
 import { validateBody } from '../../middlewares/validation';
-import { createCart, dropStale } from '../../operations/carts';
+import { createCart, updateCart } from '../../operations/carts';
 import { fetchUserItems } from '../../operations/item';
 import { createAttendant, deleteUser, fetchUser, formatUser } from '../../operations/user';
-import { Cart, Error as ResponseError, PrimitiveCartItem, ItemCategory, UserType, UserAge } from '../../types';
-import { encodeToBase64, removeAccents } from '../../utils/helpers';
+import { Cart, Error as ResponseError, ItemCategory, UserType, UserAge, PrimitiveCartItemWithItem } from '../../types';
 import { badRequest, created, forbidden, gone, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
 import * as validators from '../../utils/validators';
 import { isShopAllowed } from '../../middlewares/settings';
 import { isAuthenticated } from '../../middlewares/authentication';
 import { fetchTournament } from '../../operations/tournament';
+import { stripe } from '../../utils/stripe';
 
 export interface PayBody {
   tickets: {
@@ -58,7 +58,6 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const dropOperation = dropStale();
       const { body } = request as { body: PayBody };
 
       const requestInfo = getRequestInfo(response);
@@ -67,7 +66,7 @@ export default [
 
       const items = await fetchUserItems(team, user);
 
-      const cartItems: PrimitiveCartItem[] = [];
+      const cartItems: PrimitiveCartItemWithItem[] = [];
 
       const tournament = team && (await fetchTournament(team.tournamentId));
 
@@ -97,7 +96,7 @@ export default [
 
         // Checks if the user has already paid
         if (ticketUser.hasPaid) {
-          return forbidden(response, ResponseError.AlreadyPaid);
+          return forbidden(response, ResponseError.PlayerAlreadyPaid);
         }
 
         // Checks if the buyer and the user are in the same team
@@ -128,7 +127,7 @@ export default [
 
         // Adds the item to the basket
         cartItems.push({
-          itemId,
+          item,
           quantity: 1,
           price: item.price,
           reducedPrice: item.reducedPrice,
@@ -160,13 +159,13 @@ export default [
         }
 
         // In case user asked for multiple discounts
-        if (supplement.itemId === 'discount-switch-ssbu') {
-          supplement.quantity = 1;
+        if (supplement.itemId === 'discount-switch-ssbu' && supplement.quantity !== 1) {
+          return forbidden(response, ResponseError.OnlyOneDiscountSSBU);
         }
 
         // Push the supplement to the basket
         cartItems.push({
-          itemId: supplement.itemId,
+          item: currentItem,
           quantity: supplement.quantity,
           price: items.find((item) => item.id === supplement.itemId).price,
           reducedPrice: items.find((item) => item.id === supplement.itemId).reducedPrice,
@@ -183,21 +182,11 @@ export default [
       // Calculate if each cart item is available
       const itemsWithStock = items.filter((item) => item.left !== undefined);
 
-      // Wait for sql delete query to end (if not already ended)
-      const [, { count: droppedCartsCount }] = await dropOperation;
-      // Check if rows (ie. carts) were updated
-      if (droppedCartsCount > 0) {
-        // Update fetched items
-        const refetchedItems = await fetchUserItems(team, user);
-        for (const item of itemsWithStock)
-          item.left = refetchedItems.find((fetchedItem) => fetchedItem.id === item.id).left;
-      }
-
       // Foreach item where there is a stock
       for (const item of itemsWithStock) {
         // Checks how many items the user has orders and takes account the quantity
         const cartItemsCount = cartItems.reduce((previous, cartItem) => {
-          if (cartItem.itemId === item.id) {
+          if (cartItem.item.id === item.id) {
             return previous + cartItem.quantity;
           }
 
@@ -212,14 +201,13 @@ export default [
 
       // Check availability of items
       for (const cartItem of cartItems) {
-        const item = items.find((pItem) => pItem.id === cartItem.itemId);
         // Checks if the item is available
-        if (item.availableFrom !== null && item.availableFrom > new Date()) {
+        if (cartItem.item.availableFrom !== null && cartItem.item.availableFrom > new Date()) {
           return gone(response, ResponseError.ItemNotAvailableYet);
         }
 
         // Checks if the item is not available anymore
-        if (item.availableUntil !== null && item.availableUntil < new Date()) {
+        if (cartItem.item.availableUntil !== null && cartItem.item.availableUntil < new Date()) {
           return badRequest(response, ResponseError.ItemNotAvailableAnymore);
         }
       }
@@ -236,50 +224,49 @@ export default [
             await createAttendant(user.id, body.tickets.attendant.firstname, body.tickets.attendant.lastname),
           );
 
+          const item = items.find((pItem) => pItem.id === 'ticket-attendant');
+
           // Add the item to the basket
           cartItems.push({
-            itemId: 'ticket-attendant',
+            item,
             quantity: 1,
-            price: items.find((item) => item.id === 'ticket-attendant').price,
-            reducedPrice: items.find((item) => item.id === 'ticket-attendant').reducedPrice,
+            price: item.price,
+            reducedPrice: item.reducedPrice,
             forUserId: user.attendantId,
           });
         }
 
         // Set the cart variable defined outside the try/catch block
-        cart = await createCart(user.id, cartItems);
+        cart = await createCart(
+          user.id,
+          cartItems.map((cartItem) => ({
+            ...cartItem,
+            itemId: cartItem.item.id,
+          })),
+        );
       } catch (error) {
-        const attendantTicket = cartItems.find((cartItem) => cartItem.itemId === 'ticket-attendant');
-        await deleteUser(attendantTicket.forUserId);
+        const attendantTicket = cartItems.find((cartItem) => cartItem.item.id === 'ticket-attendant');
+        if (attendantTicket) {
+          await deleteUser(attendantTicket.forUserId);
+        }
         return next(error);
       }
 
-      // Creates a etupay basket. The accents need to be removed as on the website they don't appear otherwise
-      // We also send as encoded data the cartId to be able to retreive it in the callback
-      const basket = new Basket(
-        'UTT Arena',
-        removeAccents(user.firstname),
-        removeAccents(user.lastname),
-        user.email,
-        'checkout',
-        encodeToBase64({ cartId: cart.id }),
+      // Verify cart price is not negative
+      const cartPrice = cartItems.reduce(
+        (previous, current) => previous + (current.reducedPrice ?? current.price) * current.quantity,
+        0,
       );
-
-      // Foreach cartitem
-      for (const cartItem of cartItems) {
-        // Finds the item associated with the cartitem
-        const item = items.find((findItem) => findItem.id === cartItem.itemId);
-
-        // Add the item to the etupay basket
-        basket.addItem(removeAccents(item.name), cartItem.reducedPrice ?? cartItem.price, cartItem.quantity);
-      }
-
-      if (basket.getPrice() < 0) {
+      if (cartPrice < 0) {
         return forbidden(response, ResponseError.BasketCannotBeNegative);
       }
 
-      // Returns a answer with the etupay url
-      return created(response, { url: basket.compute(), price: basket.getPrice() });
+      const paymentIntent = await stripe.paymentIntents.create({
+        currency: 'eur',
+        amount: cartPrice,
+      });
+      await updateCart(cart.id, { transactionId: paymentIntent.id, transactionState: TransactionState.pending });
+      return created(response, { checkoutSecret: paymentIntent.client_secret });
     } catch (error) {
       return next(error);
     }

@@ -1,6 +1,7 @@
 import database from '../services/database';
 import { Item, ItemCategory, RawItem, Team, TransactionState, User, UserType } from '../types';
 import { isPartnerSchool } from '../utils/helpers';
+import { checkForExpiredCarts } from './carts';
 
 export const formatItem = async (item: RawItem): Promise<Item> => {
   // Defines the left variable to undefined
@@ -34,6 +35,7 @@ export const formatItem = async (item: RawItem): Promise<Item> => {
 };
 
 export const fetchAllItems = async (): Promise<Item[]> => {
+  await checkForExpiredCarts();
   // fetches the items
   const items = await database.item.findMany({ orderBy: [{ position: 'asc' }] });
 
@@ -42,6 +44,7 @@ export const fetchAllItems = async (): Promise<Item[]> => {
 };
 
 export const fetchItem = async (id: string) => {
+  await checkForExpiredCarts();
   const item = await database.item.findUnique({ where: { id } });
   return formatItem(item);
 };
@@ -102,18 +105,33 @@ export const findAdminItem = async (itemId: string) => {
 };
 
 export const updateAdminItem = async (
-  itemId?: string,
-  name?: string,
-  category?: ItemCategory,
-  attribute?: string,
-  price?: number,
-  reducedPrice?: number,
-  infos?: string,
-  image?: string,
-  stockDifference?: number,
-  availableFrom?: Date,
-  availableUntil?: Date,
-  display?: boolean,
+
+  itemId: string,
+  {
+    name,
+    category,
+    attribute,
+    price,
+    reducedPrice,
+    infos,
+    image,
+    stockDifference,
+    availableFrom,
+    availableUntil,
+    display,
+  }: {
+    name?: string;
+    category?: ItemCategory;
+    attribute?: string;
+    price?: number;
+    reducedPrice?: number;
+    infos?: string;
+    image?: string;
+    stockDifference?: number;
+    availableFrom?: Date;
+    availableUntil?: Date;
+    display?: boolean;
+  } = {},
 ): Promise<Item> => {
   const newStock = stockDifference
     ? (
@@ -146,7 +164,7 @@ export const updateAdminItem = async (
       itemId: item.id,
       cart: {
         transactionState: {
-          in: [TransactionState.paid, TransactionState.pending, TransactionState.authorization],
+          in: [TransactionState.paid, TransactionState.pending],
         },
       },
     },
