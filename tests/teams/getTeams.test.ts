@@ -9,6 +9,7 @@ import { createFakeTeam, createFakeTournament } from '../utils';
 
 describe('GET /teams', () => {
   let tournament: Tournament;
+
   before(async () => {
     tournament = await createFakeTournament();
     await createFakeTeam({ tournament: tournament.id });

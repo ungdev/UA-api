@@ -56,6 +56,6 @@ export const ticketsGoal: MailGoal = {
       },
       include: { item: true, forUser: true },
     });
-    return Promise.all([generateTicket(cartItem)]);
+    return [await generateTicket(cartItem)];
   },
 };

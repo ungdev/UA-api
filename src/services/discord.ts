@@ -108,13 +108,11 @@ export const fetchDiscordUser = async (discordApiToken: DiscordToken) => {
 export const rateLimitedRequest = async <T>(handler: () => Promise<AxiosResponse<T>>): Promise<T> => {
   try {
     const response = await handler();
-
     if (Number(response.headers['x-ratelimit-remaining']) <= 2) {
       const resetAfter = Number(response.headers['x-ratelimit-reset-after']);
       logger.warn(`Wait ${resetAfter} seconds to avoid rate limit (success)`);
       await sleep(resetAfter);
     }
-
     return response.data;
   } catch (error) {
     if ((<AxiosError>error).response?.status === 429) {
@@ -134,7 +132,7 @@ export const deleteDiscordChannel = (channelId: string) =>
   rateLimitedRequest(() => bot.delete<DiscordChannel>(`channels/${channelId}`));
 
 export const deleteDiscordRole = (roleId: string) =>
-  rateLimitedRequest<{}>(() => bot.delete(`guilds/${env.discord.server}/roles/${roleId}`));
+  rateLimitedRequest<Record<string, never>>(() => bot.delete(`guilds/${env.discord.server}/roles/${roleId}`));
 
 /**
  * Create a discord role

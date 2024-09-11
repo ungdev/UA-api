@@ -7,7 +7,7 @@ import { badRequest, internalServerError } from '../utils/responses';
 // Global error handler
 export default [
   // Let Sentry handle the error to send it
-  Sentry.Handlers.errorHandler(),
+  Sentry.expressErrorHandler(),
 
   // The eslint disabling is important because the error argument can only be gotten in the 4 arguments function
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

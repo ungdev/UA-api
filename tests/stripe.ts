@@ -133,7 +133,7 @@ function listen() {
 
     // Get all products (paginated)
     // This can only happen in tests, it cannot be used to make ReDoS attacks
-    // eslint-disable-next-line security/detect-unsafe-regex
+
     .get(/\/products(\?((((starting_after=[^&]*)|(limit=\d+)|(active=true))&?)+))?$/)
     .reply((uri) => {
       const limit = Number.parseInt(uri.match(/limit=(\d+)/)?.[1]);
@@ -195,7 +195,7 @@ function listen() {
 
     // Get all prices (paginated)
     // This can only happen in tests, it cannot be used to make ReDoS attacks
-    // eslint-disable-next-line security/detect-unsafe-regex
+
     .get(/\/prices(\?((starting_after=[^&]*)|(limit=\d+))+&?)?$/)
     .reply((uri) => {
       const limit = Number.parseInt(uri.match(/limit=(\d+)/)?.[1]);
@@ -238,7 +238,7 @@ function listen() {
 
     // Get all coupons (paginated)
     // This can only happen in tests, it cannot be used to make ReDoS attacks
-    // eslint-disable-next-line security/detect-unsafe-regex
+
     .get(/\/coupons(\?((starting_after=[^&]*)|(limit=\d+))+&?)?$/)
     .reply((uri) => {
       const limit = Number.parseInt(uri.match(/limit=(\d+)/)?.[1]);
