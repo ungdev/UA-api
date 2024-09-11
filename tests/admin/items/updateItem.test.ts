@@ -21,7 +21,7 @@ describe('PATCH /admin/items/:itemId', () => {
     price: number;
     reducedPrice: number;
     infos: string;
-    image: string;
+    image: boolean;
     stockDifference: number;
     availableFrom: Date;
     availableUntil: Date;

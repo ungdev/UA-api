@@ -125,7 +125,7 @@ export const updateAdminItem = async (
     price?: number;
     reducedPrice?: number;
     infos?: string;
-    image?: string;
+    image?: boolean;
     stockDifference?: number;
     availableFrom?: Date;
     availableUntil?: Date;

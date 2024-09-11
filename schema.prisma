@@ -57,7 +57,7 @@ model Item {
   price          Int
   reducedPrice   Int?
   infos          String?      @db.VarChar(300)
-  image          String?
+  image          Boolean      @default(false)
   stock          Int?
   availableFrom  DateTime?
   availableUntil DateTime?

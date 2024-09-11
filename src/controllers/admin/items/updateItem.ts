@@ -18,7 +18,7 @@ export default [
       price: Joi.number().integer(),
       reducedPrice: Joi.number().integer(),
       infos: Joi.string(),
-      image: Joi.string(),
+      image: Joi.boolean(),
       stockDifference: Joi.number().integer(),
       availableFrom: Joi.date(),
       availableUntil: Joi.date(),
@@ -50,7 +50,7 @@ export default [
         price: number;
         reducedPrice: number;
         infos: string;
-        image: string;
+        image: boolean;
         stockDifference: number;
         availableFrom: Date;
         availableUntil: Date;
