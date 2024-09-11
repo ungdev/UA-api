@@ -58,6 +58,33 @@ describe('GET /items', () => {
     await request(app).get('/items').expect(500, { error: Error.InternalServerError });
   });
 
+  it('should not return the first item', async () => {
+    const items = await database.item.findMany();
+    const itemId = 'ticket-player';
+    await database.item.update({
+      where: {
+        id: itemId,
+      },
+      data: {
+        display: false,
+      },
+    });
+
+    const response = await request(app).get('/items').expect(200);
+
+    await database.item.update({
+      where: {
+        id: itemId,
+      },
+      data: {
+        display: true,
+      },
+    });
+    // without the "discount-switch-ssbu" item and the "ticket-player-ssbu", the "pc" (in rent category) and the 'ticket-player' item
+    expect(response.body).to.have.lengthOf(items.length - 4);
+    expect(response.body).not.to.have.deep.members([items[0]]);
+  });
+
   it('should return 200 with an array of items', async () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').expect(200);

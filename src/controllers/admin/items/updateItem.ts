@@ -14,14 +14,15 @@ export default [
     Joi.object({
       name: Joi.string(),
       category: Joi.string().valid(ItemCategory.rent, ItemCategory.supplement, ItemCategory.ticket),
-      attribute: Joi.string(),
+      attribute: Joi.string().allow(null),
       price: Joi.number().integer(),
       reducedPrice: Joi.number().integer(),
       infos: Joi.string(),
-      image: Joi.string(),
+      image: Joi.boolean(),
       stockDifference: Joi.number().integer(),
       availableFrom: Joi.date(),
       availableUntil: Joi.date(),
+      display: Joi.boolean(),
     }),
   ),
 
@@ -41,6 +42,7 @@ export default [
         stockDifference,
         availableFrom,
         availableUntil,
+        display,
       } = request.body as {
         name: string;
         category: ItemCategory;
@@ -48,10 +50,11 @@ export default [
         price: number;
         reducedPrice: number;
         infos: string;
-        image: string;
+        image: boolean;
         stockDifference: number;
         availableFrom: Date;
         availableUntil: Date;
+        display: boolean;
       };
 
       if (!oldItem) {
@@ -69,6 +72,7 @@ export default [
         stockDifference,
         availableFrom,
         availableUntil,
+        display,
       });
 
       return success(response, filterAdminItem(item));

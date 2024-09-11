@@ -117,6 +117,7 @@ export const updateAdminItem = async (
     stockDifference,
     availableFrom,
     availableUntil,
+    display,
   }: {
     name?: string;
     category?: ItemCategory;
@@ -124,10 +125,11 @@ export const updateAdminItem = async (
     price?: number;
     reducedPrice?: number;
     infos?: string;
-    image?: string;
+    image?: boolean;
     stockDifference?: number;
     availableFrom?: Date;
     availableUntil?: Date;
+    display?: boolean;
   } = {},
 ): Promise<Item> => {
   const newStock = stockDifference
@@ -152,6 +154,7 @@ export const updateAdminItem = async (
       stock: newStock,
       availableFrom,
       availableUntil,
+      display,
     },
     where: { id: itemId },
   });
