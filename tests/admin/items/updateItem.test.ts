@@ -54,7 +54,7 @@ describe('PATCH /admin/items/:itemId', () => {
       price: 2000,
       reducedPrice: 1500,
       infos: 'A big pack of miel pops for big families :)',
-      image: 'https://https://picsum.photos/200',
+      image: true,
       stockDifference: 18,
       availableFrom: new Date(Date.now()),
       availableUntil: new Date(Date.now() + 1000),
