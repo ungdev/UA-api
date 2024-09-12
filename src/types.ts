@@ -338,7 +338,7 @@ export const enum Error {
   CannotChangeType = 'Tu ne peux pas changer de type si tu as payé',
   NotSameType = "Les deux utilisateurs n'ont pas le même type",
   BasketCannotBeNegative = 'Le total du panier ne peut pas être négatif',
-  TeamMaxCoachReached = 'Une équipe ne peut pas avoir plus de deux coachs',
+  TeamMaxCoachReached = 'Une équipe ne peut pas avoir plus de coachs',
   AttendantNotAllowed = "Un majeur ne peut pas avoir d'accompagnateur",
   AttendantAlreadyRegistered = "Tu ne peux pas avoir plus d'un accompagnateur",
   CannotSpectate = 'Tu dois quitter ton équipe pour devenir spectateur',

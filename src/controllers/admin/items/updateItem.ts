@@ -16,12 +16,12 @@ export default [
       category: Joi.string().valid(ItemCategory.rent, ItemCategory.supplement, ItemCategory.ticket),
       attribute: Joi.string().allow(null),
       price: Joi.number().integer(),
-      reducedPrice: Joi.number().integer(),
-      infos: Joi.string(),
+      reducedPrice: Joi.number().integer().allow(null),
+      infos: Joi.string().allow(null),
       image: Joi.boolean(),
-      stockDifference: Joi.number().integer(),
-      availableFrom: Joi.date(),
-      availableUntil: Joi.date(),
+      stockDifference: Joi.number().integer().allow(null),
+      availableFrom: Joi.date().allow(null),
+      availableUntil: Joi.date().allow(null),
       display: Joi.boolean(),
     }),
   ),
@@ -43,19 +43,19 @@ export default [
         availableFrom,
         availableUntil,
         display,
-      } = request.body as {
+      } = request.body as Partial<{
         name: string;
         category: ItemCategory;
-        attribute: string;
+        attribute: string | null;
         price: number;
-        reducedPrice: number;
-        infos: string;
+        reducedPrice: number | null;
+        infos: string | null;
         image: boolean;
-        stockDifference: number;
-        availableFrom: Date;
-        availableUntil: Date;
+        stockDifference: number | null;
+        availableFrom: Date | null;
+        availableUntil: Date | null;
         display: boolean;
-      };
+      }>;
 
       if (!oldItem) {
         return notFound(response, Error.ItemNotFound);

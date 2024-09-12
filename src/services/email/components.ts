@@ -3,19 +3,19 @@ import type { Component } from './types';
 
 export const style = {
   text: {
-    color: '#202020',
+    color: '#29292A',
     font: 'Montserrat,Roboto,Arial,sans-serif',
   },
   title: {
-    color: '#FF414D',
+    color: '#2E82B7',
     font: 'Lexend,Roboto,Arial,sans-serif',
   },
   button: {
-    background: '#FF414D',
+    background: '#2E82B7',
     font: '#fff',
   },
   sep: {
-    color: '#FF414D',
+    color: '#2E82B7',
   },
 };
 

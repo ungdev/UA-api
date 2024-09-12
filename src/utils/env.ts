@@ -77,9 +77,9 @@ const env = {
       name: loadEnv('EMAIL_SENDER_NAME') || 'UTT Arena',
       address: loadEnv('EMAIL_SENDER_ADDRESS') || 'arena@utt.fr',
     },
-    gmail: loadEnv('GMAIL') === 'true' || false,
-    username: loadEnv('GMAIL_USERNAME') || '',
-    password: loadEnv('GMAIL_PASSWORD') || '',
+    gmail: loadEnv('GMAIL') === 'true',
+    username: loadEnv('GMAIL_USERNAME') || null,
+    password: loadEnv('GMAIL_PASSWORD') || null,
     partners: ['utt.fr', 'utc.fr', 'utbm.fr'],
     maxMailsPerBatch: loadIntEnv('MAX_MAIL_PER_BATCH') || 100,
   },
@@ -173,7 +173,7 @@ const checkConfiguration = (config: object, parentKey = 'env') => {
     }
 
     // If the variable is an object, checks below
-    if (typeof value === 'object') {
+    if (typeof value === 'object' && value !== null) {
       checkConfiguration(value, currentKey);
     }
 

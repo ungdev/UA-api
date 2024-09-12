@@ -99,7 +99,7 @@
     "typescript": "^5.5.4"
   },
   "scripts": {
-    "postinstall": "husky install",
+    "postinstall": "husky",
     "dev": "ts-node-dev --no-notify --exit-child src/server.ts",
     "fake": "ts-node tests/fake.ts",
     "build": "tsc",
