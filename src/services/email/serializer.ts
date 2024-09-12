@@ -168,7 +168,7 @@ export const generateValidationEmail = (user: Omit<RawUser, 'permissions'>) =>
           [
             {
               name: 'FAQ',
-              location: `${env.front.website}/faq`,
+              location: `${env.front.website}/help`,
             },
             {
               name: 'Rejoindre le serveur Discord',
