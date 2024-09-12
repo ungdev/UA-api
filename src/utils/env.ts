@@ -173,7 +173,7 @@ const checkConfiguration = (config: object, parentKey = 'env') => {
     }
 
     // If the variable is an object, checks below
-    if (typeof value === 'object') {
+    if (typeof value === 'object' && value !== null) {
       checkConfiguration(value, currentKey);
     }
 
