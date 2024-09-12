@@ -14,7 +14,7 @@ export default [
     try {
       const { cart } = response.locals;
 
-      if (cart.transactionState !== TransactionState.processing) {
+      if (![TransactionState.processing, TransactionState.pending].includes(cart.transactionState)) {
         logger.warn(
           `A transaction with state ${cart.transactionState} has received the webhook 'payment_intent.succeeded' by Stripe.`,
         );

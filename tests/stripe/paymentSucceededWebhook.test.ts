@@ -63,20 +63,23 @@ describe('POST /stripe/succeeded', () => {
       .send(generateCart(paymentIntent.id))
       .expect(401, { error: Error.PleaseDontPlayWithStripeWebhooks })); // Given status is succeeded, real status is requires_action.
 
-  it('should change the transactionState of the cart from processing to paid', async () => {
-    paymentIntent.status = 'succeeded';
-    await updateCart(cart.id, { transactionState: TransactionState.processing });
-    await request(app).post('/stripe/succeeded').send(generateCart(paymentIntent.id)).expect(200, { api: 'ok' });
-    const databaseCart = await database.cart.findUnique({ where: { id: cart.id } });
-    expect(databaseCart.transactionState).to.equal(TransactionState.paid);
+  describe('test for initial transactionState = `processing` | `pending`', () => {
+    for (const transactionState of [TransactionState.processing, TransactionState.pending]) {
+      it(`should change the transactionState of the cart from ${transactionState} to paid`, async () => {
+        paymentIntent.status = 'succeeded';
+        await updateCart(cart.id, { transactionState });
+        await request(app).post('/stripe/succeeded').send(generateCart(paymentIntent.id)).expect(200, { api: 'ok' });
+        const databaseCart = await database.cart.findUnique({ where: { id: cart.id } });
+        expect(databaseCart.transactionState).to.equal(TransactionState.paid);
+      });
+    }
   });
 
-  describe('test for initial transactionState = `paid` | `expired` | `refunded` | `pending` | `canceled`', () => {
+  describe('test for initial transactionState = `paid` | `expired` | `refunded` | `canceled`', () => {
     for (const transactionState of [
       TransactionState.paid,
       TransactionState.expired,
       TransactionState.refunded,
-      TransactionState.pending,
       TransactionState.canceled,
     ]) {
       it(`should not change the transactionState of the cart as it already equals ${transactionState}`, async () => {
