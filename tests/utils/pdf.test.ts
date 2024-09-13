@@ -1,7 +1,6 @@
-/* eslint-disable security/detect-non-literal-fs-filename */
 import fs from 'fs/promises';
 import { UserType } from '@prisma/client';
-import { createFakeTeam, createFakeUser } from '../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../utils';
 import { createCart, updateCart } from '../../src/operations/carts';
 import { generateTicket } from '../../src/utils/ticket';
 import { getCaptain } from '../../src/utils/teams';
@@ -16,37 +15,41 @@ describe('Tests the PDF utils', () => {
     await database.cart.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   let placeId = 0;
-  for (const tournamentId of ['lol', 'ssbu', 'cs2', 'rl', 'osu', 'tft', 'open', 'pokemon']) {
-    it(`should generate a PDF ticket for ${tournamentId}`, async () => {
-      // Create a fake user and add it in a random team
-      const team = await createFakeTeam({ tournament: tournamentId as string });
-      const user = getCaptain(team);
 
-      await updateAdminUser(user, {
-        place: `A0${++placeId}`,
-      });
+  it(`should generate a PDF ticket for a player`, async () => {
+    // Create a fake user and add it in a random team
+    const tournament = await createFakeTournament();
+    const team = await createFakeTeam({ tournament: tournament.id });
+    const user = getCaptain(team);
 
-      const createdCart = await createCart(user.id, [
-        {
-          itemId: 'ticket-player',
-          quantity: 1,
-          price: (await fetchAllItems()).find((item) => item.id === 'ticket-player')!.price,
-          forUserId: user.id,
-        },
-      ]);
-
-      const detailedCart = await updateCart(createdCart.id, 123, TransactionState.paid);
-
-      const cartItem = detailedCart.cartItems[0];
-
-      const pdf = await generateTicket(cartItem);
-
-      await fs.writeFile(`artifacts/${tournamentId}.pdf`, pdf.content);
+    await updateAdminUser(user, {
+      place: `A0${++placeId}`,
     });
-  }
+
+    const createdCart = await createCart(user.id, [
+      {
+        itemId: 'ticket-player',
+        quantity: 1,
+        price: (await fetchAllItems()).find((item) => item.id === 'ticket-player')!.price,
+        forUserId: user.id,
+      },
+    ]);
+
+    const detailedCart = await updateCart(createdCart.id, {
+      transactionId: '123',
+      transactionState: TransactionState.paid,
+    });
+
+    const cartItem = detailedCart.cartItems[0];
+
+    const pdf = await generateTicket(cartItem);
+
+    await fs.writeFile(`artifacts/${tournament.id}.pdf`, pdf.content);
+  });
 
   it(`should generate a PDF ticket for a non team user`, async () => {
     // Create a fake user and add it in a random team
@@ -61,7 +64,10 @@ describe('Tests the PDF utils', () => {
       },
     ]);
 
-    const detailedCart = await updateCart(createdCart.id, 123, TransactionState.paid);
+    const detailedCart = await updateCart(createdCart.id, {
+      transactionId: '124',
+      transactionState: TransactionState.paid,
+    });
 
     const cartItem = detailedCart.cartItems[0];
 

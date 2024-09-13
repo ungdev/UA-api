@@ -4,12 +4,13 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeTeam, createFakeUser } from '../utils';
+import { Error, Team, Tournament, User, UserType } from '../../src/types';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { getCaptain } from '../../src/utils/teams';
 
 describe('PUT /teams/current/captain/:userId', () => {
+  let tournament: Tournament;
   let captain: User;
   let team: Team;
   let captainToken: string;
@@ -17,7 +18,8 @@ describe('PUT /teams/current/captain/:userId', () => {
   let futureCaptain: User;
 
   before(async () => {
-    team = await createFakeTeam({ members: 2 });
+    tournament = await createFakeTournament({ playersPerTeam: 2, coachesPerTeam: 1 });
+    team = await createFakeTeam({ members: 2, tournament: tournament.id });
 
     captain = getCaptain(team);
     captainToken = generateToken(captain);
@@ -29,6 +31,7 @@ describe('PUT /teams/current/captain/:userId', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should error as the token is missing', async () => {
@@ -43,7 +46,7 @@ describe('PUT /teams/current/captain/:userId', () => {
   });
 
   it('should error as the user is in another team', async () => {
-    const otherTeam = await createFakeTeam({ members: 2 });
+    const otherTeam = await createFakeTeam({ members: 2, tournament: tournament.id });
     const otherMember = otherTeam.players.find((player) => player.id !== otherTeam.captainId);
 
     await request(app)

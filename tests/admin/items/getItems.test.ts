@@ -5,7 +5,8 @@ import { createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Item, Permission, User, UserType } from '../../../src/types';
 import { generateToken } from '../../../src/utils/users';
-import { fetchAllItems } from '../../../src/operations/item';
+import * as itemOperations from '../../../src/operations/item';
+import { sandbox } from '../../setup';
 
 describe('GET /admin/items', () => {
   let user: User;
@@ -14,7 +15,7 @@ describe('GET /admin/items', () => {
   let adminToken: string;
 
   before(async () => {
-    items = await fetchAllItems();
+    items = await itemOperations.fetchAllItems();
     user = await createFakeUser({ type: UserType.player });
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
@@ -37,12 +38,41 @@ describe('GET /admin/items', () => {
       .expect(403, { error: Error.NoPermission });
   });
 
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(itemOperations, 'fetchAllItems').throws('Unexpected error');
+
+    await request(app)
+      .get(`/admin/items`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(500, { error: Error.InternalServerError });
+  });
+
   it('should return items list with proper stock and left value', async () => {
+    await database.item.update({
+      where: {
+        id: items[0].id,
+      },
+      data: {
+        display: false,
+      },
+    });
+
     const { body } = await request(app).get(`/admin/items`).set('Authorization', `Bearer ${adminToken}`).expect(200);
 
+    expect(body).to.have.lengthOf(items.length);
+
     for (const responseItem of body) {
-      expect(responseItem.left).to.be.equal(items.find((item) => item.name === responseItem.name).left);
-      expect(responseItem.stock).to.be.equal(items.find((item) => item.name === responseItem.name).stock);
+      expect(responseItem.left).to.be.equal(items.find((item) => item.name === responseItem.name)!.left);
+      expect(responseItem.stock).to.be.equal(items.find((item) => item.name === responseItem.name)!.stock);
     }
+
+    await database.item.update({
+      where: {
+        id: items[0].id,
+      },
+      data: {
+        display: true,
+      },
+    });
   });
 });

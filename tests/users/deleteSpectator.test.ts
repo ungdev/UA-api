@@ -53,7 +53,7 @@ describe('DELETE /users/current/spectate', () => {
       .delete(`/users/current/spectate`)
       .send()
       .set('Authorization', `Bearer ${paidToken}`)
-      .expect(403, { error: Error.AlreadyPaid });
+      .expect(403, { error: Error.PlayerAlreadyPaid });
   });
 
   it('should return the new spectator user', async () => {

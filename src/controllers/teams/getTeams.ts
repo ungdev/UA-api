@@ -5,6 +5,8 @@ import { fetchTeams } from '../../operations/team';
 import { filterTeamRestricted } from '../../utils/filters';
 import { success } from '../../utils/responses';
 import * as validators from '../../utils/validators';
+import { fetchTournament } from '../../operations/tournament';
+import { Error } from '../../types';
 
 export default [
   // Middlewares
@@ -23,6 +25,10 @@ export default [
         locked: string;
       };
       const lockedCasted = Boolean(locked);
+
+      if (!(await fetchTournament(tournamentId))) {
+        return response.status(404).json({ error: Error.TournamentNotFound });
+      }
 
       const teams = await fetchTeams(tournamentId);
 

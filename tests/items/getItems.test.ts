@@ -6,7 +6,7 @@ import * as itemOperations from '../../src/operations/item';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
 import { Error, User, Team, TransactionState, Cart, Item } from '../../src/types';
-import { createFakeTeam } from '../utils';
+import { createFakeTeam, createFakeTournament } from '../utils';
 import { getCaptain } from '../../src/utils/teams';
 import { generateToken } from '../../src/utils/users';
 
@@ -23,13 +23,15 @@ describe('GET /items', () => {
   let thirdCaptainCart: Cart;
 
   before(async () => {
+    const tournament = await createFakeTournament();
+    await createFakeTournament({ id: 'ssbu' });
     // This user should have the ssbu discount
     team = await createFakeTeam({ tournament: 'ssbu' });
     captain = getCaptain(team);
     captainToken = generateToken(captain);
 
     // This user shouldn't have the ssbu discount
-    otherTeam = await createFakeTeam({ tournament: 'lol' });
+    otherTeam = await createFakeTeam({ tournament: tournament.id });
     otherCaptain = getCaptain(otherTeam);
     otherCaptainToken = generateToken(otherCaptain);
 
@@ -47,12 +49,40 @@ describe('GET /items', () => {
     await database.cart.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail with an internal server error', async () => {
     sandbox.stub(itemOperations, 'fetchAllItems').throws('Unexpected error');
 
     await request(app).get('/items').expect(500, { error: Error.InternalServerError });
+  });
+
+  it('should not return the first item', async () => {
+    const items = await database.item.findMany();
+    const itemId = 'ticket-player';
+    await database.item.update({
+      where: {
+        id: itemId,
+      },
+      data: {
+        display: false,
+      },
+    });
+
+    const response = await request(app).get('/items').expect(200);
+
+    await database.item.update({
+      where: {
+        id: itemId,
+      },
+      data: {
+        display: true,
+      },
+    });
+    // without the "discount-switch-ssbu" item and the "ticket-player-ssbu", the "pc" (in rent category) and the 'ticket-player' item
+    expect(response.body).to.have.lengthOf(items.length - 4);
+    expect(response.body).not.to.have.deep.members([items[0]]);
   });
 
   it('should return 200 with an array of items', async () => {
@@ -72,7 +102,10 @@ describe('GET /items', () => {
   });
 
   it(`should return 200 with an array of items with the "discount-switch-ssbu" and a quantity of -1 item because user has a pending cart containing it`, async () => {
-    await cartOperations.updateCart(thirdCaptainCart.id, 123, TransactionState.pending);
+    await cartOperations.updateCart(thirdCaptainCart.id, {
+      transactionId: '123',
+      transactionState: TransactionState.pending,
+    });
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${thirdCaptainToken}`).expect(200);
 
@@ -82,7 +115,10 @@ describe('GET /items', () => {
   });
 
   it(`should return 200 with an array of items without the "discount-switch-ssbu" item because user has a paid cart containing it`, async () => {
-    await cartOperations.updateCart(thirdCaptainCart.id, 123, TransactionState.paid);
+    await cartOperations.updateCart(thirdCaptainCart.id, {
+      transactionId: '123',
+      transactionState: TransactionState.paid,
+    });
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${thirdCaptainToken}`).expect(200);
 
@@ -91,15 +127,10 @@ describe('GET /items', () => {
   });
 
   describe('should return 200 with an array of items with the "discount-switch-ssbu" item because user has a cart containing it, but it was not paid nor it is pending', () => {
-    for (const transactionState of [
-      TransactionState.canceled,
-      TransactionState.refunded,
-      TransactionState.refused,
-      TransactionState.stale,
-    ]) {
+    for (const transactionState of [TransactionState.refunded, TransactionState.expired]) {
       it(`should return 200 with array of items with the "discount-switch-ssbu" item because user has a cart containing it, but it was ${transactionState}`, async () => {
         // update cart's transactionState
-        await cartOperations.updateCart(thirdCaptainCart.id, 123, transactionState);
+        await cartOperations.updateCart(thirdCaptainCart.id, { transactionId: '123', transactionState });
         const items = await database.item.findMany();
         const response = await request(app)
           .get('/items')

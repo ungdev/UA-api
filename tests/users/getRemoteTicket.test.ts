@@ -6,7 +6,7 @@ import * as userOperations from '../../src/operations/user';
 import * as itemOperations from '../../src/operations/item';
 import database from '../../src/services/database';
 import { Error, User, Team, Item } from '../../src/types';
-import { createFakeTeam, createFakeUser } from '../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { fetchUserItems } from '../../src/operations/item';
 import { filterItem } from '../../src/utils/filters';
@@ -19,7 +19,8 @@ describe('GET /users/:userId/ticket', () => {
   let remotePlayer: User;
 
   before(async () => {
-    team = await createFakeTeam({ members: 2 });
+    const tournament = await createFakeTournament();
+    team = await createFakeTeam({ members: 2, tournament: tournament.id });
     [user, remotePlayer] = team.players;
     token = generateToken(user);
   });
@@ -30,6 +31,7 @@ describe('GET /users/:userId/ticket', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail because the user is not authenticated', async () => {
@@ -96,6 +98,6 @@ describe('GET /users/:userId/ticket', () => {
     await request(app)
       .get(`/users/${remotePlayer.id}/ticket`)
       .set('Authorization', `Bearer ${token}`)
-      .expect(403, { error: Error.AlreadyPaid });
+      .expect(403, { error: Error.PlayerAlreadyPaid });
   });
 });

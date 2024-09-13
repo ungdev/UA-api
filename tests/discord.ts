@@ -287,7 +287,7 @@ const listen = () => {
       201,
       <DiscordChannel>{
         ...(<DiscordCreateChannelRequest>body),
-        id: generateFakeDiscordId(),
+        id: createChannel(),
       },
       computeRateLimitHeader(),
     ])

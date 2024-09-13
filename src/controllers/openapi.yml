@@ -33,8 +33,8 @@ tags:
     description: Routes d'administration
   - name: Authentication
     description: Routes d'authentification
-  - name: Etupay
-    description: Routes de callback pour Etupay
+  - name: Stripe
+    description: Routes de webhook pour Stripe
   - name: Discord
     description: Routes pour associer son compte discord à son compte UA
   - name: Items
@@ -49,6 +49,8 @@ tags:
     description: Routes liées aux utilisateurs
   - name: Commissions
     description: Routes liées aux commissions
+  - name: Partners
+    description: Routes liées aux partenaires
 
 components:
   securitySchemes:
@@ -757,7 +759,6 @@ components:
           example: 2
         cashprize:
           type: integer
-          nullable: true
         cashprizeDetails:
           type: string
           nullable: true
@@ -825,6 +826,16 @@ components:
         color:
           type: string
         masterCommission:
+          type: string
+
+    Caster:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        tournamentId:
           type: string
 
   responses:

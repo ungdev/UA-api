@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 import { genSalt, hash } from 'bcryptjs';
 import { ItemCategory, RoleInCommission } from '@prisma/client';
 import sharp from 'sharp';
+import { assert } from 'chai';
 import { fetchUser } from '../src/operations/user';
 import { Permission, RawUser, User, UserAge, UserType, TransactionState } from '../src/types';
 import { fetchTeam } from '../src/operations/team';
@@ -126,19 +127,20 @@ export const createFakeUser = async (userData: FakeUserData = {}): Promise<User>
  */
 export const createFakeTeam = async ({
   members = 1,
-  tournament = 'lol',
+  tournament,
   paid = false,
   locked = false,
   name = faker.internet.userName() + faker.number.int(),
   userPassword,
 }: {
   members?: number;
-  tournament?: string;
+  tournament: string;
   paid?: boolean;
   locked?: boolean;
   name?: string;
   userPassword?: string;
-} = {}) => {
+}) => {
+  assert(members >= 1, 'Cannot create a team with less than 1 member');
   const salt = genSalt(env.bcrypt.rounds);
   const [captainData, ...memberData] = await Promise.all(
     // eslint-disable-next-line unicorn/no-new-array
@@ -171,7 +173,7 @@ export const createFakeTeam = async ({
   });
 
   logger.verbose(`Created team ${team.name}`);
-  return fetchTeam(team.id);
+  return fetchTeam(team.id)!;
 };
 
 export const createFakePartner = async ({
@@ -203,20 +205,27 @@ export const createFakePartner = async ({
 };
 
 export const createFakeTournament = async ({
-  id,
-  name,
-  playersPerTeam,
-  coachesPerTeam,
-  maxTeams,
+  id = nanoid(),
+  name = faker.word.noun(),
+  playersPerTeam = 1,
+  coachesPerTeam = 0,
+  maxTeams = 1,
 }: {
-  id: string;
-  name: string;
-  playersPerTeam: number;
-  coachesPerTeam: number;
-  maxTeams: number;
-}) => {
+  id?: string;
+  name?: string;
+  playersPerTeam?: number;
+  coachesPerTeam?: number;
+  maxTeams?: number;
+} = {}) => {
   await database.tournament.create({
-    data: { id, name, maxPlayers: playersPerTeam * maxTeams, playersPerTeam, coachesPerTeam },
+    data: {
+      id,
+      name,
+      maxPlayers: playersPerTeam * maxTeams,
+      playersPerTeam,
+      coachesPerTeam,
+      discordRoleId: discord.registerRole(),
+    },
   });
   logger.verbose(`Created tournament ${name}`);
   return fetchTournament(id);
@@ -252,7 +261,7 @@ export const createFakeCart = ({
       id: nanoid(),
       userId,
       transactionState,
-      transactionId: 123,
+      transactionId: faker.string.alpha({ length: 12 }),
       cartItems: {
         createMany: {
           data: items.map(({ itemId, quantity, price }) => ({

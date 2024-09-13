@@ -1,44 +1,52 @@
 import database from '../services/database';
-import { Item, ItemCategory, Team, TransactionState, User, UserType } from '../types';
+import { Item, ItemCategory, RawItem, Team, TransactionState, User, UserType } from '../types';
 import { isPartnerSchool } from '../utils/helpers';
+import { checkForExpiredCarts } from './carts';
+
+export const formatItem = async (item: RawItem): Promise<Item> => {
+  // Defines the left variable to undefined
+  let left;
+
+  // If the item contains stocks, computes the left variables
+  if (typeof item.stock === 'number') {
+    // Fetches all the cart items related to the item
+    const cartItems = await database.cartItem.findMany({
+      where: {
+        itemId: item.id,
+        cart: {
+          transactionState: {
+            in: [TransactionState.paid, TransactionState.pending],
+          },
+        },
+      },
+    });
+
+    // Calculates how many items were ordered by adding all the quantity ordered
+    const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
+
+    // Returns the stock minus the count. The max 0 is used in case of negative number, which should never happen
+    left = Math.max(item.stock - count, 0);
+  }
+
+  return {
+    ...item,
+    left,
+  };
+};
 
 export const fetchAllItems = async (): Promise<Item[]> => {
+  await checkForExpiredCarts();
   // fetches the items
   const items = await database.item.findMany({ orderBy: [{ position: 'asc' }] });
 
   // Add a left property which tells how many items are there left
-  return Promise.all(
-    items.map(async (item): Promise<Item> => {
-      // Defines the left variable to undefined
-      let left;
+  return Promise.all(items.map(formatItem));
+};
 
-      // If the item contains stocks, computes the left variables
-      if (typeof item.stock === 'number') {
-        // Fetches all the cart items related to the item
-        const cartItems = await database.cartItem.findMany({
-          where: {
-            itemId: item.id,
-            cart: {
-              transactionState: {
-                in: [TransactionState.paid, TransactionState.pending],
-              },
-            },
-          },
-        });
-
-        // Calculates how many items were ordered by adding all the quantity ordered
-        const count = cartItems.reduce((previous, current) => previous + current.quantity, 0);
-
-        // Returns the stock minus the count. The max 0 is used in case of negative number, which should never happen
-        left = Math.max(item.stock - count, 0);
-      }
-
-      return {
-        ...item,
-        left,
-      };
-    }),
-  );
+export const fetchItem = async (id: string) => {
+  await checkForExpiredCarts();
+  const item = await database.item.findUnique({ where: { id } });
+  return formatItem(item);
 };
 
 export const fetchUserItems = async (team?: Team, user?: User) => {
@@ -97,17 +105,32 @@ export const findAdminItem = async (itemId: string) => {
 };
 
 export const updateAdminItem = async (
-  itemId?: string,
-  name?: string,
-  category?: ItemCategory,
-  attribute?: string,
-  price?: number,
-  reducedPrice?: number,
-  infos?: string,
-  image?: string,
-  stockDifference?: number,
-  availableFrom?: Date,
-  availableUntil?: Date,
+  itemId: string,
+  {
+    name,
+    category,
+    attribute,
+    price,
+    reducedPrice,
+    infos,
+    image,
+    stockDifference,
+    availableFrom,
+    availableUntil,
+    display,
+  }: {
+    name?: string;
+    category?: ItemCategory;
+    attribute?: string;
+    price?: number;
+    reducedPrice?: number;
+    infos?: string;
+    image?: boolean;
+    stockDifference?: number;
+    availableFrom?: Date;
+    availableUntil?: Date;
+    display?: boolean;
+  } = {},
 ): Promise<Item> => {
   const newStock = stockDifference
     ? (
@@ -131,6 +154,7 @@ export const updateAdminItem = async (
       stock: newStock,
       availableFrom,
       availableUntil,
+      display,
     },
     where: { id: itemId },
   });
@@ -139,7 +163,7 @@ export const updateAdminItem = async (
       itemId: item.id,
       cart: {
         transactionState: {
-          in: [TransactionState.paid, TransactionState.pending, TransactionState.authorization],
+          in: [TransactionState.paid, TransactionState.pending],
         },
       },
     },

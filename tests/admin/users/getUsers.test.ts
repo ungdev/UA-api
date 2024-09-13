@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../../../src/app';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Error, Permission, Team, User, UserType } from '../../../src/types';
+import { Error, Permission, Team, Tournament, User, UserType } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
@@ -13,6 +13,7 @@ describe('GET /admin/users', () => {
   let user: User;
   let admin: User;
   let adminToken: string;
+  let tournament: Tournament;
 
   before(async () => {
     user = await createFakeUser({
@@ -32,6 +33,7 @@ describe('GET /admin/users', () => {
       orgaRoles: [{ role: 'respo', commission: 'dev' }],
     });
     adminToken = generateToken(admin);
+    tournament = await createFakeTournament({ maxTeams: 1, playersPerTeam: 1 });
     // We need a coach
     await createFakeUser({ type: UserType.coach });
     // We also need an orga, but not admin
@@ -44,6 +46,7 @@ describe('GET /admin/users', () => {
     await database.orgaRole.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>
@@ -224,7 +227,7 @@ describe('GET /admin/users', () => {
 
   describe('Test team field', () => {
     it('should fetch only the user in a team', async () => {
-      const team = await createFakeTeam({ members: 1, name: 'bonjour' });
+      const team = await createFakeTeam({ members: 1, name: 'bonjour', tournament: tournament.id });
 
       for (const search of ['bon', 'bonjour']) {
         const { body } = await request(app)
@@ -259,12 +262,14 @@ describe('GET /admin/users', () => {
         members: 1,
         paid: true,
         locked: true,
+        tournament: tournament.id,
       });
       [lockedTeamMember] = team.players;
       const unlockedTeam = await createFakeTeam({
         members: 1,
         paid: true,
         locked: false,
+        tournament: tournament.id,
       });
       [unlockedTeamMember] = unlockedTeam.players;
     });
@@ -336,7 +341,7 @@ describe('GET /admin/users', () => {
     let team: Team;
 
     before(async () => {
-      team = await createFakeTeam({ members: 1, name: 'bonjour', tournament: 'lol' });
+      team = await createFakeTeam({ members: 1, name: 'bonjour', tournament: tournament.id });
     });
 
     after(async () => {
@@ -346,7 +351,7 @@ describe('GET /admin/users', () => {
 
     it('should test the tournament field', async () => {
       const { body } = await request(app)
-        .get(`/admin/users?tournament=lol`)
+        .get(`/admin/users?tournament=${tournament.id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
       expect(body.users.length).to.be.equal(1);

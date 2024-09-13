@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { expect } from 'chai';
 import app from '../../../src/app';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Cart, Error, Permission, User, UserType, TransactionState } from '../../../src/types';
 import * as userOperations from '../../../src/operations/user';
@@ -19,9 +19,8 @@ describe('POST /admin/scan/:qrcode', () => {
   const validBody: { qrcode?: string } = {};
 
   before(async () => {
-    const team = await createFakeTeam({
-      members: 1,
-    });
+    const tournament = await createFakeTournament();
+    const team = await createFakeTeam({ members: 1, tournament: tournament.id });
     [user] = team.players;
     admin = await createFakeUser({ permissions: [Permission.entry], type: UserType.player });
     adminToken = generateToken(admin);
@@ -37,6 +36,7 @@ describe('POST /admin/scan/:qrcode', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>

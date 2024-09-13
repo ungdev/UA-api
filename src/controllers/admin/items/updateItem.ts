@@ -14,20 +14,23 @@ export default [
     Joi.object({
       name: Joi.string(),
       category: Joi.string().valid(ItemCategory.rent, ItemCategory.supplement, ItemCategory.ticket),
-      attribute: Joi.string(),
+      attribute: Joi.string().allow(null),
       price: Joi.number().integer(),
-      reducedPrice: Joi.number().integer(),
-      infos: Joi.string(),
-      image: Joi.string(),
-      stockDifference: Joi.number().integer(),
-      availableFrom: Joi.date(),
-      availableUntil: Joi.date(),
+      reducedPrice: Joi.number().integer().allow(null),
+      infos: Joi.string().allow(null),
+      image: Joi.boolean(),
+      stockDifference: Joi.number().integer().allow(null),
+      availableFrom: Joi.date().allow(null),
+      availableUntil: Joi.date().allow(null),
+      display: Joi.boolean(),
     }),
   ),
 
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
+      const oldItem = (await fetchAllItems()).find((item) => item.id === request.params.itemId);
+
       const {
         name,
         category,
@@ -39,25 +42,26 @@ export default [
         stockDifference,
         availableFrom,
         availableUntil,
-      } = request.body as {
+        display,
+      } = request.body as Partial<{
         name: string;
         category: ItemCategory;
-        attribute: string;
+        attribute: string | null;
         price: number;
-        reducedPrice: number;
-        infos: string;
-        image: string;
-        stockDifference: number;
-        availableFrom: Date;
-        availableUntil: Date;
-      };
+        reducedPrice: number | null;
+        infos: string | null;
+        image: boolean;
+        stockDifference: number | null;
+        availableFrom: Date | null;
+        availableUntil: Date | null;
+        display: boolean;
+      }>;
 
-      if (!(await fetchAllItems()).some((item) => item.id === request.params.itemId)) {
+      if (!oldItem) {
         return notFound(response, Error.ItemNotFound);
       }
 
-      const item = await updateAdminItem(
-        request.params.itemId,
+      const item = await updateAdminItem(request.params.itemId, {
         name,
         category,
         attribute,
@@ -68,7 +72,8 @@ export default [
         stockDifference,
         availableFrom,
         availableUntil,
-      );
+        display,
+      });
 
       return success(response, filterAdminItem(item));
     } catch (error) {

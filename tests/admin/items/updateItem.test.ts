@@ -6,6 +6,8 @@ import { createFakeCart, createFakeItem, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
 import { generateToken } from '../../../src/utils/users';
+import { sandbox } from '../../setup';
+import * as itemOperations from '../../../src/operations/item';
 
 describe('PATCH /admin/items/:itemId', () => {
   let user: User;
@@ -19,7 +21,7 @@ describe('PATCH /admin/items/:itemId', () => {
     price: number;
     reducedPrice: number;
     infos: string;
-    image: string;
+    image: boolean;
     stockDifference: number;
     availableFrom: Date;
     availableUntil: Date;
@@ -35,13 +37,12 @@ describe('PATCH /admin/items/:itemId', () => {
     user = await createFakeUser({ type: UserType.player });
     // Buy this item. Buy it once per transaction state, to test them all
     await Promise.all(
-      (['paid', 'pending', 'authorization', 'refused', 'canceled', 'refunded', 'stale'] as TransactionState[]).map(
-        (transactionState) =>
-          createFakeCart({
-            userId: user.id,
-            transactionState,
-            items: [{ itemId: item.id, price: item.price, quantity: 1 }],
-          }),
+      (['paid', 'pending', 'refunded', 'expired'] as TransactionState[]).map((transactionState) =>
+        createFakeCart({
+          userId: user.id,
+          transactionState,
+          items: [{ itemId: item.id, price: item.price, quantity: 1 }],
+        }),
       ),
     );
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
@@ -53,7 +54,7 @@ describe('PATCH /admin/items/:itemId', () => {
       price: 2000,
       reducedPrice: 1500,
       infos: 'A big pack of miel pops for big families :)',
-      image: 'https://https://picsum.photos/200',
+      image: true,
       stockDifference: 18,
       availableFrom: new Date(Date.now()),
       availableUntil: new Date(Date.now() + 1000),
@@ -103,7 +104,7 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(body.infos).to.be.equal(item.infos);
     expect(body.image).to.be.equal(item.image);
     expect(body.stock).to.be.equal(item.stock);
-    expect(body.left).to.be.equal(item.stock - 3); // Only three carts should count as bought
+    expect(body.left).to.be.equal(item.stock - 2); // Only 2 carts should count as bought
     expect(body.availableFrom).to.be.equal(item.availableFrom.toISOString());
     expect(body.availableUntil).to.be.equal(item.availableUntil.toISOString());
 
@@ -119,6 +120,16 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(itemDatabase.stock).to.be.equal(item.stock);
     expect(itemDatabase.availableFrom.getTime()).to.be.equal(item.availableFrom.getTime());
     expect(itemDatabase.availableUntil.getTime()).to.be.equal(item.availableUntil.getTime());
+  });
+
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(itemOperations, 'updateAdminItem').throws('Unexpected error');
+
+    await request(app)
+      .patch(`/admin/items/${item.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(validBody)
+      .expect(500, { error: Error.InternalServerError });
   });
 
   it('should modify the item entirely', async () => {
@@ -138,7 +149,7 @@ describe('PATCH /admin/items/:itemId', () => {
     expect(body.infos).to.be.equal(validBody.infos);
     expect(body.image).to.be.equal(validBody.image);
     expect(body.stock).to.be.equal(validBody.stockDifference + item.stock);
-    expect(body.left).to.be.equal(validBody.stockDifference + item.stock - 3); // Only three carts should count as bought
+    expect(body.left).to.be.equal(validBody.stockDifference + item.stock - 2); // Only 2 carts should count as bought
     expect(body.availableFrom).to.be.equal(validBody.availableFrom.toISOString());
     expect(body.availableUntil).to.be.equal(validBody.availableUntil.toISOString());
 

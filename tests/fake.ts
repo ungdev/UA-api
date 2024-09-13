@@ -19,10 +19,13 @@ import { createFakeTeam, createFakeUser } from './utils';
   await database.cart.deleteMany();
   await database.log.deleteMany();
   await database.team.deleteMany();
+  await database.log.deleteMany();
+  await database.cart.deleteMany();
+  await database.orgaRole.deleteMany();
   await database.orga.deleteMany();
   await database.user.deleteMany();
 
-  // For each tournaments, create fake teams
+  // For each tournament, create fake teams
   const tournaments = await fetchTournaments();
 
   await Promise.all(
@@ -66,19 +69,19 @@ import { createFakeTeam, createFakeUser } from './utils';
     username: 'ua_admin',
     password: defaultPassword,
     email: 'admin@ua.fr',
-    permissions: [Permission.admin],
+    permissions: [Permission.admin, Permission.orga],
   });
   await createFakeUser({
     username: 'ua_entry',
     password: defaultPassword,
     email: 'entry@ua.fr',
-    permissions: [Permission.entry],
+    permissions: [Permission.entry, Permission.orga],
   });
   await createFakeUser({
     username: 'ua_anim',
     password: defaultPassword,
     email: 'anim@ua.fr',
-    permissions: [Permission.anim],
+    permissions: [Permission.anim, Permission.orga],
   });
 
   // Set login and shop to allowed

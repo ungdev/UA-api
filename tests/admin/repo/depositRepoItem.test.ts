@@ -6,10 +6,11 @@ import database from '../../../src/services/database';
 import { Error, Permission, Team, User, UserType } from '../../../src/types';
 import { getCaptain } from '../../../src/utils/teams';
 import { generateToken } from '../../../src/utils/users';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import app from '../../../src/app';
 import { lockTeam } from '../../../src/operations/team';
-import { removeRepoItem } from '../../../src/operations/repo';
+import * as repoOperations from '../../../src/operations/repo';
+import { sandbox } from '../../setup';
 
 describe('POST /admin/repo/user/:userId/items', () => {
   let admin: User;
@@ -23,11 +24,12 @@ describe('POST /admin/repo/user/:userId/items', () => {
   };
 
   before(async () => {
+    const tournament = await createFakeTournament();
     admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
     adminToken = generateToken(admin);
     nonAdmin = await createFakeUser({ type: UserType.player });
     nonAdminToken = generateToken(nonAdmin);
-    team = await createFakeTeam();
+    team = await createFakeTeam({ tournament: tournament.id });
     captain = getCaptain(team);
   });
 
@@ -37,6 +39,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail as user is not authenticated', async () => {
@@ -102,6 +105,15 @@ describe('POST /admin/repo/user/:userId/items', () => {
       .expect(405, { error: Error.CantDepositMulitpleComputers });
   });
 
+  it('should fail with an internal server error', async () => {
+    sandbox.stub(repoOperations, 'addRepoItems').throws('Unexpected error');
+    await request(app)
+      .post(`/admin/repo/user/${captain.id}/items`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send(validBody)
+      .expect(500, { error: Error.InternalServerError });
+  });
+
   it('should successfully add a new item to the repo', async () => {
     await request(app)
       .post(`/admin/repo/user/${captain.id}/items`)
@@ -127,7 +139,7 @@ describe('POST /admin/repo/user/:userId/items', () => {
       itemBefore = { forUserId: captain.id, id: nanoid(), type: 'computer', zone: 'Zone 1', pickedUp: false };
       await database.repoItem.create({ data: itemBefore });
     }
-    await removeRepoItem(itemBefore.id, captain.id);
+    await repoOperations.removeRepoItem(itemBefore.id, captain.id);
     await request(app)
       .post(`/admin/repo/user/${captain.id}/items`)
       .set('Authorization', `Bearer ${adminToken}`)

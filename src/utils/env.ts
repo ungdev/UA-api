@@ -44,7 +44,8 @@ const env = {
     port: apiEndpointPort,
     prefix: apiEndpointPrefix,
     itemsPerPage: 50,
-    cartLifespan: loadIntEnv('API_CART_LIFESPAN') || 36e5,
+    rateLimit: loadIntEnv('API_RATE_LIMIT') || 12,
+    cartLifespan: loadIntEnv('API_CART_LIFESPAN') || 3600,
   },
   front: {
     website: frontEndpoint,
@@ -76,19 +77,15 @@ const env = {
       name: loadEnv('EMAIL_SENDER_NAME') || 'UTT Arena',
       address: loadEnv('EMAIL_SENDER_ADDRESS') || 'arena@utt.fr',
     },
-    gmail: loadEnv('GMAIL') === 'true' || false,
-    username: loadEnv('GMAIL_USERNAME') || '',
-    password: loadEnv('GMAIL_PASSWORD') || '',
+    gmail: loadEnv('GMAIL') === 'true',
+    username: loadEnv('GMAIL_USERNAME') || null,
+    password: loadEnv('GMAIL_PASSWORD') || null,
     partners: ['utt.fr', 'utc.fr', 'utbm.fr'],
     maxMailsPerBatch: loadIntEnv('MAX_MAIL_PER_BATCH') || 100,
   },
-  etupay: {
-    id: loadIntEnv('ETUPAY_ID') || notInProduction(1),
-    // random 256 bits key genereated if not in production
-    key: loadEnv('ETUPAY_KEY') || notInProduction(crypto.randomBytes(32).toString('base64')),
-    url: loadEnv('ETUPAY_URL') || 'https://etupay.utt.fr/initiate',
-    successUrl: loadEnv('ETUPAY_SUCCESS_URL') || `${frontEndpoint}/dashboard/payment?type=success`,
-    errorUrl: loadEnv('ETUPAY_ERROR_URL') || `${frontEndpoint}/dashboard/payment?type=error`,
+  stripe: {
+    callback: `${frontEndpoint}/stripe`,
+    token: loadEnv('STRIPE_PRIVATE_KEY'),
   },
   crypto: {
     // random 128 bits key generated if not in production
@@ -176,7 +173,7 @@ const checkConfiguration = (config: object, parentKey = 'env') => {
     }
 
     // If the variable is an object, checks below
-    if (typeof value === 'object') {
+    if (typeof value === 'object' && value !== null) {
       checkConfiguration(value, currentKey);
     }
 

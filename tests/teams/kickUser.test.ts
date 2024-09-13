@@ -3,10 +3,9 @@ import request from 'supertest';
 import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
-import * as tournamentOperations from '../../src/operations/tournament';
 import database from '../../src/services/database';
 import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeUser, createFakeTeam } from '../utils';
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import * as userOperations from '../../src/operations/user';
 import { getCaptain } from '../../src/utils/teams';
@@ -20,13 +19,18 @@ describe('DELETE /teams/current/users/:userId', () => {
   let waitingTeam: Team;
 
   before(async () => {
-    const tournament = await tournamentOperations.fetchTournament('rl');
-    team = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true, tournament: 'rl' });
+    const tournament = await createFakeTournament({ maxTeams: 2, playersPerTeam: 3, coachesPerTeam: 1 });
+    team = await createFakeTeam({
+      members: tournament.playersPerTeam,
+      paid: true,
+      locked: true,
+      tournament: tournament.id,
+    });
 
     // Find a user that is not a captain
     userToKick = team.players.find((player) => player.id !== team.captainId);
     coachToKick = await createFakeUser({ type: 'coach' });
-    teamOperations.joinTeam(team.id, coachToKick, UserType.coach);
+    await teamOperations.joinTeam(team.id, coachToKick, UserType.coach);
 
     const captain = getCaptain(team);
     captainToken = generateToken(captain);
@@ -34,7 +38,9 @@ describe('DELETE /teams/current/users/:userId', () => {
     // Fill the tournament
     const promises = [];
     for (let index = 0; index < tournament.placesLeft - 1; index++) {
-      promises.push(createFakeTeam({ members: tournament.playersPerTeam, locked: true, paid: true, tournament: 'rl' }));
+      promises.push(
+        createFakeTeam({ members: tournament.playersPerTeam, locked: true, paid: true, tournament: tournament.id }),
+      );
     }
     await Promise.all(promises);
 
@@ -43,7 +49,7 @@ describe('DELETE /teams/current/users/:userId', () => {
       members: tournament.playersPerTeam,
       locked: false,
       paid: true,
-      tournament: 'rl',
+      tournament: tournament.id,
     });
     await teamOperations.lockTeam(waitingTeam.id);
   });
@@ -53,6 +59,7 @@ describe('DELETE /teams/current/users/:userId', () => {
     await database.cart.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail because the token is not provided', async () => {
@@ -80,7 +87,8 @@ describe('DELETE /teams/current/users/:userId', () => {
   });
 
   it('should fail as the user is the captain of another team', async () => {
-    const otherTeam = await createFakeTeam();
+    const otherTournament = await createFakeTournament();
+    const otherTeam = await createFakeTeam({ tournament: otherTournament.id });
     const otherCaptain = getCaptain(otherTeam);
     const otherCaptainToken = generateToken(otherCaptain);
 

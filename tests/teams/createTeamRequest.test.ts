@@ -4,18 +4,20 @@ import app from '../../src/app';
 import { sandbox } from '../setup';
 import * as teamOperations from '../../src/operations/team';
 import database from '../../src/services/database';
-import { Error, Team, User, UserType } from '../../src/types';
-import { createFakeUser, createFakeTeam } from '../utils';
+import { Error, Team, Tournament, User, UserType } from '../../src/types';
+import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { updateAdminUser } from '../../src/operations/user';
 
 describe('POST /teams/:teamId/join-requests', () => {
+  let tournament: Tournament;
   let user: User;
   let token: string;
   let team: Team;
 
   before(async () => {
-    team = await createFakeTeam();
+    tournament = await createFakeTournament();
+    team = await createFakeTeam({ tournament: tournament.id });
     user = await createFakeUser({ type: UserType.player });
     token = generateToken(user);
   });
@@ -26,6 +28,7 @@ describe('POST /teams/:teamId/join-requests', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should fail because the team does not exists', async () => {
@@ -44,7 +47,7 @@ describe('POST /teams/:teamId/join-requests', () => {
   });
 
   it('should fail because the user is already in a team', async () => {
-    const otherTeam = await createFakeTeam();
+    const otherTeam = await createFakeTeam({ tournament: tournament.id });
     const [localUser] = otherTeam.players;
     const localToken = generateToken(localUser);
 
@@ -76,7 +79,7 @@ describe('POST /teams/:teamId/join-requests', () => {
   });
 
   it('should error as the team is locked', async () => {
-    const lockedTeam = await createFakeTeam({ members: 5, locked: true });
+    const lockedTeam = await createFakeTeam({ members: 5, locked: true, tournament: tournament.id });
 
     await request(app)
       .post(`/teams/${lockedTeam.id}/join-requests`)
@@ -85,7 +88,7 @@ describe('POST /teams/:teamId/join-requests', () => {
       .expect(403, { error: Error.TeamLocked });
   });
 
-  it('should succesfully request to join a team as a coach', async () => {
+  it('should successfully request to join a team as a coach', async () => {
     const { body } = await request(app)
       .post(`/teams/${team.id}/join-requests`)
       .send({ userType: UserType.coach })
@@ -102,7 +105,7 @@ describe('POST /teams/:teamId/join-requests', () => {
     await teamOperations.deleteTeamRequest(user.id);
   });
 
-  it('should succesfully request to join a team as a player', async () => {
+  it('should successfully request to join a team as a player', async () => {
     const { body } = await request(app)
       .post(`/teams/${team.id}/join-requests`)
       .send({ userType: UserType.player })
@@ -136,7 +139,7 @@ describe('POST /teams/:teamId/join-requests', () => {
   });
 
   it('should fail as we already asked another team', async () => {
-    const otherTeam = await createFakeTeam();
+    const otherTeam = await createFakeTeam({ tournament: tournament.id });
 
     await request(app)
       .post(`/teams/${otherTeam.id}/join-requests`)

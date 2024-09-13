@@ -6,15 +6,16 @@ import * as userOperations from '../../src/operations/user';
 import * as itemOperations from '../../src/operations/item';
 import * as cartOperations from '../../src/operations/carts';
 import database from '../../src/services/database';
-import { Error, User, Team, UserAge, UserType, TransactionState, Tournament } from '../../src/types';
+import { Error, User, Team, UserAge, UserType, TransactionState } from '../../src/types';
 import { createFakeUser, createFakeTeam, createFakeTournament } from '../utils';
 import { generateToken } from '../../src/utils/users';
 import { PayBody } from '../../src/controllers/users/createCart';
-import env from '../../src/utils/env';
 import { setShopAllowed } from '../../src/operations/settings';
 import { getCaptain } from '../../src/utils/teams';
 import { createAttendant, deleteUser, updateAdminUser } from '../../src/operations/user';
 import { joinTeam } from '../../src/operations/team';
+import { generateStripePaymentIntent, resetFakeStripeApi, stripePaymentIntents } from '../stripe';
+import { fetchItem } from '../../src/operations/item';
 
 describe('POST /users/current/carts', () => {
   let user: User;
@@ -32,7 +33,6 @@ describe('POST /users/current/carts', () => {
   let annoyingUserWithSwitchDiscount: User;
   let annoyingTokenWithSwitchDiscount: string;
 
-  let fullTournament: Tournament;
   let teamInFullTournament: Team;
   let captainInFullTournament: User;
   let tokenInFullTournament: string;
@@ -40,7 +40,7 @@ describe('POST /users/current/carts', () => {
 
   const validCart: PayBody = {
     tickets: {
-      userIds: [],
+      userIds: [], // 2 players and a coach will be added
       attendant: { firstname: 'toto', lastname: 'de lachô' },
     },
     supplements: [
@@ -120,7 +120,9 @@ describe('POST /users/current/carts', () => {
   };
 
   before(async () => {
-    const team = await createFakeTeam({ members: 1, tournament: 'cs2', name: 'dontcare' });
+    const tournament = await createFakeTournament({ playersPerTeam: 2, maxTeams: 2, coachesPerTeam: 1 });
+    await createFakeTournament({ id: 'ssbu' });
+    const team = await createFakeTeam({ members: 1, tournament: tournament.id, name: 'dontcare' });
     user = getCaptain(team);
     token = generateToken(user);
 
@@ -137,7 +139,7 @@ describe('POST /users/current/carts', () => {
     tokenWithSwitchDiscount = generateToken(userWithSwitchDiscount);
     validCartWithSwitchDiscount.tickets.userIds.push(userWithSwitchDiscount.id);
 
-    notValidTeamWithSwitchDiscount = await createFakeTeam({ tournament: 'lol' });
+    notValidTeamWithSwitchDiscount = await createFakeTeam({ tournament: tournament.id });
     notValidUserWithSwitchDiscount = getCaptain(notValidTeamWithSwitchDiscount);
     notValidTokenWithSwitchDiscount = generateToken(notValidUserWithSwitchDiscount);
     notValidCartWithSwitchDiscount.tickets.userIds.push(notValidUserWithSwitchDiscount.id);
@@ -146,14 +148,8 @@ describe('POST /users/current/carts', () => {
     annoyingUserWithSwitchDiscount = getCaptain(annoyingTeamWithSwitchDiscount);
     annoyingTokenWithSwitchDiscount = generateToken(annoyingUserWithSwitchDiscount);
 
-    fullTournament = await createFakeTournament({
-      id: 'test',
-      name: 'test',
-      playersPerTeam: 1,
-      coachesPerTeam: 1,
-      maxTeams: 0,
-    });
-    teamInFullTournament = await createFakeTeam({ members: 1, tournament: 'test' });
+    const fullTournament = await createFakeTournament({ coachesPerTeam: 1, maxTeams: 0 });
+    teamInFullTournament = await createFakeTeam({ members: 1, tournament: fullTournament.id });
     captainInFullTournament = getCaptain(teamInFullTournament);
     tokenInFullTournament = generateToken(captainInFullTournament);
     coachInFullTournament = await createFakeUser({ type: UserType.coach });
@@ -166,7 +162,8 @@ describe('POST /users/current/carts', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
-    await database.tournament.delete({ where: { id: fullTournament.id } });
+    await database.tournament.deleteMany();
+    resetFakeStripeApi();
   });
 
   it('should fail as the shop is deactivated', async () => {
@@ -191,6 +188,7 @@ describe('POST /users/current/carts', () => {
       .set('Authorization', `Bearer ${token}`)
       .expect(400, { error: Error.InvalidCart });
   });
+
   describe('dynamic tests failures on body', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const badBodies: any[] = [
@@ -321,7 +319,7 @@ describe('POST /users/current/carts', () => {
         tickets: { userIds: [paidUser.id] },
         supplements: [],
       })
-      .expect(403, { error: Error.AlreadyPaid });
+      .expect(403, { error: Error.PlayerAlreadyPaid });
 
     // Delete the user to not make the results wrong for the success test
     await database.cartItem.deleteMany({ where: { forUserId: paidUser.id } });
@@ -357,7 +355,7 @@ describe('POST /users/current/carts', () => {
       .expect(500, { error: Error.InternalServerError });
   });
 
-  it('should successfuly create a cart', async () => {
+  it('should successfully create a cart', async () => {
     const oldUserCount = await database.user.count();
     const { body } = await request(app)
       .post(`/users/current/carts`)
@@ -385,11 +383,7 @@ describe('POST /users/current/carts', () => {
     const coach = users.find((findUser) => findUser.type === UserType.coach && findUser.teamId === user.teamId);
     const attendant = users.find((findUser) => findUser.type === UserType.attendant);
 
-    expect(body.url).to.startWith(env.etupay.url);
-
-    // player place + player reduced price + coach place + attendant place + 4 * ethernet-7
-    // TODO : do it better (use directly values in the database)
-    expect(body.price).to.be.equal(2500 + 2000 + 1500 + 1500 + 4 * 1000);
+    expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(5);
@@ -403,6 +397,10 @@ describe('POST /users/current/carts', () => {
 
     expect(attendant?.firstname).to.be.equal(validCart.tickets.attendant?.firstname);
     expect(attendant?.lastname).to.be.equal(validCart.tickets.attendant?.lastname);
+
+    expect(stripePaymentIntents.at(-1).amount).to.be.equal(
+      cartItems.reduce((previous, current) => (current.reducedPrice ?? current.price) * current.quantity + previous, 0),
+    );
   });
 
   it('should successfuly create a cart even with the ssbu discount', async () => {
@@ -429,10 +427,7 @@ describe('POST /users/current/carts', () => {
       (cartItem) => cartItem.itemId === validCartWithSwitchDiscount.supplements[0].itemId,
     );
 
-    expect(body.url).to.startWith(env.etupay.url);
-
-    // player place (ssbu) - 1 * discount-ssbu
-    expect(body.price).to.be.equal(2200 - 300);
+    expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
 
     expect(carts).to.have.lengthOf(1);
     expect(cartItems).to.have.lengthOf(2);
@@ -440,6 +435,10 @@ describe('POST /users/current/carts', () => {
     expect(cartItems.filter((cartItem) => cartItem.forUserId === userWithSwitchDiscount.id)).to.have.lengthOf(2);
 
     expect(supplement?.quantity).to.be.equal(validCartWithSwitchDiscount.supplements[0].quantity);
+
+    expect(stripePaymentIntents.at(-1).amount).to.be.equal(
+      cartItems.reduce((previous, current) => current.price * current.quantity + previous, 0),
+    );
   });
 
   it('should error as spectator cannot rent a pc', async () => {
@@ -481,8 +480,8 @@ describe('POST /users/current/carts', () => {
         ],
       })
       .expect(201);
-    expect(body.url).to.startWith(env.etupay.url);
-    expect(body.price).to.be.equal(14000);
+    expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
+    expect(stripePaymentIntents.at(-1).amount).to.be.equal((await fetchItem('pc')).price);
   });
 
   it('should send an error as ssbu discount is already in a pending cart', async () => {
@@ -506,7 +505,10 @@ describe('POST /users/current/carts', () => {
         where: { forUserId: userWithSwitchDiscount.id, itemId: 'discount-switch-ssbu' },
       })
     ).cartId;
-    await cartOperations.updateCart(cartWithDiscountId, 123, TransactionState.paid);
+    await cartOperations.updateCart(cartWithDiscountId, {
+      transactionId: '123',
+      transactionState: TransactionState.paid,
+    });
     await request(app)
       .post(`/users/current/carts`)
       .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
@@ -537,7 +539,7 @@ describe('POST /users/current/carts', () => {
       .expect(403, { error: Error.BasketCannotBeNegative });
   });
 
-  it('should only apply 1 ssbu discount as user cannot order more than 1 ssbu reduction', async () => {
+  it('should fail as user cannot order more than 1 ssbu reduction', async () => {
     await database.cartItem.deleteMany({
       where: { itemId: 'discount-switch-ssbu', forUserId: userWithSwitchDiscount.id },
     });
@@ -545,11 +547,7 @@ describe('POST /users/current/carts', () => {
       .post('/users/current/carts')
       .set('Authorization', `Bearer ${tokenWithSwitchDiscount}`)
       .send(cartWithMultipleSwitchDiscounts)
-      .expect(201);
-    const discountCartItem = await database.cartItem.findFirst({
-      where: { itemId: 'discount-switch-ssbu', forUserId: userWithSwitchDiscount.id },
-    });
-    expect(discountCartItem?.quantity).to.be.equal(1);
+      .expect(403, { error: Error.OnlyOneDiscountSSBU });
   });
 
   it('should fail as the item is no longer available', async () => {
@@ -604,8 +602,8 @@ describe('POST /users/current/carts', () => {
       })
       .expect(201);
 
-    expect(body.url).to.startWith(env.etupay.url);
-    expect(body.price).to.be.equal(1000);
+    expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
+    expect(stripePaymentIntents.at(-1).amount).to.be.equal((await fetchItem('ticket-spectator')).price);
 
     return database.item.update({
       data: { stock: currentSpectatorStock },
@@ -613,14 +611,14 @@ describe('POST /users/current/carts', () => {
     });
   });
 
-  it('should pass as a stale stock-blocking cart was deleted', async () => {
+  it('should pass as an expired stock-blocking cart was deleted', async () => {
     // We clear previous tickets first
     await database.cartItem.deleteMany();
     await database.cart.deleteMany();
 
     // We retrieve ticket-spectator stock to reset it at the end of the test
     const items = await itemOperations.fetchAllItems();
-    const currentSpectatorStock = items.find((item) => item.id === 'ticket-spectator')?.stock;
+    const spectatorTicket = items.find((item) => item.id === 'ticket-spectator')!;
 
     // We set stock for the ticket to 1 unit
     await database.item.update({
@@ -628,17 +626,19 @@ describe('POST /users/current/carts', () => {
       where: { id: 'ticket-spectator' },
     });
 
-    // We use that unit for a spectator and force-stale his cart
-    const staleSpectator = await createFakeUser({ type: UserType.spectator });
-    const staleSpectatorCart = await cartOperations.forcePay(staleSpectator);
+    // We use that unit for a spectator and force-expire his cart
+    const expiredSpectator = await createFakeUser({ type: UserType.spectator });
+    const expiredSpectatorCart = await cartOperations.forcePay(expiredSpectator);
+    const paymentIntent = generateStripePaymentIntent(spectatorTicket.price);
     await database.cart.update({
       where: {
-        id: staleSpectatorCart.id,
+        id: expiredSpectatorCart.id,
       },
       data: {
         createdAt: new Date(Date.now() - 6e6),
         updatedAt: new Date(Date.now() - 6e6),
         transactionState: 'pending',
+        transactionId: paymentIntent.id,
         cartItems: {
           updateMany: {
             data: {
@@ -665,13 +665,12 @@ describe('POST /users/current/carts', () => {
       })
       .expect(201);
 
-    expect(body.url).to.startWith(env.etupay.url);
-    expect(body.price).to.be.equal(1000);
+    expect(body.checkoutSecret).to.be.equal(stripePaymentIntents.at(-1).client_secret);
 
-    // Check that the stale cart has been deleted
-    const staleSpectatorCarts = await cartOperations.fetchCarts(staleSpectator.id);
-    expect(staleSpectatorCarts).to.have.lengthOf(1);
-    expect(staleSpectatorCarts[0].transactionState).to.be.equal(TransactionState.stale);
+    // Check that the expired cart has been deleted
+    const expiredSpectatorCarts = await cartOperations.fetchCarts(expiredSpectator.id);
+    expect(expiredSpectatorCarts).to.have.lengthOf(1);
+    expect(expiredSpectatorCarts[0].transactionState).to.be.equal(TransactionState.expired);
 
     const spectatorTickets = await database.cartItem.findMany({
       where: {
@@ -680,9 +679,12 @@ describe('POST /users/current/carts', () => {
     });
     expect(spectatorTickets).to.have.lengthOf(2);
 
+    expect(stripePaymentIntents.at(-1).amount).to.be.equal(spectatorTicket.price);
+    expect(stripePaymentIntents.some((pi) => pi.id === paymentIntent.id)).to.be.false;
+
     // Restore actual stock
     return database.item.update({
-      data: { stock: currentSpectatorStock },
+      data: { stock: spectatorTicket.stock },
       where: { id: 'ticket-spectator' },
     });
   });

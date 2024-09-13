@@ -1,12 +1,11 @@
 import request from 'supertest';
 import { expect } from 'chai';
 import app from '../../../src/app';
-import { createFakeTeam, createFakeUser } from '../../utils';
+import { createFakeTeam, createFakeTournament, createFakeUser } from '../../utils';
 import database from '../../../src/services/database';
-import { Cart, Error, Permission, User, TransactionState, Team, UserType } from '../../../src/types';
+import { Cart, Error, Permission, User, TransactionState, Team } from '../../../src/types';
 import * as cartOperations from '../../../src/operations/carts';
 import * as teamOperations from '../../../src/operations/team';
-import * as tournamentOperations from '../../../src/operations/tournament';
 import * as userOperations from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import { generateToken } from '../../../src/utils/users';
@@ -20,25 +19,31 @@ describe('POST /admin/carts/:cartId/refund', () => {
   let waitingTeam: Team;
 
   before(async () => {
-    const tournament = await tournamentOperations.fetchTournament('lol');
-    user = await createFakeUser({ type: UserType.player });
-    const coach = await createFakeUser({ type: UserType.player });
-    admin = await createFakeUser({ permissions: [Permission.admin], type: UserType.player });
+    const tournament = await createFakeTournament({
+      id: 'anicetournament',
+      name: 'Read the ID',
+      playersPerTeam: 2,
+      coachesPerTeam: 1,
+      maxTeams: 1,
+    });
+    user = await createFakeUser();
+    const coach = await createFakeUser();
+    admin = await createFakeUser({ permissions: [Permission.admin] });
     adminToken = generateToken(admin);
     const team = await createFakeTeam({
       members: tournament.playersPerTeam - 1,
       paid: true,
       locked: true,
-      tournament: 'lol',
+      tournament: tournament.id,
     });
     await teamOperations.joinTeam(team.id, user, 'player');
     await teamOperations.joinTeam(team.id, coach, 'coach');
 
     // Fill the tournament
     for (let index = 0; index < tournament.placesLeft - 1; index++) {
-      await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true, tournament: 'lol' });
+      await createFakeTeam({ members: tournament.playersPerTeam, paid: true, locked: true, tournament: tournament.id });
     }
-    waitingTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: 'lol' });
+    waitingTeam = await createFakeTeam({ members: tournament.playersPerTeam, paid: true, tournament: tournament.id });
     await teamOperations.lockTeam(waitingTeam.id);
 
     // Refresh the user
@@ -58,6 +63,7 @@ describe('POST /admin/carts/:cartId/refund', () => {
     await database.team.deleteMany();
     await database.orga.deleteMany();
     await database.user.deleteMany();
+    await database.tournament.deleteMany();
   });
 
   it('should error as the user is not authenticated', () =>

@@ -14,14 +14,15 @@ import { formatUser, userInclusions } from './user';
 import { deleteDiscordTeam, sendDiscordTeamLockout, sendDiscordTeamUnlock, setupDiscordTeam } from '../utils/discord';
 import { fetchTournament } from './tournament';
 
-const teamInclusions = {
+// Okayyyy, for some reason if this is not a function, userInclusions is undefined.
+const teamInclusions = () => ({
   users: {
     include: userInclusions,
   },
   askingUsers: {
     include: userInclusions,
   },
-};
+});
 
 export const getPositionInQueue = (team: PrimitiveTeam): Promise<number | null> => {
   if (!team.enteredQueueAt) return null;
@@ -58,7 +59,7 @@ export const formatPrimitiveTeam = async (team: PrimitiveTeamWithPrimitiveUsers)
 export const fetchTeam = async (id: string): Promise<Team> | undefined => {
   const team: PrimitiveTeamWithPrimitiveUsers = await database.team.findUnique({
     where: { id },
-    include: teamInclusions,
+    include: teamInclusions(),
   });
 
   return team ? formatPrimitiveTeam(team) : undefined;
@@ -82,7 +83,7 @@ export const fetchTeams = async (tournamentId: string): Promise<Team[]> => {
     where: {
       tournamentId,
     },
-    include: teamInclusions,
+    include: teamInclusions(),
   });
 
   return Promise.all(teams.map(formatPrimitiveTeam));
@@ -101,23 +102,20 @@ export const lockTeam = async (teamId: string) => {
   // Don't relock the team, to avoid spamming messages (and also channel creation lol) (no that didn't happen :eyes:)
   if (team.lockedAt || team.enteredQueueAt) return team;
 
-  await database.$transaction(
-    askingUsers.map(
-      (user) =>
-        user.type === UserType.player &&
-        database.user.update({
-          data: {
-            askingTeam: {
-              disconnect: true,
-            },
-          },
-          where: {
-            id: user.id,
-            type: UserType.player,
-          },
-        }),
-    ),
-  );
+  askingUsers.map(async (user) => {
+    if (user.type !== UserType.player) return;
+    await database.user.update({
+      data: {
+        askingTeam: {
+          disconnect: true,
+        },
+      },
+      where: {
+        id: user.id,
+        type: UserType.player,
+      },
+    });
+  });
 
   const tournament = await fetchTournament(team.tournamentId);
   let updatedTeam: PrimitiveTeamWithPrimitiveUsers;
@@ -131,12 +129,12 @@ export const lockTeam = async (teamId: string) => {
       where: {
         id: teamId,
       },
-      include: teamInclusions,
+      include: teamInclusions(),
     });
     // Setup team on Discord
     await setupDiscordTeam(team, tournament);
 
-    // Inform inform the Discord channel that the team has been locked out
+    // Inform the Discord channel that the team has been locked out
     await sendDiscordTeamLockout(team, await fetchTournament(tournament.id));
   } else {
     // Put the team in the waiting list
@@ -147,7 +145,7 @@ export const lockTeam = async (teamId: string) => {
       where: {
         id: teamId,
       },
-      include: teamInclusions,
+      include: teamInclusions(),
     });
   }
 
@@ -194,7 +192,7 @@ export const createTeam = async (
     where: {
       captainId,
     },
-    include: teamInclusions,
+    include: teamInclusions(),
   });
 
   // Verify if team needs to be locked
@@ -215,7 +213,7 @@ export const updateTeam = async (teamId: string, name: string): Promise<Team> =>
     where: {
       id: teamId,
     },
-    include: teamInclusions,
+    include: teamInclusions(),
   });
 
   return formatPrimitiveTeam(team);
@@ -266,7 +264,7 @@ export const promoteUser = (teamId: string, newCaptainId: string): PrismaPromise
     where: {
       id: teamId,
     },
-    include: teamInclusions,
+    include: teamInclusions(),
   });
 
 export const unlockTeam = async (teamId: string) => {
@@ -289,7 +287,7 @@ export const unlockTeam = async (teamId: string) => {
 
   // Only notify if team was locked (we don't want to notify if it was in the queue)
   if (team.lockedAt) {
-    await deleteDiscordTeam(updatedTeam);
+    await deleteDiscordTeam(updatedTeam, tournament);
     await sendDiscordTeamUnlock(updatedTeam, tournament);
   }
 

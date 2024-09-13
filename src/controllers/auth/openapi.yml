@@ -42,6 +42,8 @@
     summary: Renvoie le mail de confirmation d'inscription
     description: Renvoie le mail de confirmation d'inscription à l'utilisateur.<br/>
       *L'utilisateur ne doit pas être connecté*
+    tags:
+      - Authentication
     requestBody:
       required: true
       content:

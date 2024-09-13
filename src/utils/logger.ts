@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Request, Response } from 'express';
 import { Format } from 'logform';
 import { ConsoleTransportInstance } from 'winston/lib/winston/transports';

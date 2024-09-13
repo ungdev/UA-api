@@ -1,4 +1,3 @@
-/* eslint-disable default-case */
 /* eslint-disable import/no-unresolved */
 import { fetchTournaments, fetchTournament } from '../operations/tournament';
 import { fetchTeam, fetchTeams } from '../operations/team';
@@ -197,9 +196,13 @@ export const removeDiscordRoles = async (fromUser: User) => {
   }
 };
 
-export const deleteDiscordTeam = async (team: Team) => {
+export const deleteDiscordTeam = async (team: Team, tournament: Tournament) => {
   if (!env.discord.token) {
     logger.warn('Discord token missing. It will skip discord calls');
+    return;
+  }
+
+  if (tournament.playersPerTeam === 1) {
     return;
   }
 

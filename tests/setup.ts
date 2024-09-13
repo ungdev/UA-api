@@ -13,6 +13,7 @@ import { setLoginAllowed, setShopAllowed, setTrombiAllowed } from '../src/operat
 import { transporter } from '../src/services/email';
 import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 import { disableFakeUploadApi, enableFakeUploadApi } from './upload';
+import { disableFakeStripeApi, enableFakeStripeApi } from './stripe';
 import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
 import * as uploads from './upload';
@@ -23,9 +24,9 @@ before(async () => {
   // Reset and seed the database
   execSync('pnpm test:schema:push --force-reset');
   await Promise.all(
-    readFileSync(`seed.sql`, 'utf-8')
+    readFileSync(`seed.test.sql`, 'utf-8')
       .split(';')
-      .slice(0, -1)
+      .slice(0, -1) // Remove the last empty string after the last ;
       .map((command) => database.$executeRawUnsafe(command)),
   );
   chai.use(chaiString);
@@ -35,6 +36,7 @@ before(async () => {
 
   enableFakeDiscordApi();
   enableFakeUploadApi();
+  enableFakeStripeApi();
 
   // Verify environment variables have been loaded correctly
   expect(process.env.API_PORT).to.be.undefined;
@@ -48,6 +50,7 @@ afterEach('Restore the sandbox after every tests', () => {
 after(async () => {
   disableFakeDiscordApi();
   disableFakeUploadApi();
+  disableFakeStripeApi();
 
   // Reset the database at it was
   await setLoginAllowed(false);
@@ -72,6 +75,9 @@ after(async () => {
 
   const repoLogCount = await database.repoLog.count();
   expect(repoLogCount).to.be.equal(0);
+
+  const tournamentCount = await database.tournament.count();
+  expect(tournamentCount).to.be.equal(0);
 
   const orgaRoleCount = await database.orgaRole.count();
   expect(orgaRoleCount).to.be.equal(0);

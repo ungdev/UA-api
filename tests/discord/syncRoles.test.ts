@@ -1,4 +1,3 @@
-/* eslint-disable arrow-body-style */
 import request from 'supertest';
 import { expect } from 'chai';
 import app from '../../src/app';
@@ -7,18 +6,19 @@ import * as discordFunctions from '../../src/utils/discord';
 import { Error } from '../../src/types';
 import env from '../../src/utils/env';
 import database from '../../src/services/database';
-import { createFakeTeam } from '../utils';
+import { createFakeTeam, createFakeTournament } from '../utils';
 import { registerMember, registerRole, resetFakeDiscord } from '../discord';
 
 describe('POST /discord/sync-roles', () => {
   const token = env.discord.syncKey;
 
   before(async () => {
+    const tournament = await createFakeTournament();
     const team = await createFakeTeam({
       locked: true,
       paid: true,
-      members: 5,
-      tournament: 'cs2',
+      members: 1,
+      tournament: tournament.id,
     });
     // We will test with one missing user (he may have left the server)
     for (const user of [...team.players.slice(1), ...team.coaches]) registerMember(user.discordId);
@@ -26,14 +26,14 @@ describe('POST /discord/sync-roles', () => {
 
     const team2 = await createFakeTeam({
       locked: false,
-      members: 2,
-      tournament: 'cs2',
+      members: 1,
+      tournament: tournament.id,
     });
     registerMember(team2.players[0].discordId);
 
     await database.tournament.update({
       where: {
-        id: 'cs2',
+        id: tournament.id,
       },
       data: {
         discordRoleId: registerRole(),

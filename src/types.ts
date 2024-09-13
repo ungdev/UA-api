@@ -1,5 +1,4 @@
-import prisma, { TransactionState, UserType, UserAge, Caster } from '@prisma/client';
-import type { ErrorRequestHandler } from 'express';
+import prisma, { UserType, UserAge, Caster } from '@prisma/client';
 import type Mail from 'nodemailer/lib/mailer';
 import type { ParsedQs } from 'qs';
 import type { Mail as Email } from './services/email';
@@ -117,6 +116,10 @@ export interface PrimitiveCartItem {
   forUserId: string;
 }
 
+export type PrimitiveCartItemWithItem = Omit<PrimitiveCartItem, 'itemId'> & {
+  item: Item;
+};
+
 export type ParsedPermissionsHolder<T extends RawUser> = Omit<T, 'permissions'> & {
   permissions: Permission[];
 };
@@ -228,21 +231,6 @@ export type Tournament = PrimitiveTournament & {
 };
 
 /************/
-/** Etupay **/
-/************/
-
-export interface EtupayResponse {
-  transactionId: number;
-  step: TransactionState;
-  paid: boolean;
-  serviceData: string;
-}
-
-export type EtupayError = ErrorRequestHandler & {
-  message: string;
-};
-
-/************/
 /** Badges **/
 /************/
 
@@ -317,13 +305,12 @@ export const enum Error {
   InvalidCredentials = 'Identifiants invalides',
   NoDiscordAccountLinked = 'Tu dois lier ton compte discord pour créer ou rejoindre une équipe',
   NoToken = "Aucun token n'a été donné",
+  PleaseDontPlayWithStripeWebhooks = 'Merci de ne pas jouer avec les webhooks Stripe',
 
   // 403
   // The server understood the request but refuses to authorize it
   UserAlreadyScanned = "L'utilisateur a déjà scanné son billet",
   NotPaid = "Le billet n'a pas été payé",
-  IsOrga = "L'utilisateur est un organisateur",
-  TeamNotPaid = "Tous les membres de l'équipe n'ont pas payé",
   LoginNotAllowed = 'Tu ne peux pas te connecter actuellement',
   NotAdmin = "Tu n'es pas administrateur",
   ShopNotAllowed = 'La billetterie est fermée',
@@ -339,14 +326,11 @@ export const enum Error {
   AlreadyAuthenticated = 'Tu es déjà identifié',
   NotplayerOrCoach = "L'utilisateur doit être un joueur ou un coach",
   NotPlayerOrCoachOrSpectator = "L'utilisateur n'est ni un joueur, ni un coach, ni un spectateur",
-  AlreadyPaid = 'Le joueur possède déjà une place',
-  AlreadyErrored = 'Tu ne peux pas valider une transaction échouée',
+  PlayerAlreadyPaid = 'Le joueur possède déjà une place',
   TeamLocked = "L'équipe est verrouillée",
   TeamNotLocked = "L'équipe n'est pas verrouillée",
-  TeamNotFull = "L'équipe est incomplète",
   TeamFull = "L'équipe est complète",
   AlreadyInTeam = "Tu es déjà dans l'équipe",
-  PlayerAlreadyInTeam = "L'utilisateur a déjà rejoint une équipe",
   AlreadyAskedATeam = "Tu as déjà demandé de t'inscrire dans une équipe",
   AlreadyCaptain = 'Tu es déjà un capitaine',
   NotAskedTeam = "Tu ne demandes pas l'accès à l'équipe",
@@ -354,7 +338,7 @@ export const enum Error {
   CannotChangeType = 'Tu ne peux pas changer de type si tu as payé',
   NotSameType = "Les deux utilisateurs n'ont pas le même type",
   BasketCannotBeNegative = 'Le total du panier ne peut pas être négatif',
-  TeamMaxCoachReached = 'Une équipe ne peut pas avoir plus de deux coachs',
+  TeamMaxCoachReached = 'Une équipe ne peut pas avoir plus de coachs',
   AttendantNotAllowed = "Un majeur ne peut pas avoir d'accompagnateur",
   AttendantAlreadyRegistered = "Tu ne peux pas avoir plus d'un accompagnateur",
   CannotSpectate = 'Tu dois quitter ton équipe pour devenir spectateur',
@@ -363,9 +347,9 @@ export const enum Error {
   AlreadyAppliedDiscountSSBU = 'Tu as déjà profité de la promotion !',
   NotPlayerDiscountSSBU = 'Seul les joueurs peuvent profiter de la promotion !',
   AlreadyHasPendingCartWithDiscountSSBU = "Tu as déjà un panier en attente de paiement avec une réduction SSBU. Ce panier expirera au bout d'une heure, tu pourras alors rajouter l'item à ton panier",
+  OnlyOneDiscountSSBU = 'Tu ne peux pas avoir plusieurs réductions SSBU dans ton panier',
   NotWhitelisted = "Tu n'es pas qualifié pour ce tournoi",
   HasAlreadyPaidForAnotherTicket = 'Tu as déjà payé un ticket vendu à un prix différent. Pour changer de tournoi, contacte nous !',
-  EtupayNoAccess = "Tu n'as pas accès à cette url",
   NotYourItem = "Cet item n'est pas le tiens",
   AlreadyHaveComputer = 'Tu as déjà un ordinateur stocké',
   CantDepositMulitpleComputers = 'Tu ne peux pas déposer plusieurs ordinateurs',
@@ -383,11 +367,9 @@ export const enum Error {
   UserNotFound = "L'utilisateur est introuvable",
   TeamNotFound = "L'équipe est introuvable",
   CartNotFound = 'Le panier est introuvable',
-  OrderNotFound = 'La commande est introuvable',
   ItemNotFound = "L'objet est introuvable",
   TournamentNotFound = 'Le tournoi est introuvable',
   TicketNotFound = 'Le ticket est introuvable',
-  WrongRegisterToken = "Token d'enregistrement invalide",
   CommissionNotFound = "La commission n'existe pas",
 
   // 405
@@ -418,7 +400,7 @@ export const enum Error {
 }
 
 // Toornament
-/* eslint-disable camelcase */
+
 export interface ToornamentPlayerCustomFields {
   discord?: string;
   nom_complet: {
@@ -442,7 +424,6 @@ export interface ToornamentParticipant {
   lineup: Array<ToornamentPlayer>;
   created_at: string;
 }
-/* eslint-enable camelcase */
 
 export interface DiscordParticipants {
   name: string;
