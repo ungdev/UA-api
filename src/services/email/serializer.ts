@@ -38,7 +38,7 @@ export const serialize = async (content: Mail) => {
 export const generateTicketsEmail = (cart: DetailedCart) =>
   serialize({
     title: {
-      topic: 'Bienvenue',
+      topic: 'Confirmation de commande',
       banner: 'Informations importantes',
       short: `Salut ${cart.user.firstname},`,
       highlight: "Bienvenue à l'UTT Arena&nbsp;🔥&nbsp;!",
@@ -47,25 +47,6 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
       "Tu as reçu cet email car tu es inscrit à l'UTT Arena 2024. Si ce n'est pas le cas, contacte-nous et change le mot de passe de ta boîte mail.",
     receiver: cart.user.email,
     sections: [
-      {
-        title: 'Tournoi',
-        components: [
-          'Voilà les dernières informations importantes nécessaires au bon déroulement de la compétition&nbsp;:',
-          [
-            'Il est nécessaire que *tous les joueurs* de *toutes les équipes* soient présents sur notre Discord',
-            'Tous les tournois débutent samedi à 10h, il faudra donc être présent *à partir de 9h00* pour un check-in de toutes les équipes et joueurs',
-            "N'hésite pas à contacter un membre du staff sur Discord si tu as une question ou que tu rencontres un quelconque problème 😉",
-          ],
-          {
-            name: 'Rejoindre le serveur Discord',
-            location: 'https://discord.gg/WhxZwKU',
-          },
-        ],
-      },
-      {
-        title: 'Billet',
-        components: ["Tu recevras ton *billet personnalisé* par mail quelques jours avant l'UTT Arena&nbsp;!"],
-      },
       {
         title: 'Confirmation de commande',
         components: [
@@ -122,6 +103,25 @@ export const generateTicketsEmail = (cart: DetailedCart) =>
             ],
           },
         ],
+      },
+      {
+        title: 'Tournoi',
+        components: [
+          'Voilà les dernières informations importantes nécessaires au bon déroulement de la compétition&nbsp;:',
+          [
+            'Il est nécessaire que *tous les joueurs* de *toutes les équipes* soient présents sur notre Discord',
+            'Tous les tournois débutent samedi à 10h, il faudra donc être présent *à partir de 9h00* pour un check-in de toutes les équipes et joueurs',
+            "N'hésite pas à contacter un membre du staff sur Discord si tu as une question ou que tu rencontres un quelconque problème 😉",
+          ],
+          {
+            name: 'Rejoindre le serveur Discord',
+            location: 'https://discord.gg/WhxZwKU',
+          },
+        ],
+      },
+      {
+        title: 'Billet',
+        components: ["Tu recevras ton *billet personnalisé* par mail quelques jours avant l'UTT Arena&nbsp;!"],
       },
     ],
   });
