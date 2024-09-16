@@ -1,19 +1,19 @@
 import axios, { AxiosResponse } from 'axios';
-import { readFileSync } from 'fs';
+
 import PDFkit from 'pdfkit';
 import sharp from 'sharp';
 import { Badge } from '../types';
+import env from './env';
 
 const loadImageBadgeRestricted = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-restricted.png`, 'base64')}`;
+  `data:image/png;base64,${env.front.website}/uploads/files/badges/badge-restricted.png`;
 const loadImageBadgeOrgaPrice = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-orgaprice.png`, 'base64')}`;
-const loadImageBadgeFullAccess = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-fullaccess.png`, 'base64')}`;
+  `data:image/png;base64,${env.front.website}/uploads/files/badges/badge-orgaprice.png`;
+const loadImageBadgeFullAccess = () => `data:image/png;${env.front.website}/uploads/files/badges/badge-fullaccess.png`;
 
-const loadBackRestricted = () => `data:image/png;base64,${readFileSync(`assets/badges/back-restricted.png`, 'base64')}`;
-const loadBackOrgaPrice = () => `data:image/png;base64,${readFileSync(`assets/badges/back-orgaprice.png`, 'base64')}`;
-const loadBackFullAccess = () => `data:image/png;base64,${readFileSync(`assets/badges/back-fullaccess.png`, 'base64')}`;
+const loadBackRestricted = () => `data:image/png;base64,${env.front.website}/uploads/files/badges/back-fullaccess.png`;
+const loadBackOrgaPrice = () => `data:image/png;base64,${env.front.website}/uploads/files/badges/back-orgaprice.png`;
+const loadBackFullAccess = () => `data:image/png;base64,${env.front.website}/uploads/files/badges/ba.png`;
 
 type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess';
 
