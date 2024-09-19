@@ -46,7 +46,9 @@ const env = {
     itemsPerPage: 50,
     rateLimit: loadIntEnv('API_RATE_LIMIT') || 12,
     cartLifespan: loadIntEnv('API_CART_LIFESPAN') || 3600,
+    badge: loadEnv('BADGE_SECRET') || '',
   },
+
   front: {
     website: frontEndpoint,
   },
