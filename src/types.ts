@@ -160,6 +160,7 @@ export type UserSearchQuery = {
   userId: string;
   search: string;
   type: UserType;
+  age: UserAge;
   permissions: string;
   tournament: string;
   locked: string;
