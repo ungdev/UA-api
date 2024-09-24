@@ -29,6 +29,6 @@ router.delete('/current/join-requests/current', cancelTeamRequest);
 router.delete('/current/join-requests/:userId', refuseTeamRequest);
 router.post('/current/join-requests/:userId', acceptRequest);
 
-router.get('/:teamId', getIndividualTeam);
+//router.get('/:teamId', getIndividualTeam);
 
 export default router;
