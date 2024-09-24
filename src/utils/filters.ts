@@ -143,6 +143,14 @@ export const filterTeam = (team: Team) => {
   };
 };
 
+export const filterTeamTournament = (team: Team) => {
+  const teamTournament = pick(team, ['tournamentId']);
+
+  return {
+    ...teamTournament,
+  };
+};
+
 export const filterTeamRestricted = (team: Team) => {
   const filteredTeam = pick(team, ['id', 'name', 'tournamentId', 'captainId', 'lockedAt', 'positionInQueue']);
 
