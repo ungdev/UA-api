@@ -73,6 +73,9 @@ export default [
           case 'orgas': {
             await database.user
               .findMany({
+                orderBy: {
+                  firstname: 'desc',
+                },
                 where: {
                   permissions: { contains: 'orga' },
                 },
