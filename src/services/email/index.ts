@@ -3,7 +3,7 @@ import { Log } from '@prisma/client';
 import { DetailedCart, EmailAttachement, RawUser, User, MailQuery } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
-import { generateTicketsEmail, generateValidationEmail, generatePasswordResetEmail } from './serializer';
+import { generateOrderEmail, generateValidationEmail, generatePasswordResetEmail } from './serializer';
 import type { SerializedMail } from './types';
 import database from '../database';
 
@@ -93,7 +93,7 @@ export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttache
  * request) is invalid ie. contains an object which is not a {@link Component}
  */
 export const sendPaymentConfirmation = async (cart: DetailedCart) => {
-  const content = await generateTicketsEmail(cart);
+  const content = await generateOrderEmail(cart);
   return sendEmail(content);
 };
 

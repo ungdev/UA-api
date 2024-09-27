@@ -35,7 +35,7 @@ export const serialize = async (content: Mail) => {
   };
 };
 
-export const generateTicketsEmail = (cart: DetailedCart) =>
+export const generateOrderEmail = (cart: DetailedCart) =>
   serialize({
     title: {
       topic: 'Confirmation de commande',

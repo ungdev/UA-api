@@ -7,7 +7,7 @@ import { createCart, updateCart } from '../../src/operations/carts';
 import { sendEmail } from '../../src/services/email';
 import { inflate } from '../../src/services/email/components';
 import {
-  generateTicketsEmail,
+  generateOrderEmail,
   generatePasswordResetEmail,
   generateValidationEmail,
 } from '../../src/services/email/serializer';
@@ -128,7 +128,7 @@ describe('Tests the email utils', () => {
       transactionState: TransactionState.paid,
     });
 
-    const ticketsEmail = await generateTicketsEmail(detailedCart);
+    const ticketsEmail = await generateOrderEmail(detailedCart);
 
     fs.writeFileSync('artifacts/payment.html', ticketsEmail.html);
   });
