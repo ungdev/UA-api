@@ -5,7 +5,7 @@ import { sandbox } from '../../setup';
 import * as settingsOperations from '../../../src/operations/settings';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
-import { setLoginAllowed, setShopAllowed, setTrombiAllowed } from '../../../src/operations/settings';
+import { setLoginAllowed, setShopAllowed, setTrombiAllowed , setTicketsAllowed } from '../../../src/operations/settings';
 import { createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
 
@@ -19,6 +19,7 @@ describe('PATCH /admin/settings', () => {
     await setLoginAllowed(true);
     await setShopAllowed(true);
     await setTrombiAllowed(true);
+    await setTicketsAllowed(true);
     await database.orga.deleteMany();
     await database.user.deleteMany();
   });
@@ -27,6 +28,7 @@ describe('PATCH /admin/settings', () => {
     await setLoginAllowed(true);
     await setShopAllowed(false);
     await setTrombiAllowed(false);
+    await setTicketsAllowed(false);
     admin = await createFakeUser({ permissions: [Permission.admin] });
     orga = await createFakeUser({ permissions: [Permission.orga] });
     nonAdminUser = await createFakeUser({ type: UserType.player });
@@ -99,6 +101,12 @@ describe('PATCH /admin/settings', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200, { id: 'trombi', value: false });
 
+    await request(app)
+      .patch('/admin/settings/tickets')
+      .send({ value: false })
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200, { id: 'tickets', value: false });
+
     const login = await settingsOperations.fetchSetting('login');
 
     expect(login.id).to.be.equal('login');
@@ -113,5 +121,10 @@ describe('PATCH /admin/settings', () => {
 
     expect(trombi.id).to.be.equal('trombi');
     expect(trombi.value).to.be.equal(false);
+
+    const tickets = await settingsOperations.fetchSetting('tickets');
+
+    expect(tickets.id).to.be.equal('tickets');
+    expect(tickets.value).to.be.equal(false);
   });
 });

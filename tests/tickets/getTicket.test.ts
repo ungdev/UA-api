@@ -11,8 +11,9 @@ import { generateToken } from '../../src/utils/users';
 import { createCart, fetchCarts, updateCart } from '../../src/operations/carts';
 import { fetchAllItems } from '../../src/operations/item';
 import { fetchUser } from '../../src/operations/user';
+import { setTicketsAllowed } from '../../src/operations/settings';
 
-describe('POST /users/:userId/carts', () => {
+describe('GET /tickets', () => {
   let user: User;
   let token: string;
   let team: Team;
@@ -56,6 +57,17 @@ describe('POST /users/:userId/carts', () => {
     await database.team.deleteMany();
     await database.tournament.deleteMany();
     await database.user.deleteMany();
+  });
+
+  it("should fail because tickets are not allowed", async () => {
+    await setTicketsAllowed(false);
+    
+    await request(app)
+      .get(`/tickets/${ticket.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403, { error: Error.TicketsNotAllowed });
+
+    await setTicketsAllowed(true);
   });
 
   it("should fail because cart item doesn't belong to the user", async () => {
