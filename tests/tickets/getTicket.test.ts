@@ -59,9 +59,9 @@ describe('GET /tickets', () => {
     await database.user.deleteMany();
   });
 
-  it("should fail because tickets are not allowed", async () => {
+  it('should fail because tickets are not allowed', async () => {
     await setTicketsAllowed(false);
-    
+
     await request(app)
       .get(`/tickets/${ticket.id}`)
       .set('Authorization', `Bearer ${token}`)

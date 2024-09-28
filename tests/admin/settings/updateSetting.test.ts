@@ -5,7 +5,7 @@ import { sandbox } from '../../setup';
 import * as settingsOperations from '../../../src/operations/settings';
 import database from '../../../src/services/database';
 import { Error, Permission, User, UserType } from '../../../src/types';
-import { setLoginAllowed, setShopAllowed, setTrombiAllowed , setTicketsAllowed } from '../../../src/operations/settings';
+import { setLoginAllowed, setShopAllowed, setTrombiAllowed, setTicketsAllowed } from '../../../src/operations/settings';
 import { createFakeUser } from '../../utils';
 import { generateToken } from '../../../src/utils/users';
 
