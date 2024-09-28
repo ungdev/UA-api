@@ -131,7 +131,6 @@ export const fetchUsers = async (
               { lastname: { contains: query.search } },
               { username: { contains: query.search } },
               { email: { contains: query.search } },
-              // { id: { contains: query.search } },
               {
                 team: {
                   name: { contains: query.search },
