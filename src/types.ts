@@ -313,6 +313,7 @@ export const enum Error {
   UserAlreadyScanned = "L'utilisateur a déjà scanné son billet",
   NotPaid = "Le billet n'a pas été payé",
   LoginNotAllowed = 'Tu ne peux pas te connecter actuellement',
+  TicketsNotAllowed = 'Tu ne peux pas voir ton billet actuellement',
   NotAdmin = "Tu n'es pas administrateur",
   ShopNotAllowed = 'La billetterie est fermée',
   TrombiNotAllowed = "Le trombinoscope n'est pas encore disponible",

@@ -17,7 +17,8 @@ INSERT INTO `items` (`id`, `name`, `category`, `attribute`, `price`, `reducedPri
 INSERT INTO `settings` (`id`, `value`) VALUES
 ('login', 0),
 ('shop', 0),
-('trombi', 0);
+('trombi', 0),
+('tickets', 0);
 
 INSERT INTO `commission` (`id`, `name`, `nameOnBadge`, `position`, `color`, `masterCommissionId`) VALUES
 ('animation', 'Animation', 'Anim', 1, '#123456', NULL),

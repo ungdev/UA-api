@@ -9,16 +9,18 @@ describe('GET /settings', () => {
     await settingsOperations.setLoginAllowed(false);
     await settingsOperations.setShopAllowed(false);
     await settingsOperations.setTrombiAllowed(false);
+    await settingsOperations.setTicketsAllowed(false);
 
-    await request(app).get('/settings').expect(200, { shop: false, login: false, trombi: false });
+    await request(app).get('/settings').expect(200, { shop: false, login: false, trombi: false, tickets: false });
   });
 
   it('should return the updated value', async () => {
     await settingsOperations.setLoginAllowed(true);
     await settingsOperations.setShopAllowed(true);
     await settingsOperations.setTrombiAllowed(true);
+    await settingsOperations.setTicketsAllowed(true);
 
-    await request(app).get('/settings').expect(200, { shop: true, login: true, trombi: true });
+    await request(app).get('/settings').expect(200, { shop: true, login: true, trombi: true, tickets: true });
   });
 
   it('should return an internal server error', async () => {
