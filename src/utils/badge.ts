@@ -4,15 +4,15 @@ import sharp from 'sharp';
 import { Badge } from '../types';
 import env from './env';
 
-const loadImageBadgeRestricted = () => `data:image/png;base64,${env.badge.badge_restricted}`;
-const loadImageBadgeOrgaPrice = () => `data:image/png;base64,${env.badge.badge_orgaprice}`;
-const loadImageBadgeFullAccess = () => `data:image/png;base64,${env.badge.badge_fullaccess}`;
-const loadImageBadgeInvite = () => `data:image/png;base64,${env.badge.badge_invite}`;
+const loadImageBadgeRestricted = () => env.badge.badge_restricted;
+const loadImageBadgeOrgaPrice = () => env.badge.badge_orgaprice;
+const loadImageBadgeFullAccess = () => env.badge.badge_fullaccess;
+const loadImageBadgeInvite = () => env.badge.badge_invite;
 
-const loadBackRestricted = () => `data:image/png;base64,${env.badge.badge_restricted_back}`;
-const loadBackOrgaPrice = () => `data:image/png;base64,${env.badge.badge_orgaprice_back}`;
-const loadBackFullAccess = () => `data:image/png;base64,${env.badge.badge_fullaccess_back}`;
-const loadBackInvite = () => `data:image/png;base64,${env.badge.badge_invite_back}`;
+const loadBackRestricted = () => env.badge.badge_restricted_back;
+const loadBackOrgaPrice = () => env.badge.badge_orgaprice_back;
+const loadBackFullAccess = () => env.badge.badge_fullaccess_back;
+const loadBackInvite = () => env.badge.badge_invite_back;
 
 type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess' | 'invite';
 
