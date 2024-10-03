@@ -1,21 +1,20 @@
 import axios, { AxiosResponse } from 'axios';
-import { readFileSync } from 'fs';
 import PDFkit from 'pdfkit';
 import sharp from 'sharp';
 import { Badge } from '../types';
+import env from './env';
 
-const loadImageBadgeRestricted = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-restricted.png`, 'base64')}`;
-const loadImageBadgeOrgaPrice = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-orgaprice.png`, 'base64')}`;
-const loadImageBadgeFullAccess = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-fullaccess.png`, 'base64')}`;
+const loadImageBadgeRestricted = () => `data:image/png;base64,${env.badge.badge_restricted}`;
+const loadImageBadgeOrgaPrice = () => `data:image/png;base64,${env.badge.badge_orgaprice}`;
+const loadImageBadgeFullAccess = () => `data:image/png;base64,${env.badge.badge_fullaccess}`;
+const loadImageBadgeInvite = () => `data:image/png;base64,${env.badge.badge_invite}`;
 
-const loadBackRestricted = () => `data:image/png;base64,${readFileSync(`assets/badges/back-restricted.png`, 'base64')}`;
-const loadBackOrgaPrice = () => `data:image/png;base64,${readFileSync(`assets/badges/back-orgaprice.png`, 'base64')}`;
-const loadBackFullAccess = () => `data:image/png;base64,${readFileSync(`assets/badges/back-fullaccess.png`, 'base64')}`;
+const loadBackRestricted = () => `data:image/png;base64,${env.badge.badge_restricted_back}`;
+const loadBackOrgaPrice = () => `data:image/png;base64,${env.badge.badge_orgaprice_back}`;
+const loadBackFullAccess = () => `data:image/png;base64,${env.badge.badge_fullaccess_back}`;
+const loadBackInvite = () => `data:image/png;base64,${env.badge.badge_invite_back}`;
 
-type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess';
+type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess' | 'invite';
 
 const getBack = (permission: BadgePermission): string => {
   switch (permission) {
@@ -29,6 +28,10 @@ const getBack = (permission: BadgePermission): string => {
 
     case 'fullaccess': {
       return loadBackFullAccess();
+    }
+
+    case 'invite': {
+      return loadBackInvite();
     }
 
     default: {
@@ -49,6 +52,10 @@ const getBadge = (permission: BadgePermission): string => {
 
     case 'fullaccess': {
       return loadImageBadgeFullAccess();
+    }
+
+    case 'invite': {
+      return loadImageBadgeInvite();
     }
 
     default: {
