@@ -8,21 +8,21 @@ const imageBase = async (base64: string) => {
   // convert webp base64 to png base64
   const Image = sharp(Buffer.from(base64, 'base64'));
   return `data:image/png;base64,${(await Image.toFormat('png').toBuffer()).toString('base64')}`;
-}
+};
 
-const loadImageBadgeRestricted = async () => imageBase(env.badge.badge_restricted);
-const loadImageBadgeOrgaPrice = async () => imageBase(env.badge.badge_orgaprice);
-const loadImageBadgeFullAccess = async () => imageBase(env.badge.badge_fullaccess);
-const loadImageBadgeInvite = async () => imageBase(env.badge.badge_invite);
+const loadImageBadgeRestricted = () => imageBase(env.badge.badge_restricted);
+const loadImageBadgeOrgaPrice = () => imageBase(env.badge.badge_orgaprice);
+const loadImageBadgeFullAccess = () => imageBase(env.badge.badge_fullaccess);
+const loadImageBadgeInvite = () => imageBase(env.badge.badge_invite);
 
-const loadBackRestricted = async () => imageBase(env.badge.badge_restricted_back);
-const loadBackOrgaPrice = async () => imageBase(env.badge.badge_orgaprice_back);
-const loadBackFullAccess = async () => imageBase(env.badge.badge_fullaccess_back);
-const loadBackInvite = async () => imageBase(env.badge.badge_invite_back);
+const loadBackRestricted = () => imageBase(env.badge.badge_restricted_back);
+const loadBackOrgaPrice = () => imageBase(env.badge.badge_orgaprice_back);
+const loadBackFullAccess = () => imageBase(env.badge.badge_fullaccess_back);
+const loadBackInvite = () => imageBase(env.badge.badge_invite_back);
 
 type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess' | 'invite';
 
-const getBack = async (permission: BadgePermission): Promise<string> => {
+const getBack = (permission: BadgePermission): Promise<string> => {
   switch (permission) {
     case 'restricted': {
       return loadBackRestricted();
@@ -46,7 +46,7 @@ const getBack = async (permission: BadgePermission): Promise<string> => {
   }
 };
 
-const getBadge = async (permission: BadgePermission): Promise<string> => {
+const getBadge = (permission: BadgePermission): Promise<string> => {
   switch (permission) {
     case 'restricted': {
       return loadImageBadgeRestricted();
