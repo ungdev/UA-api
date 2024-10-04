@@ -4,19 +4,25 @@ import sharp from 'sharp';
 import { Badge } from '../types';
 import env from './env';
 
-const loadImageBadgeRestricted = () => env.badge.badge_restricted;
-const loadImageBadgeOrgaPrice = () => env.badge.badge_orgaprice;
-const loadImageBadgeFullAccess = () => env.badge.badge_fullaccess;
-const loadImageBadgeInvite = () => env.badge.badge_invite;
+const imageBase = async (base64: string) => {
+  // convert webp base64 to png base64
+  const Image = sharp(Buffer.from(base64, 'base64'));
+  return `data:image/png;base64,${(await Image.toFormat('png').toBuffer()).toString('base64')}`;
+}
 
-const loadBackRestricted = () => env.badge.badge_restricted_back;
-const loadBackOrgaPrice = () => env.badge.badge_orgaprice_back;
-const loadBackFullAccess = () => env.badge.badge_fullaccess_back;
-const loadBackInvite = () => env.badge.badge_invite_back;
+const loadImageBadgeRestricted = async () => imageBase(env.badge.badge_restricted);
+const loadImageBadgeOrgaPrice = async () => imageBase(env.badge.badge_orgaprice);
+const loadImageBadgeFullAccess = async () => imageBase(env.badge.badge_fullaccess);
+const loadImageBadgeInvite = async () => imageBase(env.badge.badge_invite);
+
+const loadBackRestricted = async () => imageBase(env.badge.badge_restricted_back);
+const loadBackOrgaPrice = async () => imageBase(env.badge.badge_orgaprice_back);
+const loadBackFullAccess = async () => imageBase(env.badge.badge_fullaccess_back);
+const loadBackInvite = async () => imageBase(env.badge.badge_invite_back);
 
 type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess' | 'invite';
 
-const getBack = (permission: BadgePermission): string => {
+const getBack = async (permission: BadgePermission): Promise<string> => {
   switch (permission) {
     case 'restricted': {
       return loadBackRestricted();
@@ -40,7 +46,7 @@ const getBack = (permission: BadgePermission): string => {
   }
 };
 
-const getBadge = (permission: BadgePermission): string => {
+const getBadge = async (permission: BadgePermission): Promise<string> => {
   switch (permission) {
     case 'restricted': {
       return loadImageBadgeRestricted();
@@ -134,7 +140,7 @@ export const generateBadge = async (badges: Badge[]) => {
           }
 
           // Background
-          document.image(getBadge(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+          document.image(await getBadge(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
         }
       }
 
@@ -194,7 +200,7 @@ export const generateBadge = async (badges: Badge[]) => {
           const y = pictureY + row * rowOffset;
 
           // Background
-          document.image(getBack(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+          document.image(await getBack(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
         }
       }
 
