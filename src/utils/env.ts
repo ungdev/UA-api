@@ -9,6 +9,15 @@ if (process.env.NODE_ENV === 'test') {
   process.env.DATABASE_URL = environmentVariables.DATABASE_URL ?? process.env.DATABASE_URL;
   process.env.LOG_LEVEL = environmentVariables.LOG_LEVEL ?? process.env.DATABASE_URL;
   process.env.LOG_IN_TEST = environmentVariables.LOG_IN_TEST ?? process.env.DATABASE_URL;
+
+  process.env.BADGE_RESTRICTED = environmentVariables.BADGE_RESTRICTED ?? process.env.DATABASE_URL;
+  process.env.BADGE_RESTRICTED_BACK = environmentVariables.BADGE_RESTRICTED_BACK ?? process.env.DATABASE_URL;
+  process.env.BADGE_FULLACCESS = environmentVariables.BADGE_FULLACCESS ?? process.env.DATABASE_URL;
+  process.env.BADGE_FULLACCESS_BACK = environmentVariables.BADGE_FULLACCESS_BACK ?? process.env.DATABASE_URL;
+  process.env.BADGE_ORGAPRICE = environmentVariables.BADGE_ORGAPRICE ?? process.env.DATABASE_URL;
+  process.env.BADGE_ORGAPRICE_BACK = environmentVariables.BADGE_ORGAPRICE_BACK ?? process.env.DATABASE_URL;
+  process.env.BADGE_INVITE = environmentVariables.BADGE_INVITE ?? process.env.DATABASE_URL;
+  process.env.BADGE_INVITE_BACK = environmentVariables.BADGE_INVITE_BACK ?? process.env.DATABASE_URL;
 } else {
   // Load everything in another environment
   dotenv.config();
