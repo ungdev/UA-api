@@ -346,9 +346,8 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should fail as the user is not in the same team', async () => {
-    const otherTeam = await createFakeTeam({ members: 1, tournament: tournament.id, name: 'reallydontcare' });
+    const otherTeam = await createFakeTeam({ members: 1, tournament: 'ssbu', name: 'reallydontcare' });
     const userInOtherTeam = getCaptain(otherTeam);
-    
 
     await request(app)
       .post(`/users/current/carts`)
@@ -362,6 +361,7 @@ describe('POST /users/current/carts', () => {
     // Delete the user to not make the results wrong for the success test
     await database.cartItem.deleteMany({ where: { forUserId: userInOtherTeam.id } });
     await database.cart.deleteMany({ where: { userId: userInOtherTeam.id } });
+    await database.team.delete({ where: { captainId: userInOtherTeam.id } });
     await database.user.delete({ where: { id: userInOtherTeam.id } });
   });
 
