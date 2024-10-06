@@ -309,6 +309,19 @@ describe('POST /users/current/carts', () => {
       .expect(404, { error: Error.ItemNotFound });
   });
 
+  it('should fail as the user is not a player or a coach or a spectator', async () => {
+    const attendantUser = await createFakeUser({ type: UserType.attendant });
+
+    await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        tickets: { userIds: [attendantUser.id] },
+        supplements: [],
+      })
+      .expect(403, { error: Error.NotPlayerOrCoachOrSpectator });
+  });
+
   it('should fail as the user is already paid', async () => {
     const paidUser = await createFakeUser({ paid: true, type: UserType.player });
 
@@ -325,6 +338,20 @@ describe('POST /users/current/carts', () => {
     await database.cartItem.deleteMany({ where: { forUserId: paidUser.id } });
     await database.cart.deleteMany({ where: { userId: paidUser.id } });
     await database.user.delete({ where: { id: paidUser.id } });
+  });
+
+  it('should fail as the user is not in the same team', async () => {
+    const userInOtherTeam = await createFakeUser({ type: UserType.player });
+    const tokenInOtherTeam = generateToken(userInOtherTeam);
+
+    await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${tokenInOtherTeam}`)
+      .send({
+        tickets: { userIds: [] },
+        supplements: [],
+      })
+      .expect(403, { error: Error.NotInSameTeam });
   });
 
   it('should fail with an internal server error (inner try/catch)', () => {
