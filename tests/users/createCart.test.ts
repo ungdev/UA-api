@@ -320,6 +320,11 @@ describe('POST /users/current/carts', () => {
         supplements: [],
       })
       .expect(403, { error: Error.NotPlayerOrCoachOrSpectator });
+
+    // Delete the user to not make the results wrong for the success test
+    await database.cartItem.deleteMany({ where: { forUserId: attendantUser.id } });
+    await database.cart.deleteMany({ where: { userId: attendantUser.id } });
+    await database.user.delete({ where: { id: attendantUser.id } });
   });
 
   it('should fail as the user is already paid', async () => {
@@ -341,17 +346,23 @@ describe('POST /users/current/carts', () => {
   });
 
   it('should fail as the user is not in the same team', async () => {
-    const userInOtherTeam = await createFakeUser({ type: UserType.player });
-    const tokenInOtherTeam = generateToken(userInOtherTeam);
+    const otherTeam = await createFakeTeam({ members: 1, tournament: tournament.id, name: 'reallydontcare' });
+    const userInOtherTeam = getCaptain(otherTeam);
+    
 
     await request(app)
       .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${tokenInOtherTeam}`)
+      .set('Authorization', `Bearer ${token}`)
       .send({
-        tickets: { userIds: [] },
+        tickets: { userIds: [userInOtherTeam.id] },
         supplements: [],
       })
       .expect(403, { error: Error.NotInSameTeam });
+
+    // Delete the user to not make the results wrong for the success test
+    await database.cartItem.deleteMany({ where: { forUserId: userInOtherTeam.id } });
+    await database.cart.deleteMany({ where: { userId: userInOtherTeam.id } });
+    await database.user.delete({ where: { id: userInOtherTeam.id } });
   });
 
   it('should fail with an internal server error (inner try/catch)', () => {
