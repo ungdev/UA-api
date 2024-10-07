@@ -132,6 +132,7 @@ export const fetchUsers = async (
               { username: { contains: query.search } },
               { email: { contains: query.search } },
               { id: { contains: query.search } },
+              { discordId: { contains: query.search } },
               {
                 team: {
                   name: { contains: query.search },
