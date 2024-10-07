@@ -9,7 +9,7 @@ import chai, { expect } from 'chai';
 import chaiString from 'chai-string';
 import sinon from 'sinon';
 import database from '../src/services/database';
-import { setLoginAllowed, setShopAllowed, setTrombiAllowed } from '../src/operations/settings';
+import { setLoginAllowed, setShopAllowed, setTicketsAllowed, setTrombiAllowed } from '../src/operations/settings';
 import { transporter } from '../src/services/email';
 import { disableFakeDiscordApi, enableFakeDiscordApi } from './discord';
 import { disableFakeUploadApi, enableFakeUploadApi } from './upload';
@@ -33,6 +33,7 @@ before(async () => {
   await setLoginAllowed(true);
   await setShopAllowed(true);
   await setTrombiAllowed(true);
+  await setTicketsAllowed(true);
 
   enableFakeDiscordApi();
   enableFakeUploadApi();
@@ -55,6 +56,7 @@ after(async () => {
   // Reset the database at it was
   await setLoginAllowed(false);
   await setShopAllowed(false);
+  await setTicketsAllowed(false);
 
   // Check that there is all tests where cleaning all their data. It is to prevent data concurrency
   // We check only tables that have dynamic data. (not seeded staticly)

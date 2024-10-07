@@ -8,6 +8,7 @@ import { Error, ItemCategory, TransactionState, UserType } from '../../types';
 import { generateTicket } from '../../utils/ticket';
 import { forbidden, notFound } from '../../utils/responses';
 import { getRequestInfo } from '../../utils/users';
+import { fetchSetting } from '../../operations/settings';
 
 export default [
   // Middlewares
@@ -16,6 +17,11 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
+      const ticketsAllowed = (await fetchSetting('tickets')).value;
+      if (!ticketsAllowed) {
+        return forbidden(response, Error.TicketsNotAllowed);
+      }
+
       const { cartItemId } = request.params;
       const { user } = getRequestInfo(response);
       const team = user.teamId && (await fetchTeam(user.teamId));
