@@ -33,10 +33,6 @@ const getCommisionPermission = (commissionRole: string, commissionId: string) =>
       if (commissionRole === 'respo') return 'fullaccess';
     }
 
-    case 'ssl': {
-      if (commissionRole === 'respo') return 'fullaccess';
-    }
-
     default: {
       return 'orgaprice';
     }
