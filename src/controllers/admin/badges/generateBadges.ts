@@ -10,7 +10,7 @@ import { hasPermission } from '../../../middlewares/authentication';
 const getCommisionPermission = (commissionRole: string, commissionId: string) => {
   switch (commissionId) {
     case 'vieux': {
-      return 'restricted';
+      return 'invite';
     }
 
     case 'coord': {
