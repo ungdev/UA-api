@@ -8,6 +8,7 @@ import * as userUtils from '../../../src/utils/users';
 import { updateAdminUser } from '../../../src/operations/user';
 import { sandbox } from '../../setup';
 import * as badgeUtils from '../../../src/utils/badge';
+import { permission } from '../../../src/utils/validators';
 
 describe('POST /admin/badges', () => {
   let adminUser: User;
@@ -209,7 +210,8 @@ describe('POST /admin/badges', () => {
           {
             type: 'singlecustom',
             commissionRole: 'member',
-            commissionId: 'vieux',
+            commissionId: 'dev / annimation',
+            permission: 'orgaprice',
             firstname: 'John',
             lastname: 'Doe',
           },
