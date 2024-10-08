@@ -1,23 +1,28 @@
 import axios, { AxiosResponse } from 'axios';
-import { readFileSync } from 'fs';
 import PDFkit from 'pdfkit';
 import sharp from 'sharp';
 import { Badge } from '../types';
+import env from './env';
 
-const loadImageBadgeRestricted = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-restricted.png`, 'base64')}`;
-const loadImageBadgeOrgaPrice = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-orgaprice.png`, 'base64')}`;
-const loadImageBadgeFullAccess = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-fullaccess.png`, 'base64')}`;
+const imageBase = async (base64: string) => {
+  // convert webp base64 to png base64
+  const Image = sharp(Buffer.from(base64, 'base64'));
+  return `data:image/png;base64,${(await Image.toFormat('png').toBuffer()).toString('base64')}`;
+};
 
-const loadBackRestricted = () => `data:image/png;base64,${readFileSync(`assets/badges/back-restricted.png`, 'base64')}`;
-const loadBackOrgaPrice = () => `data:image/png;base64,${readFileSync(`assets/badges/back-orgaprice.png`, 'base64')}`;
-const loadBackFullAccess = () => `data:image/png;base64,${readFileSync(`assets/badges/back-fullaccess.png`, 'base64')}`;
+const loadImageBadgeRestricted = () => imageBase(env.badge.badge_restricted);
+const loadImageBadgeOrgaPrice = () => imageBase(env.badge.badge_orgaprice);
+const loadImageBadgeFullAccess = () => imageBase(env.badge.badge_fullaccess);
+const loadImageBadgeInvite = () => imageBase(env.badge.badge_invite);
 
-type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess';
+const loadBackRestricted = () => imageBase(env.badge.badge_restricted_back);
+const loadBackOrgaPrice = () => imageBase(env.badge.badge_orgaprice_back);
+const loadBackFullAccess = () => imageBase(env.badge.badge_fullaccess_back);
+const loadBackInvite = () => imageBase(env.badge.badge_invite_back);
 
-const getBack = (permission: BadgePermission): string => {
+type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess' | 'invite';
+
+const getBack = (permission: BadgePermission): Promise<string> => {
   switch (permission) {
     case 'restricted': {
       return loadBackRestricted();
@@ -31,13 +36,17 @@ const getBack = (permission: BadgePermission): string => {
       return loadBackFullAccess();
     }
 
+    case 'invite': {
+      return loadBackInvite();
+    }
+
     default: {
       return loadBackRestricted();
     }
   }
 };
 
-const getBadge = (permission: BadgePermission): string => {
+const getBadge = (permission: BadgePermission): Promise<string> => {
   switch (permission) {
     case 'restricted': {
       return loadImageBadgeRestricted();
@@ -49,6 +58,10 @@ const getBadge = (permission: BadgePermission): string => {
 
     case 'fullaccess': {
       return loadImageBadgeFullAccess();
+    }
+
+    case 'invite': {
+      return loadImageBadgeInvite();
     }
 
     default: {
@@ -127,7 +140,7 @@ export const generateBadge = async (badges: Badge[]) => {
           }
 
           // Background
-          document.image(getBadge(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+          document.image(await getBadge(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
         }
       }
 
@@ -187,7 +200,7 @@ export const generateBadge = async (badges: Badge[]) => {
           const y = pictureY + row * rowOffset;
 
           // Background
-          document.image(getBack(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+          document.image(await getBack(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
         }
       }
 

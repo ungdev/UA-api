@@ -236,7 +236,7 @@ export type Tournament = PrimitiveTournament & {
 /************/
 
 export type BadgeType = 'orgas' | 'custom' | 'single' | 'singlecustom';
-export type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess';
+export type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess' | 'invite';
 
 export interface Badge {
   type: BadgePermission;

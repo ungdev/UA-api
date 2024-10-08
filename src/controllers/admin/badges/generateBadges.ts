@@ -10,7 +10,7 @@ import { hasPermission } from '../../../middlewares/authentication';
 const getCommisionPermission = (commissionRole: string, commissionId: string) => {
   switch (commissionId) {
     case 'vieux': {
-      return 'restricted';
+      return 'invite';
     }
 
     case 'coord': {
@@ -172,22 +172,11 @@ export default [
 
           case 'singlecustom': {
             listBadgeToGenerate.push({
-              type: getCommisionPermission(field.commissionRole ?? 'member', field.commissionId ?? 'vieux'),
+              type: field.permission,
               firstName: field.firstname ?? '',
               lastName: field.lastname ?? '',
               image: '',
-              commissionName: await database.commission
-                .findUnique({
-                  where: { id: field.commissionId ?? 'vieux' },
-                  select: { nameOnBadge: true },
-                })
-                .then((commission) =>
-                  getCommissionName(
-                    field.commissionRole ?? 'member',
-                    field.commissionId ?? 'vieux',
-                    commission.nameOnBadge,
-                  ),
-                ),
+              commissionName: field.commissionId,
             });
             break;
           }

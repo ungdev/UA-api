@@ -3,12 +3,24 @@ import crypto from 'crypto';
 import dotenv, { DotenvPopulateInput } from 'dotenv';
 
 if (process.env.NODE_ENV === 'test') {
-  // Make sure to only load the 3 accepted variables in test
+  // Make sure to only load the accepted variables in test
   const environmentVariables: DotenvPopulateInput = {};
   dotenv.config({ path: '.env.test', processEnv: environmentVariables });
   process.env.DATABASE_URL = environmentVariables.DATABASE_URL ?? process.env.DATABASE_URL;
   process.env.LOG_LEVEL = environmentVariables.LOG_LEVEL ?? process.env.DATABASE_URL;
   process.env.LOG_IN_TEST = environmentVariables.LOG_IN_TEST ?? process.env.DATABASE_URL;
+
+  const DEFAULT_BADGE_VALUE =
+    'UklGRuQAAABXRUJQVlA4INgAAADwBACdASoUABQAPpE8mEgloyKhKA1QsBIJQBdgZYJxgK4JKssRDyp7lsJ5Rak3yQAA/vnI9CS/M7kRjFmvnjfmI4TJM+XIMCRJagu7Gfl1v0cH9qxDy7E/T9HCIDF0nlAW0v1naOAP0lpIeJYgCMO3vbv8V0mW7p0duzFR0+ElIfb2Q9hHuypJruTnig9l3fTTsD7JF8wChfGL6UIA0/KHyuFplejMC0losqvbUAqsJlqd1jfz+cvAYTOfgUZ/4B3RvppVbKE0r9DgNXtEMp0UcsYV84AAAAA=';
+
+  process.env.BADGE_RESTRICTED = environmentVariables.BADGE_RESTRICTED ?? DEFAULT_BADGE_VALUE;
+  process.env.BADGE_RESTRICTED_BACK = environmentVariables.BADGE_RESTRICTED_BACK ?? DEFAULT_BADGE_VALUE;
+  process.env.BADGE_FULLACCESS = environmentVariables.BADGE_FULLACCESS ?? DEFAULT_BADGE_VALUE;
+  process.env.BADGE_FULLACCESS_BACK = environmentVariables.BADGE_FULLACCESS_BACK ?? DEFAULT_BADGE_VALUE;
+  process.env.BADGE_ORGAPRICE = environmentVariables.BADGE_ORGAPRICE ?? DEFAULT_BADGE_VALUE;
+  process.env.BADGE_ORGAPRICE_BACK = environmentVariables.BADGE_ORGAPRICE_BACK ?? DEFAULT_BADGE_VALUE;
+  process.env.BADGE_INVITE = environmentVariables.BADGE_INVITE ?? DEFAULT_BADGE_VALUE;
+  process.env.BADGE_INVITE_BACK = environmentVariables.BADGE_INVITE_BACK ?? DEFAULT_BADGE_VALUE;
 } else {
   // Load everything in another environment
   dotenv.config();
@@ -129,6 +141,16 @@ const env = {
     colorize: loadEnv('LOG_COLORIZE') !== 'false',
     enabledInTest: loadEnv('LOG_IN_TEST') === 'true',
     sentryDsn: loadEnv('LOG_SENTRY_DSN'),
+  },
+  badge: {
+    badge_restricted: loadEnv('BADGE_RESTRICTED'),
+    badge_orgaprice: loadEnv('BADGE_ORGAPRICE'),
+    badge_fullaccess: loadEnv('BADGE_FULLACCESS'),
+    badge_invite: loadEnv('BADGE_INVITE'),
+    badge_restricted_back: loadEnv('BADGE_RESTRICTED_BACK'),
+    badge_orgaprice_back: loadEnv('BADGE_ORGAPRICE_BACK'),
+    badge_fullaccess_back: loadEnv('BADGE_FULLACCESS_BACK'),
+    badge_invite_back: loadEnv('BADGE_INVITE_BACK'),
   },
 };
 
