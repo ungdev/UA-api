@@ -1,28 +1,30 @@
 import axios, { AxiosResponse } from 'axios';
+import { readFileSync } from 'fs';
 import PDFkit from 'pdfkit';
 import sharp from 'sharp';
 import { Badge } from '../types';
-import env from './env';
 
-const imageBase = async (base64: string) => {
-  // convert webp base64 to png base64
-  const Image = sharp(Buffer.from(base64, 'base64'));
-  return `data:image/png;base64,${(await Image.toFormat('png').toBuffer()).toString('base64')}`;
+const getImage = (filename: string) => {
+  try {
+    return `data:image/png;base64,${readFileSync(`assets/badges/${filename}`, 'base64')}`;
+  } catch {
+    return `data:image/png;base64,${readFileSync(`assets/badges/blank.png`, 'base64')}`;
+  }
 };
 
-const loadImageBadgeRestricted = () => imageBase(env.badge.badge_restricted);
-const loadImageBadgeOrgaPrice = () => imageBase(env.badge.badge_orgaprice);
-const loadImageBadgeFullAccess = () => imageBase(env.badge.badge_fullaccess);
-const loadImageBadgeInvite = () => imageBase(env.badge.badge_invite);
+const loadImageBadgeRestricted = () => getImage('badge-restricted.png');
+const loadImageBadgeOrgaPrice = () => getImage('badge-orgaprice.png');
+const loadImageBadgeFullAccess = () => getImage('badge-fullaccess.png');
+const loadImageBadgeInvite = () => getImage('badge-invite.png');
 
-const loadBackRestricted = () => imageBase(env.badge.badge_restricted_back);
-const loadBackOrgaPrice = () => imageBase(env.badge.badge_orgaprice_back);
-const loadBackFullAccess = () => imageBase(env.badge.badge_fullaccess_back);
-const loadBackInvite = () => imageBase(env.badge.badge_invite_back);
+const loadBackRestricted = () => getImage('back-restricted.png');
+const loadBackOrgaPrice = () => getImage('back-orgaprice.png');
+const loadBackFullAccess = () => getImage('back-fullaccess.png');
+const loadBackInvite = () => getImage('back-invite.png');
 
 type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess' | 'invite';
 
-const getBack = (permission: BadgePermission): Promise<string> => {
+const getBack = (permission: BadgePermission): string => {
   switch (permission) {
     case 'restricted': {
       return loadBackRestricted();
@@ -46,7 +48,7 @@ const getBack = (permission: BadgePermission): Promise<string> => {
   }
 };
 
-const getBadge = (permission: BadgePermission): Promise<string> => {
+const getBadge = (permission: BadgePermission): string => {
   switch (permission) {
     case 'restricted': {
       return loadImageBadgeRestricted();
