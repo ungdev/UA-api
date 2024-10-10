@@ -142,16 +142,6 @@ const env = {
     enabledInTest: loadEnv('LOG_IN_TEST') === 'true',
     sentryDsn: loadEnv('LOG_SENTRY_DSN'),
   },
-  badge: {
-    badge_restricted: loadEnv('BADGE_RESTRICTED'),
-    badge_orgaprice: loadEnv('BADGE_ORGAPRICE'),
-    badge_fullaccess: loadEnv('BADGE_FULLACCESS'),
-    badge_invite: loadEnv('BADGE_INVITE'),
-    badge_restricted_back: loadEnv('BADGE_RESTRICTED_BACK'),
-    badge_orgaprice_back: loadEnv('BADGE_ORGAPRICE_BACK'),
-    badge_fullaccess_back: loadEnv('BADGE_FULLACCESS_BACK'),
-    badge_invite_back: loadEnv('BADGE_INVITE_BACK'),
-  },
 };
 
 // Create a warn log array to use it after winsotn initialization
