@@ -309,6 +309,24 @@ describe('POST /users/current/carts', () => {
       .expect(404, { error: Error.ItemNotFound });
   });
 
+  it('should fail as the user is not a player or a coach or a spectator', async () => {
+    const attendantUser = await createFakeUser({ type: UserType.attendant });
+
+    await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        tickets: { userIds: [attendantUser.id] },
+        supplements: [],
+      })
+      .expect(403, { error: Error.NotPlayerOrCoachOrSpectator });
+
+    // Delete the user to not make the results wrong for the success test
+    await database.cartItem.deleteMany({ where: { forUserId: attendantUser.id } });
+    await database.cart.deleteMany({ where: { userId: attendantUser.id } });
+    await database.user.delete({ where: { id: attendantUser.id } });
+  });
+
   it('should fail as the user is already paid', async () => {
     const paidUser = await createFakeUser({ paid: true, type: UserType.player });
 
@@ -325,6 +343,26 @@ describe('POST /users/current/carts', () => {
     await database.cartItem.deleteMany({ where: { forUserId: paidUser.id } });
     await database.cart.deleteMany({ where: { userId: paidUser.id } });
     await database.user.delete({ where: { id: paidUser.id } });
+  });
+
+  it('should fail as the user is not in the same team', async () => {
+    const otherTeam = await createFakeTeam({ members: 1, tournament: 'ssbu', name: 'reallydontcare' });
+    const userInOtherTeam = getCaptain(otherTeam);
+
+    await request(app)
+      .post(`/users/current/carts`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        tickets: { userIds: [userInOtherTeam.id] },
+        supplements: [],
+      })
+      .expect(403, { error: Error.NotInSameTeam });
+
+    // Delete the user to not make the results wrong for the success test
+    await database.cartItem.deleteMany({ where: { forUserId: userInOtherTeam.id } });
+    await database.cart.deleteMany({ where: { userId: userInOtherTeam.id } });
+    await database.team.delete({ where: { captainId: userInOtherTeam.id } });
+    await database.user.delete({ where: { id: userInOtherTeam.id } });
   });
 
   it('should fail with an internal server error (inner try/catch)', () => {

@@ -103,7 +103,7 @@
                       description: Le nombre de badges à créer
                     permission:
                       type: string
-                      enum: [restricted, orgaprice, fullaccess]
+                      enum: [restricted, orgaprice, fullaccess, invite]
                       description: La permission associée au badge
                     email:
                       type: string

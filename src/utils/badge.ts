@@ -4,18 +4,25 @@ import PDFkit from 'pdfkit';
 import sharp from 'sharp';
 import { Badge } from '../types';
 
-const loadImageBadgeRestricted = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-restricted.png`, 'base64')}`;
-const loadImageBadgeOrgaPrice = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-orgaprice.png`, 'base64')}`;
-const loadImageBadgeFullAccess = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-fullaccess.png`, 'base64')}`;
+const getImage = (filename: string) => {
+  try {
+    return `data:image/png;base64,${readFileSync(`assets/badges/${filename}`, 'base64')}`;
+  } catch {
+    return `data:image/png;base64,${readFileSync(`assets/badges/blank.png`, 'base64')}`;
+  }
+};
 
-const loadBackRestricted = () => `data:image/png;base64,${readFileSync(`assets/badges/back-restricted.png`, 'base64')}`;
-const loadBackOrgaPrice = () => `data:image/png;base64,${readFileSync(`assets/badges/back-orgaprice.png`, 'base64')}`;
-const loadBackFullAccess = () => `data:image/png;base64,${readFileSync(`assets/badges/back-fullaccess.png`, 'base64')}`;
+const loadImageBadgeRestricted = () => getImage('badge-restricted.png');
+const loadImageBadgeOrgaPrice = () => getImage('badge-orgaprice.png');
+const loadImageBadgeFullAccess = () => getImage('badge-fullaccess.png');
+const loadImageBadgeInvite = () => getImage('badge-invite.png');
 
-type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess';
+const loadBackRestricted = () => getImage('back-restricted.png');
+const loadBackOrgaPrice = () => getImage('back-orgaprice.png');
+const loadBackFullAccess = () => getImage('back-fullaccess.png');
+const loadBackInvite = () => getImage('back-invite.png');
+
+type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess' | 'invite';
 
 const getBack = (permission: BadgePermission): string => {
   switch (permission) {
@@ -29,6 +36,10 @@ const getBack = (permission: BadgePermission): string => {
 
     case 'fullaccess': {
       return loadBackFullAccess();
+    }
+
+    case 'invite': {
+      return loadBackInvite();
     }
 
     default: {
@@ -49,6 +60,10 @@ const getBadge = (permission: BadgePermission): string => {
 
     case 'fullaccess': {
       return loadImageBadgeFullAccess();
+    }
+
+    case 'invite': {
+      return loadImageBadgeInvite();
     }
 
     default: {
@@ -127,7 +142,7 @@ export const generateBadge = async (badges: Badge[]) => {
           }
 
           // Background
-          document.image(getBadge(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+          document.image(await getBadge(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
         }
       }
 
@@ -187,7 +202,7 @@ export const generateBadge = async (badges: Badge[]) => {
           const y = pictureY + row * rowOffset;
 
           // Background
-          document.image(getBack(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+          document.image(await getBack(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
         }
       }
 
