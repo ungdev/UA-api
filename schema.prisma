@@ -270,6 +270,26 @@ model Commission {
   @@map("commission")
 }
 
+model Result{
+  id          Int @id
+  tounamentId String
+  name        String @default("")
+  tournament  Tournament?         @relation(fields: [tournamentId], references: [id])
+
+  @@index([id])
+  @@map("results")
+}
+
+model ResultPlace {
+  id        Int @id
+  topId     Int
+  winnerId  String
+  team      Team?                 @relation(fields: [winnerId], references: [id])
+
+  @@index([id])
+  @@map("resultplace")
+}
+
 enum TransactionState {
   pending
   processing
