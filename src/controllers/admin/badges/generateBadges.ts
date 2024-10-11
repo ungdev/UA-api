@@ -175,7 +175,7 @@ export default [
               type: field.permission,
               firstName: field.firstname ?? '',
               lastName: field.lastname ?? '',
-              image: '',
+              image: field.image ?? '',
               commissionName: field.commissionId,
             });
             break;
