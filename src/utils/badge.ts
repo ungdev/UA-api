@@ -8,7 +8,7 @@ const getImage = (filename: string) => {
   try {
     return `data:image/png;base64,${readFileSync(`assets/badges/${filename}`, 'base64')}`;
   } catch {
-    return `data:image/png;base64,${readFileSync(`assets/badges/blank.png`, 'base64')}`;
+    return `data:image/png;base64,${readFileSync(`assets/defaultbadge/blank.png`, 'base64')}`;
   }
 };
 
