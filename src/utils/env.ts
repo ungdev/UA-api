@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import dotenv, { DotenvPopulateInput } from 'dotenv';
 
 if (process.env.NODE_ENV === 'test') {
-  // Make sure to only load the 3 accepted variables in test
+  // Make sure to only load the accepted variables in test
   const environmentVariables: DotenvPopulateInput = {};
   dotenv.config({ path: '.env.test', processEnv: environmentVariables });
   process.env.DATABASE_URL = environmentVariables.DATABASE_URL ?? process.env.DATABASE_URL;
