@@ -148,7 +148,7 @@ export const generateBadge = async (badges: Badge[]) => {
 
       // Place the text containing the name is the bottom middle in bold and in uppercase
       // Define a text format
-      const textFormat = document.font(fontFamily).fill([239, 220, 235]).fontSize(fontSize);
+      const textFormat = document.font(fontFamily).fill([23, 18, 74]).fontSize(fontSize);
 
       // 'for' because I dont like to repeat but I like potatoes and pain au chocolat
       for (let col = 0; col < columns; col++) {
