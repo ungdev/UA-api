@@ -24,3 +24,5 @@ pnpm-error.log
 openapi.json
 
 /docs/build
+
+/assets/badges
