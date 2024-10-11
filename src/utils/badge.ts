@@ -168,7 +168,7 @@ export const generateBadge = async (badges: Badge[]) => {
           textFormat.text(
             lastName.toUpperCase(),
             offsetX - textFormat.widthOfString(lastName.toUpperCase()) / 2,
-            offsetY - 277 - lastNameHeight / 2,
+            offsetY - 282 - lastNameHeight / 2,
           );
           // Firstname
           const firstNameHeight = textFormat.heightOfString(firstName);
