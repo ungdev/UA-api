@@ -155,10 +155,9 @@ export const generateBadge = async (badges: Badge[]) => {
 
           // Place the text containing the name is the bottom middle in bold and in uppercase
           // Define a text format
-          const textFormat =
-            badges[index].type === 'fullaccess'
-              ? document.font(fontFamily).fill([239, 220, 235]).fontSize(fontSize)
-              : document.font(fontFamily).fill([23, 18, 74]).fontSize(fontSize);
+          const color: PDFKit.Mixins.ColorValue = badges[index].type === 'fullaccess' ? [239, 220, 235] : [23, 18, 74];
+
+          const textFormat = document.font(fontFamily).fill(color).fontSize(fontSize);
 
           // Informations about badge
           const lastName = `${badges[index].lastName || ' '}`;
