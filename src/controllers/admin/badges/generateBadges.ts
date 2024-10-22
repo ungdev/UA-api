@@ -177,6 +177,7 @@ export default [
               lastName: field.lastname ?? '',
               image: field.image ?? '',
               commissionName: field.commissionId,
+              place: field.place,
             });
             break;
           }

@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { readFileSync } from 'fs';
-import PDFkit from 'pdfkit';
+import PDFkit, { text } from 'pdfkit';
 import sharp from 'sharp';
 import { Badge } from '../types';
 
@@ -205,6 +205,18 @@ export const generateBadge = async (badges: Badge[]) => {
 
           // Background
           document.image(await getBack(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+
+          const color: PDFKit.Mixins.ColorValue = [23, 18, 74];
+          const textFormat = document.font(fontFamily).fill(color).fontSize(fontSize);
+
+          // Offsets
+          const offsetX = textX + (3 - col) * columnOffset;
+          const offsetY = textY + row * rowOffset;
+
+          // Place
+          const place = badges[index].place ? `${badges[index].place}` : `Z${(index + 1).toString().padStart(3, '0')}`;
+          const placeHeight = textFormat.heightOfString(place);
+          textFormat.text(place, offsetX - 75, offsetY - 231 - placeHeight / 2);
         }
       }
 
