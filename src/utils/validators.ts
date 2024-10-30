@@ -3,8 +3,8 @@ import { UserAge, UserType, Permission, Error as ResponseError } from '../types'
 
 // Matches with LoL EUW summoner name
 const usernameRegex = /^[0-9\p{L} _#-]{3,22}$/u;
-const nameRegex = /^[\p{L}\d _'#-]{1,100}$/u;
-const lastnameRegex = /^[\p{L} _'-]{1,100}$/u;
+const nameRegex = /^[\p{L}\d _'#-]{3,30}$/u;
+const lastnameRegex = /^[\p{L} _'-]{1,50}$/u;
 const passwordRegex = /^.{6,100}$/;
 const placeRegex = /^[A-Z]\d{1,3}$/;
 
