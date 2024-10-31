@@ -107,6 +107,8 @@ export default [
                       user.orga.roles[mainCommissionIndex].commission.id,
                       user.orga.roles[mainCommissionIndex].commission.nameOnBadge,
                     ),
+                    place: user.place,
+                    firstaid: !!user.permissions.includes('firstaid'),
                   });
                 }
               });

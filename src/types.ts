@@ -245,6 +245,7 @@ export interface Badge {
   image: string;
   commissionName: string;
   place?: string;
+  firstaid?: boolean;
 }
 
 export interface BadgeField {
