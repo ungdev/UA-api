@@ -107,6 +107,8 @@ export default [
                       user.orga.roles[mainCommissionIndex].commission.id,
                       user.orga.roles[mainCommissionIndex].commission.nameOnBadge,
                     ),
+                    place: user.place,
+                    firstaid: !!user.permissions.includes('firstaid'),
                   });
                 }
               });
@@ -177,6 +179,7 @@ export default [
               lastName: field.lastname ?? '',
               image: field.image ?? '',
               commissionName: field.commissionId,
+              place: field.place,
             });
             break;
           }

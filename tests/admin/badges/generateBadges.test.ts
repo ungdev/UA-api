@@ -212,6 +212,7 @@ describe('POST /admin/badges', () => {
             permission: 'orgaprice',
             firstname: 'John',
             lastname: 'Doe',
+            firstaid: true,
           },
         ],
       })

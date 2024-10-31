@@ -244,6 +244,8 @@ export interface Badge {
   lastName: string;
   image: string;
   commissionName: string;
+  place?: string;
+  firstaid?: boolean;
 }
 
 export interface BadgeField {
@@ -257,6 +259,7 @@ export interface BadgeField {
   lastname?: string;
   name?: string;
   image?: string;
+  place?: string;
 }
 
 /**********/
