@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { readFileSync } from 'fs';
-import PDFkit, { text } from 'pdfkit';
+import PDFkit from 'pdfkit';
 import sharp from 'sharp';
 import { Badge } from '../types';
 import env from './env';
