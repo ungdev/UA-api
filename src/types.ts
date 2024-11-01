@@ -64,6 +64,7 @@ export enum Permission {
   admin = 'admin',
   repo = 'repo',
   orga = 'orga',
+  firstaid = 'firstaid',
 }
 
 export { TransactionState, UserAge, UserType, ItemCategory, Log, RepoItemType } from '@prisma/client';
