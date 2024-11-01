@@ -162,6 +162,7 @@ export default [
                   firstName: user[0].firstname,
                   lastName: user[0].lastname,
                   image: `${env.front.website}/uploads/files/orga/${user[0].orga.photoFilename}.webp`,
+                  firstaid: !!user[0].permissions.includes('firstaid'),
                   commissionName: getCommissionName(
                     user[0].orga.roles[mainCommissionIndex].commissionRole,
                     user[0].orga.roles[mainCommissionIndex].commission.id,
