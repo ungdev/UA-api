@@ -3,19 +3,27 @@ import { readFileSync } from 'fs';
 import PDFkit from 'pdfkit';
 import sharp from 'sharp';
 import { Badge } from '../types';
+import env from './env';
 
-const loadImageBadgeRestricted = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-restricted.png`, 'base64')}`;
-const loadImageBadgeOrgaPrice = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-orgaprice.png`, 'base64')}`;
-const loadImageBadgeFullAccess = () =>
-  `data:image/png;base64,${readFileSync(`assets/badges/badge-fullaccess.png`, 'base64')}`;
+const getImage = (filename: string) => {
+  try {
+    return `data:image/png;base64,${readFileSync(`assets/badges/${filename}`, 'base64')}`;
+  } catch {
+    return `data:image/png;base64,${readFileSync(`assets/defaultbadge/blank.png`, 'base64')}`;
+  }
+};
 
-const loadBackRestricted = () => `data:image/png;base64,${readFileSync(`assets/badges/back-restricted.png`, 'base64')}`;
-const loadBackOrgaPrice = () => `data:image/png;base64,${readFileSync(`assets/badges/back-orgaprice.png`, 'base64')}`;
-const loadBackFullAccess = () => `data:image/png;base64,${readFileSync(`assets/badges/back-fullaccess.png`, 'base64')}`;
+const loadImageBadgeRestricted = () => getImage('badge-restricted.png');
+const loadImageBadgeOrgaPrice = () => getImage('badge-orgaprice.png');
+const loadImageBadgeFullAccess = () => getImage('badge-fullaccess.png');
+const loadImageBadgeInvite = () => getImage('badge-invite.png');
 
-type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess';
+const loadBackRestricted = () => getImage('back-restricted.png');
+const loadBackOrgaPrice = () => getImage('back-orgaprice.png');
+const loadBackFullAccess = () => getImage('back-fullaccess.png');
+const loadBackInvite = () => getImage('back-invite.png');
+
+type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess' | 'invite';
 
 const getBack = (permission: BadgePermission): string => {
   switch (permission) {
@@ -29,6 +37,10 @@ const getBack = (permission: BadgePermission): string => {
 
     case 'fullaccess': {
       return loadBackFullAccess();
+    }
+
+    case 'invite': {
+      return loadBackInvite();
     }
 
     default: {
@@ -49,6 +61,10 @@ const getBadge = (permission: BadgePermission): string => {
 
     case 'fullaccess': {
       return loadImageBadgeFullAccess();
+    }
+
+    case 'invite': {
+      return loadImageBadgeInvite();
     }
 
     default: {
@@ -114,6 +130,7 @@ export const generateBadge = async (badges: Badge[]) => {
 
           // Informations about badge
           const image = await fetchImage(badges[index].image);
+          const firstaid = await fetchImage(`${env.front.website}/uploads/files/badges/first-aid.png`);
           // Coordonates
           const x = pictureX + col * columnOffset;
           const y = pictureY + row * rowOffset;
@@ -127,13 +144,14 @@ export const generateBadge = async (badges: Badge[]) => {
           }
 
           // Background
-          document.image(getBadge(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+          document.image(await getBadge(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+
+          // FirstAid
+          if (badges[index].firstaid) {
+            document.image(firstaid, x + 60, y + 216, { width: pictureSize - 120 });
+          }
         }
       }
-
-      // Place the text containing the name is the bottom middle in bold and in uppercase
-      // Define a text format
-      const textFormat = document.font(fontFamily).fill([239, 220, 235]).fontSize(fontSize);
 
       // 'for' because I dont like to repeat but I like potatoes and pain au chocolat
       for (let col = 0; col < columns; col++) {
@@ -141,6 +159,12 @@ export const generateBadge = async (badges: Badge[]) => {
           const index = page * columns * rows + col * rows + row;
 
           if (index >= badges.length) break;
+
+          // Place the text containing the name is the bottom middle in bold and in uppercase
+          // Define a text format
+          const color: PDFKit.Mixins.ColorValue = badges[index].type === 'fullaccess' ? [239, 220, 235] : [23, 18, 74];
+
+          const textFormat = document.font(fontFamily).fill(color).fontSize(fontSize);
 
           // Informations about badge
           const lastName = `${badges[index].lastName || ' '}`;
@@ -153,7 +177,7 @@ export const generateBadge = async (badges: Badge[]) => {
           textFormat.text(
             lastName.toUpperCase(),
             offsetX - textFormat.widthOfString(lastName.toUpperCase()) / 2,
-            offsetY - 277 - lastNameHeight / 2,
+            offsetY - 282 - lastNameHeight / 2,
           );
           // Firstname
           const firstNameHeight = textFormat.heightOfString(firstName);
@@ -187,7 +211,21 @@ export const generateBadge = async (badges: Badge[]) => {
           const y = pictureY + row * rowOffset;
 
           // Background
-          document.image(getBack(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+          document.image(await getBack(badges[index].type), x, y, { width: pictureSize }); // After the image because of... 42
+
+          const color: PDFKit.Mixins.ColorValue = [23, 18, 74];
+          const textFormat = document.font(fontFamily).fill(color).fontSize(fontSize);
+
+          // Offsets
+          const offsetX = textX + (3 - col) * columnOffset;
+          const offsetY = textY + row * rowOffset;
+
+          // Place
+          const place = badges[index].place
+            ? `${badges[index].place}`
+            : `Z${(index + 501).toString().padStart(3, '0')}`;
+          const placeHeight = textFormat.heightOfString(place);
+          textFormat.text(place, offsetX - 75, offsetY - 231 - placeHeight / 2);
         }
       }
 

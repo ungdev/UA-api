@@ -64,6 +64,7 @@ export enum Permission {
   admin = 'admin',
   repo = 'repo',
   orga = 'orga',
+  firstaid = 'firstaid',
 }
 
 export { TransactionState, UserAge, UserType, ItemCategory, Log, RepoItemType } from '@prisma/client';
@@ -236,7 +237,7 @@ export type Tournament = PrimitiveTournament & {
 /************/
 
 export type BadgeType = 'orgas' | 'custom' | 'single' | 'singlecustom';
-export type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess';
+export type BadgePermission = 'restricted' | 'orgaprice' | 'fullaccess' | 'invite';
 
 export interface Badge {
   type: BadgePermission;
@@ -244,6 +245,8 @@ export interface Badge {
   lastName: string;
   image: string;
   commissionName: string;
+  place?: string;
+  firstaid?: boolean;
 }
 
 export interface BadgeField {
@@ -256,6 +259,8 @@ export interface BadgeField {
   firstname?: string;
   lastname?: string;
   name?: string;
+  image?: string;
+  place?: string;
 }
 
 /**********/

@@ -10,7 +10,7 @@ import { hasPermission } from '../../../middlewares/authentication';
 const getCommisionPermission = (commissionRole: string, commissionId: string) => {
   switch (commissionId) {
     case 'vieux': {
-      return 'restricted';
+      return 'invite';
     }
 
     case 'coord': {
@@ -30,10 +30,6 @@ const getCommisionPermission = (commissionRole: string, commissionId: string) =>
     }
 
     case 'electricity': {
-      if (commissionRole === 'respo') return 'fullaccess';
-    }
-
-    case 'ssl': {
       if (commissionRole === 'respo') return 'fullaccess';
     }
 
@@ -73,6 +69,9 @@ export default [
           case 'orgas': {
             await database.user
               .findMany({
+                orderBy: {
+                  firstname: 'desc',
+                },
                 where: {
                   permissions: { contains: 'orga' },
                 },
@@ -108,6 +107,8 @@ export default [
                       user.orga.roles[mainCommissionIndex].commission.id,
                       user.orga.roles[mainCommissionIndex].commission.nameOnBadge,
                     ),
+                    place: user.place,
+                    firstaid: !!user.permissions.includes('firstaid'),
                   });
                 }
               });
@@ -161,6 +162,7 @@ export default [
                   firstName: user[0].firstname,
                   lastName: user[0].lastname,
                   image: `${env.front.website}/uploads/files/orga/${user[0].orga.photoFilename}.webp`,
+                  firstaid: !!user[0].permissions.includes('firstaid'),
                   commissionName: getCommissionName(
                     user[0].orga.roles[mainCommissionIndex].commissionRole,
                     user[0].orga.roles[mainCommissionIndex].commission.id,
@@ -173,22 +175,12 @@ export default [
 
           case 'singlecustom': {
             listBadgeToGenerate.push({
-              type: getCommisionPermission(field.commissionRole ?? 'member', field.commissionId ?? 'vieux'),
+              type: field.permission,
               firstName: field.firstname ?? '',
               lastName: field.lastname ?? '',
-              image: '',
-              commissionName: await database.commission
-                .findUnique({
-                  where: { id: field.commissionId ?? 'vieux' },
-                  select: { nameOnBadge: true },
-                })
-                .then((commission) =>
-                  getCommissionName(
-                    field.commissionRole ?? 'member',
-                    field.commissionId ?? 'vieux',
-                    commission.nameOnBadge,
-                  ),
-                ),
+              image: field.image ?? '',
+              commissionName: field.commissionId,
+              place: field.place,
             });
             break;
           }

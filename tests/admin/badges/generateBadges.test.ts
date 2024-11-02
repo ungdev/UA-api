@@ -208,10 +208,11 @@ describe('POST /admin/badges', () => {
         fields: [
           {
             type: 'singlecustom',
-            commissionRole: 'member',
-            commissionId: 'vieux',
+            commissionId: 'dev / annimation',
+            permission: 'orgaprice',
             firstname: 'John',
             lastname: 'Doe',
+            firstaid: true,
           },
         ],
       })
