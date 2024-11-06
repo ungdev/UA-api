@@ -4,7 +4,7 @@ import { readFile } from 'fs/promises';
 import { render } from 'mustache';
 import nodemailer from 'nodemailer';
 import { Log } from '@prisma/client';
-import { EmailAttachement, RawUser, MailQuery } from '../../types';
+import { EmailAttachement, RawUser, MailQuery, User } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
 import type { Component, Mail, SerializedMail } from './types';
@@ -170,13 +170,13 @@ export const sendMailsFromTemplate = async (template: string, targets: any[]) =>
   }
 };
 
-export const sendGeneralMail = async (generalMail: string) => {
+export const sendGeneralMail = async (generalMail: string, previewUser: User | null = null) => {
   const mail = availableGeneralMails[generalMail];
 
   if (!mail) {
     return false;
   }
 
-  const targets = await mail.targets();
+  const targets = previewUser == null ? await mail.targets() : [{ email: previewUser.email }];
   return sendMailsFromTemplate(generalMail, targets);
 };

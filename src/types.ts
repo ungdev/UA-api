@@ -37,6 +37,11 @@ export type EmailAttachement = Mail.Attachment & {
   content: Buffer;
 };
 
+export type MailGeneralQuery = {
+  readonly preview: boolean;
+  readonly generalMail: string;
+};
+
 export type MailQuery = ParsedQs & {
   readonly locked?: boolean;
   readonly tournamentId?: string;
