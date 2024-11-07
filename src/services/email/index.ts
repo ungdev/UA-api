@@ -63,15 +63,18 @@ export const getEmailsLogs = async () =>
     user: RawUser;
   })[];
 
-const emailOptions = env.email.gmail
-  ? {
-      service: 'gmail',
-      auth: {
-        user: env.email.username,
-        pass: env.email.password,
-      },
-    }
-  : env.email.uri;
+const emailOptions = {
+  host: env.email.host,
+  port: env.email.port,
+  secure: env.email.secure,
+  auth: {
+    user: env.email.auth.user,
+    pass: env.email.auth.password,
+  },
+  tls: {
+    rejectUnauthorized: env.email.rejectUnauthorized,
+  },
+}
 
 export const transporter = nodemailer.createTransport(emailOptions);
 
