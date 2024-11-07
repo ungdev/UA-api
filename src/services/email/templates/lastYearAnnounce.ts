@@ -1,10 +1,9 @@
 import { serialize } from '..';
-import { RawUser } from '../../../types';
 import env from '../../../utils/env';
 
-export const generateLastYearPublicAnnounce = (user: Omit<RawUser, 'permissions'>) =>
+export const generateLastYearPublicAnnounce = (email: string) =>
   serialize({
-    receiver: user.email,
+    receiver: email,
     reason:
       "Tu as reçu ce mail car tu as participé à l'UTT Arena en décembre 2023. Si ce n'est pas le cas, ignore ce message.",
     title: {

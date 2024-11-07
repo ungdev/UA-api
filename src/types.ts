@@ -42,6 +42,14 @@ export type MailGeneralQuery = {
   readonly generalMail: string;
 };
 
+export type MailTemplateQuery = {
+  readonly preview: boolean;
+  readonly templateMail: string;
+  // TODO: Fix this type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly targets: any[];
+};
+
 export type MailQuery = ParsedQs & {
   readonly locked?: boolean;
   readonly tournamentId?: string;
@@ -79,6 +87,7 @@ export { TransactionState, UserAge, UserType, ItemCategory, Log, RepoItemType } 
 /************************/
 
 // We define all the type here, even if we dont extend them to avoid importing @prisma/client in files and mix both types to avoid potential errors
+import { transports } from 'winston';
 
 export type Setting = prisma.Setting;
 export type CartItem = prisma.CartItem;
