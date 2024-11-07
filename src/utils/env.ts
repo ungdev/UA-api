@@ -77,7 +77,7 @@ const env = {
     secure: loadEnv('EMAIL_SECURE') !== 'false',
     sender: {
       name: loadEnv('EMAIL_SENDER_NAME') || 'UTT Arena',
-      address: loadEnv('EMAIL_SENDER_ADDRESS') || 'arena@utt'
+      address: loadEnv('EMAIL_SENDER_ADDRESS') || 'arena@utt.fr'
     },
     auth: {
       user: loadEnv('EMAIL_AUTH_USER'),
