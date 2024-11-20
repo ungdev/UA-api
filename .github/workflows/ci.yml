@@ -136,11 +136,3 @@ jobs:
           push: true
           tags: |
             uttarena/api:${{ github.ref == 'refs/heads/master' && 'master' || 'dev' }}
-      - uses: lazy-actions/slatify@master
-        if: always()
-        with:
-          type: ${{ job.status }}
-          job_name: '*Deployment to ${{ env.RESOURCE_NAME }}*'
-          commit: true
-          url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          token: ${{ secrets.GITHUB_TOKEN }}
