@@ -128,6 +128,7 @@ jobs:
       - name: Login to registry
         uses: docker/login-action@v3
         with:
+          registry: ${{ secrets.REGISTRY_URL }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_TOKEN }}
       - name: Build and push
