@@ -135,5 +135,6 @@ jobs:
         uses: docker/build-push-action@v6
         with: 
           push: true
+          registry: ${{ secrets.REGISTRY_URL }}
           tags: |
             uttarena/api:${{ github.ref == 'refs/heads/master' && 'master' || 'dev' }}
