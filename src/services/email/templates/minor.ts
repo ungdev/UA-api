@@ -8,7 +8,7 @@ export const generateMinorEmail = (user: Omit<RawUser, 'permissions'>) =>
       banner: 'On se retrouve ce weekend !',
       highlight: `Salut ${user.firstname}`,
       short: "L'UTT Arena arrive à grands pas 🔥",
-      topic: "Ton ticket pour l'UTT Arena",
+      topic: "N'oublie pas ton autorisation parentale",
     },
     receiver: user.email,
     sections: [

@@ -8,7 +8,7 @@ export const generateNotPaidEmail = (user: Omit<RawUser, 'permissions'>) =>
       banner: 'On se retrouve ce weekend !',
       highlight: `Salut ${user.firstname}`,
       short: "L'UTT Arena arrive à grands pas 🔥",
-      topic: "Ton ticket pour l'UTT Arena",
+      topic: "Tu n'as pas encore payé",
     },
     receiver: user.email,
     sections: [

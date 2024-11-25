@@ -74,7 +74,7 @@ const emailOptions = {
   tls: {
     rejectUnauthorized: env.email.rejectUnauthorized,
   },
-}
+};
 
 export const transporter = nodemailer.createTransport(emailOptions);
 
