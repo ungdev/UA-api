@@ -20,12 +20,15 @@ export default [
   ),
 
   // Controller
-  (request: Request, response: Response, next: NextFunction) => {
+  async (request: Request, response: Response, next: NextFunction) => {
     try {
       const mail = request.body as MailGeneralQuery;
       const { user } = getRequestInfo(response);
 
-      return sendGeneralMail(mail.generalMail, mail.preview ? user : null);
+      let nbMailSent = await sendGeneralMail(mail.generalMail, mail.preview ? user : null);
+
+      // TODO: change return to a created response
+      return response.json({ message: `Sent ${nbMailSent} emails` });
     } catch (error) {
       return next(error);
     }

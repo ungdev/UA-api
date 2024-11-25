@@ -21,13 +21,16 @@ export default [
   ),
 
   // Controller
-  (request: Request, response: Response, next: NextFunction) => {
+  async (request: Request, response: Response, next: NextFunction) => {
     try {
       const mail = request.body as MailTemplateQuery;
       const { user } = getRequestInfo(response);
 
       // TODO: Fix as array depends on the template...
-      return sendMailsFromTemplate(mail.templateMail, mail.preview ? [user] : mail.targets);
+      await sendMailsFromTemplate(mail.templateMail, mail.preview ? [user] : mail.targets);
+
+      // TODO: change return to a created response
+      return response.json({ message: `Sent ${mail.targets.length} emails` });
     } catch (error) {
       return next(error);
     }

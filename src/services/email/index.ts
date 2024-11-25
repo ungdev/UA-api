@@ -180,6 +180,8 @@ export const sendGeneralMail = async (generalMail: string, previewUser: User | n
     return false;
   }
 
-  const targets = previewUser == null ? await mail.targets() : [{ email: previewUser.email }];
-  return sendMailsFromTemplate(generalMail, targets);
+  const targets = previewUser == null ? await mail.targets() : [{ firstname:previewUser.firstname, email: previewUser.email }];
+  await sendMailsFromTemplate(generalMail, targets);
+
+  return targets.length;
 };
