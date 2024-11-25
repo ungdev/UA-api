@@ -25,7 +25,7 @@ export default [
       const mail = request.body as MailGeneralQuery;
       const { user } = getRequestInfo(response);
 
-      let nbMailSent = await sendGeneralMail(mail.generalMail, mail.preview ? user : null);
+      const nbMailSent = await sendGeneralMail(mail.generalMail, mail.preview ? user : null);
 
       // TODO: change return to a created response
       return response.json({ message: `Sent ${nbMailSent} emails` });

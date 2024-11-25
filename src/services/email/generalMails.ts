@@ -1,6 +1,6 @@
 import { MailGeneral } from '.';
 import { getNextPaidAndValidatedUserBatch } from '../../operations/user';
-import { getNotOnDiscordServerUsers, getNotPaidSsbuUsers, getNotPaidUsers } from './targets';
+import { getMinorUsers, getNotOnDiscordServerUsers, getNotPaidSsbuUsers, getNotPaidUsers } from './targets';
 
 export const availableGeneralMails: {
   [key: string]: MailGeneral;
@@ -10,7 +10,7 @@ export const availableGeneralMails: {
     template: 'joindiscord',
   },
   minor: {
-    targets: getNotPaidUsers,
+    targets: getMinorUsers,
     template: 'minor',
   },
   notpaid: {
