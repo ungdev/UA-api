@@ -84,7 +84,7 @@ describe('POST /auth/resendEmail', () => {
   });
 
   it('should return an error as the code has not been sent successfully', async () => {
-    sandbox.stub(mailOperations, 'sendValidationCode').throws('Unexpected error');
+    sandbox.stub(mailOperations, 'sendMailsFromTemplate').throws('Unexpected error');
     await request(app)
       .post('/auth/resendEmail')
       .send({

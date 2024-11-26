@@ -37,6 +37,19 @@ export type EmailAttachement = Mail.Attachment & {
   content: Buffer;
 };
 
+export type MailGeneralQuery = {
+  readonly preview: boolean;
+  readonly generalMail: string;
+};
+
+export type MailTemplateQuery = {
+  readonly preview: boolean;
+  readonly templateMail: string;
+  // TODO: Fix this type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly targets: any[];
+};
+
 export type MailQuery = ParsedQs & {
   readonly locked?: boolean;
   readonly tournamentId?: string;

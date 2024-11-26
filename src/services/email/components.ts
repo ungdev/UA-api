@@ -1,5 +1,5 @@
 import { escape } from 'mustache';
-import type { Component } from './types';
+import type { Component, MailButton, MailTable } from './types';
 
 export const style = {
   text: {
@@ -35,7 +35,7 @@ export const escapeText = (text: string) =>
     .replaceAll(/_([^<>_]+)_/gi, '<i>$1</i>')
     .replaceAll(/\*([^*<>]+)\*/gi, '<strong>$1</strong>');
 
-const inflateButton = (item: Component.Button) =>
+const inflateButton = (item: MailButton) =>
   `<a target="_blank" href="${escapeText(
     item.location,
   )}" style="border:none;text-decoration:none;user-select:none"><button style="background-color:${
@@ -44,12 +44,12 @@ const inflateButton = (item: Component.Button) =>
     style.text.font
   };outline:none;border:none;color:${style.button.font};cursor:pointer">${item.name}</button></a>`;
 
-const inflateButtonWrapper = (item: Component.Button | Component.Button[]) =>
+const inflateButtonWrapper = (item: MailButton | MailButton[]) =>
   `<tr><td><table style="border:none;border-spacing:5px"><tbody><tr>${
     Array.isArray(item) ? item.map(inflateButton).join('') : inflateButton(item)
   }</tr></tbody></table></td></tr>`;
 
-const inflateTable = (item: Component.Table) => {
+const inflateTable = (item: MailTable) => {
   const properties = Object.keys(item.items[0] ?? {});
   if (properties.length === 0 || item.items.length < 2) return '';
   return `${
@@ -99,9 +99,8 @@ const inflateText = (item: string) =>
 export const inflate = (content: Component): string => {
   if (typeof content === 'string') return inflateText(content);
   if (Array.isArray(content)) {
-    if (content.some((item: string | Component.Button) => typeof item !== 'object'))
-      return inflateList(<string[]>content);
-    return inflateButtonWrapper(<Component.Button[]>content);
+    if (content.some((item: string | MailButton) => typeof item !== 'object')) return inflateList(<string[]>content);
+    return inflateButtonWrapper(<MailButton[]>content);
   }
   if ('location' in content) return inflateButtonWrapper(content);
   if ('items' in content) return inflateTable(content);

@@ -72,16 +72,20 @@ const env = {
   email: {
     // We don't use the normal 25 port because of testing (25 listening is usually denied)
     // Also reject self signed certificates only in tests
-    uri: loadEnv('SMTP_URI') || `smtp://localhost:2525/?pool=true&maxConnections=1&tls.rejectUnauthorized=${!isTest}`,
+    host: loadEnv('EMAIL_HOST'),
+    port: loadIntEnv('EMAIL_PORT'),
+    secure: loadEnv('EMAIL_SECURE') !== 'false',
     sender: {
       name: loadEnv('EMAIL_SENDER_NAME') || 'UTT Arena',
       address: loadEnv('EMAIL_SENDER_ADDRESS') || 'arena@utt.fr',
     },
-    gmail: loadEnv('GMAIL') === 'true',
-    username: loadEnv('GMAIL_USERNAME') || null,
-    password: loadEnv('GMAIL_PASSWORD') || null,
-    partners: ['utt.fr', 'utc.fr', 'utbm.fr'],
+    auth: {
+      user: loadEnv('EMAIL_AUTH_USER'),
+      password: loadEnv('EMAIL_AUTH_PASSWORD'),
+    },
+    rejectUnauthorized: loadEnv('EMAIL_REJECT_UNAUTHORIZED') !== 'false',
     maxMailsPerBatch: loadIntEnv('MAX_MAIL_PER_BATCH') || 100,
+    partners: loadEnv('PARTNER_MAILS')?.split(',') || [],
   },
   stripe: {
     callback: `${frontEndpoint}/stripe`,
