@@ -87,7 +87,6 @@ export { TransactionState, UserAge, UserType, ItemCategory, Log, RepoItemType } 
 /************************/
 
 // We define all the type here, even if we dont extend them to avoid importing @prisma/client in files and mix both types to avoid potential errors
-import { transports } from 'winston';
 
 export type Setting = prisma.Setting;
 export type CartItem = prisma.CartItem;
