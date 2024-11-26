@@ -276,7 +276,7 @@ export const enum Error {
   InvalidParameters = 'Paramètres de la requête invalides',
   InvalidQueryParameters = 'Paramètres de la requête invalides (query)',
   EmptyBasket = 'Le panier est vide',
-  InvalidUsername = "Nom d'utilisateur invalide (minimum 3 charactères)",
+  InvalidUsername = "Nom d'utilisateur invalide (entre 3 et 22 charactères)",
   InvalidFirstName = 'Prénom invalide',
   InvalidLastName = 'Nom de famille invalide',
   InvalidEmail = 'Email invalide',

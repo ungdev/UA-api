@@ -2,8 +2,9 @@ import Joi from 'joi';
 import { UserAge, UserType, Permission, Error as ResponseError } from '../types';
 
 // Matches with LoL EUW summoner name
-const usernameRegex = /^[0-9\p{L} _#-]{3,22}$/u;
-const nameRegex = /^[\p{L}\d _'#-]{3,30}$/u;
+const usernameRegex = /^[0-9\p{L} _'#-]{3,22}$/u;
+const nameRegex = /^[\p{L}\d _'-]{3,30}$/u;
+const teamnameRegex = /^[\p{L}\d _'#-]{3,32}$/u;
 const lastnameRegex = /^[\p{L} _'-]{1,50}$/u;
 const passwordRegex = /^.{6,100}$/;
 const placeRegex = /^[A-Z]\d{1,3}$/;
@@ -36,7 +37,7 @@ export const permissions = Joi.string().regex(
 export const stringBoolean = Joi.string().valid('true', 'false').error(new Error(ResponseError.stringBooleanError));
 
 // Team
-export const teamName = Joi.string().regex(nameRegex).error(new Error(ResponseError.InvalidTeamName));
+export const teamName = Joi.string().regex(teamnameRegex).error(new Error(ResponseError.InvalidTeamName));
 
 // Cart
 export const quantity = Joi.number().integer().min(1).error(new Error(ResponseError.EmptyBasket));
