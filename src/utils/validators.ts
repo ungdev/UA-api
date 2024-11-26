@@ -2,9 +2,9 @@ import Joi from 'joi';
 import { UserAge, UserType, Permission, Error as ResponseError } from '../types';
 
 // Matches with LoL EUW summoner name
-const usernameRegex = /^[0-9\p{L} _#-]{3,22}$/u;
-const nameRegex = /^[\p{L}\d _'#-]{3,30}$/u;
-const teamnameRegex = /^[\p{L}\d _'#-]{3,40}$/u;
+const usernameRegex = /^[0-9\p{L} _'#-]{3,22}$/u;
+const nameRegex = /^[\p{L}\d _'-]{3,30}$/u;
+const teamnameRegex = /^[\p{L}\d _'#-]{3,32}$/u;
 const lastnameRegex = /^[\p{L} _'-]{1,50}$/u;
 const passwordRegex = /^.{6,100}$/;
 const placeRegex = /^[A-Z]\d{1,3}$/;
