@@ -79,13 +79,6 @@ const env = {
       name: loadEnv('EMAIL_SENDER_NAME') || 'UTT Arena',
       address: loadEnv('EMAIL_SENDER_ADDRESS') || 'arena@utt.fr',
     },
-<<<<<<< HEAD
-=======
-    auth: {
-      user: loadEnv('EMAIL_AUTH_USER'),
-      password: loadEnv('EMAIL_AUTH_PASSWORD'),
-    },
->>>>>>> origin/dev
     rejectUnauthorized: loadEnv('EMAIL_REJECT_UNAUTHORIZED') !== 'false',
     maxMailsPerBatch: loadIntEnv('MAX_MAIL_PER_BATCH') || 100,
     partners: loadEnv('PARTNER_MAILS')?.split(',') || [],
