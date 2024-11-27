@@ -67,10 +67,6 @@ const emailOptions = {
   host: env.email.host,
   port: env.email.port,
   secure: env.email.secure,
-  auth: {
-    user: env.email.auth.user,
-    pass: env.email.auth.password,
-  },
   tls: {
     rejectUnauthorized: env.email.rejectUnauthorized,
   },
@@ -117,8 +113,9 @@ export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttache
     });
 
     logger.info(`Email sent to ${mail.to}`);
-  } catch {
+  } catch (error) {
     logger.warn(`Could not send email to ${mail.to}`);
+    logger.error(error);
   }
 };
 
