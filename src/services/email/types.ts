@@ -1,30 +1,30 @@
-export declare type Component = string | string[] | Component.Button | Component.Button[] | Component.Table;
+import { EmailAttachement } from '../../types';
 
-export declare namespace Component {
-  interface Button {
-    /** Button text */
-    name: string;
-    /** Button link */
-    location: string;
-    /** Button color. Matches UA colors by default */
-    color?: `#${string}`;
-  }
-
-  interface Table {
-    /** Name of the table. Displayed BEFORE the table */
-    name?: string;
-    /**
-     * List of ALL rows contained in the table.
-     * The first element of thie array will be used for column creation:
-     * All keys of this object will be attached to a column, named by the
-     * item value corresponding to the (column) key
-     * All other object will match one single row and fill the columns depending
-     * on their keys.
-     * This means that all columns must be defined in the first object
-     */
-    items: Array<{ [key: string]: string }>;
-  }
+export interface MailButton {
+  /** Button text */
+  name: string;
+  /** Button link */
+  location: string;
+  /** Button color. Matches UA colors by default */
+  color?: `#${string}`;
 }
+
+export interface MailTable {
+  /** Name of the table. Displayed BEFORE the table */
+  name?: string;
+  /**
+   * List of ALL rows contained in the table.
+   * The first element of thie array will be used for column creation:
+   * All keys of this object will be attached to a column, named by the
+   * item value corresponding to the (column) key
+   * All other object will match one single row and fill the columns depending
+   * on their keys.
+   * This means that all columns must be defined in the first object
+   */
+  items: Array<{ [key: string]: string }>;
+}
+
+export declare type Component = string | string[] | MailButton | MailButton[] | MailTable;
 
 export declare interface Mail {
   /** The email address to send this email to (written in the footer, before the {@link reason}) */
@@ -60,6 +60,11 @@ export declare interface Mail {
     title: string;
     components: Component[];
   }[];
+  /**
+   * The attachments to include in the mail. If this property is omitted (or if the list is empty),
+   * no attachment will be included in the mail.
+   */
+  attachments?: EmailAttachement[];
 }
 
 export declare interface SerializedMail {
