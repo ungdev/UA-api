@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { updateCart } from '../../operations/carts';
-import { sendMailsFromTemplate } from '../../services/email';
+import { sendPaymentConfirmation } from '../../services/email';
 import { TransactionState } from '../../types';
 import { success } from '../../utils/responses';
 import { paymentIntentWebhookMiddleware } from '../../utils/stripe';
@@ -26,7 +26,7 @@ export default [
         transactionState: TransactionState.paid,
         succeededAt: new Date(Date.now()),
       });
-      await sendMailsFromTemplate('orderconfirmation', [updatedCart]);
+      await sendPaymentConfirmation(updatedCart);
 
       return success(response, { api: 'ok' });
     } catch (error) {

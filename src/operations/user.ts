@@ -541,7 +541,7 @@ export const getPaidAndValidatedUsers = () =>
     },
   });
 
-export const getNextPaidAndValidatedUserBatch = async (batchMaxSize: number = env.email.maxMailsPerBatch) => {
+export const getNextPaidAndValidatedUserBatch = async (batchMaxSize: number) => {
   const users = await database.user.findMany({
     where: {
       discordId: {

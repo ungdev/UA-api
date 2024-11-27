@@ -1,48 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { readFile } from 'fs/promises';
-import { render } from 'mustache';
 import nodemailer from 'nodemailer';
 import { Log } from '@prisma/client';
-import { EmailAttachement, RawUser, MailQuery, User } from '../../types';
+import { DetailedCart, EmailAttachement, RawUser, User, MailQuery } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
-import type { Component, Mail, SerializedMail } from './types';
+import { generateTicketsEmail, generateValidationEmail, generatePasswordResetEmail } from './serializer';
+import type { SerializedMail } from './types';
 import database from '../database';
-import { escapeText, inflate, style } from './components';
-import { availableTemplates } from './templates';
-import { availableGeneralMails } from './generalMails';
 
 export type { Component, Mail, SerializedMail } from './types';
-
-/**
- * Applied {@link Mail} content in the template
- * @throws an error when an unknwon component is in the {@link Mail#sections#components}
- */
-export const serialize = async (content: Mail) => {
-  const template = await readFile('assets/email/template.html', 'utf8');
-  const year = new Date().getFullYear();
-  return <SerializedMail>{
-    to: content.receiver,
-    subject: `${content.title.topic} - UTT Arena ${year}`,
-    html: render(
-      template,
-      {
-        ...content,
-        year,
-        style,
-      },
-      undefined,
-      {
-        escape: (text: Component[] | string): string =>
-          // These are the elements mustache tries to write in the mail. They can be
-          // full text or the list of components (cf. assets/email/template.html)
-          // We escape text and handle components
-          typeof text === 'string' ? escapeText(text) : text.map(inflate).join(''),
-      },
-    ),
-  };
-};
 
 export const getEmailsLogs = async () =>
   (await database.log.findMany({
@@ -63,18 +28,15 @@ export const getEmailsLogs = async () =>
     user: RawUser;
   })[];
 
-const emailOptions = {
-  host: env.email.host,
-  port: env.email.port,
-  secure: env.email.secure,
-  auth: {
-    user: env.email.auth.user,
-    pass: env.email.auth.password,
-  },
-  tls: {
-    rejectUnauthorized: env.email.rejectUnauthorized,
-  },
-};
+const emailOptions = env.email.gmail
+  ? {
+      service: 'gmail',
+      auth: {
+        user: env.email.username,
+        pass: env.email.password,
+      },
+    }
+  : env.email.uri;
 
 export const transporter = nodemailer.createTransport(emailOptions);
 
@@ -122,67 +84,38 @@ export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttache
   }
 };
 
-export type MailGeneral = {
-  // TODO: Fix this type
-  targets: () => any;
-  template: string;
-};
-// TODO: Fix this type
-export type MailTemplate = (target: any) => Promise<SerializedMail>;
-// TODO: Fix this type
-export const sendMailsFromTemplate = async (template: string, targets: any[]) => {
-  try {
-    const mailTemplate = availableTemplates[template];
-
-    if (targets.length === 0 && !mailTemplate) {
-      return false;
-    }
-
-    if (targets.length > 1) {
-      const outgoingMails = await Promise.allSettled(
-        targets.map(async (target) => {
-          await sendEmail(await mailTemplate(target));
-        }),
-      );
-
-      const results = outgoingMails.reduce(
-        (result, state) => {
-          if (state.status === 'fulfilled')
-            return {
-              ...result,
-              delivered: result.delivered + 1,
-            };
-          logger.error(`Impossible d'envoyer de mail à ${state.reason}`);
-          return {
-            ...result,
-            undelivered: result.undelivered + 1,
-          };
-        },
-        { delivered: 0, undelivered: 0 },
-      );
-
-      // eslint-disable-next-line no-console
-      console.info(`\tMails envoyés: ${results.delivered}\n\tMails non envoyés: ${results.undelivered}`);
-      return results;
-    }
-
-    return sendEmail(await mailTemplate(targets[0]));
-  } catch (error) {
-    logger.error('Error while sending emails', error);
-    return false;
-  }
+/**
+ * Sends an email to the user, containing information about the event,
+ * a list of all items bought on the store and his tickets.
+ * @param cart the cart of the user
+ * @returns a promise that resolves when the mail has been sent
+ * @throws an error if the mail declared above (corresponding to this
+ * request) is invalid ie. contains an object which is not a {@link Component}
+ */
+export const sendPaymentConfirmation = async (cart: DetailedCart) => {
+  const content = await generateTicketsEmail(cart);
+  return sendEmail(content);
 };
 
-export const sendGeneralMail = async (generalMail: string, previewUser: User | null = null) => {
-  const mail = availableGeneralMails[generalMail];
+/**
+ * Sends an email to the user with his account validation code.
+ * This code (given to the user as a link) is required before logging in
+ * @param user the user to send the mail to
+ * @returns a promise that resolves when the mail was GENERATED. We don't wait
+ * for the mail to be sent as it may take time (for several reasons, including mail
+ * processing and network delays) and we don't want the current request to timeout
+ * @throws an error if the mail declared above (corresponding to this
+ * request) is invalid ie. contains an object which is not a {@link Component}
+ */
+export const sendValidationCode = async (user: RawUser | User) => sendEmail(await generateValidationEmail(user));
 
-  if (!mail) {
-    return false;
-  }
-
-  const targets =
-    previewUser == null ? await mail.targets() : [{ firstname: previewUser.firstname, email: previewUser.email }];
-  await sendMailsFromTemplate(generalMail, targets);
-
-  return targets.length;
-};
+/**
+ * Sends an email to the user with a password reset link.
+ * @param user the user to send the mail to
+ * @returns a promise that resolves when the mail was GENERATED. We don't wait
+ * for the mail to be sent as it may take time (for several reasons, including mail
+ * processing and network delays) and we don't want the current request to timeout
+ * @throws an error if the mail declared above (corresponding to this
+ * request) is invalid ie. contains an object which is not a {@link Component}
+ */
+export const sendPasswordReset = async (user: RawUser) => sendEmail(await generatePasswordResetEmail(user));

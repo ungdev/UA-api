@@ -8,7 +8,7 @@ import * as validators from '../../utils/validators';
 import { forbidden, success, unauthenticated } from '../../utils/responses';
 import { Error as ResponseError } from '../../types';
 import { fetchUser } from '../../operations/user';
-import { sendMailsFromTemplate } from '../../services/email';
+import { sendValidationCode } from '../../services/email';
 import logger from '../../utils/logger';
 
 export default [
@@ -53,7 +53,7 @@ export default [
       // Don't send sync when it is not needed
       // If the mail is not sent, the error will be reported through Sentry
       // and staff may resend it manually
-      sendMailsFromTemplate('accountvalidation', [user]).catch((error) => {
+      sendValidationCode(user).catch((error) => {
         Sentry.captureException(error, {
           user: {
             id: user.id,

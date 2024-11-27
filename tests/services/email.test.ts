@@ -6,7 +6,11 @@ import { PrimitiveCartItem, ItemCategory, TransactionState, UserType } from '../
 import { createCart, updateCart } from '../../src/operations/carts';
 import { sendEmail } from '../../src/services/email';
 import { inflate } from '../../src/services/email/components';
-import { availableTemplates } from '../../src/services/email/templates';
+import {
+  generateTicketsEmail,
+  generatePasswordResetEmail,
+  generateValidationEmail,
+} from '../../src/services/email/serializer';
 import { randomInt } from '../../src/utils/helpers';
 import { fetchAllItems } from '../../src/operations/item';
 import env from '../../src/utils/env';
@@ -124,7 +128,7 @@ describe('Tests the email utils', () => {
       transactionState: TransactionState.paid,
     });
 
-    const ticketsEmail = await availableTemplates.orderconfirmation(detailedCart);
+    const ticketsEmail = await generateTicketsEmail(detailedCart);
 
     fs.writeFileSync('artifacts/payment.html', ticketsEmail.html);
   });
@@ -132,7 +136,7 @@ describe('Tests the email utils', () => {
   it(`should generate an account validation template`, async () => {
     const user = await createFakeUser({ confirmed: false });
 
-    const validationEmail = await availableTemplates.accountvalidation(user);
+    const validationEmail = await generateValidationEmail(user);
 
     fs.writeFileSync('artifacts/validation.html', validationEmail.html);
   });
@@ -141,7 +145,7 @@ describe('Tests the email utils', () => {
     const user = await createFakeUser({ type: UserType.player });
     user.resetToken = (await generateResetToken(user.id)).resetToken;
 
-    const passwordResetEmail = await availableTemplates.passwordreset(user);
+    const passwordResetEmail = await generatePasswordResetEmail(user);
 
     fs.writeFileSync('artifacts/pwd-reset.html', passwordResetEmail.html);
   });

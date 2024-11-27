@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/node';
 import { isNotAuthenticated } from '../../middlewares/authentication';
 import { validateBody } from '../../middlewares/validation';
 import { fetchUser, generateResetToken } from '../../operations/user';
-import { sendMailsFromTemplate } from '../../services/email';
+import { sendPasswordReset } from '../../services/email';
 import { noContent } from '../../utils/responses';
 import * as validators from '../../utils/validators';
 import logger from '../../utils/logger';
@@ -37,7 +37,7 @@ export default [
         // Don't wait for mail to be sent as it could take time
         // We suppose here that is will pass. If it is not the case, error is
         // reported through Sentry and staff may resend the email manually
-        sendMailsFromTemplate('passwordreset', [userWithToken]).catch((error) => {
+        sendPasswordReset(userWithToken).catch((error) => {
           logger.error(error);
           Sentry.captureException(error, {
             user: {

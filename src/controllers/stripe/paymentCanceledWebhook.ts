@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { updateCart } from '../../operations/carts';
-import { sendMailsFromTemplate } from '../../services/email';
+import { sendPaymentConfirmation } from '../../services/email';
 import { TransactionState } from '../../types';
 import { success } from '../../utils/responses';
 import { paymentIntentWebhookMiddleware } from '../../utils/stripe';
@@ -24,7 +24,7 @@ export default [
 
       // Update the cart with the callback data
       const updatedCart = await updateCart(cart.id, { transactionState: TransactionState.canceled });
-      await sendMailsFromTemplate('orderconfirmation', [updatedCart]);
+      await sendPaymentConfirmation(updatedCart);
 
       return success(response, { api: 'ok' });
     } catch (error) {
