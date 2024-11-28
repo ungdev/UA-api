@@ -258,15 +258,16 @@ export const fetchOrgas = async (): Promise<Orga[]> => {
       },
     },
   });
-  return orgas.map((orga) => {
-    // log the orga to see what it looks like
-    logger.debug(`Format de l'orga : ${orga.username}`);
-    logger.debug(orga);
-    logger.debug(orga.id);
-    logger.debug(orga.orga);
-    const formattedOrga = formatOrga(orga);
-    return formattedOrga;
-  });
+  return orgas
+    .map((orga) => {
+      try {
+        return formatOrga(orga);
+      } catch (error) {
+        logger.error(`Error while formatting orga ${orga.id}`, error);
+        return null;
+      }
+    })
+    .filter((orga) => orga !== null);
 };
 
 export const createUser = async (user: {
