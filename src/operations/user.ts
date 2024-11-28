@@ -263,7 +263,7 @@ export const fetchOrgas = async (): Promise<Orga[]> => {
     logger.debug(`Format de l'orga : ${orga.username}`);
     logger.debug(orga);
     logger.debug(orga.id);
-    logger.debug(orga.orga.displayName);
+    logger.debug(orga.orga);
     const formattedOrga = formatOrga(orga);
     return formattedOrga;
   });
