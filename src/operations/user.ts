@@ -258,7 +258,15 @@ export const fetchOrgas = async (): Promise<Orga[]> => {
       },
     },
   });
-  return orgas.map(formatOrga);
+  return orgas.map((orga) => {
+    // log the orga to see what it looks like
+    logger.debug(`Format de l'orga : ${orga.username}`);
+    logger.debug(orga);
+    logger.debug(orga.id);
+    logger.debug(orga.orga.displayName);
+    const formattedOrga = formatOrga(orga);
+    return formattedOrga;
+  });
 };
 
 export const createUser = async (user: {
