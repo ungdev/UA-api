@@ -4,7 +4,7 @@ import { readFile } from 'fs/promises';
 import { render } from 'mustache';
 import nodemailer from 'nodemailer';
 import { Log } from '@prisma/client';
-import { EmailAttachement, RawUser, MailQuery, User } from '../../types';
+import { RawUser, MailQuery, User } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
 import type { Component, Mail, SerializedMail } from './types';

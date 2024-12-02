@@ -4,7 +4,6 @@ import PDFkit from 'pdfkit';
 import { encrypt } from './helpers';
 import { fetchTeamWithTournament } from '../operations/team';
 import { DetailedCartItem, EmailAttachement, UserType } from '../types';
-import logger from './logger';
 
 const ticketsDesignAmount = 3;
 
