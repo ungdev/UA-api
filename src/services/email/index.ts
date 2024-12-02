@@ -4,7 +4,7 @@ import { readFile } from 'fs/promises';
 import { render } from 'mustache';
 import nodemailer from 'nodemailer';
 import { Log } from '@prisma/client';
-import { EmailAttachement, RawUser, MailQuery, User } from '../../types';
+import { RawUser, MailQuery, User } from '../../types';
 import env from '../../utils/env';
 import logger from '../../utils/logger';
 import type { Component, Mail, SerializedMail } from './types';
@@ -41,6 +41,7 @@ export const serialize = async (content: Mail) => {
           typeof text === 'string' ? escapeText(text) : text.map(inflate).join(''),
       },
     ),
+    attachments: content.attachments,
   };
 };
 
@@ -100,16 +101,15 @@ export const transporter = nodemailer.createTransport(emailOptions);
  *  ]
  * }))
  */
-export const sendEmail = async (mail: SerializedMail, attachments?: EmailAttachement[]) => {
+export const sendEmail = async (mail: SerializedMail) => {
   const from = `${env.email.sender.name} <${env.email.sender.address}>`;
-
   try {
     await transporter.sendMail({
       from,
       to: mail.to,
       subject: mail.subject,
       html: mail.html,
-      attachments,
+      attachments: mail.attachments,
     });
 
     logger.info(`Email sent to ${mail.to}`);
@@ -138,7 +138,8 @@ export const sendMailsFromTemplate = async (template: string, targets: any[]) =>
     if (targets.length > 1) {
       const outgoingMails = await Promise.allSettled(
         targets.map(async (target) => {
-          await sendEmail(await mailTemplate(target));
+          const mail = await mailTemplate(target);
+          await sendEmail(mail);
         }),
       );
 
@@ -162,8 +163,8 @@ export const sendMailsFromTemplate = async (template: string, targets: any[]) =>
       console.info(`\tMails envoyés: ${results.delivered}\n\tMails non envoyés: ${results.undelivered}`);
       return results;
     }
-
-    return sendEmail(await mailTemplate(targets[0]));
+    const mail = await mailTemplate(targets[0]);
+    return sendEmail(mail);
   } catch (error) {
     logger.error('Error while sending emails', error);
     return false;
