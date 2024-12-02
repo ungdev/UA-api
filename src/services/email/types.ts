@@ -71,4 +71,5 @@ export declare interface SerializedMail {
   to: string;
   subject: string;
   html: string;
+  attachments?: EmailAttachement[];
 }
