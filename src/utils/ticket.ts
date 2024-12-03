@@ -78,7 +78,7 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
     if (user.place) {
       const place = `Siège ${user.place}`;
       const placeWidth = document.widthOfString(place);
-      textFormat.text(place, textX - placeWidth / 2, height - lineSpaceCorrection * 2);
+      textFormat.text(place, textX - placeWidth / 2, height - fontSize - lineSpaceCorrection * 4);
     }
     // Place the QR Code
     document.image(qrcode, qrCodeX, qrCodeY, { width: qrCodeSize });
