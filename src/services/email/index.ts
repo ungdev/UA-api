@@ -138,8 +138,7 @@ export const sendMailsFromTemplate = async (template: string, targets: any[]) =>
     if (targets.length > 1) {
       const outgoingMails = await Promise.allSettled(
         targets.map(async (target) => {
-          const mail = await mailTemplate(target);
-          await sendEmail(mail);
+          await sendEmail(await mailTemplate(target));
         }),
       );
 
@@ -163,8 +162,7 @@ export const sendMailsFromTemplate = async (template: string, targets: any[]) =>
       console.info(`\tMails envoyés: ${results.delivered}\n\tMails non envoyés: ${results.undelivered}`);
       return results;
     }
-    const mail = await mailTemplate(targets[0]);
-    return sendEmail(mail);
+    return sendEmail(await mailTemplate(targets[0]));
   } catch (error) {
     logger.error('Error while sending emails', error);
     return false;
