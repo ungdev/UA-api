@@ -2,6 +2,7 @@ import { RawUser, TransactionState } from '../../../types';
 import { serialize } from '..';
 import database from '../../database';
 import { generateTicket } from '../../../utils/ticket';
+import logger from '../../../utils/logger';
 
 export const generateTicketsEmail = async (user: Omit<RawUser, 'permissions'>) =>
   serialize({
@@ -49,19 +50,24 @@ export const generateTicketsEmail = async (user: Omit<RawUser, 'permissions'>) =
       },
     ],
     attachments: await (async () => {
-      const cartItem = await database.cartItem.findFirst({
-        where: {
-          cart: {
-            paidAt: {
-              not: null,
+      try {
+        const cartItem = await database.cartItem.findFirst({
+          where: {
+            cart: {
+              paidAt: {
+                not: null,
+              },
+              transactionState: TransactionState.paid,
             },
-            transactionState: TransactionState.paid,
+            itemId: `ticket-${user.type}`,
+            forUserId: user.id,
           },
-          itemId: `ticket-${user.type}`,
-          forUserId: user.id,
-        },
-        include: { item: true, forUser: true },
-      });
-      return [await generateTicket(cartItem)];
+          include: { item: true, forUser: true },
+        });
+        return [await generateTicket(cartItem)];
+      } catch (error) {
+        logger.error(error);
+        return [];
+      }
     })(),
   });

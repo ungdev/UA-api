@@ -5,25 +5,21 @@ import { encrypt } from './helpers';
 import { fetchTeamWithTournament } from '../operations/team';
 import { DetailedCartItem, EmailAttachement, UserType } from '../types';
 
-const ticketsDesignAmount = 3;
-
-const loadImage = () => {
-  const random = Math.floor(Math.random() * ticketsDesignAmount) + 1;
-  return `data:image/jpg;base64,${readFileSync(`assets/email/backgrounds/ticket_${random}.jpg`, 'base64')}`;
-};
+const loadImage = () => `data:image/png;base64,${readFileSync(`assets/email/backgrounds/ticket.png`, 'base64')}`;
 
 export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailAttachement> => {
   // Define the parameters for the function
   const fontFamily = 'assets/email/font.ttf';
-  const fontSize = 24;
-  const qrCodeSize = 182;
-  const qrCodeX = 35;
-  const qrCodeY = 567;
-  const bottomLine = 842 - 150; // sponsors height substracted to ticket height
+  const fontSize = 75;
+  const qrCodeSize = 751;
+  const qrCodeX = 100;
+  const qrCodeY = 197;
+  const width = 3949;
+  const height = 1604;
+  const textX = qrCodeX + qrCodeSize / 2;
   const lineSpaceCorrection = 22;
 
   const user = cartItem.forUser;
-  const fullName = `${user.firstname} ${user.lastname}`;
 
   const background = loadImage();
 
@@ -56,26 +52,34 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
 
   const pdf = await new Promise<Buffer>((resolve, reject) => {
     // Create the document and the background
-    const document = new PDFkit({ size: 'A4', margin: 0, layout: 'portrait' });
-    document.image(background, 0, 0, { width: 595, height: 842 });
+    const document = new PDFkit({ size: [width, height], margin: 0, layout: 'portrait' });
+    document.rect(0, 0, width, height).fillColor('#17124A').fill();
+
+    document.image(background, 0, 0, { width, height });
 
     // Define a text format
-    const textFormat = document.font(fontFamily).fill([255, 255, 255]).fontSize(fontSize);
+    const textFormat = document.font(fontFamily).fill([0, 0, 0]).fontSize(fontSize);
 
     // Place the tournament name under the qrCode with the same margin as the qrcode
-    textFormat.text(tournoiText, qrCodeX + qrCodeSize + lineSpaceCorrection, bottomLine);
+    const tournamentNameWidth = document.widthOfString(tournoiText);
+    textFormat.text(tournoiText, textX - tournamentNameWidth / 2, qrCodeY + qrCodeSize + lineSpaceCorrection);
 
-    // Place the full name of the user
-    textFormat.text(fullName, qrCodeX + qrCodeSize + lineSpaceCorrection, bottomLine - lineSpaceCorrection * 4 - 15);
+    // Place the first name of the user
+    const firstName = user.firstname;
+    const firstNameWidth = document.widthOfString(firstName);
+    textFormat.text(firstName, textX - firstNameWidth / 2, 0);
+
+    // Place the last name of the user
+    const lastName = user.lastname;
+    const lastNameWidth = document.widthOfString(lastName);
+    textFormat.text(lastName, textX - lastNameWidth / 2, fontSize + lineSpaceCorrection - 10);
 
     // Place the text containing the seat
-    if (user.place)
-      textFormat.text(
-        `Place ${user.place}`,
-        qrCodeX + qrCodeSize + lineSpaceCorrection,
-        bottomLine - lineSpaceCorrection * 2 - 7,
-      );
-
+    if (user.place) {
+      const place = `Place ${user.place}`;
+      const placeWidth = document.widthOfString(place);
+      textFormat.text(place, textX - placeWidth / 2, height - fontSize - lineSpaceCorrection * 4);
+    }
     // Place the QR Code
     document.image(qrcode, qrCodeX, qrCodeY, { width: qrCodeSize });
 
