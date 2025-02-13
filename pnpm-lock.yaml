@@ -17,6 +17,9 @@ importers:
       '@slack/web-api':
         specifier: ^7.4.0
         version: 7.4.0
+      '@types/base45':
+        specifier: ^2.0.2
+        version: 2.0.2
       '@types/multer':
         specifier: ^1.4.12
         version: 1.4.12
@@ -29,6 +32,9 @@ importers:
       axios:
         specifier: ^1.7.7
         version: 1.7.7
+      base45:
+        specifier: ^2.0.1
+        version: 2.0.1
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -1580,6 +1586,9 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
+  '@types/base45@2.0.2':
+    resolution: {integrity: sha512-nSeKjjdr8q6x+nEra6Ufuk/YWW/Cj9zIIRWkKQo5HEpUT4+/+VPmdbVBHfUzl/GzzFJWlljz/XOQOnWq9WVIog==}
+
   '@types/bcryptjs@2.4.6':
     resolution: {integrity: sha512-9xlo6R2qDs5uixm0bcIqCeMCE6HiQsIyel9KQySStiyqNl2tnj2mP3DX1Nf56MD6KMenNNlBBsy3LJ7gUEQPXQ==}
 
@@ -2066,6 +2075,9 @@ packages:
   base32.js@0.1.0:
     resolution: {integrity: sha512-n3TkB02ixgBOhTvANakDb4xaMXnYUVkNoRFJjQflcqMQhyEKxEHdj3E6N8t8sUQ0mjH/3/JxzlXuz3ul/J90pQ==}
     engines: {node: '>=0.12.0'}
+
+  base45@2.0.1:
+    resolution: {integrity: sha512-Cr2mmczMfOQSkt9OyzpUpUNWKCurLpYhCjkN+yPXicjEc47gkN9LbklR3c7dUrpcPonjoAyZp7bZQChRRg4G1Q==}
 
   base64-js@0.0.8:
     resolution: {integrity: sha512-3XSA2cR/h/73EzlXXdU6YNycmYI7+kicTxks4eJg2g39biHR84slg2+des+p7iHYhbRg/udIS4TD53WabcOUkw==}
@@ -7887,6 +7899,10 @@ snapshots:
 
   '@tsconfig/node16@1.0.4': {}
 
+  '@types/base45@2.0.2':
+    dependencies:
+      '@types/node': 20.9.2
+
   '@types/bcryptjs@2.4.6': {}
 
   '@types/body-parser@1.19.5':
@@ -8464,6 +8480,8 @@ snapshots:
   balanced-match@1.0.2: {}
 
   base32.js@0.1.0: {}
+
+  base45@2.0.1: {}
 
   base64-js@0.0.8: {}
 

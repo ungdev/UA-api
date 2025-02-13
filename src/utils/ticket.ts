@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import QRCode from 'qrcode';
 import PDFkit from 'pdfkit';
+import base45 from 'base45';
 import { encrypt } from './helpers';
 import { fetchTeamWithTournament } from '../operations/team';
 import { DetailedCartItem, EmailAttachement, UserType } from '../types';
@@ -42,8 +43,9 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
   }
 
   const encryptedUserId = encrypt(user.id);
+  const encryptedBase45 = await base45.encode(encryptedUserId);
 
-  const qrcode = await QRCode.toDataURL([{ data: encryptedUserId, mode: 'byte' }], {
+  const qrcode = await QRCode.toDataURL([{ data: encryptedBase45, mode: 'alphanumeric' }], {
     width: qrCodeSize,
     margin: 1,
     color: { dark: '#000', light: '#fff' },
