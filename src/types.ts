@@ -219,6 +219,8 @@ export type Orga = {
   mainCommission?: prisma.Commission;
 };
 
+export type OrgaWithoutRoleAndDisplayData = Pick<Orga, 'id' | 'name' | 'username' | 'photoFilename'>;
+
 export type PrimitiveTeamWithPrimitiveUsers = PrimitiveTeam & {
   users: RawUserWithCartItems[];
   askingUsers: RawUserWithCartItems[];

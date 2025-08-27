@@ -4,7 +4,7 @@ import { fetchOrgas } from '../../operations/user';
 import { forbidden, success } from '../../utils/responses';
 import database from '../../services/database';
 import { fetchSetting } from '../../operations/settings';
-import { Error } from '../../types';
+import { Error, OrgaWithoutRoleAndDisplayData } from '../../types';
 import { validateQuery } from '../../middlewares/validation';
 
 export default [
@@ -34,7 +34,7 @@ export default [
             position: commission.position,
             color: commission.color,
             masterCommission: commission.masterCommissionId,
-            roles: { respo: [], member: [] },
+            roles: { respo: [] as OrgaWithoutRoleAndDisplayData[], member: [] as OrgaWithoutRoleAndDisplayData[]},
           },
         ]),
       );
