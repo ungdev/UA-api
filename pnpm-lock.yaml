@@ -53,9 +53,6 @@ importers:
       express:
         specifier: ^4.21.2
         version: 4.21.2
-      gpg:
-        specifier: ^0.6.0
-        version: 0.6.0
       helmet:
         specifier: ^7.2.0
         version: 7.2.0
@@ -3537,10 +3534,6 @@ packages:
   got@12.6.1:
     resolution: {integrity: sha512-mThBblvlAF1d4O5oqyvN+ZxLAYwIJK7bpMxgYqPD9okW0C3qm5FFn7k811QrcuEBwaogR3ngOFoCfs6mRv7teQ==}
     engines: {node: '>=14.16'}
-
-  gpg@0.6.0:
-    resolution: {integrity: sha512-u0BpbalUehzMbaMxtzRAFn/gMmtnaVo2Y0yCp7X6csPnumyaDrXF4uvEWPhj3b1sqrblvKvNEXFSfOQrvGEiQw==}
-    engines: {node: '>= 0.10.0'}
 
   graceful-fs@4.2.10:
     resolution: {integrity: sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA==}
@@ -10562,8 +10555,6 @@ snapshots:
       lowercase-keys: 3.0.0
       p-cancelable: 3.0.0
       responselike: 3.0.0
-
-  gpg@0.6.0: {}
 
   graceful-fs@4.2.10: {}
 
