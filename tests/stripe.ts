@@ -57,7 +57,10 @@ function decodeBody(body: string) {
         }
         currentObject = currentObject[keys[index]] as Record<string, unknown>;
       }
-      currentObject[keys.at(-1)] = value;
+      const lastKey = keys.at(-1);
+      if (lastKey !== undefined) {
+        currentObject[lastKey] = value;
+      }
       return object;
     },
     {} as Record<string, unknown>,
@@ -136,10 +139,12 @@ function listen() {
 
     .get(/\/products(\?((((starting_after=[^&]*)|(limit=\d+)|(active=true))&?)+))?$/)
     .reply((uri) => {
-      const limit = Number.parseInt(uri.match(/limit=(\d+)/)?.[1]);
+      const limitString = uri.match(/limit=(\d+)/)?.[1];
+      const parsedLimit = limitString === undefined ? Number.NaN : Number.parseInt(limitString, 10);
+      const limit = Number.isNaN(parsedLimit) ? 10 : parsedLimit;
       const starting_after = uri.match(/starting_after=([^&]+)/)?.[1];
       const fromIndex = starting_after ? stripeProducts.findIndex((product) => product.id === starting_after) : 0;
-      const toIndex = fromIndex + (limit ?? 10);
+      const toIndex = fromIndex + limit;
       return [200, { has_more: toIndex < stripeProducts.length, data: stripeProducts.slice(fromIndex, toIndex) }];
     })
 
@@ -198,10 +203,12 @@ function listen() {
 
     .get(/\/prices(\?((starting_after=[^&]*)|(limit=\d+))+&?)?$/)
     .reply((uri) => {
-      const limit = Number.parseInt(uri.match(/limit=(\d+)/)?.[1]);
+      const limitString = uri.match(/limit=(\d+)/)?.[1];
+      const parsedLimit = limitString === undefined ? Number.NaN : Number.parseInt(limitString, 10);
+      const limit = Number.isNaN(parsedLimit) ? 10 : parsedLimit;
       const starting_after = uri.match(/starting_after=([^&]+)/)?.[1];
       const fromIndex = starting_after ? stripePrices.findIndex((price) => price.id === starting_after) : 0;
-      const toIndex = fromIndex + (limit ?? 10);
+      const toIndex = fromIndex + limit;
       return [200, { has_more: toIndex < stripePrices.length, data: stripePrices.slice(fromIndex, toIndex) }];
     })
 
@@ -241,10 +248,12 @@ function listen() {
 
     .get(/\/coupons(\?((starting_after=[^&]*)|(limit=\d+))+&?)?$/)
     .reply((uri) => {
-      const limit = Number.parseInt(uri.match(/limit=(\d+)/)?.[1]);
+      const limitString = uri.match(/limit=(\d+)/)?.[1];
+      const parsedLimit = limitString === undefined ? Number.NaN : Number.parseInt(limitString, 10);
+      const limit = Number.isNaN(parsedLimit) ? 10 : parsedLimit;
       const starting_after = uri.match(/starting_after=([^&]+)/)?.[1];
       const fromIndex = starting_after ? stripeCoupons.findIndex((coupon) => coupon.id === starting_after) : 0;
-      const toIndex = fromIndex + (limit ?? 10);
+      const toIndex = fromIndex + limit;
       return [200, { has_more: toIndex < stripeCoupons.length, data: stripeCoupons.slice(fromIndex, toIndex) }];
     })
 
@@ -315,7 +324,8 @@ function listen() {
           body.customer_email ?? '',
           Object.values(body.line_items).reduce(
             (previous, current) =>
-              stripePrices.find((price) => price.id === current.price).unit_amount * current.quantity + previous,
+              (stripePrices.find((price) => price.id === current.price)?.unit_amount ?? 0) * current.quantity +
+              previous,
             0,
           ) - totalDiscount,
         ),
@@ -348,7 +358,11 @@ function listen() {
 
     .post(/\/payment_intents\/.*\/cancel$/)
     .reply((uri) => {
-      const paymentIntentId = uri.match(/payment_intents\/(.*)\/cancel$/)[1];
+      const match = uri.match(/payment_intents\/(.*)\/cancel$/);
+      if (!match) {
+        return [500, 'Invalid payment intent cancel URI'];
+      }
+      const paymentIntentId = match[1];
       const paymentIntentIndex = stripePaymentIntents.findIndex((pi) => pi.id === paymentIntentId);
       if (!paymentIntentIndex) {
         return [500, 'Payment intent was not found'];
