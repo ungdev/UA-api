@@ -130,7 +130,7 @@ export const createFakeTeam = async ({
   tournament,
   paid = false,
   locked = false,
-  name = faker.internet.userName() + faker.number.int(),
+  name = faker.internet.username() + faker.number.int(),
   userPassword,
 }: {
   members?: number;
