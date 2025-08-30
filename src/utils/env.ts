@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 import crypto from 'crypto';
 import dotenv, { DotenvPopulateInput } from 'dotenv';
+import { StringValue } from 'ms';
 
 if (process.env.NODE_ENV === 'test') {
   // Make sure to only load the accepted variables in test
@@ -63,7 +64,7 @@ const env = {
   },
   jwt: {
     secret: loadEnv('JWT_SECRET') || notInProduction('LongRandomKey'),
-    expires: loadEnv('JWT_EXPIRES') || '1y',
+    expires: (loadEnv('JWT_EXPIRES') as StringValue | number) || '1y',
   },
   slack: {
     token: loadEnv('SLACK_TOKEN'),
