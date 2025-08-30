@@ -87,7 +87,7 @@ export const generateBadge = async (badges: Badge[]) => {
   const pdf = await new Promise<Buffer>(async (resolve, reject) => {
     // Create the document and the background
     const document = new PDFkit({ size: 'A4', margin: 0, layout: 'landscape' });
-    const fetchImage = async (source: string): Promise<ArrayBuffer> => {
+    const fetchImage = async (source: string): Promise<Buffer> => {
       // If the source is empty, return a new image 300x300 in a solid color
       if (source === '')
         return sharp({
