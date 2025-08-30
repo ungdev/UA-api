@@ -239,7 +239,7 @@ export const fetchUsers = async (
         },
       ],
     }),
-    database.user.count(filter),
+    database.user.count({ where: filter.where }),
   ]);
 
   return [users.map(formatUserWithTeamAndTournament), count];
