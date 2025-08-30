@@ -80,7 +80,7 @@ jobs:
       - run: pnpm pnpx prisma db push
       - run: docker exec -i mariadb mysql -utest -ptest arena < seed.sql
       - run: pnpm test:coverage
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
           verbose: true
