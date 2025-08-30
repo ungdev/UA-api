@@ -98,6 +98,7 @@ export default [
       'security/detect-object-injection': 'off',
       'security/detect-non-literal-fs-filename': 'off',
       'unicorn/consistent-function-scoping': 'off',
+      'unicorn/expiring-todo-comments': 'off',
 
       'unicorn/filename-case': [
         'error',

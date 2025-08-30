@@ -34,7 +34,7 @@ export default [
             position: commission.position,
             color: commission.color,
             masterCommission: commission.masterCommissionId,
-            roles: { respo: [] as OrgaWithoutRoleAndDisplayData[], member: [] as OrgaWithoutRoleAndDisplayData[]},
+            roles: { respo: [] as OrgaWithoutRoleAndDisplayData[], member: [] as OrgaWithoutRoleAndDisplayData[] },
           },
         ]),
       );

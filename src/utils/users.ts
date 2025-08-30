@@ -1,8 +1,8 @@
 import { Response } from 'express';
 import jwt from 'jsonwebtoken';
+import ms from 'ms';
 import { Team, User } from '../types';
 import env from './env';
-import ms from 'ms';
 
 export const getRequestInfo = (response: Response) => ({
   user: response.locals.user as User,
