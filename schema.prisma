@@ -110,6 +110,7 @@ model Tournament {
   displayCashprize       Boolean  @default(false)
   format                 String?
   infos                  String?
+  ffsu                   Boolean  @default(false)
   casters                Caster[]
   displayCasters         Boolean  @default(false)
   display                Boolean  @default(false)
