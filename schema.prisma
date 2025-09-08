@@ -177,6 +177,7 @@ model User {
   attendantId    String?    @unique
   teamId         String?
   askingTeamId   String?
+  ffsuLicense    String?    @unique
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @default(now()) @updatedAt
   ticketMailSent Boolean    @default(false)

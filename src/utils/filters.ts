@@ -168,6 +168,7 @@ export const filterTournamentRestricted = (tournament: Tournament) => {
     'cashprizeDetails',
     'format',
     'infos',
+    'ffsu',
   );
 
   return {
