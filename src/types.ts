@@ -297,6 +297,7 @@ export const enum Error {
   InvalidEmail = 'Email invalide',
   InvalidPassword = 'Mot de passe invalide',
   InvalidDiscordid = 'Identifiant Discord invalide',
+  InvalidFfsuLicense = 'Numéro de licence FFSU invalide',
   InvalidAge = 'Tu dois préciser si tu es majeur ou mineur',
   InvalidUserType = "Type d'utilisateur invalide",
   InvalidPlace = 'Numéro de place invalide',
@@ -407,6 +408,7 @@ export const enum Error {
   PlaceAlreadyAttributed = 'Cette place est déjà attribuée',
   DiscordAccountAlreadyUsed = 'Ce compte discord est déjà lié à un compte',
   TournamentNameAlreadyExists = 'Un tournoi a déjà ce nom',
+  FfsuLicenseAlreadyExists = 'Ce numéro de licence FFSU est déjà utilisé',
 
   // 410
   // indicates that access to the target resource is no longer available at the server.
