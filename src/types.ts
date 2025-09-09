@@ -382,6 +382,7 @@ export const enum Error {
   IsNotOrga = "L'utilisateur n'est pas un organisateur. Impossible de lui assigner des commissions",
   MainCommissionMustBeInList = "L'organisateur doit être dans sa propre commission principale",
   MustHaveMainCommission = "L'une des commissions de l'utilisateur doit être sa commission principale",
+  CartNotEligible = 'Le panier doit être gratuit pour être validé',
 
   // 404
   // The server can't find the requested resource
