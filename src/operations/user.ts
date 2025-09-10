@@ -95,7 +95,7 @@ export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentI
       cartItem.itemId !== 'ticket-attendant',
   );
   const tickets = (await fetchAllItems()).filter((item) => item.category === 'ticket');
-  const tournament = await fetchTournament(tournamentId);
+  const tournament = tournamentId ? await fetchTournament(tournamentId) : { ffsu: false };
   const requiredTicket = tournament.ffsu
     ? tickets.find((ticket) => ticket.id === `ticket-${userType}-ffsu`)
     : (tickets.find((ticket) => ticket.id === `ticket-${userType}-${tournamentId}`) ??
