@@ -23,6 +23,7 @@ import { deserializePermissions, serializePermissions } from '../utils/helpers';
 import { fetchAllItems } from './item';
 import { deleteFile } from './upload';
 import logger from '../utils/logger';
+import { fetchTournament } from './tournament';
 
 export const userInclusions = {
   cartItems: {
@@ -94,9 +95,11 @@ export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentI
       cartItem.itemId !== 'ticket-attendant',
   );
   const tickets = (await fetchAllItems()).filter((item) => item.category === 'ticket');
-  const requiredTicket =
-    tickets.find((ticket) => ticket.id === `ticket-${userType}-${tournamentId}`) ??
-    tickets.find((ticket) => ticket.id === `ticket-${userType}`);
+  const tournament = await fetchTournament(tournamentId);
+  const requiredTicket = tournament.ffsu
+    ? tickets.find((ticket) => ticket.id === `ticket-${userType}-ffsu`)
+    : (tickets.find((ticket) => ticket.id === `ticket-${userType}-${tournamentId}`) ??
+      tickets.find((ticket) => ticket.id === `ticket-${userType}`));
   return (
     currentTickets.length > 0 && !currentTickets.some((currentTicket) => currentTicket.price === requiredTicket.price)
   );
