@@ -78,9 +78,9 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
     items = items.filter((element) => element.category !== ItemCategory.rent);
   }
 
-  const tournament = await fetchTournament(team?.tournamentId);
+  const ffsu = team?.tournamentId ? (await fetchTournament(team?.tournamentId)).ffsu : false;
 
-  const currentTicket = tournament?.ffsu
+  const currentTicket = ffsu
     ? items.find((item) => item.id === 'ticket-player-ffsu')
     : (items.find((item) => item.id === `ticket-player-${team?.tournamentId}`) ??
       items.find((item) => item.id === 'ticket-player'));

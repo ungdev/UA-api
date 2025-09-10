@@ -100,6 +100,7 @@ describe('GET /admin/users', () => {
       hasPaid: user.hasPaid,
       customMessage: null,
       orga: null,
+      ffsuLicense: null,
     });
   });
 
@@ -150,6 +151,7 @@ describe('GET /admin/users', () => {
       hasPaid: false,
       customMessage: null,
       orga: null,
+      ffsuLicense: null,
     });
 
     return database.user.delete({ where: { id: placedUser.id } });
