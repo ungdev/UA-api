@@ -6,12 +6,14 @@ import getUser from './getUser';
 import { become, leave } from './spectate';
 import { fetchRemoteTicket } from './getRemoteTicket';
 import getOrgas from './getOrgas';
+import updateUserFfsu from './updateUserFfsu';
 
 const router = Router();
 
 router.get('/current', getUser);
 
 router.patch('/current', updateUser);
+router.patch('/current/ffsu', updateUserFfsu);
 router.post('/current/carts', createCart);
 router.get('/current/carts', getCarts);
 

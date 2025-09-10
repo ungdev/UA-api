@@ -326,6 +326,25 @@ export const updateUser = async (
   return formatUser(user);
 };
 
+export const updateUserFfsu = async (
+  userId: string,
+  data: {
+    ffsuLicense: string | null;
+  },
+): Promise<User> => {
+  const user = await database.user.update({
+    data: {
+      ffsuLicense: data.ffsuLicense,
+    },
+    where: {
+      id: userId,
+    },
+    include: userInclusions,
+  });
+
+  return formatUser(user);
+};
+
 export const updateAdminUser = async (user: User, updates: UserPatchBody): Promise<User> => {
   const userId = user.id;
   if (updates.permissions && !updates.permissions.includes(Permission.orga)) {

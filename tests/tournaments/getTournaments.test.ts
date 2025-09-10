@@ -82,6 +82,7 @@ describe('GET /tournaments', () => {
       'infos',
       'format',
       'cashprizeDetails',
+      'ffsu',
     ]);
     expect(response.body[0].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.a('number');
@@ -121,6 +122,7 @@ describe('GET /tournaments', () => {
       'infos',
       'format',
       'cashprizeDetails',
+      'ffsu',
     ]);
     expect(response.body[1].lockedTeamsCount).to.be.a('number');
     expect(response.body[0].cashprize).to.be.null;

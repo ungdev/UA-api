@@ -110,6 +110,7 @@ model Tournament {
   displayCashprize       Boolean  @default(false)
   format                 String?
   infos                  String?
+  ffsu                   Boolean  @default(false)
   casters                Caster[]
   displayCasters         Boolean  @default(false)
   display                Boolean  @default(false)
@@ -176,6 +177,7 @@ model User {
   attendantId    String?    @unique
   teamId         String?
   askingTeamId   String?
+  ffsuLicense    String?    @unique
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @default(now()) @updatedAt
   ticketMailSent Boolean    @default(false)

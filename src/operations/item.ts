@@ -2,6 +2,7 @@ import database from '../services/database';
 import { Item, ItemCategory, RawItem, Team, TransactionState, User, UserType } from '../types';
 import { isPartnerSchool } from '../utils/helpers';
 import { checkForExpiredCarts } from './carts';
+import { fetchTournament } from './tournament';
 
 export const formatItem = async (item: RawItem): Promise<Item> => {
   // Defines the left variable to undefined
@@ -77,9 +78,13 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
     items = items.filter((element) => element.category !== ItemCategory.rent);
   }
 
-  const currentTicket =
-    items.find((item) => item.id === `ticket-player-${team?.tournamentId}`) ??
-    items.find((item) => item.id === 'ticket-player');
+  const ffsu = team?.tournamentId ? (await fetchTournament(team?.tournamentId)).ffsu : false;
+
+  const currentTicket = ffsu
+    ? items.find((item) => item.id === 'ticket-player-ffsu')
+    : (items.find((item) => item.id === `ticket-player-${team?.tournamentId}`) ??
+      items.find((item) => item.id === 'ticket-player'));
+
   // Remove every ticket-player* item except the currentTicket
   items = items.filter((item) => !item.id.startsWith('ticket-player') || item.id === currentTicket.id);
   // Update the currentTicket id

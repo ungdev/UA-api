@@ -14,6 +14,7 @@ import stripe from './stripe';
 import discord from './discord';
 import admin from './admin';
 import commissions from './commissions';
+import carts from './carts';
 
 const options = {
   definition: {
@@ -68,5 +69,8 @@ router.use('/admin', admin);
 
 // Commissions routes
 router.use('/commissions', commissions);
+
+// Carts routes
+router.use('/carts', carts);
 
 export default router;
