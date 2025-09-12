@@ -23,6 +23,7 @@ import { deserializePermissions, serializePermissions } from '../utils/helpers';
 import { fetchAllItems } from './item';
 import { deleteFile } from './upload';
 import logger from '../utils/logger';
+import { fetchTournament } from './tournament';
 
 export const userInclusions = {
   cartItems: {
@@ -94,9 +95,11 @@ export const hasUserAlreadyPaidForAnotherTicket = async (user: User, tournamentI
       cartItem.itemId !== 'ticket-attendant',
   );
   const tickets = (await fetchAllItems()).filter((item) => item.category === 'ticket');
-  const requiredTicket =
-    tickets.find((ticket) => ticket.id === `ticket-${userType}-${tournamentId}`) ??
-    tickets.find((ticket) => ticket.id === `ticket-${userType}`);
+  const tournament = tournamentId ? await fetchTournament(tournamentId) : { ffsu: false };
+  const requiredTicket = tournament.ffsu
+    ? tickets.find((ticket) => ticket.id === `ticket-${userType}-ffsu`)
+    : (tickets.find((ticket) => ticket.id === `ticket-${userType}-${tournamentId}`) ??
+      tickets.find((ticket) => ticket.id === `ticket-${userType}`));
   return (
     currentTickets.length > 0 && !currentTickets.some((currentTicket) => currentTicket.price === requiredTicket.price)
   );
@@ -239,7 +242,7 @@ export const fetchUsers = async (
         },
       ],
     }),
-    database.user.count(filter),
+    database.user.count({ where: filter.where }),
   ]);
 
   return [users.map(formatUserWithTeamAndTournament), count];
@@ -316,6 +319,25 @@ export const updateUser = async (
     data: {
       username: data.username,
       password: hashedPassword,
+    },
+    where: {
+      id: userId,
+    },
+    include: userInclusions,
+  });
+
+  return formatUser(user);
+};
+
+export const updateUserFfsu = async (
+  userId: string,
+  data: {
+    ffsuLicense: string | null;
+  },
+): Promise<User> => {
+  const user = await database.user.update({
+    data: {
+      ffsuLicense: data.ffsuLicense,
     },
     where: {
       id: userId,

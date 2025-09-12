@@ -8,6 +8,7 @@ const teamnameRegex = /^[\p{L}\d _'#-]{3,32}$/u;
 const lastnameRegex = /^[\p{L} _'-]{1,50}$/u;
 const passwordRegex = /^.{6,100}$/;
 const placeRegex = /^[A-Z]\d{1,3}$/;
+const ffsuLicenseRegex = /^[\dA-Za-z]{10}$/;
 
 // General
 export const id = Joi.string()
@@ -21,6 +22,7 @@ export const lastname = Joi.string().regex(lastnameRegex).error(new Error(Respon
 export const email = Joi.string().email().error(new Error(ResponseError.InvalidEmail));
 export const password = Joi.string().regex(passwordRegex).error(new Error(ResponseError.InvalidPassword));
 export const discordId = Joi.string().error(new Error(ResponseError.InvalidDiscordid));
+export const ffsuLicense = Joi.string().regex(ffsuLicenseRegex).error(new Error(ResponseError.InvalidFfsuLicense));
 export const type = Joi.string()
   .valid(...Object.keys(UserType))
   .error(new Error(ResponseError.InvalidUserType));

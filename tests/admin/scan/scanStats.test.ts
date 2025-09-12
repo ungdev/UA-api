@@ -10,7 +10,7 @@ import { generateToken } from '../../../src/utils/users';
 import { forcePay } from '../../../src/operations/carts';
 import { lockTeam } from '../../../src/operations/team';
 
-describe('GET /admin/scan/', () => {
+describe('GET /admin/scan', () => {
   const users: User[] = [];
   let admin: User;
   let adminToken: string;

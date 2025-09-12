@@ -29,6 +29,7 @@ export const filterUser = (user: User) =>
     'place',
     'scannedAt',
     'discordId',
+    'ffsuLicense',
     'teamId',
     'askingTeamId',
     'attendant.firstname',
@@ -168,6 +169,7 @@ export const filterTournamentRestricted = (tournament: Tournament) => {
     'cashprizeDetails',
     'format',
     'infos',
+    'ffsu',
   );
 
   return {
