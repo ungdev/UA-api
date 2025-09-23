@@ -305,7 +305,7 @@ export const enum Error {
   stringBooleanError = "Ce n'est pas du texte",
   ShowNameOrPseudo = 'Vous devez au moins afficher le nom ou le pseudo',
 
-  InvalidTeamName = "Nom d'équipe invalide !",
+  InvalidTeamName = "Nom d'équipe invalide (entre 3 et 32 charactères)",
 
   InvalidQRCode = 'Le QR code est invalide',
   NoQRCode = "Le QR code n'existe pas",
