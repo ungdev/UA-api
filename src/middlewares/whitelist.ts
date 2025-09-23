@@ -4,7 +4,6 @@ import { isAuthenticated } from './authentication';
 import whitelist from '../../whitelist.json';
 import { forbidden } from '../utils/responses';
 import { Error } from '../types';
-import logger from '../utils/logger';
 
 export default [
   ...isAuthenticated,
@@ -14,7 +13,6 @@ export default [
 
     if (tournamentId in whitelist) {
       if (whitelist[<keyof typeof whitelist>tournamentId].includes(user.email.toLowerCase())) return next();
-      logger.info(whitelist);
       return forbidden(response, Error.NotWhitelisted);
     }
     return next();
