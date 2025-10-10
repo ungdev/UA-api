@@ -15,7 +15,7 @@ export default [
 
   validateBody(
     Joi.object({
-      ffsuLicense: validators.ffsuLicense.allow(null),
+      ffsuLicense: validators.ffsuLicense,
     }),
   ),
 
