@@ -8,7 +8,7 @@ const teamnameRegex = /^[\p{L}\d _'#-]{3,32}$/u;
 const lastnameRegex = /^[\p{L} _'-]{1,50}$/u;
 const passwordRegex = /^.{6,100}$/;
 const placeRegex = /^[A-Z]\d{1,3}$/;
-const ffsuLicenseRegex = /^[\dA-Za-z]{10}$/;
+const ffsuLicenseRegex = /^[\dA-Za-z]{7}$/;
 
 // General
 export const id = Joi.string()
