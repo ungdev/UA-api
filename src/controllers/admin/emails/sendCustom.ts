@@ -6,7 +6,6 @@ import { Error as ApiError, MailQuery } from '../../../types';
 import { validateBody } from '../../../middlewares/validation';
 import { sendEmail, SerializedMail, serialize } from '../../../services/email';
 import { getRequestInfo } from '../../../utils/users';
-import logger from '../../../utils/logger';
 
 export default [
   // Middlewares
@@ -80,7 +79,6 @@ export default [
           } catch {
             throw ApiError.MalformedMailBody;
           }
-          logger.info(mailContent.html);
           return sendEmail(mailContent);
         }),
       );
