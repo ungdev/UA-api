@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-nested-ternary */
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 import { badRequest, created } from '../../../utils/responses';
@@ -6,8 +5,8 @@ import { hasPermission } from '../../../middlewares/authentication';
 import { Error as ApiError, MailQuery } from '../../../types';
 import { validateBody } from '../../../middlewares/validation';
 import { sendEmail, SerializedMail, serialize } from '../../../services/email';
-import database from '../../../services/database';
 import { getRequestInfo } from '../../../utils/users';
+import logger from '../../../utils/logger';
 
 export default [
   // Middlewares
@@ -15,8 +14,7 @@ export default [
   validateBody(
     Joi.object({
       preview: Joi.boolean().default(false),
-      locked: Joi.boolean().optional(),
-      tournamentId: Joi.string().optional(),
+      emails: Joi.array().items(Joi.string().email()).required(),
       subject: Joi.string().required(),
       highlight: Joi.object({
         title: Joi.string().required(),
@@ -41,50 +39,31 @@ export default [
   // Controller
   async (request: Request, response: Response, next: NextFunction) => {
     try {
-      const mail = request.body as MailQuery;
+      const mail = request.body as MailQuery & { emails?: string[] };
       const { user } = getRequestInfo(response);
 
-      // Find mail adresses to send the mail to
-      const mails = await database.user
-        .findMany({
-          where: {
-            registerToken: null,
-            email: {
-              not: null,
-            },
-            ...(mail.preview
-              ? {
-                  id: user.id,
-                }
-              : {
-                  team: {
-                    ...(mail.locked
-                      ? {
-                          NOT: {
-                            lockedAt: null,
-                          },
-                        }
-                      : mail.locked === false
-                        ? { lockedAt: null }
-                        : {}),
-                    tournamentId: mail.tournamentId,
-                  },
-                }),
-          },
-          select: {
-            email: true,
-          },
-        })
-        .then((mailWrappers) => mailWrappers.map((mailWrapper) => mailWrapper.email));
+      let mails: (string | null)[];
+
+      if (mail.preview) {
+        // En mode preview, envoyer seulement à l'utilisateur admin connecté
+        mails = [user.email];
+      } else if (mail.emails && mail.emails.length > 0) {
+        // Si des emails personnalisés sont fournis, les utiliser
+        mails = mail.emails;
+      } else {
+        throw ApiError.InvalidMailOptions;
+      }
+
+      // Filtrer les emails null/undefined
+      const validEmails = mails.filter((email): email is string => email !== null && email !== undefined);
+
+      if (validEmails.length === 0) {
+        return badRequest(response, ApiError.InvalidMailOptions);
+      }
 
       // Parallelize mails as it may take time
-      // As every mail is generated on a user basis, we cannot catch
-      // a mail format error as simply as usual. This is the reason
-      // why we track the status of all sent mails.
-      // If all mails are errored due to invalid syntax, it is most
-      // likely that the sender did a mistake.
       const outgoingMails = await Promise.allSettled(
-        mails.map(async (adress) => {
+        validEmails.map(async (address) => {
           let mailContent: SerializedMail;
           try {
             mailContent = await serialize({
@@ -96,11 +75,12 @@ export default [
                 short: mail.highlight.intro,
                 topic: mail.preview ? `[PREVIEW]: ${mail.subject}` : mail.subject,
               },
-              receiver: adress,
+              receiver: address,
             });
           } catch {
             throw ApiError.MalformedMailBody;
           }
+          logger.info(mailContent.html);
           return sendEmail(mailContent);
         }),
       );
