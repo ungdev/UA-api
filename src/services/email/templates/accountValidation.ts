@@ -32,12 +32,6 @@ export const generateAccountValidationEmail = (user: Omit<RawUser, 'permissions'
         ],
       },
       {
-        title: 'Tournoi Super Smash Bros Ultimate',
-        components: [
-          "Si tu as choisi de t'inscrire à ce tournoi et que tu choisis de venir avec ta propre console, tu peux bénéficier d'une réduction sur ton billet 😉 _(offre limitée à un certain nombre de places)_",
-        ],
-      },
-      {
         title: 'Des questions ?',
         components: [
           "On t'invite à lire la FAQ ou à poser tes questions directement sur Discord.",
