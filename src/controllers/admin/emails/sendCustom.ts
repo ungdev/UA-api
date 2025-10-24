@@ -13,7 +13,7 @@ export default [
   validateBody(
     Joi.object({
       preview: Joi.boolean().default(false),
-      emails: Joi.array().items(Joi.string().email()).required(),
+      emails: Joi.array().items(Joi.string().email()).optional(),
       subject: Joi.string().required(),
       highlight: Joi.object({
         title: Joi.string().required(),
