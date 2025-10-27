@@ -270,6 +270,14 @@ model Commission {
   @@map("commission")
 }
 
+model Faq {
+   id                 String       @id
+   category           String
+   question           String
+   answer             String
+   display            Boolean
+}
+
 enum TransactionState {
   pending
   processing

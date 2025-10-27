@@ -98,6 +98,7 @@ export type PrimitiveTournament = prisma.Tournament;
 export type RepoItem = prisma.RepoItem;
 export type RepoLog = prisma.RepoLog & { item: RepoItem };
 export type RawOrga = prisma.Orga;
+export type PrimitiveFaq = prisma.Faq;
 
 export type Item = RawItem & {
   left?: number;
@@ -244,6 +245,14 @@ export type Tournament = PrimitiveTournament & {
   teams: Team[];
   casters: Caster[];
 };
+
+export type Faq =  PrimitiveFaq & {
+  id:string;
+  category:string;
+  question:string;
+  answer:string;
+  display:boolean;
+}
 
 /************/
 /** Badges **/

@@ -12,6 +12,7 @@ import tournaments from './tournaments';
 import partners from './partners';
 import settings from './settings';
 import upload from './upload';
+import faq from './faq';
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use('/tournaments', tournaments);
 router.use('/partners', partners);
 router.use('/settings', settings);
 router.use('/upload', upload);
+router.use('/faq', faq);
 
 export default router;
