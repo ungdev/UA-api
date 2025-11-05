@@ -34,7 +34,7 @@ export default [
           }),
         )
         .optional(),
-      orgaMainCommission: Joi.string().optional(),
+      orgaMainCommission: Joi.string().allow(null).required(),
     }),
   ),
 
@@ -87,7 +87,10 @@ export default [
       // Check that the main commission of the user is a commission of this user
       const orga = await fetchOrga(user);
 
-      const newMainCommission = orgaMainCommission ?? (orga ? orga.mainCommissionId : null);
+      const newMainCommission =
+        // eslint-disable-next-line prettier/prettier
+        'orgaMainCommission' in request.body ? orgaMainCommission : (orga ? orga.mainCommissionId : null);
+
       const newRoles =
         orgaRoles ??
         (orga
@@ -99,7 +102,7 @@ export default [
         return forbidden(response, Error.IsNotOrga);
       }
 
-      if (newMainCommission && !newRoles.some((role) => role.commission === newMainCommission)) {
+      if (isOrga && !newMainCommission) {
         return forbidden(response, Error.MainCommissionMustBeInList);
       }
 
