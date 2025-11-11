@@ -59,7 +59,6 @@ export const getNotPaidUsers = () =>
                       itemId: {
                         startsWith: 'ticket-',
                       },
-                      forcePaid: false,
                     },
                     {
                       cart: {
@@ -80,9 +79,23 @@ export const getNotPaidUsers = () =>
           ],
         },
         {
-          team: {
-            lockedAt: null,
-          },
+          OR: [
+            {
+              team: {
+                lockedAt: null,
+              },
+            },
+            {
+              AND: [
+                {
+                  team: null,
+                },
+                {
+                  permissions: null,
+                },
+              ],
+            },
+          ],
         },
       ],
     },
