@@ -350,12 +350,22 @@ export const updateUserFfsu = async (
 
 export const updateAdminUser = async (user: User, updates: UserPatchBody): Promise<User> => {
   const userId = user.id;
+
   if (updates.permissions && !updates.permissions.includes(Permission.orga)) {
-    await database.orga.deleteMany({ where: { userId } });
+    // Need to clean up orga-related data in the correct order due to foreign key constraints
+    await database.$transaction(async (tx) => {
+      // First delete all roles associated with this orga (if any)
+      await tx.orgaRole.deleteMany({ where: { userId } });
+
+      // Then delete the orga record itself
+      await tx.orga.deleteMany({ where: { userId } });
+    });
   }
+
   const shouldConnectToOrga =
     (!updates.permissions && user.permissions.includes(Permission.orga)) ||
     (updates.permissions && updates.permissions.includes(Permission.orga));
+
   const updatedUser = await database.user.update({
     data: {
       type: updates.type,
@@ -387,7 +397,8 @@ export const updateAdminUser = async (user: User, updates: UserPatchBody): Promi
                 userId,
               },
               data: {
-                mainCommissionId: updates.orgaMainCommission,
+                // Modification ici : utiliser 'orgaMainCommission' in updates pour détecter si fourni
+                mainCommissionId: 'orgaMainCommission' in updates ? updates.orgaMainCommission : undefined,
                 roles: {
                   connectOrCreate: updates.orgaRoles?.map((orgaRole) => ({
                     where: {
