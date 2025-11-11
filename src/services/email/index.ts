@@ -131,7 +131,7 @@ export const sendMailsFromTemplate = async (template: string, targets: any[]) =>
   try {
     const mailTemplate = availableTemplates[template];
 
-    if (targets.length === 0 && !mailTemplate) {
+    if (targets.length === 0 || !mailTemplate) {
       return false;
     }
 
