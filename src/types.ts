@@ -196,7 +196,10 @@ export type UserPatchBody = Partial<
     | 'firstname'
     | 'lastname'
     | 'email'
-  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }>; orgaMainCommission?: string }
+  > & {
+    orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }>;
+    orgaMainCommission: string | null;
+  }
 >;
 
 export type RawOrgaWithDetailedRoles = RawOrga & {
