@@ -73,6 +73,14 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
     items.find((element) => element.id === 'discount-switch-ssbu').left = -1;
   }
 
+  // if (
+  //   (!user || user.type === UserType.spectator || !team || team.tournamentId === 'ssbu') &&
+  //   !user.permissions.includes(Permission.orga)
+  // ) {
+  //   // Remove rents
+  //   items = items.filter((element) => element.category !== ItemCategory.rent);
+  // }
+
   const ffsu = team?.tournamentId ? (await fetchTournament(team?.tournamentId)).ffsu : false;
 
   const currentTicket = ffsu
