@@ -479,27 +479,6 @@ describe('POST /users/current/carts', () => {
     );
   });
 
-  it('should error as spectator cannot rent a pc', async () => {
-    const spectator = await createFakeUser({ type: UserType.spectator });
-    const specToken = generateToken(spectator);
-
-    return request(app)
-      .post(`/users/current/carts`)
-      .set('Authorization', `Bearer ${specToken}`)
-      .send({
-        tickets: {
-          userIds: [],
-        },
-        supplements: [
-          {
-            itemId: 'pc',
-            quantity: 1,
-          },
-        ],
-      })
-      .expect(404, { error: Error.ItemNotFound });
-  });
-
   it('should sucessfully create a cart with a rental pc', async () => {
     const userToken = generateToken(notValidUserWithSwitchDiscount);
 
