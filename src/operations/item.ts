@@ -1,5 +1,5 @@
 import database from '../services/database';
-import { Item, ItemCategory, RawItem, Team, TransactionState, User, UserType } from '../types';
+import { Item, ItemCategory, RawItem, Team, TransactionState, User } from '../types';
 import { isPartnerSchool } from '../utils/helpers';
 import { checkForExpiredCarts } from './carts';
 import { fetchTournament } from './tournament';
@@ -71,11 +71,6 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
     // The user then has a pending cart with a SSBU discount
     // Before being able to add it to his cart again, he needs to wait an hour for the cart to expire (and not pay it during that time)
     items.find((element) => element.id === 'discount-switch-ssbu').left = -1;
-  }
-
-  if (!user || user.type !== UserType.player || !team || team.tournamentId === 'ssbu') {
-    // Remove rents
-    items = items.filter((element) => element.category !== ItemCategory.rent);
   }
 
   const ffsu = team?.tournamentId ? (await fetchTournament(team?.tournamentId)).ffsu : false;
