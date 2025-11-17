@@ -181,6 +181,7 @@ export type UserSearchQuery = {
   payment: string;
   scan: string;
   place: string;
+  commision: string;
 };
 
 export type UserPatchBody = Partial<
