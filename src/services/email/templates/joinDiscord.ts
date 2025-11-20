@@ -19,7 +19,7 @@ export const generateJoinDiscordEmail = (user: Omit<RawUser, 'permissions'>) =>
           'Sur ce serveur, tu pourras également y discuter avec les autres joueurs, ou poser des questions aux organisateurs de ton tournoi.',
           {
             name: 'Rejoindre le serveur Discord',
-            location: 'https://discord.gg/WhxZwKU',
+            location: 'https://discord.gg/tkRrVZYXmT',
           },
         ],
       },

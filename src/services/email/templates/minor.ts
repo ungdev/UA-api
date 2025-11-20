@@ -18,7 +18,7 @@ export const generateMinorEmail = (user: Omit<RawUser, 'permissions'>) =>
           "Tu nous as indiqué que tu seras mineur à la date de l'UTT Arena. N'oublie pas de préparer *ton autorisation parentale, et une photocopie de ta pièce d'identité, et de celle de ton responsable légal* !",
           "La vérification se fera à l'entrée de l'UTT Arena, n'hésite pas à envoyer à l'avance ces documents par mail à arena@utt.fr pour simplifier la procédure à l'entrée.",
           {
-            location: 'https://arena.utt.fr/uploads/files/Autorisation_parentale_-_UTT_Arena_2024.pdf',
+            location: 'https://arena.utt.fr/uploads/files/Autorisation_parentale_-_UTT_Arena_2025.pdf',
             name: "Télécharger l'autorisation parentale",
           },
         ],

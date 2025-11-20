@@ -42,7 +42,7 @@ export const generateAccountValidationEmail = (user: Omit<RawUser, 'permissions'
             },
             {
               name: 'Rejoindre le serveur Discord',
-              location: 'https://discord.gg/WhxZwKU',
+              location: 'https://discord.gg/tkRrVZYXmT',
             },
           ],
         ],
