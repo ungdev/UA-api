@@ -80,8 +80,8 @@ describe('GET /items', () => {
         display: true,
       },
     });
-    // without the "discount-switch-ssbu" item and the "ticket-player-ssbu", the "pc" (in rent category) and the 'ticket-player' item
-    expect(response.body).to.have.lengthOf(items.length - 4);
+    // without the "discount-switch-ssbu" item and the "ticket-player-ssbu" and the 'ticket-player' item
+    expect(response.body).to.have.lengthOf(items.length - 3);
     expect(response.body).not.to.have.deep.members([items[0]]);
   });
 
@@ -89,16 +89,16 @@ describe('GET /items', () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').expect(200);
 
-    // without the "discount-switch-ssbu" item and the "ticket-player-ssbu" and the "pc" (in rent category)
-    expect(response.body).to.have.lengthOf(items.length - 3);
+    // without the "discount-switch-ssbu" item and the "ticket-player-ssbu"
+    expect(response.body).to.have.lengthOf(items.length - 2);
   });
 
   it('should return 200 with an array of items with the "discount-switch-ssbu" item', async () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${captainToken}`).expect(200);
 
-    // with the "discount-switch-ssbu" item but without the legacy "ticket-player" and without "pc" (in rent category)
-    expect(response.body).to.have.lengthOf(items.length - 2);
+    // with the "discount-switch-ssbu" item but without the legacy "ticket-player"
+    expect(response.body).to.have.lengthOf(items.length - 1);
   });
 
   it(`should return 200 with an array of items with the "discount-switch-ssbu" and a quantity of -1 item because user has a pending cart containing it`, async () => {
@@ -109,8 +109,8 @@ describe('GET /items', () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${thirdCaptainToken}`).expect(200);
 
-    // without the legacy "ticket-player" and without "pc" (in rent category)
-    expect(response.body).to.have.lengthOf(items.length - 2);
+    // without the legacy "ticket-player"
+    expect(response.body).to.have.lengthOf(items.length - 1);
     expect(response.body.find((item: Item) => item.id === 'discount-switch-ssbu').left).to.be.equal(-1);
   });
 
@@ -122,8 +122,8 @@ describe('GET /items', () => {
     const items = await database.item.findMany();
     const response = await request(app).get('/items').set('Authorization', `Bearer ${thirdCaptainToken}`).expect(200);
 
-    // without the "discount-switch-ssbu" item and the legacy "ticket-player" and without "pc" (in rent category)
-    expect(response.body).to.have.lengthOf(items.length - 3);
+    // without the "discount-switch-ssbu" item and the legacy "ticket-player"
+    expect(response.body).to.have.lengthOf(items.length - 2);
   });
 
   describe('should return 200 with an array of items with the "discount-switch-ssbu" item because user has a cart containing it, but it was not paid nor it is pending', () => {
@@ -137,8 +137,8 @@ describe('GET /items', () => {
           .set('Authorization', `Bearer ${thirdCaptainToken}`)
           .expect(200);
 
-        // with the "discount-switch-ssbu" item but without the legacy "ticket-player" and without "pc" (in rent category)
-        expect(response.body).to.have.lengthOf(items.length - 2);
+        // with the "discount-switch-ssbu" item but without the legacy "ticket-player"
+        expect(response.body).to.have.lengthOf(items.length - 1);
       });
     }
   });

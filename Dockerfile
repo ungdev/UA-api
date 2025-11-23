@@ -16,7 +16,7 @@ RUN pnpm install --frozen-lockfile --production=false
 
 COPY --chown=node:node ./ ./
 
-RUN pnpm pnpx prisma generate
+RUN pnpm prisma generate
 RUN pnpm build
 
 # Prunes devDependencies

@@ -22,7 +22,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm pnpx prisma generate
+      - run: pnpm prisma generate
       - run: pnpm lint
 
   build:
@@ -41,7 +41,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm pnpx prisma generate
+      - run: pnpm prisma generate
       - run: pnpm build
 
   test:
@@ -76,8 +76,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm pnpx prisma generate
-      - run: pnpm pnpx prisma db push
+      - run: pnpm prisma generate
+      - run: pnpm prisma db push
       - run: docker exec -i mariadb mysql -utest -ptest arena < seed.sql
       - run: pnpm test:coverage
       - uses: codecov/codecov-action@v5
@@ -108,7 +108,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: pnpm pnpx prisma generate
+      - run: pnpm prisma generate
       - env:
           BRANCH: ${{ github.ref == 'refs/heads/master' && 'master' || 'dev' }}
           DBDOCS_TOKEN: ${{ secrets.DBDOCS_TOKEN }}
@@ -133,7 +133,7 @@ jobs:
           password: ${{ secrets.REGISTRY_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v6
-        with: 
+        with:
           push: true
           tags: |
             ${{ secrets.REGISTRY_URL }}/uttarena/api:${{ github.ref == 'refs/heads/master' && 'master' || 'dev' }}

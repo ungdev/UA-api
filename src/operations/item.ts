@@ -1,5 +1,5 @@
 import database from '../services/database';
-import { Item, ItemCategory, RawItem, Team, TransactionState, User, UserType } from '../types';
+import { Item, ItemCategory, RawItem, Team, TransactionState, User } from '../types';
 import { isPartnerSchool } from '../utils/helpers';
 import { checkForExpiredCarts } from './carts';
 import { fetchTournament } from './tournament';
@@ -73,10 +73,13 @@ export const fetchUserItems = async (team?: Team, user?: User) => {
     items.find((element) => element.id === 'discount-switch-ssbu').left = -1;
   }
 
-  if (!user || user.type !== UserType.player || !team || team.tournamentId === 'ssbu') {
-    // Remove rents
-    items = items.filter((element) => element.category !== ItemCategory.rent);
-  }
+  // if (
+  //   (!user || user.type === UserType.spectator || !team || team.tournamentId === 'ssbu') &&
+  //   !user.permissions.includes(Permission.orga)
+  // ) {
+  //   // Remove rents
+  //   items = items.filter((element) => element.category !== ItemCategory.rent);
+  // }
 
   const ffsu = team?.tournamentId ? (await fetchTournament(team?.tournamentId)).ffsu : false;
 

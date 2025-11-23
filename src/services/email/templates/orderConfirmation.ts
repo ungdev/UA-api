@@ -11,7 +11,7 @@ export const generateOrderConfirmationEmail = (cart: DetailedCart) =>
       highlight: "Bienvenue à l'UTT Arena&nbsp;🔥&nbsp;!",
     },
     reason:
-      "Tu as reçu cet email car tu es inscrit à l'UTT Arena 2024. Si ce n'est pas le cas, contacte-nous et change le mot de passe de ta boîte mail.",
+      "Tu as reçu cet email car tu es inscrit à l'UTT Arena 2025. Si ce n'est pas le cas, contacte-nous et change le mot de passe de ta boîte mail.",
     receiver: cart.user.email,
     sections: [
       {
@@ -82,7 +82,7 @@ export const generateOrderConfirmationEmail = (cart: DetailedCart) =>
           ],
           {
             name: 'Rejoindre le serveur Discord',
-            location: 'https://discord.gg/WhxZwKU',
+            location: 'https://discord.gg/tkRrVZYXmT',
           },
         ],
       },

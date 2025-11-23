@@ -28,7 +28,7 @@ export const generateLastYearPublicAnnounce = (email: string) =>
         components: [
           "Pour s'inscrire, ça se passe sur le site !",
           {
-            name: "Inscris toi à l'UTT Arena 2024 !",
+            name: "Inscris toi à l'UTT Arena 2025 !",
             location: `https://arena.utt.fr/`,
           },
           `_Si le bouton ne marche pas, tu peux utiliser ce lien:_\n_https://arena.utt.fr/_`,
@@ -45,7 +45,7 @@ export const generateLastYearPublicAnnounce = (email: string) =>
             },
             {
               name: 'Rejoindre le serveur Discord',
-              location: 'https://discord.gg/WhxZwKU',
+              location: 'https://discord.gg/tkRrVZYXmT',
             },
           ],
         ],

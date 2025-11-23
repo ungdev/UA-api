@@ -36,7 +36,7 @@ const getCommisionPermission = (commissionRole: string, commissionId: string) =>
 };
 
 const getCommissionName = (commissionRole: string, commissionId: string, commissionName: string) => {
-  if (commissionId === 'coord' && commissionRole === 'respo') return 'Présidente';
+  if (commissionId === 'coord' && commissionRole === 'respo') return 'Président';
 
   if (commissionRole === 'respo') return `Respo ${commissionName}`;
   return commissionName;
