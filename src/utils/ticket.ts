@@ -60,27 +60,27 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
     document.image(background, 0, 0, { width, height });
 
     // Define a text format
-    const textFormat = document.font(fontFamily).fill([0, 0, 0]).fontSize(fontSize);
+    const textFormat = document.font(fontFamily).fill([255, 255, 255]).fontSize(fontSize);
 
     // Place the tournament name under the qrCode with the same margin as the qrcode
     const tournamentNameWidth = document.widthOfString(tournoiText);
-    textFormat.text(tournoiText, textX - tournamentNameWidth / 2, qrCodeY + qrCodeSize + lineSpaceCorrection);
+    textFormat.text(tournoiText, textX - tournamentNameWidth / 2, qrCodeY + qrCodeSize + lineSpaceCorrection - 16);
 
     // Place the first name of the user
     const firstName = user.firstname;
     const firstNameWidth = document.widthOfString(firstName);
-    textFormat.text(firstName, textX - firstNameWidth / 2, 0);
+    textFormat.text(firstName, textX - firstNameWidth / 2, 12);
 
     // Place the last name of the user
     const lastName = user.lastname;
     const lastNameWidth = document.widthOfString(lastName);
-    textFormat.text(lastName, textX - lastNameWidth / 2, fontSize + lineSpaceCorrection - 10);
+    textFormat.text(lastName, textX - lastNameWidth / 2, fontSize + lineSpaceCorrection + 2);
 
     // Place the text containing the seat
     if (user.place) {
       const place = `Place ${user.place}`;
       const placeWidth = document.widthOfString(place);
-      textFormat.text(place, textX - placeWidth / 2, height - fontSize - lineSpaceCorrection * 4);
+      textFormat.text(place, textX - placeWidth / 2, height - fontSize - lineSpaceCorrection * 7);
     }
     // Place the QR Code
     document.image(qrcode, qrCodeX, qrCodeY, { width: qrCodeSize });
