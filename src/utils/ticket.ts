@@ -60,7 +60,7 @@ export const generateTicket = async (cartItem: DetailedCartItem): Promise<EmailA
     document.image(background, 0, 0, { width, height });
 
     // Define a text format
-    const textFormat = document.font(fontFamily).fill([0, 0, 0]).fontSize(fontSize);
+    const textFormat = document.font(fontFamily).fill([255, 255, 255]).fontSize(fontSize);
 
     // Place the tournament name under the qrCode with the same margin as the qrcode
     const tournamentNameWidth = document.widthOfString(tournoiText);
