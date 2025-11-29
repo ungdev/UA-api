@@ -141,6 +141,21 @@ export const fetchUsers = async (
                   name: { contains: query.search },
                 },
               },
+                    {
+              id: {
+                 in: (
+                    await database.orgaRole.findMany({
+                      where: {
+                        OR: [
+                          { userId: { contains: query.search } },
+                          { commissionId: { contains: query.search } },
+                          ],
+                        },
+                    select: { userId: true },
+                })
+            ).map(role => role.userId),
+    },
+  },
             ],
           }
         : {}),
