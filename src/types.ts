@@ -196,7 +196,10 @@ export type UserPatchBody = Partial<
     | 'firstname'
     | 'lastname'
     | 'email'
-  > & { orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }>; orgaMainCommission?: string }
+  > & {
+    orgaRoles?: Array<{ commission: string; commissionRole: 'respo' | 'member' }>;
+    orgaMainCommission: string | null;
+  }
 >;
 
 export type RawOrgaWithDetailedRoles = RawOrga & {
@@ -380,7 +383,7 @@ export const enum Error {
   TooMuchLockedTeams = "Il y a plus d'équipes inscrites que le nombre d'équipes maximal souhaité",
   TournamentFull = "Le tournoi est plein, attends qu'une place se libère pour payer un ticket",
   IsNotOrga = "L'utilisateur n'est pas un organisateur. Impossible de lui assigner des commissions",
-  MainCommissionMustBeInList = "L'organisateur doit être dans sa propre commission principale",
+  MainCommissionMustBeInList = "L'organisateur doit avoir une commission principale",
   MustHaveMainCommission = "L'une des commissions de l'utilisateur doit être sa commission principale",
   CartNotEligible = 'Le panier doit être gratuit pour être validé',
 

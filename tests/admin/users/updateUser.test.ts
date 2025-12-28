@@ -30,6 +30,7 @@ describe('PATCH /admin/users/:userId', () => {
     lastname: 'User',
     username: 'some-random-user',
     discordId: registerMember(),
+    orgaMainCommission: null,
   };
 
   const validAnimBody: UserPatchBody = {
