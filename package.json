@@ -1,6 +1,7 @@
 {
   "name": "ua-api",
   "description": "API web à destination des services de l'UTT Arena",
+  "packageManager": "pnpm@12.15.0",
   "version": "1.0.0",
   "private": false,
   "license": "MIT",

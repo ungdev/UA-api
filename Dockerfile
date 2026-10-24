@@ -1,4 +1,4 @@
-FROM node:22
+FROM node:26
 
 ENV NODE_ENV=production
 WORKDIR /srv/app
@@ -10,7 +10,7 @@ RUN chown node:node .
 USER node
 
 # Node has the uid 1000
-COPY --chown=node:node package.json pnpm-lock.yaml schema.prisma ./
+COPY --chown=node:node package.json pnpm-lock.yaml schema.prisma pnpm-workspace.yaml ./
 
 RUN pnpm install --frozen-lockfile --production=false
 
